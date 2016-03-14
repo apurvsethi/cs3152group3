@@ -20,7 +20,7 @@ public class GameEngine extends ApplicationAdapter {
 	public void create() {
 		manager = new AssetManager();
 		canvas = new GameCanvas();
-		controller = new GameplayController();
+		controller = new GameplayController(canvas.getWidth(), canvas.getHeight());
 	}
 
 	@Override
@@ -38,7 +38,7 @@ public class GameEngine extends ApplicationAdapter {
 	
 	@Override
 	public void dispose() {
-		GameplayController.UnloadContent(manager);
+		controller.UnloadContent(manager);
 		manager.clear();
 		manager.dispose();
 		manager = null;
