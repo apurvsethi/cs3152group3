@@ -147,7 +147,7 @@ public class InputController {
 	 *
 	 * @return true if the player wants to go back in menu.
 	 */
-	public boolean didRetreat() {
+	public boolean didBack() {
 		return backPressed && !backPrevious;
 	}
 	
