@@ -15,8 +15,8 @@ public class LevelModel {
 		TECHNICAL,
 	}
 	
+	/** Array of all objects in the level*/
 	protected Array<GameObject> levelObjects;
-	
 	/** Current image for this object. May change over time. */
 	protected FilmStrip animator;
 	/** Reference to texture origin */
@@ -25,56 +25,101 @@ public class LevelModel {
 	protected float radius;
 	/** Maximum width of the climbing wall*/
 	protected int wallWidth;
-	/** How quickly energy is lost*/
+	/** How quickly energy is lost
+	 *  Range from 0.0 - 1.0*/
 	protected float energyLossFactor;
-	/** How slippery handholds are*/
+	/** How slippery handholds are
+	 *  Range from 0.0 - 1.0*/
 	protected float slipFactor;
 	/** How strong gravity is*/
 	protected float gravity;
 	
+	/**
+	 * Returns the texture of this level
+	 *
+	 * @return Returns the texture of this level
+	 */
+	public Texture getTexture() {
+		return animator == null ? null : animator.getTexture();
+	}
 	
 	
-	// ACCESSORS
+	/**
+	 * Sets the texture of this level.
+	 *
+	 * @param texture the texture of this level
+	 */
 	public void setTexture(Texture texture) {
 		animator = new FilmStrip(texture,1,1,1);
 		radius = animator.getRegionHeight() / 2.0f;
 		origin = new Vector2(animator.getRegionWidth()/2.0f, animator.getRegionHeight()/2.0f);
 	}
 	
-	public Texture getTexture() {
-		return animator == null ? null : animator.getTexture();
-	}
-	
-	public void setWallWidth(int width){
-		wallWidth = width;
-	}
-	
+	/**
+	 * Returns the max wall width of this level
+	 *
+	 * @return Returns the max wall width of this level
+	 */
 	public int getWallWidth(){
 		return wallWidth;
 	}
 	
+	/**
+	 * Sets the max wall width of this level.
+	 *
+	 * @param width the max wall width of this level
+	 */
+	public void setWallWidth(int width){
+		wallWidth = width;
+	}
+	
+	/**
+	 * Returns the energy loss factor of this level
+	 *
+	 * @return Returns the energy loss factor of this level
+	 */
+	public float getEnergyLoss(){
+		return energyLossFactor;
+	}
+		
+	/**
+	 * Sets the energy loss factor of this level.
+	 *
+	 * @param energyLoss the energy loss factor of this level
+	 */
 	public void setEnergyLoss(float energyLoss){
 		energyLossFactor = energyLoss;
 	}
 	
-	public float getEnergyLoss(){
-		return energyLossFactor;
-	}
-	
-	public void setSlip(float slip){
-		slipFactor = slip;
-	}
-	
+	/**
+	 * Returns the slip factor of this level
+	 *
+	 * @return Returns the slip factor of this level
+	 */
 	public float getSlip(){
 		return slipFactor;
 	}
 	
-	public void setGravity(float g){
-		gravity = g;
+	/**
+	 * Sets the slip factor of this level.
+	 *
+	 * @param slip the slip factor of this level
+	 */
+	public void setSlip(float slip){
+		slipFactor = slip;
 	}
 	
 	public float getGravity(){
 		return gravity;
+	}
+	
+	/**
+	 * Sets the gravity of this level.
+	 *
+	 * @param g the gravity of this level
+	 */
+	public void setGravity(float g){
+		gravity = g;
 	}
 		
 	/** Draws all of the objects in this level*/
@@ -98,7 +143,9 @@ public class LevelModel {
 		drawObjects(canvas);
 	}
 	
-	
-	
+	/** Creates a trivial LevelModel*/
+	public LevelModel(){
+		
+	}
 	
 }
