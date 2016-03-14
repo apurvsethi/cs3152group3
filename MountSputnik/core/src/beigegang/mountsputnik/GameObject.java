@@ -1,8 +1,13 @@
 package beigegang.mountsputnik;
 
 import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.graphics.*;
 import beigegang.util.*;
+
+
+//TODO: garbage collection D:
 
 /** Base model class that is the parent class to all other models
  *  In charge of general getting / setting textures, physics 
@@ -27,6 +32,8 @@ public abstract class GameObject {
 		CHARACTER,
 		/*A body part of the character*/
 		PART,
+		/*An extremity of the character**/
+		EXTREMITY,
 		/**A handhold, which is a static (at this point) object that
 		 * can be grabbed */
 		HANDHOLD,
@@ -45,14 +52,31 @@ public abstract class GameObject {
 		protected float radius;
 		/** CURRENT image for this object. May change over time. */
 		protected FilmStrip animator;
+		/** Drawing scale to convert physics units to pixels */
+		protected Vector2 drawScale = new Vector2(1.0f,1.0f);
+		//TODO: determine if all joints should be revolute
+		/** Revolute Joint definition for Joint creation*/
+		protected static RevoluteJointDef jointDef = new RevoluteJointDef();
+		/** Body definition for Body creation*/
+		protected static BodyDef bDef = new BodyDef();
 		
 		// ACCESSORS
+		/**
+		 * Sets the texture of this object 
+		 *
+		 * @param texture the texture of this object 
+		 */
 		public void setTexture(Texture texture) {
 			animator = new FilmStrip(texture,1,1,1);
 			radius = animator.getRegionHeight() / 2.0f;
 			origin = new Vector2(animator.getRegionWidth()/2.0f, animator.getRegionHeight()/2.0f);
 		}
 		
+		/**
+		 * Returns the texture of this object 
+		 *
+		 * @return the texture of this object 
+		 */
 		public Texture getTexture() {
 			return animator == null ? null : animator.getTexture();
 		}
@@ -184,7 +208,68 @@ public abstract class GameObject {
 			velocity = new Vector2(0.0f, 0.0f);
 			radius = 0.0f;
 		}
+		
+		/**
+		 * Constructs a game object
+		 *
+		 * @param texture the texture of this object
+		 */
+		public GameObject(Texture texture){
+			setTexture(texture);
+			position = new Vector2(0.0f, 0.0f);
+			velocity = new Vector2(0.0f, 0.0f);
+		}
 
+		/**
+	     * @return the drawing scale for this physics object
+	     */
+	    public Vector2 getDrawScale() { 
+	    	return drawScale; 
+	    }
+	    
+	    /**
+	     * Sets the drawing scale for this physics object
+	     *
+	     * The drawing scale is the number of pixels to draw before Box2D unit. Because
+	     * mass is a function of area in Box2D, we typically want the physics objects
+	     * to be small.  So we decouple that scale from the physics object.  However,
+	     * we must track the scale difference to communicate with the scene graph.
+	     *
+	     * We allow for the scaling factor to be non-uniform.
+	     *
+	     * @param value  the drawing scale for this physics object
+	     */
+	    public void setDrawScale(Vector2 value) { 
+	    	setDrawScale(value.x,value.y); 
+		}
+	    
+	    /**
+	     * Sets the drawing scale for this physics object
+	     *
+	     * The drawing scale is the number of pixels to draw before Box2D unit. Because
+	     * mass is a function of area in Box2D, we typically want the physics objects
+	     * to be small.  So we decouple that scale from the physics object.  However,
+	     * we must track the scale difference to communicate with the scene graph.
+	     *
+	     * We allow for the scaling factor to be non-uniform.
+	     *
+	     * @param x  the x-axis scale for this physics object
+	     * @param y  the y-axis scale for this physics object
+	     */
+	    public void setDrawScale(float x, float y) {
+	    	drawScale.set(x,y);
+	    }
+	    
+	    /** Returns the height that this texture is drawn at*/
+	    public float getDrawHeight(){
+	    	return animator.getTexture().getHeight()/drawScale.y;
+	    }
+	    
+	    /** Returns the width that this texture is drawn at*/
+	    public float getDrawWidth(){
+	    	return animator.getTexture().getWidth()/drawScale.x;
+	    }
+		
 		/**
 		 * Updates the state of this object.
 		 *
