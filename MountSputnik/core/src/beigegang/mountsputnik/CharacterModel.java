@@ -1,10 +1,12 @@
 package beigegang.mountsputnik;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
+
+import beigegang.util.FilmStrip;
+import static beigegang.mountsputnik.Constants.*;
 
 public class CharacterModel extends GameObject{
 
@@ -15,106 +17,7 @@ public class CharacterModel extends GameObject{
 	/** Cache vector for organizing body parts */
 	private Vector2 partCache = new Vector2();
 	/** Texture assets for the body parts */
-	private TextureRegion[] partTextures;
-	
-	/** Initial onscreen location of the head */
-	//TODO: determine actual position of head
-	private static final float HEAD_X = 4.0f;
-	private static final float HEAD_Y = 4.0f;
-	
-	/** Parameters to pass into extremities*/
-	//TODO: determine actual push / pull factor through playtesting
-	private static final float HAND_PUSH = 1.0f;
-	private static final float HAND_PULL = 1.0f;
-	private static final float FOOT_PUSH = 1.0f;
-	private static final float FOOT_PULL = 1.0f;
-	
-	/** The number of DISTINCT body parts */
-	private static final int BODY_TEXTURE_COUNT = 10;
-	
-	/** Indices of specific part locations in the array*/
-	private static final int HEAD = 0;
-	private static final int CHEST = 1;
-	private static final int ABDOMEN = 2;
-	private static final int HIPS = 3;
-	private static final int ARM_LEFT = 4;
-	private static final int ARM_RIGHT = 5;
-	private static final int FOREARM_LEFT = 6;
-	private static final int FOREARM_RIGHT = 7;
-	private static final int HAND_LEFT = 8;
-	private static final int HAND_RIGHT = 9;
-	private static final int THIGH_LEFT = 10;
-	private static final int THIGH_RIGHT = 11;
-	private static final int SHIN_LEFT = 12;
-	private static final int SHIN_RIGHT = 13;
-	private static final int FOOT_LEFT = 14;
-	private static final int FOOT_RIGHT = 15;
-	private static final int NONE = -1;
-	
-	/**
-	 * Returns the texture index for the given body part 
-	 *
-	 * As some body parts are symmetrical, we reuse textures.
-	 *
-	 * @returns the texture index for the given body part 
-	 */
-	private static int partToAsset(int part) {
-		switch (part) {
-		case HEAD:
-			return 0;
-		case CHEST:
-			return 1;
-		case ABDOMEN: 
-			return 2;
-		case HIPS: 
-			return 3;
-		case ARM_LEFT:
-		case ARM_RIGHT: 
-			return 4;
-		case FOREARM_LEFT:
-		case FOREARM_RIGHT: 
-			return 5;
-		case HAND_LEFT: 
-		case HAND_RIGHT: 
-			return 6;
-		case THIGH_LEFT: 
-		case THIGH_RIGHT: 
-			return 7;
-		case SHIN_LEFT: 
-		case SHIN_RIGHT: 
-			return 8;
-		case FOOT_LEFT: 
-		case FOOT_RIGHT: 
-			return 9;
-		default:
-			return -1;
-		}
-	}
-	
-	//TODO: once character assets complete, determine actual offsets
-	/** Distance between chest center and face center */
-	private static final float CHEST_OFFSET   = 3.8f;
-	/** Distance between abdomen center and chest center*/
-	private static final float ABDOMEN_OFFSET = 3.8f;
-	/** Distance between hip center and abdomen center*/
-	private static final float HIP_OFFSET = 3.8f;
-	/** Y-distance between chest center and arm center */
-	private static final float ARM_YOFFSET    = 1.75f;  
-	/** X-distance between chest center and arm center */
-	private static final float ARM_XOFFSET    = 3.15f;  
-	/** Distance between center of arm and center of forearm */
-	private static final float FOREARM_OFFSET = 2.75f; 
-	/** Distance between center of forearm and center of hand */
-	private static final float HAND_OFFSET = 2.75f; 
-	/** X-distance from center of hips to center of leg */
-	private static final float THIGH_XOFFSET  = 0.75f;  
-	/** Y-distance from center of hips to center of thigh */
-	private static final float THIGH_YOFFSET  = 3.5f;  
-	/** Distance between center of thigh and center of shin */
-	private static final float SHIN_OFFSET    = 2.75f;
-	/** Distance between center of shin and center of foot */
-	private static final float FOOT_OFFSET    = 2.75f;
-	
+	private FilmStrip[] partTextures;
 	
 	@Override
 	public ObjectType getType() {
@@ -149,7 +52,7 @@ public class CharacterModel extends GameObject{
      *
      * @return the array of textures for the individual body parts.
      */
-    public TextureRegion[] getPartTextures() {
+    public FilmStrip[] getPartTextures() {
     	return partTextures;
     }
     
@@ -160,16 +63,16 @@ public class CharacterModel extends GameObject{
      *
      * @param textures the array of textures for the individual body parts.
      */
-    public void setPartTextures(TextureRegion[] textures, World w) {
+    public void setPartTextures(FilmStrip[] textures, World w) {
     	assert textures != null && textures.length > BODY_TEXTURE_COUNT : "Texture array is not large enough";
     	
-    	partTextures = new TextureRegion[BODY_TEXTURE_COUNT];
+    	partTextures = new FilmStrip[BODY_TEXTURE_COUNT];
     	System.arraycopy(textures, 0, partTextures, 0, BODY_TEXTURE_COUNT);
     	if (parts.size == 0) {
     		init(w);
     	} else {
     		for(int ii = 0; ii <=FOOT_RIGHT; ii++) {
-    			parts.get(ii).setTexture(partTextures[partToAsset(ii)].getTexture());
+    			parts.get(ii).setTexture(partTextures[ii].getTexture());
     		}
     	}
     }
@@ -178,48 +81,51 @@ public class CharacterModel extends GameObject{
      * 
      * @param w			The world*/
 	protected void init(World w) {
-		// TODO: Look at PartModel setAngle / setFixedRotation
-		PartModel part;
 		
 		// HEAD
-	    makePart(HEAD, NONE, getX(), getY(), 0.0f, 0.0f, w);
+	    makePart(HEAD, NONE, HEAD_X, 0, HEAD_Y, 0, 0, 0, w);
 		
 		// CHEST
-		makePart(CHEST, HEAD, 0, CHEST_OFFSET, 0.0f, 0.0f, w);
-		
-		//ABDOMEN
-		makePart(ABDOMEN, CHEST, 0, ABDOMEN_OFFSET, 0.0f, 0.0f, w);
+		makePart(CHEST, HEAD, 0, 0, CHEST_HEAD_OFFSET, HEAD_OFFSET, 0, 0, w);	
 		
 		//HIPS
-		makePart(HIPS, ABDOMEN, 0, HIP_OFFSET, 0.0f, 0.0f, w);
+		makePart(HIPS, CHEST, 0, 0, HIP_CHEST_OFFSET, CHEST_HIP_OFFSET, 0, 0, w);
 		
 		// ARMS
-		makePart(ARM_LEFT, CHEST, -ARM_XOFFSET, ARM_YOFFSET, 0.0f, 0.0f, w);
-		part = makePart(ARM_RIGHT, CHEST, ARM_XOFFSET, ARM_YOFFSET, 0.0f, 0.0f, w);
-		//part.setAngle((float)Math.PI);
+		makePart(ARM_LEFT, CHEST, -ARM_X_CHEST_OFFSET, -CHEST_X_ARM_OFFSET,
+				ARM_Y_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0, 0, w);
+		makePart(ARM_RIGHT, CHEST, ARM_X_CHEST_OFFSET, CHEST_X_ARM_OFFSET,
+				ARM_Y_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0, 0, w);
 		
 		// FOREARMS
-		makePart(FOREARM_LEFT, ARM_LEFT, -FOREARM_OFFSET, 0, 0.0f, 0.0f, w);
-		part = makePart(FOREARM_RIGHT, ARM_RIGHT, FOREARM_OFFSET, 0, 0.0f, 0.0f, w);
-		//part.setAngle((float)Math.PI);
+		makePart(FOREARM_LEFT, ARM_LEFT, -FOREARM_X_ARM_OFFSET, -ARM_X_FOREARM_OFFSET,
+				FOREARM_Y_ARM_OFFSET, ARM_Y_FOREARM_OFFSET, 0, 0, w);
+		makePart(FOREARM_RIGHT, ARM_RIGHT, FOREARM_X_ARM_OFFSET, ARM_X_FOREARM_OFFSET,
+				FOREARM_Y_ARM_OFFSET, ARM_Y_FOREARM_OFFSET, 0, 0, w);
 		
 		//HANDS
-		makePart(HAND_LEFT, FOREARM_LEFT, -HAND_OFFSET, 0 , HAND_PUSH, HAND_PULL, w);
-		part = makePart(HAND_RIGHT, FOREARM_RIGHT, HAND_OFFSET, 0 , HAND_PUSH, HAND_PULL, w);
-		//part.setAngle((float)Math.PI);
+		makePart(HAND_LEFT, FOREARM_LEFT, -HAND_X_OFFSET, -FOREARM_X_HAND_OFFSET, 
+				HAND_Y_OFFSET, FOREARM_Y_HAND_OFFSET, HAND_PUSH, HAND_PULL, w);
+		makePart(HAND_RIGHT, FOREARM_RIGHT, HAND_X_OFFSET, FOREARM_X_HAND_OFFSET, 
+				HAND_Y_OFFSET, FOREARM_Y_HAND_OFFSET, HAND_PUSH, HAND_PULL, w);
 		
 		// THIGHS
-		makePart(THIGH_LEFT, HIPS, -THIGH_XOFFSET, -THIGH_YOFFSET, 0.0f, 0.0f, w);
-		makePart(THIGH_RIGHT, HIPS, THIGH_XOFFSET, -THIGH_YOFFSET, 0.0f, 0.0f, w);
+		makePart(THIGH_LEFT, HIPS, -THIGH_X_HIP_OFFSET, -HIP_X_THIGH_OFFSET,
+				THIGH_Y_HIP_OFFSET, HIP_Y_THIGH_OFFSET, 0, 0, w);
+		makePart(THIGH_RIGHT, HIPS, THIGH_X_HIP_OFFSET, HIP_X_THIGH_OFFSET,
+				THIGH_Y_HIP_OFFSET, HIP_Y_THIGH_OFFSET, 0, 0, w);
 		
 		// SHINS
-		makePart(SHIN_LEFT,  THIGH_LEFT, 0, -SHIN_OFFSET, 0.0f, 0.0f, w);
-		makePart(SHIN_RIGHT, THIGH_RIGHT, 0, -SHIN_OFFSET, 0.0f, 0.0f, w);
+		makePart(SHIN_LEFT,  THIGH_LEFT, -SHIN_X_THIGH_OFFSET, -THIGH_X_SHIN_OFFSET,
+				SHIN_Y_THIGH_OFFSET, THIGH_Y_SHIN_OFFSET, 0, 0, w);
+		makePart(SHIN_RIGHT, THIGH_RIGHT, SHIN_X_THIGH_OFFSET, THIGH_X_SHIN_OFFSET,
+				SHIN_Y_THIGH_OFFSET, THIGH_Y_SHIN_OFFSET, 0, 0, w);
 		
 		//FEET
-		makePart(FOOT_LEFT, SHIN_LEFT, -FOOT_OFFSET, 0, FOOT_PUSH, FOOT_PULL, w);
-		part = makePart(FOOT_RIGHT, SHIN_RIGHT, FOOT_OFFSET, 0, FOOT_PUSH, FOOT_PULL, w);
-		//part.setAngle((float)Math.PI);
+		makePart(FOOT_LEFT, SHIN_LEFT, -FOOT_X_OFFSET, -SHIN_X_FOOT_OFFSET, FOOT_Y_OFFSET,
+				SHIN_Y_FOOT_OFFSET, FOOT_PUSH, FOOT_PULL, w);
+		makePart(FOOT_RIGHT, SHIN_RIGHT, FOOT_X_OFFSET, SHIN_X_FOOT_OFFSET, FOOT_Y_OFFSET,
+				SHIN_Y_FOOT_OFFSET, FOOT_PUSH, FOOT_PULL, w);
 		
 	}
     
@@ -228,18 +134,22 @@ public class CharacterModel extends GameObject{
 	 * 
 	 * @param part The part to make
 	 * @param connect The part to connect to
-	 * @param x The x-offset RELATIVE to the connecting part
-	 * @param y	The y-offset RELATIVE to the connecting part
+	 * @param partX The x-offset of the part RELATIVE to the connecting part's offset
+	 * @param partY	The y-offset of the part RELATIVE to the connecting part's offset
+	 * @param conenctX The x-offset of the connecting part RELATIVE to the part's offset
+	 * @param connnectY	The y-offset of the connecting part RELATIVE to the part's offset
 	 * @param w	The world this part is created in
 	 * 
 	 * @return the newly created part
 	 */
-	private PartModel makePart(int part, int connect, float x, float y, float push, float pull, World w) {
-		TextureRegion texture = partTextures[partToAsset(part)];
+	private PartModel makePart(int part, int connect, float partX, float connectX,
+			float partY, float connectY, float push, float pull, World w) {
+		FilmStrip texture = partTextures[part];
 		
-		partCache.set(x,y);
+		partCache.set(partX,partY);
 		if (connect != NONE) {
 			partCache.add(parts.get(connect).getPosition());
+			partCache.add(connectX,connectY);
 		}
 
 		//TODO: set body origin to be the actual origin
@@ -254,21 +164,22 @@ public class CharacterModel extends GameObject{
 				: new ExtremityModel(push, pull, body, texture.getTexture()));
 		
 		partModel.setDrawScale(drawScale);
+		
 		//TODO: set density in individual parts
 		//partModel.setDensity(DENSITY);
+		
 		parts.add(partModel);
 		
-		if (connect != NONE){
-			//create joint
-			//TODO: split x into partx and connectx, same with y
-			partCache.set(x/2, -y/2); 
+		//create joint if two parts present
+		if (connect != NONE){	
+			jointDef.bodyA = parts.get(connect).getBody();
+			partCache.set(connectX, connectY); 
 			jointDef.localAnchorA.set(partCache);
 			
-			partCache.set(-x/2, y/2); 
-			jointDef.localAnchorB.set(partCache);
-	
-			jointDef.bodyA = parts.get(connect).getBody();
 			jointDef.bodyB = parts.get(part).getBody();
+			partCache.set(partX, partY); 
+			jointDef.localAnchorB.set(partCache);
+
 			jointDef.collideConnected = false;
 			Joint joint = w.createJoint(jointDef);
 			joints.add(joint);
@@ -290,7 +201,7 @@ public class CharacterModel extends GameObject{
 	 * 
 	 * @param textures the texture map of the character
 	 * @param w	the world*/
-	public CharacterModel(TextureRegion[] textures, World w){
+	public CharacterModel(FilmStrip[] textures, World w){
 		init(w);
 		setPartTextures(textures, w);
 		setX(HEAD_X);
