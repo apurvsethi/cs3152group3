@@ -2,6 +2,12 @@ package beigegang.mountsputnik;
 
 public final class Constants {
 
+	/** pixel radius around a handhold
+	 * if character extremity is within this radius and handhold is
+	 * within max reach, releasing the trigger / bumper will snap
+	 * to the handhold*/
+	public static final int SNAP_RADIUS = 15;
+	
 	/** Initial onscreen location of the head */
 	//TODO: determine actual position of head
 	public static final float HEAD_X = 4.0f;
