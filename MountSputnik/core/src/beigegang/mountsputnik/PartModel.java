@@ -30,7 +30,7 @@ public class PartModel extends GameObject{
 	/** A root body for this box 2d. */
     protected Body body;
 	/** Density of this part, has default value of 1.0*/
-	protected static float density = 1.0f;
+	protected float density = 1.0f;
 
 	@Override
 	public ObjectType getType() {
