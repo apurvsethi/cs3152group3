@@ -8,12 +8,6 @@ import com.badlogic.gdx.utils.Array;
 import beigegang.util.FilmStrip;
 
 public class LevelModel {
-
-	/** Enum to define different level types
-	 *  At this point, only level for technical exists*/
-	private enum LevelType {
-		TECHNICAL,
-	}
 	
 	/** Array of all objects in the level*/
 	protected Array<GameObject> levelObjects;
@@ -28,9 +22,12 @@ public class LevelModel {
 	/** How quickly energy is lost
 	 *  Range from 0.0 - 1.0*/
 	protected float energyLossFactor;
-	/** How slippery handholds are
+	/** How slippery standard handholds in this level are
 	 *  Range from 0.0 - 1.0*/
 	protected float slipFactor;
+	/** How crumbly standard handholds in this level are
+	 *  Range from 0.0 - 1.0*/
+	protected float crumbleFactor;
 	/** How strong gravity is*/
 	protected float gravity;
 	
@@ -107,6 +104,24 @@ public class LevelModel {
 	 */
 	public void setSlip(float slip){
 		slipFactor = slip;
+	}
+	
+	/**
+	 * Returns the crumble factor of this level
+	 *
+	 * @return Returns the crumble factor of this level
+	 */
+	public float getCrumble(){
+		return crumbleFactor;
+	}
+	
+	/**
+	 * Sets the crumble factor of this level.
+	 *
+	 * @param slip the crumble factor of this level
+	 */
+	public void setCrumble(float crumble){
+		crumbleFactor = crumble;
 	}
 	
 	public float getGravity(){
