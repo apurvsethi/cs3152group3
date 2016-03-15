@@ -6,12 +6,10 @@ import com.badlogic.gdx.physics.box2d.Body;
 public class ExtremityModel extends PartModel{
 
 	/** How hard this extremity can push
-	 *  Range from 0.0 - 1.0
-	 */
+	 *  Range from 0.0 - 1.0*/
 	protected float pushFactor;
 	/** How hard this extremity can pull
-	 *  Range from 0.0 - 1.0
-	 */
+	 *  Range from 0.0 - 1.0*/
 	protected float pullFactor;
 	/** Whether or not this extremity is gripping*/
 	protected boolean isGripping;
