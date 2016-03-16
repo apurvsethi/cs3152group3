@@ -99,7 +99,7 @@ public class GameMode extends ModeController {
 		// TODO: Use inputController methods to select limbs, 
 		//       horizontal and vertical to move them
 		
-		// TODO: Movements of other objects (obstacles, evenutally)
+		// TODO: Movements of other objects (obstacles, eventually)
 		
 		// TODO: Interactions between limbs and handholds
 	}
