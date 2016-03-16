@@ -13,11 +13,11 @@ public class GameMode extends ModeController {
 	/** Strings for files used, string[] for parts, etc. */
 	private static final String BACKGROUND_FILE = "preliminaryCharacterFilmStrip.png";
 	private static final String FOREGROUND_FILE = "preliminaryCharacterFilmStrip.png";
-	private static final String PART_TEXTURES[] = {"Ragdoll/Head.png","Ragdoll/Torso.png","Ragdoll/Hips.png",
-				"Ragdoll/ArmLeft.png", "Ragdoll/ArmRight.png", "Ragdoll/ForearmLeft.png","Ragdoll/ForearmRight.png",
-				"Ragdoll/HandLeftUngripped.png","Ragdoll/HandRightUngripped.png","Ragdoll/ThighLeft.png",
-				"Ragdoll/ThighRight.png", "Ragdoll/CalfLeft.png", "Ragdoll/CalfRight.png", "Ragdoll/FeetShoeLeft.png",
-				"Ragdoll/FeetShoeRight.png"};
+	private static final String PART_TEXTURES[] = {"Ragdoll/Corrected/Head.png","Ragdoll/Corrected/Torso.png","Ragdoll/Corrected/Hips.png",
+				"Ragdoll/Corrected/ArmLeft.png", "Ragdoll/Corrected/ArmRight.png", "Ragdoll/Corrected/ForearmLeft.png","Ragdoll/Corrected/ForearmRight.png",
+				"Ragdoll/Corrected/HandLeftUngripped.png","Ragdoll/Corrected/HandRightUngripped.png","Ragdoll/Corrected/ThighLeft.png",
+				"Ragdoll/Corrected/ThighRight.png", "Ragdoll/Corrected/CalfLeft.png", "Ragdoll/Corrected/CalfRight.png", "Ragdoll/Corrected/FeetShoeLeft.png",
+				"Ragdoll/Corrected/FeetShoeRight.png"};
 
 	/** Texture asset for files used, parts, etc. */
 	private static TextureRegion background;
