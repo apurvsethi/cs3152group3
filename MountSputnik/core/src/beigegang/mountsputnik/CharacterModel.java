@@ -1,10 +1,10 @@
 package beigegang.mountsputnik;
 
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 
-import beigegang.util.FilmStrip;
 import static beigegang.mountsputnik.Constants.*;
 
 public class CharacterModel extends GameObject{
@@ -16,7 +16,7 @@ public class CharacterModel extends GameObject{
 	/** Cache vector for organizing body parts */
 	private Vector2 partCache = new Vector2();
 	/** Texture assets for the body parts */
-	private FilmStrip[] partTextures;
+	private TextureRegion[] partTextures;
 	
 	@Override
 	public ObjectType getType() {
@@ -51,7 +51,7 @@ public class CharacterModel extends GameObject{
      *
      * @return the array of textures for the individual body parts.
      */
-    public FilmStrip[] getPartTextures() {
+    public TextureRegion[] getPartTextures() {
     	return partTextures;
     }
     
@@ -62,10 +62,10 @@ public class CharacterModel extends GameObject{
      *
      * @param textures the array of textures for the individual body parts.
      */
-    public void setPartTextures(FilmStrip[] textures, World w) {
+    public void setPartTextures(TextureRegion[] textures, World w) {
     	assert textures != null && textures.length > BODY_TEXTURE_COUNT : "Texture array is not large enough";
     	
-    	partTextures = new FilmStrip[BODY_TEXTURE_COUNT];
+    	partTextures = new TextureRegion[BODY_TEXTURE_COUNT];
     	System.arraycopy(textures, 0, partTextures, 0, BODY_TEXTURE_COUNT);
     	if (parts.size == 0) {
     		init(w);
@@ -143,7 +143,7 @@ public class CharacterModel extends GameObject{
 	 */
 	private PartModel makePart(int part, int connect, float partX, float connectX,
 			float partY, float connectY, float push, float pull, World w) {
-		FilmStrip texture = partTextures[part];
+		TextureRegion texture = partTextures[part];
 		
 		partCache.set(partX,partY);
 		if (connect != NONE) {
@@ -200,11 +200,21 @@ public class CharacterModel extends GameObject{
 	 * 
 	 * @param textures the texture map of the character
 	 * @param w	the world*/
-	public CharacterModel(FilmStrip[] textures, World w){
+	public CharacterModel(TextureRegion[] textures, World w){
+		//setPartTextures(textures, w);
+		parts = new Array<PartModel>();
+		joints = new Array<Joint>();
+		partTextures = textures;
 		init(w);
-		setPartTextures(textures, w);
 		setX(HEAD_X);
 		setY(HEAD_Y);
 	}
-
+	
+	/** Draw method for character model */
+	@Override
+	public void draw(GameCanvas canvas) {
+		for (PartModel part : parts) {
+			part.draw(canvas);
+		}
+	}
 }
