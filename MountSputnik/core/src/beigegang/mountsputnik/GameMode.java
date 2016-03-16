@@ -13,7 +13,11 @@ public class GameMode extends ModeController {
 	/** Strings for files used, string[] for parts, etc. */
 	private static final String BACKGROUND_FILE = "preliminaryCharacterFilmStrip.png";
 	private static final String FOREGROUND_FILE = "preliminaryCharacterFilmStrip.png";
-	private static final String PART_TEXTURES[] = {"preliminaryCharacterFilmStrip.png"};
+	private static final String PART_TEXTURES[] = {"Ragdoll/Head.png","Ragdoll/Torso.png","Ragdoll/Hips.png",
+				"Ragdoll/ArmLeft.png", "Ragdoll/ArmRight.png", "Ragdoll/ForearmLeft.png","Ragdoll/ForearmRight.png",
+				"Ragdoll/HandLeftUngripped.png","Ragdoll/HandRightUngripped.png","Ragdoll/ThighLeft.png",
+				"Ragdoll/ThighRight.png", "Ragdoll/CalfLeft.png", "Ragdoll/CalfRight.png", "Ragdoll/FeetShoeLeft.png",
+				"Ragdoll/FeetShoeRight.png"};
 
 	/** Texture asset for files used, parts, etc. */
 	private static TextureRegion background;
@@ -83,8 +87,8 @@ public class GameMode extends ModeController {
 	}
 	
 	public void populateLevel() {
-//		character = new CharacterModel(partTextures, world);
-//		objects.add(character);
+		character = new CharacterModel(partTextures, world);
+		objects.add(character);
 		// TODO: Populate level with whatever pieces and part are necessary (handholds, etc)
 		// Will probably do through a level generator later, level model access
 	}
@@ -103,9 +107,13 @@ public class GameMode extends ModeController {
 	public void draw() {
 		canvas.clear();
 		
-		canvas.begin();
-		canvas.draw(background, Color.WHITE, 0, 0,canvas.getWidth(),canvas.getHeight());
-		canvas.end();
+//		canvas.begin();
+//		canvas.draw(background, Color.WHITE, 0, 0,canvas.getWidth(),canvas.getHeight());
+//		canvas.end();
+//		
+//		canvas.begin();
+//		canvas.draw(foreground, Color.WHITE, canvas.getWidth()/5, 0,canvas.getWidth()*3/5,canvas.getHeight());
+//		canvas.end();
 		
 		canvas.begin();
 		for(GameObject obj : objects) {
@@ -120,10 +128,6 @@ public class GameMode extends ModeController {
 			}
 			canvas.end();
 		}
-
-		canvas.begin();
-		canvas.draw(foreground, Color.WHITE, 0, 0,canvas.getWidth(),canvas.getHeight());
-		canvas.end();
 	}
 
 	/**
