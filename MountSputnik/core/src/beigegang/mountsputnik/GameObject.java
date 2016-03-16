@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.graphics.*;
 
 import beigegang.util.*;
+import static beigegang.mountsputnik.Constants.*;
 
 
 //TODO: garbage collection D:
@@ -55,7 +56,7 @@ public abstract class GameObject {
 	/** CURRENT image for this object. May change over time. */
 	protected FilmStrip animator;
 	/** Drawing scale to convert physics units to pixels */
-	protected Vector2 drawScale = new Vector2(1.0f,1.0f);
+	protected Vector2 drawScale = new Vector2(0.25f,0.25f);
 	//TODO: determine if all joints should be revolute
 	/** Revolute Joint definition for Joint creation*/
 	protected static RevoluteJointDef jointDef = new RevoluteJointDef();
@@ -275,6 +276,8 @@ public abstract class GameObject {
 	 */
 	public GameObject(Texture texture){
 		setTexture(texture);
+		//TODO: figure out draw scale based on blocks
+		//setDrawScale(BLOCK_SIZE / texture.getWidth(), BLOCK_SIZE / texture.getHeight());
 		position = new Vector2(0.0f, 0.0f);
 		velocity = new Vector2(0.0f, 0.0f);
 	}
@@ -378,7 +381,7 @@ public abstract class GameObject {
 	 */
 	public void draw(GameCanvas canvas) {
 		canvas.draw(animator, Color.WHITE, origin.x, origin.y, 
-					position.x, position.y, 0.0f, 1.0f, 1.f);
+					position.x, position.y, 0.0f, drawScale.x, drawScale.y);
 	}
 
 	/**

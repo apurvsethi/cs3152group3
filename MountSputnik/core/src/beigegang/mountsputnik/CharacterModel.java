@@ -214,7 +214,7 @@ public class CharacterModel extends GameObject{
 	@Override
 	public void draw(GameCanvas canvas) {
 		for (PartModel part : parts) {
-			part.draw(canvas);
+			part.draw(canvas);;
 		}
 	}
 }
