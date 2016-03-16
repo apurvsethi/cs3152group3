@@ -1,7 +1,19 @@
 package beigegang.mountsputnik;
 
 public final class Constants {
-
+	
+	/**Constants for the window size*/
+	public static final int GAME_WIDTH = 1920;
+	public static final int GAME_HEIGHT = 1080;
+	/**Game block size in pixels*/
+	public static final float BLOCK_SIZE = 48;
+	
+	/**Total grid size */
+	public static final float X_BLOCKS = GAME_WIDTH / BLOCK_SIZE;
+	public static final float Y_BLOCKS = GAME_HEIGHT / BLOCK_SIZE;
+	/**Max number of blocks for width of climbing wall*/
+	public static final int WALL_WIDTH = 30;
+	
 	/** pixel radius around a handhold
 	 * if character extremity is within this radius and handhold is
 	 * within max reach, releasing the trigger / bumper will snap
@@ -9,9 +21,8 @@ public final class Constants {
 	public static final int SNAP_RADIUS = 15;
 	
 	/** Initial onscreen location of the head */
-	//TODO: determine actual position of head
-	public static final float HEAD_X = 4.0f;
-	public static final float HEAD_Y = 4.0f;
+	public static final float HEAD_X = GAME_WIDTH / 2;
+	public static final float HEAD_Y = GAME_HEIGHT / 2;
 	
 	/** Parameters to pass into extremities*/
 	//TODO: determine actual push / pull factor through playtesting
