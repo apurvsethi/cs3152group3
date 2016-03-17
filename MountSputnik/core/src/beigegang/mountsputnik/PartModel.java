@@ -93,34 +93,16 @@ public class PartModel extends GameObject{
 	public void setDensity(float d){
 		density = d;
 	}
-		
-	/** Contructs a PartModel
-	 * 
-	 * @param b	the body of this part
-	 * */
-	public PartModel(Body b){
-		body = b;
-		setX(b.getPosition().x);
-		setY(b.getPosition().y);
-	}
 	
 	/** Contructs a PartModel
-	 * 
-	 * @param x	x coordinate of part
+	 *
 	 * @param t	the texture of this part
 	 * */
-	public PartModel(float x, float y, Texture t, World w){
+	public PartModel(float x, float y, Texture t){
 		super(t, t.getWidth(), t.getHeight(), 1, 1);
-
-		bDef.type = BodyDef.BodyType.DynamicBody;
-		bDef.angle = 0;
 		shape.setAsBox(t.getWidth() / 2, t.getHeight() / 2);
-		bDef.position.set(500, 500);
-		body = w.createBody(bDef);
-		fixture.shape = shape;
-		geometry = body.createFixture(fixture);
-//		setX(x);
-//		setY(y);
+		setX(x);
+		setY(y);
 	}
 
 	/**
@@ -134,8 +116,8 @@ public class PartModel extends GameObject{
 		}
 
 		// Create the fixture
-		fixture.shape = shape;
-		geometry = body.createFixture(fixture);
+		fixtureDef.shape = shape;
+		geometry = body.createFixture(fixtureDef);
 		markDirty(false);
 	}
 
@@ -152,6 +134,19 @@ public class PartModel extends GameObject{
 	}
 
 	/**
+	 * Draws this object to the canvas
+	 *
+	 * There is only one drawing pass in this application, so you can draw the objects
+	 * in any order.
+	 *
+	 * @param canvas The drawing context
+	 */
+	public void draw(GameCanvas canvas) {
+		canvas.draw(animator, Color.WHITE, origin.x, origin.y,
+				getX(), getY(), 0.0f, drawScale.x, drawScale.y);
+	}
+
+	/**
 	 * Draws the outline of the physics body.
 	 *
 	 * This method can be helpful for understanding issues with collisions.
@@ -159,6 +154,6 @@ public class PartModel extends GameObject{
 	 * @param canvas Drawing context
 	 */
 	public void drawDebug(GameCanvas canvas) {
-		canvas.drawPhysics(shape, Color.YELLOW,0,0,getAngle(),drawScale.x,drawScale.y);
+		canvas.drawPhysics(shape, Color.YELLOW, getX(), getY(), getAngle(),drawScale.x,drawScale.y);
 	}
 }

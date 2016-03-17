@@ -9,4 +9,14 @@ public class ObstacleModel extends GameObject{
 		return ObjectType.OBSTACLE;
 	}
 
+	@Override
+	protected void createFixtures() {
+
+	}
+
+	@Override
+	protected void releaseFixtures() {
+
+	}
+
 }

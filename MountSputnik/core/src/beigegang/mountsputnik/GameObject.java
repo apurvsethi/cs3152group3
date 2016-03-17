@@ -9,8 +9,6 @@ import beigegang.util.*;
 import static beigegang.mountsputnik.Constants.*;
 
 
-//TODO: garbage collection D:
-
 /** Base model class that is the parent class to all other models
  *  In charge of general getting / setting textures, physics 
  *  parameters, and position
@@ -44,10 +42,6 @@ public abstract class GameObject {
 	}
 
 	// Attributes for all game objects
-	/** Object position (centered on the texture middle) */
-	protected Vector2 position;
-	/** Object velocity vector */
-	protected Vector2 velocity;
 	/** Reference to texture origin */
 	protected Vector2 origin;
 	/** CURRENT image for this object. May change over time. */
@@ -68,13 +62,23 @@ public abstract class GameObject {
 	/** Body definition for Body creation*/
 	protected static BodyDef bDef = new BodyDef();
 	/** Stores the fixture information for this shape */
-	public FixtureDef fixture = new FixtureDef();
+	public FixtureDef fixtureDef = new FixtureDef();
 
 	/// Track garbage collection status
 	/** Whether the object should be removed from the world on next pass */
 	private boolean toRemove;
 	/** Whether the object has changed shape and needs a new fixture */
 	private boolean isDirty;
+
+	/// Caching objects
+	/** A cache value for when the user wants to access the body position */
+	protected Vector2 positionCache = new Vector2();
+	/** A cache value for when the user wants to access the linear velocity */
+	protected Vector2 velocityCache = new Vector2();
+	/** A cache value for when the user wants to access the center of mass */
+	protected Vector2 centroidCache = new Vector2();
+	/** A cache value for when the user wants to access the drawing scale */
+	protected Vector2 scaleCache = new Vector2();
 	
 	// ACCESSORS
 	/**
@@ -97,99 +101,159 @@ public abstract class GameObject {
 	}
 
 	/**
-	 * Returns the position of this object (e.g. location of the center pixel)
+	 * Returns the position of this object
 	 *
-	 * The value returned is a reference to the position vector, which may be
-	 * modified freely.
+	 * This method does NOT return a reference to the position vector. Changes to this
+	 * vector will not affect the body.  However, it returns the same vector each time
+	 * its is called, and so cannot be used as an allocator.
 	 *
 	 * @return the position of this object
 	 */
 	public Vector2 getPosition() {
-		return position;
+		return body != null ? body.getPosition() : bDef.position;
 	}
 
 	/**
-	 * Returns the x-coordinate of the object position (center).
+	 * Sets the current position for this physics body
 	 *
-	 * @return the x-coordinate of the object position
+	 * This method does not keep a reference to the parameter.
+	 *
+	 * @param value  the current position for this physics body
+	 */
+	public void setPosition(Vector2 value) {
+		if (body != null) body.setTransform(value, 0);
+		else bDef.position.set(value);
+	}
+
+	/**
+	 * Sets the current position for this physics body
+	 *
+	 * @param x  the x-coordinate for this physics body
+	 * @param y  the y-coordinate for this physics body
+	 */
+	public void setPosition(float x, float y) {
+		if (body != null) body.setTransform(x, y, 0);
+		else bDef.position.set(x, y);
+	}
+
+	/**
+	 * Returns the x-coordinate for this physics body
+	 *
+	 * @return the x-coordinate for this physics body
 	 */
 	public float getX() {
-		return position.x;
+		return body != null ? body.getPosition().x : bDef.position.x;
 	}
 
 	/**
-	 * Sets the x-coordinate of the object position (center).
+	 * Sets the x-coordinate for this physics body
 	 *
-	 * @param value the x-coordinate of the object position
+	 * @param value  the x-coordinate for this physics body
 	 */
 	public void setX(float value) {
-		position.x = value;
+		if (body != null) {
+			positionCache.set(value,body.getPosition().y);
+			body.setTransform(positionCache,body.getAngle());
+		} else {
+			bDef.position.x = value;
+		}
 	}
 
 	/**
-	 * Returns the y-coordinate of the object position (center).
+	 * Returns the y-coordinate for this physics body
 	 *
-	 * @return the y-coordinate of the object position
+	 * @return the y-coordinate for this physics body
 	 */
 	public float getY() {
-		return position.y;
+		return body != null ? body.getPosition().y : bDef.position.y;
 	}
 
 	/**
-	 * Sets the y-coordinate of the object position (center).
+	 * Sets the y-coordinate for this physics body
 	 *
-	 * @param value the y-coordinate of the object position
+	 * @param value  the y-coordinate for this physics body
 	 */
 	public void setY(float value) {
-		position.y = value;
+		if (body != null) {
+			positionCache.set(body.getPosition().x,value);
+			body.setTransform(positionCache,body.getAngle());
+		} else {
+			bDef.position.y = value;
+		}
 	}
 
 	/**
-	 * Returns the velocity of this object in pixels per animation frame.
+	 * Returns the linear velocity for this physics body
 	 *
-	 * The value returned is a reference to the velocity vector, which may be
-	 * modified freely.
+	 * This method does NOT return a reference to the velocity vector. Changes to this
+	 * vector will not affect the body.  However, it returns the same vector each time
+	 * its is called, and so cannot be used as an allocator.
 	 *
-	 * @return the velocity of this object
+	 * @return the linear velocity for this physics body
 	 */
-	public Vector2 getVelocity() {
-		return velocity;
+	public Vector2 getLinearVelocity() {
+		return (body != null ? body.getLinearVelocity() : velocityCache.set(bDef.linearVelocity));
 	}
 
 	/**
-	 * Returns the x-coordinate of the object velocity.
+	 * Sets the linear velocity for this physics body
 	 *
-	 * @return the x-coordinate of the object velocity.
+	 * This method does not keep a reference to the parameter.
+	 *
+	 * @param value  the linear velocity for this physics body
+	 */
+	public void setLinearVelocity(Vector2 value) {
+		if (body != null) {
+			body.setLinearVelocity(value);
+		} else {
+			bDef.linearVelocity.set(value);
+		}
+	}
+
+	/**
+	 * Returns the x-velocity for this physics body
+	 *
+	 * @return the x-velocity for this physics body
 	 */
 	public float getVX() {
-		return velocity.x;
+		return (body != null ? body.getLinearVelocity().x : bDef.linearVelocity.x);
 	}
 
 	/**
-	 * Sets the x-coordinate of the object velocity.
+	 * Sets the x-velocity for this physics body
 	 *
-	 * @param value the x-coordinate of the object velocity.
+	 * @param value  the x-velocity for this physics body
 	 */
 	public void setVX(float value) {
-		velocity.x = value;
+		if (body != null) {
+			velocityCache.set(value,body.getLinearVelocity().y);
+			body.setLinearVelocity(velocityCache);
+		} else {
+			bDef.linearVelocity.x = value;
+		}
 	}
 
 	/**
-	 * Returns the y-coordinate of the object velocity.
+	 * Returns the y-velocity for this physics body
 	 *
-	 * @return the y-coordinate of the object velocity.
+	 * @return the y-velocity for this physics body
 	 */
 	public float getVY() {
-		return velocity.y;
+		return (body != null ? body.getLinearVelocity().y : bDef.linearVelocity.y);
 	}
 
 	/**
-	 * Sets the y-coordinate of the object velocity.
+	 * Sets the y-velocity for this physics body
 	 *
-	 * @param value the y-coordinate of the object velocity.
+	 * @param value  the y-velocity for this physics body
 	 */
 	public void setVY(float value) {
-		velocity.y = value;
+		if (body != null) {
+			velocityCache.set(body.getLinearVelocity().x,value);
+			body.setLinearVelocity(velocityCache);
+		} else {
+			bDef.linearVelocity.y = value;
+		}
 	}
 
 	/**
@@ -200,7 +264,7 @@ public abstract class GameObject {
 	 * @return the angle of rotation for this body
 	 */
 	public float getAngle() {
-		return body.getAngle();
+		return body != null ? body.getAngle() : bDef.angle;
 	}
 
 	/**
@@ -269,8 +333,6 @@ public abstract class GameObject {
 	 * The created object has no position or size.  These should be set by the subclasses.
 	 */
 	public GameObject() {
-		position = new Vector2(0.0f, 0.0f);
-		velocity = new Vector2(0.0f, 0.0f);
 	}
 	
 	/**
@@ -281,8 +343,6 @@ public abstract class GameObject {
 	public GameObject(Texture texture, float width, float height, float box_width, float box_height) {
 		vertices = new float[8];
 		shape = new PolygonShape();
-		position = new Vector2(0.0f, 0.0f);
-		velocity = new Vector2(0.0f, 0.0f);
 
 		setTexture(texture);
 		setDrawScale(BLOCK_SIZE * box_width / width, BLOCK_SIZE * box_height / height);
@@ -349,7 +409,9 @@ public abstract class GameObject {
 	 * @param delta Number of seconds since last animation frame
 	 */
 	public void update(float delta) {
-		position.add(velocity);
+		if (isDirty()) {
+			createFixtures();
+		}
 	}
 	
 	/**
@@ -363,7 +425,18 @@ public abstract class GameObject {
 	 * @return true if object allocation succeeded
 	 */
 	public boolean activatePhysics(World world) {
-		//TODO: Be able to activate physics for any object, may need to be abstract
+		// Make a body, if possible
+		bDef.active = true;
+		body = world.createBody(bDef);
+		body.setUserData(this);
+
+		// Only initialize if a body was created.
+		if (body != null) {
+			createFixtures();
+			return true;
+		}
+
+		bDef.active = false;
 		return false;
 	}
 
@@ -374,8 +447,49 @@ public abstract class GameObject {
 	 * @param world Box2D world that stores body
 	 */
 	public void deactivatePhysics(World world) {
-		// TODO: Be able to deactivate physics for any object, may need to be abstract
+		if (body != null) {
+			// Snapshot the values
+			setBodyState(body);
+			world.destroyBody(body);
+			body = null;
+			bDef.active = false;
+		}
 	}
+
+	/**
+	 * Copies the state from the given body to the body def.
+	 *
+	 * This is important if you want to save the state of the body before removing
+	 * it from the world.
+	 */
+	protected void setBodyState(Body body) {
+		bDef.type   = body.getType();
+		bDef.angle  = body.getAngle();
+		bDef.active = body.isActive();
+		bDef.awake  = body.isAwake();
+		bDef.bullet = body.isBullet();
+		bDef.position.set(body.getPosition());
+		bDef.linearVelocity.set(body.getLinearVelocity());
+		bDef.allowSleep = body.isSleepingAllowed();
+		bDef.fixedRotation = body.isFixedRotation();
+		bDef.gravityScale  = body.getGravityScale();
+		bDef.angularDamping = body.getAngularDamping();
+		bDef.linearDamping  = body.getLinearDamping();
+	}
+
+	/**
+	 * Create new fixtures for this body, defining the shape
+	 *
+	 * This is the primary method to override for custom physics objects
+	 */
+	protected abstract void createFixtures();
+
+	/**
+	 * Release the fixtures for this body, reseting the shape
+	 *
+	 * This is the primary method to override for custom physics objects.
+	 */
+	protected abstract void releaseFixtures();
 
 	/**
 	 * Draws this object to the canvas
@@ -386,8 +500,7 @@ public abstract class GameObject {
 	 * @param canvas The drawing context
 	 */
 	public void draw(GameCanvas canvas) {
-		canvas.draw(animator, Color.WHITE, origin.x, origin.y, 
-					position.x, position.y, 0.0f, drawScale.x, drawScale.y);
+		canvas.draw(animator,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),1,1);
 	}
 
 	/**
