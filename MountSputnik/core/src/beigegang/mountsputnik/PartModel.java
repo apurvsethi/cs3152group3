@@ -1,7 +1,11 @@
 package beigegang.mountsputnik;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.World;
 
 public class PartModel extends GameObject{
 
@@ -27,8 +31,6 @@ public class PartModel extends GameObject{
 	
 	/** The current part's type*/
 	private PartType partType;
-	/** A root body for this box 2d. */
-    protected Body body;
 	/** Density of this part, has default value of 1.0*/
 	protected float density = 1.0f;
 
@@ -68,7 +70,7 @@ public class PartModel extends GameObject{
 	/**
 	 * Sets the body of this object.
 	 *
-	 * @param body the body of this part
+	 * @param b the body of this part
 	 */
 	public void setBody(Body b){
 		body = b;
@@ -86,7 +88,7 @@ public class PartModel extends GameObject{
 	/**
 	 * Sets the density of this object.
 	 *
-	 * @param density the density of this part
+	 * @param d the density of this part
 	 */
 	public void setDensity(float d){
 		density = d;
@@ -104,14 +106,59 @@ public class PartModel extends GameObject{
 	
 	/** Contructs a PartModel
 	 * 
-	 * @param b	the body of this part
+	 * @param x	x coordinate of part
 	 * @param t	the texture of this part
 	 * */
-	public PartModel(Body b, Texture t){
-		super(t);
-		body = b;
-		setX(b.getPosition().x);
-		setY(b.getPosition().y);
+	public PartModel(float x, float y, Texture t, World w){
+		super(t, t.getWidth(), t.getHeight(), 1, 1);
+
+		bDef.type = BodyDef.BodyType.DynamicBody;
+		bDef.angle = 0;
+		shape.setAsBox(t.getWidth() / 2, t.getHeight() / 2);
+		bDef.position.set(500, 500);
+		body = w.createBody(bDef);
+		fixture.shape = shape;
+		geometry = body.createFixture(fixture);
+//		setX(x);
+//		setY(y);
 	}
-	
+
+	/**
+	 * Create new fixtures for this body, defining the shape
+	 *
+	 * This is the primary method to override for custom physics objects
+	 */
+	protected void createFixtures() {
+		if (body == null) {
+			return;
+		}
+
+		// Create the fixture
+		fixture.shape = shape;
+		geometry = body.createFixture(fixture);
+		markDirty(false);
+	}
+
+	/**
+	 * Release the fixtures for this body, reseting the shape
+	 *
+	 * This is the primary method to override for custom physics objects
+	 */
+	protected void releaseFixtures() {
+		if (geometry != null) {
+			body.destroyFixture(geometry);
+			geometry = null;
+		}
+	}
+
+	/**
+	 * Draws the outline of the physics body.
+	 *
+	 * This method can be helpful for understanding issues with collisions.
+	 *
+	 * @param canvas Drawing context
+	 */
+	public void drawDebug(GameCanvas canvas) {
+		canvas.drawPhysics(shape, Color.YELLOW,0,0,getAngle(),drawScale.x,drawScale.y);
+	}
 }

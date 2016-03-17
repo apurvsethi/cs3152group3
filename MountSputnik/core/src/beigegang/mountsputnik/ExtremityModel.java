@@ -2,6 +2,7 @@ package beigegang.mountsputnik;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.World;
 
 public class ExtremityModel extends PartModel{
 
@@ -96,8 +97,8 @@ public class ExtremityModel extends PartModel{
 	 * @param b the body of this extremity
 	 * @param t	the texture of this extremity
 	 */
-	public ExtremityModel(float push, float pull, Body b, Texture t){
-		super(b, t);
+	public ExtremityModel(float push, float pull, float x, float y, Texture t, World w){
+		super(x, y, t, w);
 		pushFactor= push;
 		pullFactor = pull;
 		isGripping = false;

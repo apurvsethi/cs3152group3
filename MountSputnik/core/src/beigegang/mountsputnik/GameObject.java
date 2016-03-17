@@ -1,8 +1,7 @@
 package beigegang.mountsputnik;
 
 import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.graphics.*;
 
@@ -51,17 +50,25 @@ public abstract class GameObject {
 	protected Vector2 velocity;
 	/** Reference to texture origin */
 	protected Vector2 origin;
-	/** Radius of the object (used for collisions) */
-	protected float radius;
 	/** CURRENT image for this object. May change over time. */
 	protected FilmStrip animator;
 	/** Drawing scale to convert physics units to pixels */
 	protected Vector2 drawScale = new Vector2(0.25f,0.25f);
+	/** Shape information for this object */
+	protected PolygonShape shape;
+	/** Cache of the polygon vertices (for resizing) */
+	protected float[] vertices;
+	/** A root body for this box 2d. */
+	protected Body body;
+	/** A cache value for the fixture (for resizing) */
+	public Fixture geometry;
 	//TODO: determine if all joints should be revolute
 	/** Revolute Joint definition for Joint creation*/
 	protected static RevoluteJointDef jointDef = new RevoluteJointDef();
 	/** Body definition for Body creation*/
 	protected static BodyDef bDef = new BodyDef();
+	/** Stores the fixture information for this shape */
+	public FixtureDef fixture = new FixtureDef();
 
 	/// Track garbage collection status
 	/** Whether the object should be removed from the world on next pass */
@@ -77,7 +84,6 @@ public abstract class GameObject {
 	 */
 	public void setTexture(Texture texture) {
 		animator = new FilmStrip(texture,1,1,1);
-		radius = animator.getRegionHeight() / 2.0f;
 		origin = new Vector2(animator.getRegionWidth()/2.0f, animator.getRegionHeight()/2.0f);
 	}
 	
@@ -96,7 +102,7 @@ public abstract class GameObject {
 	 * The value returned is a reference to the position vector, which may be
 	 * modified freely.
 	 *
-	 * @return the position of this object 
+	 * @return the position of this object
 	 */
 	public Vector2 getPosition() {
 		return position;
@@ -128,7 +134,7 @@ public abstract class GameObject {
 	public float getY() {
 		return position.y;
 	}
-	
+
 	/**
 	 * Sets the y-coordinate of the object position (center).
 	 *
@@ -137,14 +143,14 @@ public abstract class GameObject {
 	public void setY(float value) {
 		position.y = value;
 	}
-	
+
 	/**
 	 * Returns the velocity of this object in pixels per animation frame.
 	 *
 	 * The value returned is a reference to the velocity vector, which may be
 	 * modified freely.
 	 *
-	 * @return the velocity of this object 
+	 * @return the velocity of this object
 	 */
 	public Vector2 getVelocity() {
 		return velocity;
@@ -169,9 +175,9 @@ public abstract class GameObject {
 	}
 
 	/**
-	 * Sets the y-coordinate of the object velocity.
+	 * Returns the y-coordinate of the object velocity.
 	 *
-	 * @param value the y-coordinate of the object velocity.
+	 * @return the y-coordinate of the object velocity.
 	 */
 	public float getVY() {
 		return velocity.y;
@@ -185,17 +191,16 @@ public abstract class GameObject {
 	public void setVY(float value) {
 		velocity.y = value;
 	}
-	
 
 	/**
-	 * Returns the radius of this object.
+	 * Returns the angle of rotation for this body (about the center).
 	 *
-	 * All of our objects are circles, to make collision detection easy.
+	 * The value returned is in radians
 	 *
-	 * @return the radius of this object.
+	 * @return the angle of rotation for this body
 	 */
-	public float getRadius() { 
-		return radius;
+	public float getAngle() {
+		return body.getAngle();
 	}
 
 	/**
@@ -266,7 +271,6 @@ public abstract class GameObject {
 	public GameObject() {
 		position = new Vector2(0.0f, 0.0f);
 		velocity = new Vector2(0.0f, 0.0f);
-		radius = 0.0f;
 	}
 	
 	/**
@@ -274,12 +278,14 @@ public abstract class GameObject {
 	 *
 	 * @param texture the texture of this object
 	 */
-	public GameObject(Texture texture){
-		setTexture(texture);
-		//TODO: figure out draw scale based on blocks
-		//setDrawScale(BLOCK_SIZE / texture.getWidth(), BLOCK_SIZE / texture.getHeight());
+	public GameObject(Texture texture, float width, float height, float box_width, float box_height) {
+		vertices = new float[8];
+		shape = new PolygonShape();
 		position = new Vector2(0.0f, 0.0f);
 		velocity = new Vector2(0.0f, 0.0f);
+
+		setTexture(texture);
+		setDrawScale(BLOCK_SIZE * box_width / width, BLOCK_SIZE * box_height / height);
 	}
 
 	/**
@@ -392,7 +398,7 @@ public abstract class GameObject {
 	 * @param canvas Drawing context
 	 */
 	public void drawDebug(GameCanvas canvas) {
-		//TODO: draw a debugging version of the image, may need to be abstract
+		canvas.drawPhysics(shape,Color.YELLOW,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
 	}
 }
 	

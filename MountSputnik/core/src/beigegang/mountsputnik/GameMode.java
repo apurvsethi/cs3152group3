@@ -122,11 +122,11 @@ public class GameMode extends ModeController {
 		canvas.end();
 		
 		if (debug) {
-			canvas.begin();
+			canvas.beginDebug();
 			for(GameObject obj : objects) {
 				obj.drawDebug(canvas);
 			}
-			canvas.end();
+			canvas.endDebug();
 		}
 	}
 

@@ -55,27 +55,6 @@ public class CharacterModel extends GameObject{
     	return partTextures;
     }
     
-    /**
-     * Sets the array of textures for the individual body parts.
-     *
-     * The array should be BODY_TEXTURE_COUNT in size.
-     *
-     * @param textures the array of textures for the individual body parts.
-     */
-    public void setPartTextures(TextureRegion[] textures, World w) {
-    	assert textures != null && textures.length > BODY_TEXTURE_COUNT : "Texture array is not large enough";
-    	
-    	partTextures = new TextureRegion[BODY_TEXTURE_COUNT];
-    	System.arraycopy(textures, 0, partTextures, 0, BODY_TEXTURE_COUNT);
-    	if (parts.size == 0) {
-    		init(w);
-    	} else {
-    		for(int ii = 0; ii <=FOOT_RIGHT; ii++) {
-    			parts.get(ii).setTexture(partTextures[ii].getTexture());
-    		}
-    	}
-    }
-    
     /**Initializes the character, with all of their body parts
      * 
      * @param w			The world*/
@@ -135,8 +114,8 @@ public class CharacterModel extends GameObject{
 	 * @param connect The part to connect to
 	 * @param partX The x-offset of the part RELATIVE to the connecting part's offset
 	 * @param partY	The y-offset of the part RELATIVE to the connecting part's offset
-	 * @param conenctX The x-offset of the connecting part RELATIVE to the part's offset
-	 * @param connnectY	The y-offset of the connecting part RELATIVE to the part's offset
+	 * @param connectX The x-offset of the connecting part RELATIVE to the part's offset
+	 * @param connectY	The y-offset of the connecting part RELATIVE to the part's offset
 	 * @param w	The world this part is created in
 	 * 
 	 * @return the newly created part
@@ -150,17 +129,10 @@ public class CharacterModel extends GameObject{
 			partCache.add(parts.get(connect).getPosition());
 			partCache.add(connectX,connectY);
 		}
-
-		//TODO: set body origin to be the actual origin
-		bDef.type = BodyDef.BodyType.DynamicBody;
-		bDef.position.set(partCache.x, partCache.y);
-		bDef.angle = 0;
-		
-		Body body = w.createBody(bDef);
 		
 		PartModel partModel = (push == 0.0f? 
-				new PartModel(body, texture.getTexture())
-				: new ExtremityModel(push, pull, body, texture.getTexture()));
+				new PartModel(partCache.x, partCache.y, texture.getTexture(), w)
+				: new ExtremityModel(push, pull, partCache.x, partCache.y, texture.getTexture(), w));
 		
 		partModel.setDrawScale(drawScale);
 		
@@ -201,7 +173,6 @@ public class CharacterModel extends GameObject{
 	 * @param textures the texture map of the character
 	 * @param w	the world*/
 	public CharacterModel(TextureRegion[] textures, World w){
-		//setPartTextures(textures, w);
 		parts = new Array<PartModel>();
 		joints = new Array<Joint>();
 		partTextures = textures;
@@ -214,7 +185,15 @@ public class CharacterModel extends GameObject{
 	@Override
 	public void draw(GameCanvas canvas) {
 		for (PartModel part : parts) {
-			part.draw(canvas);;
+			part.draw(canvas);
+		}
+	}
+
+	/** Draw debug method for character model */
+	@Override
+	public void drawDebug(GameCanvas canvas) {
+		for (PartModel part : parts) {
+			part.drawDebug(canvas);
 		}
 	}
 }
