@@ -239,7 +239,8 @@ public class GameCanvas {
 	}
 	
 	public void translateCamera(float x, float y){
-		camera.translate(x, y);
+		Vector3 screenCoords = camera.project(new Vector3(x,y,0));
+		camera.translate(screenCoords.x, screenCoords.y);
 		camera.update();
 	}
 

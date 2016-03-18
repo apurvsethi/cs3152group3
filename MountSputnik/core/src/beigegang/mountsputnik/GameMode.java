@@ -95,6 +95,8 @@ public class GameMode extends ModeController {
 
 	@Override
 	public void reset() {
+		character = null;
+		objects.clear();
 		populateLevel();
 		
 	}
@@ -113,30 +115,37 @@ public class GameMode extends ModeController {
 	public void update(float dt) {
 		InputController input = InputController.getInstance();
 		
-		//debug code for testing if physics activated
-		if(input.didLeftLeg()){
-			character.parts.get(3).setVX(111f);
-		}
 		// TODO: Use inputController methods to select limbs, 
 		//       horizontal and vertical to move them
-		if(input.didLeftArm()){
-			canvas.translateCamera(-1, 1);
-		}
-		if(input.didLeftLeg()){
-			canvas.translateCamera(1, -1);
-		}
-		if(input.didRightArm()){
-			canvas.translateCamera(1, 1);
-		}
-		if(input.didRightLeg()){
-			canvas.translateCamera(-1, -1); 
-		}
+
+		//move camera with character
+		canvas.translateCamera(0, character.parts.get(CHEST).getLinearVelocity().y);
 		
 		// TODO: Movements of other objects (obstacles, eventually)
 		
 		// TODO: Interactions between limbs and handholds
 		
-		// TODO: Update energy quantity
+		// TODO: Update energy quantity (fill in these values)
+		float dEdt = calculateEnergyChange(0,0);
+		character.setEnergy(character.getEnergy()+dEdt);
+	}
+	
+	/**
+	 * dE/dt = A (1-B*sin(angle/2))(Base energy gain)(Environmental Gain Modifier) - 
+	 * - C (Exertion+1)(Environmental Loss Modifier)(3-feet)(3-hands) - D 
+	 * 
+	 * A, C and D are playtested constants
+	 * B allows for rotation to not effect energy gain
+	 * Base energy gain is a value in the character
+	 * 
+	 * @param gainModifier Environmental Gain Modifier
+	 * @param lossModifier Environmental Loss Modifier
+	 * 
+	 * @return change in energy value
+	 */
+	private float calculateEnergyChange(float gainModifier, float lossModifier){
+		//TODO: FILL IN THIS FUNCTION
+		return 0;
 	}
 	
 	public void draw() {
