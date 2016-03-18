@@ -170,6 +170,7 @@ public class CharacterModel extends GameObject{
 				: new ExtremityModel(push, pull, partCache.x, partCache.y, texture.getTexture()));
 		
 		partModel.setDrawScale(drawScale);
+		partModel.setAngle(angle);
 		partModel.activatePhysics(w);
 		partModel.setBodyType(BodyDef.BodyType.DynamicBody);
 		
@@ -189,6 +190,9 @@ public class CharacterModel extends GameObject{
 			jointDef.localAnchorB.set(partCache);
 
 			jointDef.collideConnected = false;
+			jointDef.lowerAngle = rotationLimitLower;
+			jointDef.upperAngle = rotationLimitUpper;
+			
 			Joint joint = w.createJoint(jointDef);
 			joints.add(joint);
 		}
