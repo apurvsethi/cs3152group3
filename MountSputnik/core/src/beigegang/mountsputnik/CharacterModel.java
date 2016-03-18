@@ -181,11 +181,11 @@ public class CharacterModel extends GameObject{
 		//create joint if two parts present
 		if (connect != NONE){
 			jointDef.bodyA = parts.get(connect).getBody();
-			partCache.set(0, 0);
+			partCache.set(connectX, connectY);
 			jointDef.localAnchorA.set(partCache);
 
 			jointDef.bodyB = parts.get(part).getBody();
-			partCache.set(0, 0);
+			partCache.set(-partX, -partY);
 			jointDef.localAnchorB.set(partCache);
 
 			jointDef.collideConnected = false;
