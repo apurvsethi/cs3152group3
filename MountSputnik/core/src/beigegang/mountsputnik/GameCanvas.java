@@ -34,6 +34,8 @@ import com.badlogic.gdx.physics.box2d.*;
  * that mode must be done in a separate begin/end pass.
  */
 public class GameCanvas {
+
+
 	/** Enumeration to track which pass we are in */
 	private enum DrawPass {
 		/** We are not drawing */
@@ -343,7 +345,16 @@ public class GameCanvas {
 		Gdx.gl.glClearColor(0.39f, 0.58f, 0.93f, 1.0f);  // Homage to the XNA years
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);		
 	}
+	/** resets camera position */
+	public void resetCamera() {
+		setCameraPosition(this.getWidth()/2f,this.getHeight()/2f);
+	}
 
+	/** set camera Position to whereever you want */
+
+	private void setCameraPosition(float width, float height) {
+		camera.position.set(width,height,0f);
+	}
 	/**
 	 * Start a standard drawing sequence.
 	 *

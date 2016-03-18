@@ -30,9 +30,9 @@ public abstract class GameObject {
 	public enum ObjectType {
 		/**The character*/
 		CHARACTER,
-		/*A body part of the character*/
+		/**A body part of the character*/
 		PART,
-		/*An extremity of the character**/
+		/**An extremity of the character**/
 		EXTREMITY,
 		/**A handhold, which is a static (at this point) object that
 		 * can be grabbed */
@@ -47,7 +47,7 @@ public abstract class GameObject {
 	/** CURRENT image for this object. May change over time. */
 	protected FilmStrip animator;
 	/** Drawing scale to convert physics units to pixels */
-	protected Vector2 drawScale = new Vector2(0.25f,0.25f);
+	protected Vector2 drawScale = new Vector2(0.1f,0.1f);
 	/** Shape information for this object */
 	protected PolygonShape shape;
 	/** Cache of the polygon vertices (for resizing) */
@@ -266,7 +266,42 @@ public abstract class GameObject {
 	public float getAngle() {
 		return body != null ? body.getAngle() : bDef.angle;
 	}
-
+	
+	/**
+	 * Sets the angle of rotation for this body (about the center).
+	 *
+	 * @param angle The new angle in radians
+	 */
+	public void setAngle(float angle) {
+		bDef.angle = angle;
+	}
+		
+	/**
+	 * Returns the type of this body
+	 *
+	 * @return The type of the body
+	 */
+	public BodyDef.BodyType getBodyType(){
+		if(body != null){
+			return body.getType();
+		}
+		else
+			return bDef.type;
+	}
+	
+	/**
+	 * Sets the body type for this body.
+	 *
+	 * @param type The new type
+	 */
+	public void setBodyType(BodyDef.BodyType type){
+		if(body != null){
+			body.setType(type);
+		}
+		else
+			bDef.type = type;
+	}
+	
 	/**
 	 * Returns the type of this object.
 	 *
@@ -345,7 +380,6 @@ public abstract class GameObject {
 		shape = new PolygonShape();
 
 		setTexture(texture);
-		setDrawScale(BLOCK_SIZE * box_width / width, BLOCK_SIZE * box_height / height);
 	}
 
 	/**
@@ -494,13 +528,14 @@ public abstract class GameObject {
 	/**
 	 * Draws this object to the canvas
 	 *
-	 * There is only one drawing pass in this application, so you can draw the objects 
+	 * There is only one drawing pass in this application, so you can draw the objects
 	 * in any order.
 	 *
 	 * @param canvas The drawing context
 	 */
 	public void draw(GameCanvas canvas) {
-		canvas.draw(animator,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),1,1);
+		canvas.draw(animator, Color.WHITE, origin.x, origin.y,
+				getX(), getY(), 0.0f, drawScale.x, drawScale.y);
 	}
 
 	/**
@@ -511,7 +546,7 @@ public abstract class GameObject {
 	 * @param canvas Drawing context
 	 */
 	public void drawDebug(GameCanvas canvas) {
-		canvas.drawPhysics(shape,Color.YELLOW,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
+		canvas.drawPhysics(shape, Color.YELLOW, getX(), getY(), getAngle(),1,1);
 	}
 }
 	

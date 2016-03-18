@@ -60,7 +60,8 @@ public final class Constants {
 	public static final int FOOT_LEFT = 13;
 	public static final int FOOT_RIGHT = 14;
 	public static final int NONE = -1;
-	
+
+	public static final int[] EXTREMITIES = new int[]{FOOT_LEFT,FOOT_RIGHT,HAND_LEFT,HAND_RIGHT};
 	
 	/**Giant monster section of hard coded offsets. Disgusting, but necessary*/
 	//TODO: once character assets complete, determine actual offsets
@@ -117,8 +118,18 @@ public final class Constants {
 	/** Shin y offset from foot */
 	public static final float SHIN_Y_FOOT_OFFSET    = -50;
 	/** Foot x offset from shin */
-	public static final float FOOT_X_OFFSET    = 40;
+	public static final float FOOT_X_OFFSET    = 30;
 	/** Foot x offset from shin */
-	public static final float FOOT_Y_OFFSET    = -50;
+	public static final float FOOT_Y_OFFSET    = -35;
+
+	//TODO: Figure out what these should be
+	/** Constant Multiplier on energy gain */
+	public static final float ENERGY_GAIN_MULTIPLIER = 1;
+	/** Constant Multiplier on energy loss */
+	public static final float ENERGY_LOSS_MULTIPLIER = 1;
+	/** Constant of energy loss */
+	public static final float ENERGY_LOSS = 1;
+	/** Base energy gain */
+	public static final float BASE_ENERGY_GAIN = 1;
 	
 }
