@@ -20,6 +20,9 @@ public final class Constants {
 	 * to the handhold*/
 	public static final int SNAP_RADIUS = 15;
 	
+	/** The number of handholds on the given level. TODO: remove. For testing purposes only  */
+	public static final int HANDHOLD_NUMBER = 5; 
+	
 	/** Initial onscreen location of the head */
 	public static final float HEAD_X = GAME_WIDTH / 2;
 	public static final float HEAD_Y = GAME_HEIGHT * 0.75f;
