@@ -95,6 +95,7 @@ public class GameMode extends ModeController {
 
 	@Override
 	public void reset() {
+		System.out.println("RESET");
 		if(character!=null)
 			character.deactivatePhysics(world);
 		character = null;
@@ -124,9 +125,6 @@ public class GameMode extends ModeController {
 
 		if(input.didLeftArm()){
 			character.parts.get(ARM_LEFT).body.applyForceToCenter(100f,0,false);
-		}
-		for(PartModel p : character.parts){
-			System.out.print(p.body.getPosition());
 		}
 		System.out.println("");
 		//move camera with character
