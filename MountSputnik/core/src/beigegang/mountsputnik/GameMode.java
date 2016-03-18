@@ -98,6 +98,7 @@ public class GameMode extends ModeController {
 		character = null;
 		objects.clear();
 		populateLevel();
+		canvas.resetCamera();
 		
 	}
 	
