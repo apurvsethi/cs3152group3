@@ -380,7 +380,6 @@ public abstract class GameObject {
 		shape = new PolygonShape();
 
 		setTexture(texture);
-		setDrawScale(BLOCK_SIZE * box_width / width, BLOCK_SIZE * box_height / height);
 	}
 
 	/**
@@ -529,13 +528,14 @@ public abstract class GameObject {
 	/**
 	 * Draws this object to the canvas
 	 *
-	 * There is only one drawing pass in this application, so you can draw the objects 
+	 * There is only one drawing pass in this application, so you can draw the objects
 	 * in any order.
 	 *
 	 * @param canvas The drawing context
 	 */
 	public void draw(GameCanvas canvas) {
-		canvas.draw(animator,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),1,1);
+		canvas.draw(animator, Color.WHITE, origin.x, origin.y,
+				getX(), getY(), 0.0f, drawScale.x, drawScale.y);
 	}
 
 	/**
@@ -546,7 +546,7 @@ public abstract class GameObject {
 	 * @param canvas Drawing context
 	 */
 	public void drawDebug(GameCanvas canvas) {
-		canvas.drawPhysics(shape,Color.YELLOW,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
+		canvas.drawPhysics(shape, Color.YELLOW, getX(), getY(), getAngle(),drawScale.x,drawScale.y);
 	}
 }
 	
