@@ -119,7 +119,7 @@ public class GameMode extends ModeController {
 		//       horizontal and vertical to move them
 
 		//move camera with character
-		canvas.translateCamera(0, character.parts.get(CHEST).getLinearVelocity().y);
+		canvas.translateCamera(0, character.parts.get(CHEST).getBody().getLinearVelocity().y * 18f/GAME_HEIGHT);
 		
 		// TODO: Movements of other objects (obstacles, eventually)
 		
