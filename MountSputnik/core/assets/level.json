@@ -6,6 +6,7 @@
     "crumble"
     "gravity"
 
+    "background": "canyon", 
 
     "character": {
     	"density"
