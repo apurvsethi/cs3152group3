@@ -3,8 +3,8 @@ package beigegang.mountsputnik;
 public final class Constants {
 	
 	/**Constants for the window size*/
-	public static final int GAME_WIDTH = 1280;
-	public static final int GAME_HEIGHT = 720;
+	public static final int GAME_WIDTH = 1920;
+	public static final int GAME_HEIGHT = 1080;
 	/**Game block size in pixels*/
 	public static final float BLOCK_SIZE = 48;
 	
