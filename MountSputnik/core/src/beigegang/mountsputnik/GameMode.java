@@ -95,7 +95,8 @@ public class GameMode extends ModeController {
 
 	@Override
 	public void reset() {
-		character.deactivatePhysics(world);
+		if(character!=null)
+			character.deactivatePhysics(world);
 		character = null;
 		objects.clear();
 		populateLevel();
@@ -120,9 +121,11 @@ public class GameMode extends ModeController {
 		// TODO: Use inputController methods to select limbs, 
 		//       horizontal and vertical to move them
 
-		if(input.didLeftArm()){
-			character.parts.get(ARM_LEFT).body.applyForceToCenter(100f,0,false);
-		}
+		//if(input.didLeftArm()){
+		//	character.parts.get(ARM_LEFT).body.applyForceToCenter(100f,0,false);
+		//}
+		//System.out.println(world.getBodyCount());
+		
 		//move camera with character
 		canvas.translateCamera(0, character.parts.get(CHEST).getBody().getLinearVelocity().y * 18f/GAME_HEIGHT);
 		
