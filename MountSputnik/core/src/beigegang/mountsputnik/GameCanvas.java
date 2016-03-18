@@ -237,6 +237,11 @@ public class GameCanvas {
 	public void setBackground(Texture background) {
 		this.background = background;
 	}
+	
+	public void translateCamera(float x, float y){
+		camera.translate(x, y);
+		camera.update();
+	}
 
 	/**
 	 * Returns whether this canvas is currently fullscreen.
@@ -889,13 +894,12 @@ public class GameCanvas {
 	
 	private void drawBackground() {
 		if (background == null) {
-			System.out.println("no background to show"); 
 			return;
 		}
 		
 		// Only use of spritebatch in game.
 		spriteBatch.begin();
-		spriteBatch.draw(background, 0, 0, getWidth(), getHeight());
+		spriteBatch.draw(background, 0, 0, getWidth(), background.getHeight());
 		spriteBatch.end();
 	}
 	

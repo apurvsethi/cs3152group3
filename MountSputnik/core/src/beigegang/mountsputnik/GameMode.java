@@ -98,6 +98,18 @@ public class GameMode extends ModeController {
 		
 		// TODO: Use inputController methods to select limbs, 
 		//       horizontal and vertical to move them
+		if(input.didLeftArm()){
+			canvas.translateCamera(-1, 1);
+		}
+		if(input.didLeftLeg()){
+			canvas.translateCamera(1, -1);
+		}
+		if(input.didRightArm()){
+			canvas.translateCamera(1, 1);
+		}
+		if(input.didRightLeg()){
+			canvas.translateCamera(-1, -1); 
+		}
 		
 		// TODO: Movements of other objects (obstacles, eventually)
 		
