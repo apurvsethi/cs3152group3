@@ -95,6 +95,7 @@ public class GameMode extends ModeController {
 
 	@Override
 	public void reset() {
+		System.out.println("RESET");
 		if(character!=null)
 			character.deactivatePhysics(world);
 		character = null;
