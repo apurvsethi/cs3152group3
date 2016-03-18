@@ -22,8 +22,18 @@ public class CharacterModel extends GameObject{
 	public ObjectType getType() {
 		return ObjectType.CHARACTER;
 	}
-	
-    /**
+
+	@Override
+	protected void createFixtures() {
+
+	}
+
+	@Override
+	protected void releaseFixtures() {
+
+	}
+
+	/**
      * Sets the drawing scale for this physics object
      *
      * The drawing scale is the number of pixels to draw before Box2D unit. Because
@@ -131,10 +141,11 @@ public class CharacterModel extends GameObject{
 		}
 		
 		PartModel partModel = (push == 0.0f? 
-				new PartModel(partCache.x, partCache.y, texture.getTexture(), w)
-				: new ExtremityModel(push, pull, partCache.x, partCache.y, texture.getTexture(), w));
+				new PartModel(partCache.x, partCache.y, texture.getTexture())
+				: new ExtremityModel(push, pull, partCache.x, partCache.y, texture.getTexture()));
 		
 		partModel.setDrawScale(drawScale);
+		partModel.activatePhysics(w);
 		
 		//TODO: set density in individual parts
 		//partModel.setDensity(DENSITY);

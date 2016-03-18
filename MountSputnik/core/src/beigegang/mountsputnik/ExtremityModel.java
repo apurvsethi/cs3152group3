@@ -81,24 +81,10 @@ public class ExtremityModel extends PartModel{
 	 * 
 	 * @param push the push factor of this extremity
 	 * @param pull the pull factor of this extremity
-	 * @param b	the body of this extremity
-	 */
-	public ExtremityModel(float push, float pull, Body b){
-		super(b);
-		pushFactor= push;
-		pullFactor = pull;
-		isGripping = false;
-	}
-	
-	/** Contructs an ExtremityModel
-	 * 
-	 * @param push the push factor of this extremity
-	 * @param pull the pull factor of this extremity
-	 * @param b the body of this extremity
 	 * @param t	the texture of this extremity
 	 */
-	public ExtremityModel(float push, float pull, float x, float y, Texture t, World w){
-		super(x, y, t, w);
+	public ExtremityModel(float push, float pull, float x, float y, Texture t){
+		super(x, y, t);
 		pushFactor= push;
 		pullFactor = pull;
 		isGripping = false;

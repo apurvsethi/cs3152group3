@@ -37,7 +37,7 @@ public class HandholdModel extends GameObject{
 	/**
 	 * Sets the body of this handhold.
 	 *
-	 * @param body the body of this handhold
+	 * @param b the body of this handhold
 	 */
 	public void setBody(Body b){
 		body = b;
@@ -64,7 +64,7 @@ public class HandholdModel extends GameObject{
 	/**
 	 * Sets the crumble factor of this handhold.
 	 *
-	 * @param slip the crumble factor of this handhold
+	 * @param crumble the crumble factor of this handhold
 	 */
 	public void setCrumble(float crumble){
 		crumbleFactor = crumble;
@@ -96,5 +96,15 @@ public class HandholdModel extends GameObject{
 	/**trivial handhold model constructor*/
 	public HandholdModel(){
 		isCrumbling = false;
+	}
+
+	@Override
+	protected void createFixtures() {
+
+	}
+
+	@Override
+	protected void releaseFixtures() {
+
 	}
 }
