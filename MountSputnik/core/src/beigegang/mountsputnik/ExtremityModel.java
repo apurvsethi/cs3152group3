@@ -72,7 +72,7 @@ public class ExtremityModel extends PartModel{
 	}
 	
 	/** Sets the value of isGripping to false*/
-	public void release(){
+	public void ungrip(){
 		isGripping = false;
 		//TODO: change animation for releasing?
 	}

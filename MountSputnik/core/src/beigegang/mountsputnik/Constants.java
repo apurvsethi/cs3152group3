@@ -60,7 +60,8 @@ public final class Constants {
 	public static final int FOOT_LEFT = 13;
 	public static final int FOOT_RIGHT = 14;
 	public static final int NONE = -1;
-	
+
+	public static final int[] EXTREMITIES = new int[]{FOOT_LEFT,FOOT_RIGHT,HAND_LEFT,HAND_RIGHT};
 	
 	/**Giant monster section of hard coded offsets. Disgusting, but necessary*/
 	//TODO: once character assets complete, determine actual offsets
@@ -120,5 +121,6 @@ public final class Constants {
 	public static final float FOOT_X_OFFSET    = 30;
 	/** Foot x offset from shin */
 	public static final float FOOT_Y_OFFSET    = -35;
-	
+
+
 }

@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import static beigegang.mountsputnik.Constants.*;
+import com.badlogic.gdx.math.Vector2;
 
 
 public class GameMode extends ModeController {
@@ -88,7 +89,9 @@ public class GameMode extends ModeController {
 	private CharacterModel character;
 	/** A handhold */
 	private HandholdModel handhold; 
-	
+	private int lastPressed = NONE;
+	private int pressContinued = 0;
+	private int nextToPress = NONE;
 	public GameMode() {
 		super(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_GRAVITY);
 	}
@@ -115,7 +118,71 @@ public class GameMode extends ModeController {
 	
 	public void update(float dt) {
 		InputController input = InputController.getInstance();
-		
+		pressContinued = 0;
+		if (input.didLeftLeg()){
+			if (lastPressed == NONE){
+				lastPressed = FOOT_LEFT;
+				pressContinued = 1;
+			}
+			else if (lastPressed != FOOT_LEFT){
+				if (nextToPress == NONE){
+					nextToPress = FOOT_LEFT;
+				}
+			}
+			else{
+				pressContinued = 1;
+			}
+		}
+		if (input.didRightLeg()){
+			if (lastPressed == NONE){
+				lastPressed = FOOT_RIGHT;
+				pressContinued = 1;
+			}
+			else if (lastPressed != FOOT_RIGHT){
+				if (nextToPress == NONE){
+					nextToPress = FOOT_RIGHT;
+				}
+			}
+			else{
+				pressContinued = 1;
+			}
+		}
+		if (input.didLeftArm()){
+			if (lastPressed == NONE){
+				lastPressed = HAND_LEFT;
+				pressContinued = 1;
+			}else if (lastPressed != HAND_LEFT){
+				if (nextToPress == NONE){
+					nextToPress = HAND_LEFT;
+				}
+			}
+			else{
+				pressContinued = 1;
+			}
+		}
+
+		if (input.didRightArm()){
+			if (lastPressed == NONE){
+				lastPressed = HAND_RIGHT;
+				pressContinued = 1;
+			}else if (lastPressed != HAND_RIGHT){
+				if (nextToPress == NONE){
+					nextToPress = HAND_RIGHT;
+				}
+			}
+			else{
+				pressContinued = 1;
+			}
+		}
+		if (pressContinued == 1){
+			calculateForce(lastPressed,input);
+		}else if (nextToPress != NONE) {
+			calculateForce(nextToPress,input);
+		}
+		else{
+			//no movement required.
+		}
+
 		// TODO: Use inputController methods to select limbs, 
 		//       horizontal and vertical to move them
 
@@ -130,7 +197,59 @@ public class GameMode extends ModeController {
 		float dEdt = calculateEnergyChange(0,0);
 		character.setEnergy(character.getEnergy()+dEdt);
 	}
-	
+
+	private void calculateForce(int currentLimb,InputController input) {
+	/*	ExtremityModel curPart = ((ExtremityModel)(character.parts.get(currentLimb)));
+		curPart.ungrip();
+		//force NOT based off function of how far tilting joystick
+		//based on how long joystick in certain direction
+		float x = input.getHorizontal();
+		float y = input.getVertical();
+//		if (y > -.2 && y < .2) y = 0;
+//		if (x > -.2 && x < .2) y = 0;
+//compare where each extremity is in comparison to hand for y value
+		float curY = curPart.getY();
+		//if extremity above
+		float forceFactor = 0.0f;
+//		each arm
+
+				//check distance from center of mass for Y - its own function
+				//check distance from for X -
+
+
+
+		for (int ex: EXTREMITIES){
+			ExtremityModel e = (ExtremityModel)(character.parts.get(ex));
+			float eFactor = 0;
+			boolean pull = false;
+			boolean isLeft = false;
+			if (e.isGripping()){
+				isLeft = ex == HAND_LEFT || ex == FOOT_LEFT;
+				pull =  e.getY() > curY;
+				eFactor = pull ? e.getPush():e.getPull();
+			}
+			if (pull){
+				Vector2 distance = e.getPosition().sub(character.parts.get(CHEST).getPosition());
+				//calculate distance from shoulder for width (closer the 0 the better)
+				//
+				//what side it's on.
+				float distFromShoulder = distance.x - character.getPosition().x;
+
+			}else{
+				Vector2 distance = e.getPosition().sub(character.parts.get(CHEST).getPosition());
+				float distFromShoulder = distance.x - character.getPosition().x;
+
+			}
+		}
+		double tan1 = Math.atan(y/x);
+
+*/
+//		boolean up = 0;
+//		boolean right = 0;
+
+
+	}
+
 	/**
 	 * dE/dt = A (1-B*sin(angle/2))(Base energy gain)(Environmental Gain Modifier) - 
 	 * - C (Exertion+1)(Environmental Loss Modifier)(3-feet)(3-hands) - D 
