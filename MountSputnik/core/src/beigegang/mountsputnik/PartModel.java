@@ -118,6 +118,7 @@ public class PartModel extends GameObject{
 		// Create the fixture
 		fixtureDef.shape = shape;
 		geometry = body.createFixture(fixtureDef);
+		shape.dispose();
 		markDirty(false);
 	}
 

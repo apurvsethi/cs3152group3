@@ -95,6 +95,8 @@ public class GameMode extends ModeController {
 
 	@Override
 	public void reset() {
+		if(character!=null)
+			character.deactivatePhysics(world);
 		character = null;
 		objects.clear();
 		populateLevel();
@@ -119,6 +121,11 @@ public class GameMode extends ModeController {
 		// TODO: Use inputController methods to select limbs, 
 		//       horizontal and vertical to move them
 
+		//if(input.didLeftArm()){
+		//	character.parts.get(ARM_LEFT).body.applyForceToCenter(100f,0,false);
+		//}
+		//System.out.println(world.getBodyCount());
+		
 		//move camera with character
 		canvas.translateCamera(0, character.parts.get(CHEST).getBody().getLinearVelocity().y * 18f/GAME_HEIGHT);
 		
@@ -127,7 +134,7 @@ public class GameMode extends ModeController {
 		// TODO: Interactions between limbs and handholds
 		
 		// TODO: Update energy quantity (fill in these values)
-		float dEdt = calculateEnergyChange(0,0);
+		float dEdt = calculateEnergyChange(0,0, true);
 		character.setEnergy(character.getEnergy()+dEdt);
 	}
 	
@@ -141,11 +148,13 @@ public class GameMode extends ModeController {
 	 * 
 	 * @param gainModifier Environmental Gain Modifier
 	 * @param lossModifier Environmental Loss Modifier
+	 * @param rotationGain Whether or not rotation affects gain (would be false if in space or places with low gravity)
 	 * 
 	 * @return change in energy value
 	 */
-	private float calculateEnergyChange(float gainModifier, float lossModifier){
+	private float calculateEnergyChange(float gainModifier, float lossModifier, boolean rotationGain){
 		//TODO: FILL IN THIS FUNCTION
+		int b = rotationGain ? 1 : 0;
 		return 0;
 	}
 	
