@@ -30,9 +30,9 @@ public abstract class GameObject {
 	public enum ObjectType {
 		/**The character*/
 		CHARACTER,
-		/*A body part of the character*/
+		/**A body part of the character*/
 		PART,
-		/*An extremity of the character**/
+		/**An extremity of the character**/
 		EXTREMITY,
 		/**A handhold, which is a static (at this point) object that
 		 * can be grabbed */
