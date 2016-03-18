@@ -121,4 +121,14 @@ public final class Constants {
 	/** Foot x offset from shin */
 	public static final float FOOT_Y_OFFSET    = -35;
 	
+	//TODO: Figure out what these should be
+	/** Constant Multiplier on energy gain */
+	public static final float ENERGY_GAIN_MULTIPLIER = 1;
+	/** Constant Multiplier on energy loss */
+	public static final float ENERGY_LOSS_MULTIPLIER = 1;
+	/** Constant of energy loss */
+	public static final float ENERGY_LOSS = 1;
+	/** Base energy gain */
+	public static final float BASE_ENERGY_GAIN = 1;
+	
 }

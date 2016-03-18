@@ -92,49 +92,49 @@ public class CharacterModel extends GameObject{
 		
 		
 		// HEAD
-	    makePart(HEAD, NONE, HEAD_X, 0, HEAD_Y, 0, 0,0,360, 0, 0, w);
+	    makePart(HEAD, NONE, HEAD_X, 0, HEAD_Y, 0, 0,0,2f*(float)(Math.PI), 0, 0, w);
 		
 		// CHEST
-		makePart(CHEST, HEAD, 0, 0, CHEST_HEAD_OFFSET, HEAD_OFFSET, 0,0,360, 0, 0, w);	
+		makePart(CHEST, HEAD, 0, 0, CHEST_HEAD_OFFSET, HEAD_OFFSET, 0,0,2f*(float)(Math.PI), 0, 0, w);	
 		
 		//HIPS
-		makePart(HIPS, CHEST, 0, 0, HIP_CHEST_OFFSET, CHEST_HIP_OFFSET, 0,0,360, 0, 0, w);
+		makePart(HIPS, CHEST, 0, 0, HIP_CHEST_OFFSET, CHEST_HIP_OFFSET, 0,0,2f*(float)(Math.PI), 0, 0, w);
 		
 		// ARMS
 		makePart(ARM_LEFT, CHEST, -ARM_X_CHEST_OFFSET, -CHEST_X_ARM_OFFSET,
-				ARM_Y_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0,0,360, 0, 0, w);
+				ARM_Y_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0,0,2f*(float)(Math.PI), 0, 0, w);
 		makePart(ARM_RIGHT, CHEST, ARM_X_CHEST_OFFSET, CHEST_X_ARM_OFFSET,
-				ARM_Y_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0,0,360, 0, 0, w);
+				ARM_Y_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0,0,2f*(float)(Math.PI), 0, 0, w);
 		
 		// FOREARMS
 		makePart(FOREARM_LEFT, ARM_LEFT, -FOREARM_X_ARM_OFFSET, -ARM_X_FOREARM_OFFSET,
-				FOREARM_Y_ARM_OFFSET, ARM_Y_FOREARM_OFFSET, 0,0,360, 0, 0, w);
+				FOREARM_Y_ARM_OFFSET, ARM_Y_FOREARM_OFFSET, 0,0,2f*(float)(Math.PI), 0, 0, w);
 		makePart(FOREARM_RIGHT, ARM_RIGHT, FOREARM_X_ARM_OFFSET, ARM_X_FOREARM_OFFSET,
-				FOREARM_Y_ARM_OFFSET, ARM_Y_FOREARM_OFFSET, 0,0,360, 0, 0, w);
+				FOREARM_Y_ARM_OFFSET, ARM_Y_FOREARM_OFFSET, 0,0,2f*(float)(Math.PI), 0, 0, w);
 		
 		//HANDS
 		makePart(HAND_LEFT, FOREARM_LEFT, -HAND_X_OFFSET, -FOREARM_X_HAND_OFFSET, 
-				HAND_Y_OFFSET, FOREARM_Y_HAND_OFFSET, 0,0,360, HAND_PUSH, HAND_PULL, w);
+				HAND_Y_OFFSET, FOREARM_Y_HAND_OFFSET, 0,0,2f*(float)(Math.PI), HAND_PUSH, HAND_PULL, w);
 		makePart(HAND_RIGHT, FOREARM_RIGHT, HAND_X_OFFSET, FOREARM_X_HAND_OFFSET, 
-				HAND_Y_OFFSET, FOREARM_Y_HAND_OFFSET, 0,0,360, HAND_PUSH, HAND_PULL, w);
+				HAND_Y_OFFSET, FOREARM_Y_HAND_OFFSET, 0,0,2f*(float)(Math.PI), HAND_PUSH, HAND_PULL, w);
 		
 		// THIGHS
 		makePart(THIGH_LEFT, HIPS, -THIGH_X_HIP_OFFSET, -HIP_X_THIGH_OFFSET,
-				THIGH_Y_HIP_OFFSET, HIP_Y_THIGH_OFFSET, 0,0,360, 0, 0, w);
+				THIGH_Y_HIP_OFFSET, HIP_Y_THIGH_OFFSET, 0,0,2f*(float)(Math.PI), 0, 0, w);
 		makePart(THIGH_RIGHT, HIPS, THIGH_X_HIP_OFFSET, HIP_X_THIGH_OFFSET,
-				THIGH_Y_HIP_OFFSET, HIP_Y_THIGH_OFFSET, 0,0,360, 0, 0, w);
+				THIGH_Y_HIP_OFFSET, HIP_Y_THIGH_OFFSET, 0,0,2f*(float)(Math.PI), 0, 0, w);
 		
 		// SHINS
 		makePart(SHIN_LEFT,  THIGH_LEFT, -SHIN_X_THIGH_OFFSET, -THIGH_X_SHIN_OFFSET,
-				SHIN_Y_THIGH_OFFSET, THIGH_Y_SHIN_OFFSET, 0,0,360, 0, 0, w);
+				SHIN_Y_THIGH_OFFSET, THIGH_Y_SHIN_OFFSET, 0,0,2f*(float)(Math.PI), 0, 0, w);
 		makePart(SHIN_RIGHT, THIGH_RIGHT, SHIN_X_THIGH_OFFSET, THIGH_X_SHIN_OFFSET,
-				SHIN_Y_THIGH_OFFSET, THIGH_Y_SHIN_OFFSET, 0,0,360, 0, 0, w);
+				SHIN_Y_THIGH_OFFSET, THIGH_Y_SHIN_OFFSET, 0,0,2f*(float)(Math.PI), 0, 0, w);
 		
 		//FEET
 		makePart(FOOT_LEFT, SHIN_LEFT, -FOOT_X_OFFSET, -SHIN_X_FOOT_OFFSET, FOOT_Y_OFFSET,
-				SHIN_Y_FOOT_OFFSET, 0,0,360, FOOT_PUSH, FOOT_PULL, w);
+				SHIN_Y_FOOT_OFFSET, 0,0,2f*(float)(Math.PI), FOOT_PUSH, FOOT_PULL, w);
 		makePart(FOOT_RIGHT, SHIN_RIGHT, FOOT_X_OFFSET, SHIN_X_FOOT_OFFSET, FOOT_Y_OFFSET,
-				SHIN_Y_FOOT_OFFSET, 0,0,360, FOOT_PUSH, FOOT_PULL, w);
+				SHIN_Y_FOOT_OFFSET, 0,0,2f*(float)(Math.PI), FOOT_PUSH, FOOT_PULL, w);
 		
 	}
     
@@ -200,9 +200,9 @@ public class CharacterModel extends GameObject{
 		return partModel;
 	}
 	
-	/** Contructs a CharacterModel
+	/** Constructs a CharacterModel
 	 * 
-	 * @param w					the world*/
+	 * @param w	the world*/
 	public CharacterModel(World w){
 		init(w);
 		setX(HEAD_X);
@@ -210,7 +210,7 @@ public class CharacterModel extends GameObject{
 		energy = 100;
 	}
 	
-	/** Contructs a CharacterModel
+	/** Constructs a CharacterModel
 	 * 
 	 * @param textures the texture map of the character
 	 * @param w	the world*/
