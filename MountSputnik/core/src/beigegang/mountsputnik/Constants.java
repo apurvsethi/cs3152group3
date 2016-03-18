@@ -22,8 +22,11 @@ public final class Constants {
 	
 	/** Initial onscreen location of the head */
 	public static final float HEAD_X = GAME_WIDTH / 2;
-	public static final float HEAD_Y = GAME_HEIGHT / 2;
-	
+	public static final float HEAD_Y = GAME_HEIGHT * 0.75f;
+
+	public static final float DEG_TO_RAD = 0.0174532925199432957f;
+	public static final float RAD_TO_DEG = 57.295779513082320876f;
+
 	/** Parameters to pass into extremities*/
 	//TODO: determine actual push / pull factor through playtesting
 	public static final float HAND_PUSH = 1.0f;
@@ -59,60 +62,60 @@ public final class Constants {
 	/**Giant monster section of hard coded offsets. Disgusting, but necessary*/
 	//TODO: once character assets complete, determine actual offsets
 	/** Face offset*/
-	public static final float HEAD_OFFSET = 3.8f;
+	public static final float HEAD_OFFSET = -75;
 	/** Chest offset from face*/
-	public static final float CHEST_HEAD_OFFSET   = 3.8f;
+	public static final float CHEST_HEAD_OFFSET   = -50;
 	/** Chest offset from hips*/
-	public static final float CHEST_HIP_OFFSET   = 3.8f;
+	public static final float CHEST_HIP_OFFSET   = -50;
 	/** Chest x offset from arm*/
-	public static final float CHEST_X_ARM_OFFSET   = 3.8f;
+	public static final float CHEST_X_ARM_OFFSET   = 10;
 	/** Chest y offset from arm*/
-	public static final float CHEST_Y_ARM_OFFSET   = 3.8f;
+	public static final float CHEST_Y_ARM_OFFSET   = -25;
 	/** Arm x offset from chest*/
-	public static final float ARM_X_CHEST_OFFSET = 3.8f;
+	public static final float ARM_X_CHEST_OFFSET = 75;
 	/** Arm y offset from chest*/
-	public static final float ARM_Y_CHEST_OFFSET = 3.8f;
+	public static final float ARM_Y_CHEST_OFFSET = -10;
 	/** Arm  x offset from forearm*/
-	public static final float ARM_X_FOREARM_OFFSET = 3.8f;
+	public static final float ARM_X_FOREARM_OFFSET = 0;
 	/** Arm  y offset from forearm*/
-	public static final float ARM_Y_FOREARM_OFFSET = 3.8f;
+	public static final float ARM_Y_FOREARM_OFFSET = -50;
 	/** Forearm  x offset from arm*/
-	public static final float FOREARM_X_ARM_OFFSET = 3.8f;
+	public static final float FOREARM_X_ARM_OFFSET = 0;
 	/** Forearm  y offset from arm*/
-	public static final float FOREARM_Y_ARM_OFFSET = 3.8f;
+	public static final float FOREARM_Y_ARM_OFFSET = -50;
 	/** Forearm  x offset from hand*/
-	public static final float FOREARM_X_HAND_OFFSET = 3.8f;
+	public static final float FOREARM_X_HAND_OFFSET = 0;
 	/** Forearm  y offset from hand*/
-	public static final float FOREARM_Y_HAND_OFFSET = 3.8f;
+	public static final float FOREARM_Y_HAND_OFFSET = -25;
 	/**Hand x offset from forearm*/
-	public static final float HAND_X_OFFSET = 2.75f; 
+	public static final float HAND_X_OFFSET = 0;
 	/**Hand y offset from forearm */
-	public static final float HAND_Y_OFFSET = 2.75f;
+	public static final float HAND_Y_OFFSET = -25;
 	/** Hip offset from chest*/
-	public static final float HIP_CHEST_OFFSET = 3.8f;
+	public static final float HIP_CHEST_OFFSET = -50;
 	/** Hip x offset from thigh */
-	public static final float HIP_X_THIGH_OFFSET  = 0.75f;  
+	public static final float HIP_X_THIGH_OFFSET  = 20;
 	/** Hip y offset from thigh */
-	public static final float HIP_Y_THIGH_OFFSET  = 3.5f;  
+	public static final float HIP_Y_THIGH_OFFSET  = -75;
 	/** Thigh x offset from hip */
-	public static final float THIGH_X_HIP_OFFSET  = 0.75f;  
+	public static final float THIGH_X_HIP_OFFSET  = 20;
 	/** Thigh y offset from hip */
-	public static final float THIGH_Y_HIP_OFFSET  = 3.5f; 
+	public static final float THIGH_Y_HIP_OFFSET  = -50;
 	/** Thigh x offset from shins */
-	public static final float THIGH_X_SHIN_OFFSET  = 0.75f;  
+	public static final float THIGH_X_SHIN_OFFSET  = 0;
 	/** Thigh y offset from shins */
-	public static final float THIGH_Y_SHIN_OFFSET  = 3.5f; 
+	public static final float THIGH_Y_SHIN_OFFSET  = -50;
 	/** Shin x offset from thigh */
-	public static final float SHIN_X_THIGH_OFFSET    = 2.75f;
+	public static final float SHIN_X_THIGH_OFFSET    = 0;
 	/** Shin y offset from thigh */
-	public static final float SHIN_Y_THIGH_OFFSET    = 2.75f;
+	public static final float SHIN_Y_THIGH_OFFSET    = -50;
 	/** Shin x offset from foot */
-	public static final float SHIN_X_FOOT_OFFSET    = 2.75f;
+	public static final float SHIN_X_FOOT_OFFSET    = 0;
 	/** Shin y offset from foot */
-	public static final float SHIN_Y_FOOT_OFFSET    = 2.75f;
+	public static final float SHIN_Y_FOOT_OFFSET    = -50;
 	/** Foot x offset from shin */
-	public static final float FOOT_X_OFFSET    = 2.75f;
+	public static final float FOOT_X_OFFSET    = 40;
 	/** Foot x offset from shin */
-	public static final float FOOT_Y_OFFSET    = 2.75f;
+	public static final float FOOT_Y_OFFSET    = -50;
 	
 }
