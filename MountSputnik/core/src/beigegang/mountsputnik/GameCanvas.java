@@ -24,6 +24,8 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.*;
 import com.badlogic.gdx.physics.box2d.*;
 
+
+
 /**
  * Primary view class for the game, abstracting the basic graphics calls.
  * 
@@ -75,6 +77,9 @@ public class GameCanvas {
 	
 	/** Camera for the underlying SpriteBatch */
 	private OrthographicCamera camera;
+	
+	/** Background Texture **/ 
+	private Texture background; 
 	
 	/** Value to cache window width (if we are currently full screen) */
 	int width;
@@ -225,6 +230,14 @@ public class GameCanvas {
 
 	}
 	
+	public Texture getBackground() {
+		return background;
+	}
+
+	public void setBackground(Texture background) {
+		this.background = background;
+	}
+
 	/**
 	 * Returns whether this canvas is currently fullscreen.
 	 *
@@ -335,6 +348,8 @@ public class GameCanvas {
     	global.mulLeft(camera.combined);
 		spriteBatch.setProjectionMatrix(global);
 		
+		drawBackground(); 
+		
 		setBlendState(BlendState.NO_PREMULT);
 		spriteBatch.begin();
     	active = DrawPass.STANDARD;
@@ -354,6 +369,8 @@ public class GameCanvas {
     	global.mulLeft(camera.combined);
 		spriteBatch.setProjectionMatrix(global);
 		
+		drawBackground(); 
+		
     	spriteBatch.begin();
     	active = DrawPass.STANDARD;
     }
@@ -365,8 +382,10 @@ public class GameCanvas {
 	 */
     public void begin() {
 		spriteBatch.setProjectionMatrix(camera.combined);
-    	spriteBatch.begin();
+		drawBackground(); 
+		spriteBatch.begin();
     	active = DrawPass.STANDARD;
+    	
     }
 
 	/**
@@ -866,6 +885,18 @@ public class GameCanvas {
 		// Invert and restore
 		local.inv();
 		computeVertices(local,region.getVertices());
+	}
+	
+	private void drawBackground() {
+		if (background == null) {
+			System.out.println("no background to show"); 
+			return;
+		}
+		
+		// Only use of spritebatch in game.
+		spriteBatch.begin();
+		spriteBatch.draw(background, 0, 0, getWidth(), getHeight());
+		spriteBatch.end();
 	}
 	
 	/**

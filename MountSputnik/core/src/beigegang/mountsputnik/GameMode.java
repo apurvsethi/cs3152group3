@@ -11,7 +11,7 @@ public class GameMode extends ModeController {
 	protected AssetState assetState = AssetState.EMPTY;
 	
 	/** Strings for files used, string[] for parts, etc. */
-	private static final String BACKGROUND_FILE = "preliminaryCharacterFilmStrip.png";
+	private static final String BACKGROUND_FILE = "background.png";
 	private static final String FOREGROUND_FILE = "preliminaryCharacterFilmStrip.png";
 	private static final String PART_TEXTURES[] = {"Ragdoll/Corrected/Head.png","Ragdoll/Corrected/Torso.png","Ragdoll/Corrected/Hips.png",
 				"Ragdoll/Corrected/ArmLeft.png", "Ragdoll/Corrected/ArmRight.png", "Ragdoll/Corrected/ForearmLeft.png","Ragdoll/Corrected/ForearmRight.png",
@@ -106,7 +106,7 @@ public class GameMode extends ModeController {
 	
 	public void draw() {
 		canvas.clear();
-		
+		canvas.setBackground(background.getTexture());
 //		canvas.begin();
 //		canvas.draw(background, Color.WHITE, 0, 0,canvas.getWidth(),canvas.getHeight());
 //		canvas.end();
