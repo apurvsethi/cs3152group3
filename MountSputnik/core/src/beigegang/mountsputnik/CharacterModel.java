@@ -185,12 +185,12 @@ public class CharacterModel extends GameObject{
 			jointDef.localAnchorA.set(partCache);
 
 			jointDef.bodyB = parts.get(part).getBody();
-			partCache.set(0, 0);
+			partCache.set(-partX*2, -partY*2);
 			jointDef.localAnchorB.set(partCache);
 
-			jointDef.collideConnected = false;
-			jointDef.lowerAngle = rotationLimitLower;
-			jointDef.upperAngle = rotationLimitUpper;
+			jointDef.collideConnected = true;
+			//jointDef.lowerAngle = rotationLimitLower;
+			//jointDef.upperAngle = rotationLimitUpper;
 			
 			Joint joint = w.createJoint(jointDef);
 			joints.add(joint);

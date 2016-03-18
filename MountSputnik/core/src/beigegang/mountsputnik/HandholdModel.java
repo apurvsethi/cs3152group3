@@ -94,11 +94,20 @@ public class HandholdModel extends GameObject{
 		snapPoints.add(snapPoint);
 	}
 	
-	/**trivial handhold model constructor*/
-	public HandholdModel(Texture t, float x, float y){
-		super(t, x, y, 1, 1);
+	/**
+	 * Constructs HandholdModel
+	 *  
+	 * @param t Texture
+	 * @param width The width of the model
+	 * @param height The height of the model
+	 * @param x The x position of the model
+	 * @param y The y position of the model
+	 */
+	public HandholdModel(Texture t, float width, float height, float x, float y){
+		super(t, width, height, 1, 1);
 		isCrumbling = false;
 		shape.setAsBox(t.getWidth() / 2, t.getHeight() / 2);
+		setDrawScale(width/t.getWidth(), height/t.getHeight());
 		setX(x);
 		setY(y);
 	}

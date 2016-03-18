@@ -110,7 +110,8 @@ public class GameMode extends ModeController {
 		// TODO: Populate level with whatever pieces and part are necessary (handholds, etc)
 		// Will probably do through a level generator later, level model access
 		for (int i = 0; i < HANDHOLD_NUMBER; i++){
-			handhold = new HandholdModel(holdTextures[0].getTexture(), 100*i, 200*i);
+			handhold = new HandholdModel(holdTextures[0].getTexture(), 50, 50, 10*i+300, 20*i+300);
+			handhold.activatePhysics(world);
 			objects.add(handhold);
 		}
 	}
@@ -121,11 +122,13 @@ public class GameMode extends ModeController {
 		// TODO: Use inputController methods to select limbs, 
 		//       horizontal and vertical to move them
 
-		//if(input.didLeftArm()){
-		//	character.parts.get(ARM_LEFT).body.applyForceToCenter(100f,0,false);
-		//}
-		//System.out.println(world.getBodyCount());
-		
+		if(input.didLeftArm()){
+			character.parts.get(ARM_LEFT).body.applyForceToCenter(100f,0,false);
+		}
+		for(PartModel p : character.parts){
+			System.out.print(p.body.getPosition());
+		}
+		System.out.println("");
 		//move camera with character
 		canvas.translateCamera(0, character.parts.get(CHEST).getBody().getLinearVelocity().y * 18f/GAME_HEIGHT);
 		
