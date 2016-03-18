@@ -1,4 +1,5 @@
 package beigegang.mountsputnik;
+import com.badlogic.gdx.math.Vector2;
 
 public final class Constants {
 	
@@ -32,11 +33,12 @@ public final class Constants {
 
 	/** Parameters to pass into extremities*/
 	//TODO: determine actual push / pull factor through playtesting
-	public static final float HAND_PUSH = 1.0f;
-	public static final float HAND_PULL = 1.0f;
-	public static final float FOOT_PUSH = 1.0f;
-	public static final float FOOT_PULL = 1.0f;
-	
+	public static final float HAND_PUSH = 100.0f;
+	public static final float HAND_PULL = 100.0f;
+	public static final float FOOT_PUSH = 100.0f;
+	public static final float FOOT_PULL = 100.0f;
+	public static final Vector2 MAX_FORCE_THRESHOLD = new Vector2(0,100f);
+
 	/** Array of the number of animation frames for each part*/
 	public static final int[] PART_FRAMES = {1,1,1,1,1,1,1,2,2,1,1,1,1,1,1};
 	
@@ -62,7 +64,12 @@ public final class Constants {
 	public static final int NONE = -1;
 
 	public static final int[] EXTREMITIES = new int[]{FOOT_LEFT,FOOT_RIGHT,HAND_LEFT,HAND_RIGHT};
-	
+	public static final float PULL_A = 1;
+	public static final float PULL_C = 0;
+	public static final float PUSH_A = 1;
+	public static final float PUSH_C = 0;
+	public static final Vector2 DAMPENING_Y = new Vector2 (0,1f);
+
 	/**Giant monster section of hard coded offsets. Disgusting, but necessary*/
 	//TODO: once character assets complete, determine actual offsets
 	/** Face offset*/
@@ -121,6 +128,9 @@ public final class Constants {
 	public static final float FOOT_X_OFFSET    = 30;
 	/** Foot x offset from shin */
 	public static final float FOOT_Y_OFFSET    = -35;
+
+	public static final float MAX_ARM_DIST = ARM_Y_CHEST_OFFSET + ARM_Y_FOREARM_OFFSET + FOREARM_Y_ARM_OFFSET + FOREARM_Y_HAND_OFFSET + HAND_Y_OFFSET;
+	public static final float MAX_LEG_DIST = THIGH_Y_HIP_OFFSET + THIGH_Y_SHIN_OFFSET + SHIN_Y_THIGH_OFFSET + SHIN_Y_FOOT_OFFSET + FOOT_Y_OFFSET * 2;
 
 	//TODO: Figure out what these should be
 	/** Constant Multiplier on energy gain */
