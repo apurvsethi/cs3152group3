@@ -94,47 +94,47 @@ public class CharacterModel extends GameObject{
 		// HEAD
 	    makePart(HEAD, NONE, HEAD_X, 0, HEAD_Y, 0, 0,0,360, 0, 0, w);
 		
-		// CHEST
-		makePart(CHEST, HEAD, 0, 0, CHEST_HEAD_OFFSET, HEAD_OFFSET, 0,0,360, 0, 0, w);	
-		
-		//HIPS
-		makePart(HIPS, CHEST, 0, 0, HIP_CHEST_OFFSET, CHEST_HIP_OFFSET, 0,0,360, 0, 0, w);
-		
-		// ARMS
-		makePart(ARM_LEFT, CHEST, -ARM_X_CHEST_OFFSET, -CHEST_X_ARM_OFFSET,
-				ARM_Y_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0,0,360, 0, 0, w);
-		makePart(ARM_RIGHT, CHEST, ARM_X_CHEST_OFFSET, CHEST_X_ARM_OFFSET,
-				ARM_Y_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0,0,360, 0, 0, w);
-		
-		// FOREARMS
-		makePart(FOREARM_LEFT, ARM_LEFT, -FOREARM_X_ARM_OFFSET, -ARM_X_FOREARM_OFFSET,
-				FOREARM_Y_ARM_OFFSET, ARM_Y_FOREARM_OFFSET, 0,0,360, 0, 0, w);
-		makePart(FOREARM_RIGHT, ARM_RIGHT, FOREARM_X_ARM_OFFSET, ARM_X_FOREARM_OFFSET,
-				FOREARM_Y_ARM_OFFSET, ARM_Y_FOREARM_OFFSET, 0,0,360, 0, 0, w);
-		
-		//HANDS
-		makePart(HAND_LEFT, FOREARM_LEFT, -HAND_X_OFFSET, -FOREARM_X_HAND_OFFSET, 
-				HAND_Y_OFFSET, FOREARM_Y_HAND_OFFSET, 0,0,360, HAND_PUSH, HAND_PULL, w);
-		makePart(HAND_RIGHT, FOREARM_RIGHT, HAND_X_OFFSET, FOREARM_X_HAND_OFFSET, 
-				HAND_Y_OFFSET, FOREARM_Y_HAND_OFFSET, 0,0,360, HAND_PUSH, HAND_PULL, w);
-		
-		// THIGHS
-		makePart(THIGH_LEFT, HIPS, -THIGH_X_HIP_OFFSET, -HIP_X_THIGH_OFFSET,
-				THIGH_Y_HIP_OFFSET, HIP_Y_THIGH_OFFSET, 0,0,360, 0, 0, w);
-		makePart(THIGH_RIGHT, HIPS, THIGH_X_HIP_OFFSET, HIP_X_THIGH_OFFSET,
-				THIGH_Y_HIP_OFFSET, HIP_Y_THIGH_OFFSET, 0,0,360, 0, 0, w);
-		
-		// SHINS
-		makePart(SHIN_LEFT,  THIGH_LEFT, -SHIN_X_THIGH_OFFSET, -THIGH_X_SHIN_OFFSET,
-				SHIN_Y_THIGH_OFFSET, THIGH_Y_SHIN_OFFSET, 0,0,360, 0, 0, w);
-		makePart(SHIN_RIGHT, THIGH_RIGHT, SHIN_X_THIGH_OFFSET, THIGH_X_SHIN_OFFSET,
-				SHIN_Y_THIGH_OFFSET, THIGH_Y_SHIN_OFFSET, 0,0,360, 0, 0, w);
-		
-		//FEET
-		makePart(FOOT_LEFT, SHIN_LEFT, -FOOT_X_OFFSET, -SHIN_X_FOOT_OFFSET, FOOT_Y_OFFSET,
-				SHIN_Y_FOOT_OFFSET, 0,0,360, FOOT_PUSH, FOOT_PULL, w);
-		makePart(FOOT_RIGHT, SHIN_RIGHT, FOOT_X_OFFSET, SHIN_X_FOOT_OFFSET, FOOT_Y_OFFSET,
-				SHIN_Y_FOOT_OFFSET, 0,0,360, FOOT_PUSH, FOOT_PULL, w);
+//		// CHEST
+//		makePart(CHEST, HEAD, 0, 0, CHEST_HEAD_OFFSET, HEAD_OFFSET, 0,0,360, 0, 0, w);
+//
+//		//HIPS
+//		makePart(HIPS, CHEST, 0, 0, HIP_CHEST_OFFSET, CHEST_HIP_OFFSET, 0,0,360, 0, 0, w);
+//
+//		// ARMS
+//		makePart(ARM_LEFT, CHEST, -ARM_X_CHEST_OFFSET, -CHEST_X_ARM_OFFSET,
+//				ARM_Y_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0,0,360, 0, 0, w);
+//		makePart(ARM_RIGHT, CHEST, ARM_X_CHEST_OFFSET, CHEST_X_ARM_OFFSET,
+//				ARM_Y_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0,0,360, 0, 0, w);
+//
+//		// FOREARMS
+//		makePart(FOREARM_LEFT, ARM_LEFT, -FOREARM_X_ARM_OFFSET, -ARM_X_FOREARM_OFFSET,
+//				FOREARM_Y_ARM_OFFSET, ARM_Y_FOREARM_OFFSET, 0,0,360, 0, 0, w);
+//		makePart(FOREARM_RIGHT, ARM_RIGHT, FOREARM_X_ARM_OFFSET, ARM_X_FOREARM_OFFSET,
+//				FOREARM_Y_ARM_OFFSET, ARM_Y_FOREARM_OFFSET, 0,0,360, 0, 0, w);
+//
+//		//HANDS
+//		makePart(HAND_LEFT, FOREARM_LEFT, -HAND_X_OFFSET, -FOREARM_X_HAND_OFFSET,
+//				HAND_Y_OFFSET, FOREARM_Y_HAND_OFFSET, 0,0,360, HAND_PUSH, HAND_PULL, w);
+//		makePart(HAND_RIGHT, FOREARM_RIGHT, HAND_X_OFFSET, FOREARM_X_HAND_OFFSET,
+//				HAND_Y_OFFSET, FOREARM_Y_HAND_OFFSET, 0,0,360, HAND_PUSH, HAND_PULL, w);
+//
+//		// THIGHS
+//		makePart(THIGH_LEFT, HIPS, -THIGH_X_HIP_OFFSET, -HIP_X_THIGH_OFFSET,
+//				THIGH_Y_HIP_OFFSET, HIP_Y_THIGH_OFFSET, 0,0,360, 0, 0, w);
+//		makePart(THIGH_RIGHT, HIPS, THIGH_X_HIP_OFFSET, HIP_X_THIGH_OFFSET,
+//				THIGH_Y_HIP_OFFSET, HIP_Y_THIGH_OFFSET, 0,0,360, 0, 0, w);
+//
+//		// SHINS
+//		makePart(SHIN_LEFT,  THIGH_LEFT, -SHIN_X_THIGH_OFFSET, -THIGH_X_SHIN_OFFSET,
+//				SHIN_Y_THIGH_OFFSET, THIGH_Y_SHIN_OFFSET, 0,0,360, 0, 0, w);
+//		makePart(SHIN_RIGHT, THIGH_RIGHT, SHIN_X_THIGH_OFFSET, THIGH_X_SHIN_OFFSET,
+//				SHIN_Y_THIGH_OFFSET, THIGH_Y_SHIN_OFFSET, 0,0,360, 0, 0, w);
+//
+//		//FEET
+//		makePart(FOOT_LEFT, SHIN_LEFT, -FOOT_X_OFFSET, -SHIN_X_FOOT_OFFSET, FOOT_Y_OFFSET,
+//				SHIN_Y_FOOT_OFFSET, 0,0,360, FOOT_PUSH, FOOT_PULL, w);
+//		makePart(FOOT_RIGHT, SHIN_RIGHT, FOOT_X_OFFSET, SHIN_X_FOOT_OFFSET, FOOT_Y_OFFSET,
+//				SHIN_Y_FOOT_OFFSET, 0,0,360, FOOT_PUSH, FOOT_PULL, w);
 		
 	}
     
@@ -170,8 +170,8 @@ public class CharacterModel extends GameObject{
 				: new ExtremityModel(push, pull, partCache.x, partCache.y, texture.getTexture()));
 		
 		partModel.setDrawScale(drawScale);
-		partModel.activatePhysics(w);
 		partModel.setBodyType(BodyDef.BodyType.DynamicBody);
+		partModel.activatePhysics(w);
 		
 		//TODO: set density in individual parts
 		//partModel.setDensity(DENSITY);
@@ -179,13 +179,13 @@ public class CharacterModel extends GameObject{
 		parts.add(partModel);
 		
 		//create joint if two parts present
-		if (connect != NONE){	
+		if (connect != NONE){
 			jointDef.bodyA = parts.get(connect).getBody();
-			partCache.set(connectX, connectY); 
+			partCache.set(0, 0);
 			jointDef.localAnchorA.set(partCache);
-			
+
 			jointDef.bodyB = parts.get(part).getBody();
-			partCache.set(partX, partY); 
+			partCache.set(0, 0);
 			jointDef.localAnchorB.set(partCache);
 
 			jointDef.collideConnected = false;
@@ -218,6 +218,23 @@ public class CharacterModel extends GameObject{
 		setX(HEAD_X);
 		setY(HEAD_Y);
 		energy = 100f;
+	}
+
+	/** Activate physics for each of character model's parts */
+	@Override
+	public boolean activatePhysics(World world) {
+		for (PartModel part : parts) {
+			part.activatePhysics(world);
+		}
+		return true;
+	}
+
+	/** Deactivate physics for each of character model's parts */
+	@Override
+	public void deactivatePhysics(World world) {
+		for (PartModel part : parts) {
+			part.deactivatePhysics(world);
+		}
 	}
 	
 	/** Draw method for character model */
