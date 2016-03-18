@@ -1,0 +1,52 @@
+{
+	"textures": {
+		"background": {
+			"canyon": "textures/canyon.png", 
+			"mountain": "textures/mountain.png", 
+			"sky": "textures/sky.png", 
+			"space": "textures/space.png"
+		}, 
+
+		"levelBlocks": {	
+			"easy":{
+				"1": "textures/easyblock1.png", 
+				"2": "textures/easyblock2.png", 
+			},
+			"medium":{
+
+			},	
+			"hard": {
+
+			}
+		},
+
+		"handholds": {
+			"1": "textures/hold1.png", 
+			"2": "textures/hold2.png"
+		},
+
+		"character": {
+			"head": "textures/head.png", 
+			"torso": "textures/torso.png"
+		},
+
+		"obstacles": {
+			"boulders": "textures/boulder.png", 
+			"lava": "textures/lava.png"
+		}
+	},
+
+	"fonts": {
+		"display": {
+			"file":	"fonts/RetroGame.tff", 
+			"size": 64
+		}
+	}, 
+
+	"sounds": {
+		"jump": {
+			"file": "sounds/jump.mp3", 
+			"volume": 0.8
+		}
+	}
+}
