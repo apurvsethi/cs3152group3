@@ -114,8 +114,8 @@ public final class Constants {
 	/** Shin y offset from foot */
 	public static final float SHIN_Y_FOOT_OFFSET    = -50;
 	/** Foot x offset from shin */
-	public static final float FOOT_X_OFFSET    = 40;
+	public static final float FOOT_X_OFFSET    = 30;
 	/** Foot x offset from shin */
-	public static final float FOOT_Y_OFFSET    = -50;
+	public static final float FOOT_Y_OFFSET    = -35;
 	
 }

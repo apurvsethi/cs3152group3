@@ -47,7 +47,7 @@ public abstract class GameObject {
 	/** CURRENT image for this object. May change over time. */
 	protected FilmStrip animator;
 	/** Drawing scale to convert physics units to pixels */
-	protected Vector2 drawScale = new Vector2(0.25f,0.25f);
+	protected Vector2 drawScale = new Vector2(0.1f,0.1f);
 	/** Shape information for this object */
 	protected PolygonShape shape;
 	/** Cache of the polygon vertices (for resizing) */
@@ -266,7 +266,42 @@ public abstract class GameObject {
 	public float getAngle() {
 		return body != null ? body.getAngle() : bDef.angle;
 	}
-
+	
+	/**
+	 * Sets the angle of rotation for this body (about the center).
+	 *
+	 * @param angle The new angle in radians
+	 */
+	public void setAngle(float angle) {
+		bDef.angle = angle;
+	}
+		
+	/**
+	 * Returns the type of this body
+	 *
+	 * @return The type of the body
+	 */
+	public BodyDef.BodyType getBodyType(){
+		if(body != null){
+			return body.getType();
+		}
+		else
+			return bDef.type;
+	}
+	
+	/**
+	 * Sets the body type for this body.
+	 *
+	 * @param type The new type
+	 */
+	public void setBodyType(BodyDef.BodyType type){
+		if(body != null){
+			body.setType(type);
+		}
+		else
+			bDef.type = type;
+	}
+	
 	/**
 	 * Returns the type of this object.
 	 *

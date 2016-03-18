@@ -70,6 +70,8 @@ public class CharacterModel extends GameObject{
      * @param w			The world*/
 	protected void init(World w) {
 		
+		PartModel part;
+		
 		// HEAD
 	    makePart(HEAD, NONE, HEAD_X, 0, HEAD_Y, 0, 0, 0, w);
 		
@@ -80,8 +82,9 @@ public class CharacterModel extends GameObject{
 		makePart(HIPS, CHEST, 0, 0, HIP_CHEST_OFFSET, CHEST_HIP_OFFSET, 0, 0, w);
 		
 		// ARMS
-		makePart(ARM_LEFT, CHEST, -ARM_X_CHEST_OFFSET, -CHEST_X_ARM_OFFSET,
+		part = makePart(ARM_LEFT, CHEST, -ARM_X_CHEST_OFFSET, -CHEST_X_ARM_OFFSET,
 				ARM_Y_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0, 0, w);
+		//part.setAngle((float)Math.PI);
 		makePart(ARM_RIGHT, CHEST, ARM_X_CHEST_OFFSET, CHEST_X_ARM_OFFSET,
 				ARM_Y_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0, 0, w);
 		
@@ -126,6 +129,7 @@ public class CharacterModel extends GameObject{
 	 * @param partY	The y-offset of the part RELATIVE to the connecting part's offset
 	 * @param connectX The x-offset of the connecting part RELATIVE to the part's offset
 	 * @param connectY	The y-offset of the connecting part RELATIVE to the part's offset
+	 * @param angle The angle between this part and its connecting part
 	 * @param w	The world this part is created in
 	 * 
 	 * @return the newly created part
@@ -146,6 +150,7 @@ public class CharacterModel extends GameObject{
 		
 		partModel.setDrawScale(drawScale);
 		partModel.activatePhysics(w);
+		partModel.setBodyType(BodyDef.BodyType.DynamicBody);
 		
 		//TODO: set density in individual parts
 		//partModel.setDensity(DENSITY);

@@ -96,12 +96,18 @@ public class GameMode extends ModeController {
 	public void update(float dt) {
 		InputController input = InputController.getInstance();
 		
+		//debug code for testing if physics activated
+		if(input.didLeftLeg()){
+			character.parts.get(3).setVX(111f);
+		}
 		// TODO: Use inputController methods to select limbs, 
 		//       horizontal and vertical to move them
 		
 		// TODO: Movements of other objects (obstacles, eventually)
 		
 		// TODO: Interactions between limbs and handholds
+		
+		// TODO: Update energy quantity
 	}
 	
 	public void draw() {
