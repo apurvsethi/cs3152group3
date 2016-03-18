@@ -1,5 +1,6 @@
 package beigegang.mountsputnik;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Array;
@@ -94,8 +95,12 @@ public class HandholdModel extends GameObject{
 	}
 	
 	/**trivial handhold model constructor*/
-	public HandholdModel(){
+	public HandholdModel(Texture t, float x, float y){
+		super(t, x, y, 1, 1);
 		isCrumbling = false;
+		shape.setAsBox(t.getWidth() / 2, t.getHeight() / 2);
+		setX(x);
+		setY(y);
 	}
 
 	@Override
