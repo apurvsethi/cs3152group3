@@ -546,7 +546,7 @@ public abstract class GameObject {
 	 * @param canvas Drawing context
 	 */
 	public void drawDebug(GameCanvas canvas) {
-		canvas.drawPhysics(shape, Color.YELLOW, getX(), getY(), getAngle(),drawScale.x,drawScale.y);
+		canvas.drawPhysics(shape, Color.YELLOW, getX(), getY(), getAngle(),1,1);
 	}
 }
 	
