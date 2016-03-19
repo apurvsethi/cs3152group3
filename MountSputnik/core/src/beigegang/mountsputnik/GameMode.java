@@ -408,6 +408,7 @@ public class GameMode extends ModeController {
 		float change = gain - loss - ENERGY_LOSS;
 		
 		//Energy only ranges from 0 to 100
+		//Do you still like ternary operators Meg?
 		change = character.getEnergy()>=100 && change > 0 ? 0 : character.getEnergy()<=0 && change < 0 ? 0 : change;
 		return change;
 	}

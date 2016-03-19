@@ -535,7 +535,7 @@ public abstract class GameObject {
 	 */
 	public void draw(GameCanvas canvas) {
 		canvas.draw(animator, Color.WHITE, origin.x, origin.y,
-				getX(), getY(), 0.0f, drawScale.x, drawScale.y);
+				getX(), getY(), getAngle(), drawScale.x, drawScale.y);
 	}
 
 	/**
