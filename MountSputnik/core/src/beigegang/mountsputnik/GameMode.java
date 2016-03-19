@@ -99,6 +99,8 @@ public class GameMode extends ModeController {
 	private int nextToPress = NONE;
 	public GameMode() {
 		super(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_GRAVITY);
+		
+		//create debug font
 		font.setColor(Color.RED);
 		font.getData().setScale(5);
 	}
@@ -137,12 +139,10 @@ public class GameMode extends ModeController {
 		snapLimbsToHandholds(input);
 		
 		if(input.getHorizontal()!=0){
-			character.parts.get(HAND_LEFT).getBody().applyForceToCenter(input.getHorizontal()*1000
-					, 0, true);
+			character.parts.get(HAND_LEFT).setVX(input.getHorizontal()*100f);
 		}
 		if(input.getVertical()!=0){
-			character.parts.get(HAND_LEFT).getBody().applyForceToCenter(0
-					, input.getVertical()*1000, true);
+			character.parts.get(HAND_LEFT).setVY(input.getVertical()*100f);
 		}
 		
 		pressContinued = 0;

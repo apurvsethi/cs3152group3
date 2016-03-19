@@ -60,7 +60,7 @@ public abstract class GameObject {
 	/** Revolute Joint definition for Joint creation*/
 	protected static RevoluteJointDef jointDef = new RevoluteJointDef();
 	/** Body definition for Body creation*/
-	protected static BodyDef bDef = new BodyDef();
+	protected BodyDef bDef = new BodyDef();
 	/** Stores the fixture information for this shape */
 	public FixtureDef fixtureDef = new FixtureDef();
 
