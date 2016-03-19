@@ -3,9 +3,11 @@ package beigegang.mountsputnik;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import static beigegang.mountsputnik.Constants.*;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 
 
 public class GameMode extends ModeController {
@@ -23,6 +25,9 @@ public class GameMode extends ModeController {
 				"Ragdoll/Corrected/ThighRight.png", "Ragdoll/Corrected/CalfLeft.png", "Ragdoll/Corrected/CalfRight.png", "Ragdoll/Corrected/FeetShoeLeft.png",
 				"Ragdoll/Corrected/FeetShoeRight.png"};
 
+	/**font for displaying debug values to screen */
+	private static BitmapFont font = new BitmapFont();
+	
 	/** Texture asset for files used, parts, etc. */
 	private static TextureRegion background;
 	private static TextureRegion foreground;
@@ -94,6 +99,8 @@ public class GameMode extends ModeController {
 	private int nextToPress = NONE;
 	public GameMode() {
 		super(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_GRAVITY);
+		font.setColor(Color.RED);
+		font.getData().setScale(5);
 	}
 
 	@Override
@@ -116,15 +123,20 @@ public class GameMode extends ModeController {
 		for (int i = 0; i < HANDHOLD_NUMBER; i++){
 			handhold = new HandholdModel(holdTextures[0].getTexture(), 50, 50, 10*i+300, 20*i+300);
 			handhold.activatePhysics(world);
+			handhold.setBodyType(BodyDef.BodyType.StaticBody);
 			objects.add(handhold);
 		}
 	}
 	
 	public void update(float dt) {
-		System.out.println("UPDATE");
+		//System.out.println("UPDATE");
 		InputController input = InputController.getInstance();
 		snapLimbsToHandholds(input);
-
+		
+		if(input.getHorizontal()!=0){
+			character.parts.get(HEAD).body.setAngularVelocity(5*input.getHorizontal());
+		}
+		
 		pressContinued = 0;
 //		float force = 0f;
 		if (input.didLeftLeg()){
@@ -395,6 +407,7 @@ public class GameMode extends ModeController {
 		for(GameObject obj : objects) {
 			obj.draw(canvas);
 		}
+		canvas.drawText(((Float)character.getEnergy()).toString(), font, 0f, GAME_HEIGHT-50f);
 		canvas.end();
 		
 		if (debug) {
@@ -428,5 +441,10 @@ public class GameMode extends ModeController {
 	@Override
 	public void resize(int width, int height) {
 		// TODO Auto-generated method stub
+	}
+	
+	public void dispose(){
+		font.dispose();
+		super.dispose();
 	}
 }
