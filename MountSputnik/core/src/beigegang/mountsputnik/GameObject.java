@@ -464,7 +464,7 @@ public abstract class GameObject {
 		body = world.createBody(bDef);
 		body.setUserData(this);
 		body.setActive(true);
-
+		
 		// Only initialize if a body was created.
 		if (body != null) {
 			createFixtures();

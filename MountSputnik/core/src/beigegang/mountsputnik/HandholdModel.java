@@ -8,9 +8,7 @@ import com.badlogic.gdx.utils.Array;
 
 public class HandholdModel extends GameObject{
 	
-	/** A root body for this box 2d. */
-    protected Body body;
-    /** How crumbly handhold is
+	/** How crumbly handhold is
      * Range from 0.0 - 1.0*/
     protected float crumbleFactor;
     /** How slippery handhold is
@@ -120,7 +118,15 @@ public class HandholdModel extends GameObject{
 
 	@Override
 	protected void createFixtures() {
+		if (body == null) {
+			return;
+		}
 
+		// Create the fixture
+		fixtureDef.shape = shape;
+		geometry = body.createFixture(fixtureDef);
+		shape.dispose();
+		markDirty(false);
 	}
 
 	@Override

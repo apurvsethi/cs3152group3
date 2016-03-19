@@ -175,6 +175,9 @@ public abstract class ModeController implements Screen {
 	protected PooledList<GameObject> addQueue = new PooledList<GameObject>();
 	/** Listener that will update the player mode when we are done */
 	protected ScreenListener listener;
+	/** A contact listener for interactions between handholds and extremities */ 
+	protected ListenerClass contactListener; 
+	
 
 	/** The Box2D world */
 	protected World world;
@@ -289,6 +292,7 @@ public abstract class ModeController implements Screen {
 		this.scale = new Vector2(1,1);
 		debug  = false;
 		active = false;
+		
 	}
 
 	/**

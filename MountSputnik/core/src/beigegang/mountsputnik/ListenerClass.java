@@ -19,13 +19,18 @@ public class ListenerClass implements ContactListener {
         Fixture fixtureB = contact.getFixtureB();
         String typeA = (String) fixtureA.getUserData();
         String typeB = (String) fixtureB.getUserData();
+        
         if(typeA == null || typeB == null)
         	return;
         
-        if((typeA.equals("handhold")&&(typeB.contains("extremity"))))
+        if((typeA.equals("handhold")&&(typeB.contains("extremity")))){
 	    	stickies.add(new StickyInfo(fixtureB.getBody(), fixtureA.getBody(),typeB));
-        else if((typeB.equals("handhold")&&(typeA.contains("extremity"))))
+	    	System.out.println("Touching");
+        }
+        else if((typeB.equals("handhold")&&(typeA.contains("extremity")))){
+        	System.out.println("Touching");
         	stickies.add(new StickyInfo(fixtureA.getBody(), fixtureB.getBody(),typeA));
+        }
     }
 
 	@Override

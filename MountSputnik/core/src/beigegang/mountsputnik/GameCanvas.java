@@ -24,7 +24,7 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.*;
 import com.badlogic.gdx.physics.box2d.*;
 
-
+import static beigegang.mountsputnik.Constants.*;
 
 /**
  * Primary view class for the game, abstracting the basic graphics calls.
@@ -241,14 +241,17 @@ public class GameCanvas {
 
 	}
 	
+	/** Returns the texture that represents the background*/ 
 	public Texture getBackground() {
 		return background;
 	}
-
+	
+	/** Given a texture, sets it to the background */ 
 	public void setBackground(Texture background) {
 		this.background = background;
 	}
 	
+	/** Translates the camera by (x,y), then updates */ 
 	public void translateCamera(float x, float y){
 		camera.translate(x, y);
 		camera.update();
@@ -925,6 +928,8 @@ public class GameCanvas {
 		computeVertices(local,region.getVertices());
 	}
 	
+	/** draws the background to the screen, stretching to the width of the screen, 
+	 *  but allowing the vertical to be > screen height  */
 	private void drawBackground() {
 		if (background == null) {
 			return;
@@ -932,7 +937,7 @@ public class GameCanvas {
 		
 		// Only use of spritebatch in game.
 		spriteBatch.begin();
-		spriteBatch.draw(background, 0, 0, getWidth(), background.getHeight());
+		spriteBatch.draw(background, 0, 0, GAME_WIDTH, background.getHeight());
 		spriteBatch.end();
 	}
 	
