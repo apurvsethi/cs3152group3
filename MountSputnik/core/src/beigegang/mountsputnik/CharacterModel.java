@@ -172,6 +172,9 @@ public class CharacterModel extends GameObject{
 		partModel.setAngle(angle);
 		partModel.setBodyType(BodyDef.BodyType.DynamicBody);
 		partModel.activatePhysics(w);
+		if(part==7 || part == 8 || part == 13 || part == 14){
+			partModel.geometry.setUserData("extremity");
+		}
 		
 		//TODO: set density in individual parts
 		//partModel.setDensity(DENSITY);

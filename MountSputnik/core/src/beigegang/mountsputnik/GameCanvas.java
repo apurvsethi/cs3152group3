@@ -24,7 +24,7 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.*;
 import com.badlogic.gdx.physics.box2d.*;
 
-
+import static beigegang.mountsputnik.Constants.*;
 
 /**
  * Primary view class for the game, abstracting the basic graphics calls.
@@ -925,7 +925,7 @@ public class GameCanvas {
 		
 		// Only use of spritebatch in game.
 		spriteBatch.begin();
-		spriteBatch.draw(background, 0, 0, getWidth(), background.getHeight());
+		spriteBatch.draw(background, 0, 0, GAME_WIDTH, background.getHeight());
 		spriteBatch.end();
 	}
 	

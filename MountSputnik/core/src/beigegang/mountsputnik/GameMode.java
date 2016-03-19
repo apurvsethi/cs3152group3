@@ -8,12 +8,15 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import static beigegang.mountsputnik.Constants.*;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.World;
+
 
 
 public class GameMode extends ModeController {
 
 	/** Track asset loading from all instances and subclasses */
 	protected AssetState assetState = AssetState.EMPTY;
+	
 	
 	/** Strings for files used, string[] for parts, etc. */
 	private static final String BACKGROUND_FILE = "background.png";
@@ -107,14 +110,19 @@ public class GameMode extends ModeController {
 
 	@Override
 	public void reset() {
-		System.out.println("RESET");
-		if(character!=null)
-			character.deactivatePhysics(world);
-		character = null;
-		objects.clear();
-		populateLevel();
-		canvas.resetCamera();
+		Vector2 gravity = new Vector2(world.getGravity() );
 		
+		for(GameObject obj : objects) {
+			obj.deactivatePhysics(world);
+		}
+		objects.clear();
+		addQueue.clear();
+		world.dispose();
+		
+		world = new World(gravity,false);
+		contactListener = new ListenerClass();
+		world.setContactListener(contactListener);
+		populateLevel();
 	}
 	
 	public void populateLevel() {
@@ -126,9 +134,10 @@ public class GameMode extends ModeController {
 		// TODO: Populate level with whatever pieces and part are necessary (handholds, etc)
 		// Will probably do through a level generator later, level model access
 		for (int i = 0; i < HANDHOLD_NUMBER; i++){
-			handhold = new HandholdModel(holdTextures[0].getTexture(), 50, 50, 10*i+300, 20*i+300);
+			handhold = new HandholdModel(holdTextures[0].getTexture(), 50, 50, 100*i+500, 20*i+500);
 			handhold.activatePhysics(world);
 			handhold.setBodyType(BodyDef.BodyType.StaticBody);
+			handhold.geometry.setUserData("handhold");
 			objects.add(handhold);
 		}
 	}
