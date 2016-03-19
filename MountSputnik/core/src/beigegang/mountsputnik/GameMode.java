@@ -118,6 +118,9 @@ public class GameMode extends ModeController {
 	public void populateLevel() {
 		character = new CharacterModel(partTextures, world);
 		objects.add(character);
+		for(PartModel p : character.parts){
+			objects.add(p);
+		}
 		// TODO: Populate level with whatever pieces and part are necessary (handholds, etc)
 		// Will probably do through a level generator later, level model access
 		for (int i = 0; i < HANDHOLD_NUMBER; i++){
@@ -134,9 +137,13 @@ public class GameMode extends ModeController {
 		snapLimbsToHandholds(input);
 		
 		if(input.getHorizontal()!=0){
-			character.parts.get(HEAD).body.setAngularVelocity(5*input.getHorizontal());
+			character.parts.get(HAND_LEFT).getBody().applyForceToCenter(input.getHorizontal()*1000
+					, 0, true);
 		}
-		System.out.println(character.parts.get(HEAD).getAngle());
+		if(input.getVertical()!=0){
+			character.parts.get(HAND_LEFT).getBody().applyForceToCenter(0
+					, input.getVertical()*1000, true);
+		}
 		
 		pressContinued = 0;
 //		float force = 0f;
@@ -250,13 +257,9 @@ public class GameMode extends ModeController {
 		// TODO: Use inputController methods to select limbs, 
 		//       horizontal and vertical to move them
 
-//		if(input.didLeftArm()){
-//			character.parts.get(ARM_LEFT).body.applyForceToCenter(100f,0,false);
-//		}
-//		character.parts.get()
-		System.out.println("");
 		//move camera with character
-		canvas.translateCamera(0, character.parts.get(CHEST).getBody().getLinearVelocity().y * 18f/GAME_HEIGHT);
+		canvas.setCameraPosition(GAME_WIDTH/2,
+				character.parts.get(CHEST).getBody().getPosition().y);
 		
 		// TODO: Movements of other objects (obstacles, eventually)
 		
@@ -428,7 +431,10 @@ public class GameMode extends ModeController {
 		for(GameObject obj : objects) {
 			obj.draw(canvas);
 		}
-		canvas.drawText(((Float)character.getEnergy()).toString(), font, 0f, GAME_HEIGHT-50f);
+		
+		//debug energy text in top left of screen
+		canvas.drawText(((Integer)(Math.round(character.getEnergy()))).toString(), font, 0f, 
+				canvas.getCamera().position.y+GAME_HEIGHT/2-50f);
 		canvas.end();
 		
 		if (debug) {

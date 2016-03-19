@@ -463,6 +463,7 @@ public abstract class GameObject {
 		bDef.active = true;
 		body = world.createBody(bDef);
 		body.setUserData(this);
+		body.setActive(true);
 
 		// Only initialize if a body was created.
 		if (body != null) {

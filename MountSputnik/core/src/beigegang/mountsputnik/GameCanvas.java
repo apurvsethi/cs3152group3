@@ -150,6 +150,15 @@ public class GameCanvas {
 	}
 	
 	/**
+	 * Returns the camera this canvas is using
+	 * 
+	 * @return The camera
+	 */
+	public Camera getCamera(){
+		return camera;
+	}
+	
+	/**
 	 * Changes the width of this canvas
 	 *
 	 * This method raises an IllegalStateException if called while drawing is
@@ -347,10 +356,11 @@ public class GameCanvas {
 		setCameraPosition(this.getWidth()/2f,this.getHeight()/2f);
 	}
 
-	/** set camera Position to whereever you want */
+	/** set camera Position to where ever you want */
 
-	private void setCameraPosition(float width, float height) {
+	public void setCameraPosition(float width, float height) {
 		camera.position.set(width,height,0f);
+		camera.update();
 	}
 	/**
 	 * Start a standard drawing sequence.
