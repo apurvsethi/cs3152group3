@@ -126,7 +126,7 @@ public class GameMode extends ModeController {
 		// TODO: Populate level with whatever pieces and part are necessary (handholds, etc)
 		// Will probably do through a level generator later, level model access
 		for (int i = 0; i < HANDHOLD_NUMBER; i++){
-			handhold = new HandholdModel(holdTextures[0].getTexture(), 50, 50, 10*i+300, 20*i+300);
+			handhold = new HandholdModel(holdTextures[0].getTexture(), 50, 50, 200*i+300, 200);
 			handhold.activatePhysics(world);
 			handhold.setBodyType(BodyDef.BodyType.StaticBody);
 			objects.add(handhold);
@@ -135,15 +135,16 @@ public class GameMode extends ModeController {
 	
 	public void update(float dt) {
 		//System.out.println("UPDATE");
+
 		InputController input = InputController.getInstance();
 		snapLimbsToHandholds(input);
-		
-		if(input.getHorizontal()!=0){
-			character.parts.get(HAND_LEFT).setVX(input.getHorizontal()*100f);
-		}
-		if(input.getVertical()!=0){
-			character.parts.get(HAND_LEFT).setVY(input.getVertical()*100f);
-		}
+		glowHandholds();
+//		if(input.getHorizontal()!=0){
+//			character.parts.get(HAND_LEFT).setVX(input.getHorizontal()*100f);
+//		}
+//		if(input.getVertical()!=0){
+//			character.parts.get(HAND_LEFT).setVY(input.getVertical()*100f);
+//		}
 		
 		pressContinued = 0;
 //		float force = 0f;
@@ -270,6 +271,25 @@ public class GameMode extends ModeController {
 		character.setEnergy(character.getEnergy()+dEdt);
 	}
 
+	private void glowHandholds() {
+		for (GameObject obj:objects) {
+			if (obj.getType() == GameObject.ObjectType.HANDHOLD) {
+				HandholdModel h = (HandholdModel) obj;
+				h.unglow();
+//				go through extremities
+				for (int e : EXTREMITIES) {
+					for (Vector2 snapPoint : h.snapPoints) {
+						if (closeEnough(e, snapPoint)) {
+							h.glow();
+							System.out.println("CLOSE ENOUGH");
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
 	private void snapLimbsToHandholds(InputController input) {
 		switch(lastPressed){
 			case FOOT_LEFT:
@@ -295,9 +315,29 @@ public class GameMode extends ModeController {
 		}
 	}
 
-	private void snapIfPossible(int footLeft) {
-//		for (GameObject)
+	private void snapIfPossible(int limb) {
+		for (GameObject obj:objects){
+			if (obj.getType() == GameObject.ObjectType.HANDHOLD){
+				HandholdModel h = (HandholdModel)obj;
+				for (Vector2 snapPoint:h.snapPoints){
+					if (closeEnough(limb,snapPoint)){
+						character.parts.get(limb).setPosition(snapPoint);
+						((ExtremityModel)character.parts.get(limb)).grip();
+						character.parts.get(limb).body.setType(BodyDef.BodyType.StaticBody);
+					}
+				}
+
+				}
+			}
+		}
+/** helper function to check if limb is close enough to a snapPoint on a handhold
+ * used for both snapping limbs to handholds and glowing handholds showing player they're close enough to snap */
+	private boolean closeEnough(int limb, Vector2 snapPoint) {
+		Vector2 dist = character.parts.get(limb).getPosition().sub(snapPoint);
+		return (Math.sqrt(dist.x * dist.x + dist.y * dist.y)<= SNAP_RADIUS);
 	}
+
+
 
 	/**
 	 * calculates Y force player can use

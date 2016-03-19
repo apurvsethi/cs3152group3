@@ -19,7 +19,7 @@ public final class Constants {
 	 * if character extremity is within this radius and handhold is
 	 * within max reach, releasing the trigger / bumper will snap
 	 * to the handhold*/
-	public static final int SNAP_RADIUS = 15;
+	public static final int SNAP_RADIUS = 30;
 	
 	/** The number of handholds on the given level. TODO: remove. For testing purposes only  */
 	public static final int HANDHOLD_NUMBER = 5; 

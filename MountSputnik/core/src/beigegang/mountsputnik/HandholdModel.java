@@ -1,5 +1,6 @@
 package beigegang.mountsputnik;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -20,6 +21,8 @@ public class HandholdModel extends GameObject{
     protected boolean isCrumbling;
     /** array of all snap points for this handhold*/
     protected Array<Vector2> snapPoints;
+/** says if this handhold should be drawn glowing */
+	protected int glowing = 0;
 	
 	@Override
 	public ObjectType getType() {
@@ -110,7 +113,10 @@ public class HandholdModel extends GameObject{
 		setDrawScale(width/t.getWidth(), height/t.getHeight());
 		setX(x);
 		setY(y);
+		snapPoints = new Array<Vector2>();
+		snapPoints.add(getPosition());
 	}
+
 
 	@Override
 	protected void createFixtures() {
@@ -121,4 +127,18 @@ public class HandholdModel extends GameObject{
 	protected void releaseFixtures() {
 
 	}
+
+	public void unglow() {
+		glowing = 0;
+	}
+	public void glow() {
+		glowing = 1;
+	}
+//	@Override
+//	public void draw(GameCanvas canvas) {
+////		this.getTexture().getTextureData().
+//		canvas.draw(animator, Color.WHITE, this.getPosition().x-1, this.getPosition().y - 1,
+//				getX(), getY(), getAngle(), drawScale.x, drawScale.y,glowing);
+//
+//	}
 }

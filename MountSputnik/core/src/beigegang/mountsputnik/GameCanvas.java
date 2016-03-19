@@ -699,7 +699,19 @@ public class GameCanvas {
 		spriteBatch.setColor(tint);
 		spriteBatch.draw(region, region.getRegionWidth(), region.getRegionHeight(), local);
 	}
+	public void draw(TextureRegion region, Color tint, float ox, float oy,
+					 float x, float y, float angle, float sx, float sy,int glow) {
+		if (active != DrawPass.STANDARD) {
+			Gdx.app.error("GameCanvas", "Cannot draw without active begin()", new IllegalStateException());
+			return;
+		}
 
+		// BUG: The draw command for texture regions does not work properly.
+		// There is a workaround, but it will break if the bug is fixed.
+		// For now, it is better to set the affine transform directly.
+		draw( region,  tint,  ox,  oy, x,  y,  angle,  sx,  sy);
+
+	}
 	/**
 	 * Draws the tinted texture with the given transformations
 	 *
