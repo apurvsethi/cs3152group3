@@ -223,6 +223,27 @@ public class CharacterModel extends GameObject{
 		energy = 100f;
 	}
 
+	/** Calculate percentage of pullY factor */
+	public float calcPullPercentageY(float y, boolean arm){
+
+		return arm ?  (1-(MAX_ARM_DIST - y)/MAX_ARM_DIST):  (1-(MAX_LEG_DIST - y)/MAX_LEG_DIST);
+	}
+
+	/** Calculate percentage of pushY factor */
+	public float calcPushPercentageY(float y, boolean arm){
+		return arm ?  (1-(MAX_ARM_DIST - y)/MAX_ARM_DIST):  (1-(MAX_LEG_DIST - y)/MAX_LEG_DIST);
+	}
+
+	/** Calculate percentage of pullX factor */
+	public float calcPullPercentageX(float x, boolean arm){
+
+		return arm ?  (1-x/MAX_ARM_DIST):  (1-x/MAX_LEG_DIST);
+	}
+
+	/** Calculate percentage of pushX factor */
+	public float calcPushPercentageX(float x, boolean arm){
+		return arm ?  (1-x/MAX_ARM_DIST):  (1-x/MAX_LEG_DIST);
+	}
 	/** Activate physics for each of character model's parts */
 	@Override
 	public boolean activatePhysics(World world) {

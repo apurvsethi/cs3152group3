@@ -60,7 +60,7 @@ public abstract class GameObject {
 	/** Revolute Joint definition for Joint creation*/
 	protected static RevoluteJointDef jointDef = new RevoluteJointDef();
 	/** Body definition for Body creation*/
-	protected static BodyDef bDef = new BodyDef();
+	protected BodyDef bDef = new BodyDef();
 	/** Stores the fixture information for this shape */
 	public FixtureDef fixtureDef = new FixtureDef();
 
@@ -463,6 +463,7 @@ public abstract class GameObject {
 		bDef.active = true;
 		body = world.createBody(bDef);
 		body.setUserData(this);
+		body.setActive(true);
 
 		// Only initialize if a body was created.
 		if (body != null) {
@@ -535,7 +536,7 @@ public abstract class GameObject {
 	 */
 	public void draw(GameCanvas canvas) {
 		canvas.draw(animator, Color.WHITE, origin.x, origin.y,
-				getX(), getY(), 0.0f, drawScale.x, drawScale.y);
+				getX(), getY(), getAngle(), drawScale.x, drawScale.y);
 	}
 
 	/**

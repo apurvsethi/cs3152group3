@@ -3,9 +3,11 @@ package beigegang.mountsputnik;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import static beigegang.mountsputnik.Constants.*;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 
 
 public class GameMode extends ModeController {
@@ -23,6 +25,9 @@ public class GameMode extends ModeController {
 				"Ragdoll/Corrected/ThighRight.png", "Ragdoll/Corrected/CalfLeft.png", "Ragdoll/Corrected/CalfRight.png", "Ragdoll/Corrected/FeetShoeLeft.png",
 				"Ragdoll/Corrected/FeetShoeRight.png"};
 
+	/**font for displaying debug values to screen */
+	private static BitmapFont font = new BitmapFont();
+	
 	/** Texture asset for files used, parts, etc. */
 	private static TextureRegion background;
 	private static TextureRegion foreground;
@@ -94,6 +99,10 @@ public class GameMode extends ModeController {
 	private int nextToPress = NONE;
 	public GameMode() {
 		super(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_GRAVITY);
+		
+		//create debug font
+		font.setColor(Color.RED);
+		font.getData().setScale(5);
 	}
 
 	@Override
@@ -111,19 +120,35 @@ public class GameMode extends ModeController {
 	public void populateLevel() {
 		character = new CharacterModel(partTextures, world);
 		objects.add(character);
+		for(PartModel p : character.parts){
+			objects.add(p);
+		}
 		// TODO: Populate level with whatever pieces and part are necessary (handholds, etc)
 		// Will probably do through a level generator later, level model access
 		for (int i = 0; i < HANDHOLD_NUMBER; i++){
 			handhold = new HandholdModel(holdTextures[0].getTexture(), 50, 50, 10*i+300, 20*i+300);
 			handhold.activatePhysics(world);
+			handhold.setBodyType(BodyDef.BodyType.StaticBody);
 			objects.add(handhold);
 		}
 	}
 	
 	public void update(float dt) {
+		//System.out.println("UPDATE");
 		InputController input = InputController.getInstance();
+		snapLimbsToHandholds(input);
+		
+		if(input.getHorizontal()!=0){
+			character.parts.get(HAND_LEFT).setVX(input.getHorizontal()*100f);
+		}
+		if(input.getVertical()!=0){
+			character.parts.get(HAND_LEFT).setVY(input.getVertical()*100f);
+		}
+		
 		pressContinued = 0;
+//		float force = 0f;
 		if (input.didLeftLeg()){
+			System.out.println("LEFT LEG");
 			if (lastPressed == NONE){
 				lastPressed = FOOT_LEFT;
 				pressContinued = 1;
@@ -138,6 +163,8 @@ public class GameMode extends ModeController {
 			}
 		}
 		if (input.didRightLeg()){
+			System.out.println("RIGHT LEG");
+
 			if (lastPressed == NONE){
 				lastPressed = FOOT_RIGHT;
 				pressContinued = 1;
@@ -152,6 +179,8 @@ public class GameMode extends ModeController {
 			}
 		}
 		if (input.didLeftArm()){
+			System.out.println("LEFT ARM");
+
 			if (lastPressed == NONE){
 				lastPressed = HAND_LEFT;
 				pressContinued = 1;
@@ -166,6 +195,8 @@ public class GameMode extends ModeController {
 		}
 
 		if (input.didRightArm()){
+			System.out.println("RIGHT ARM");
+
 			if (lastPressed == NONE){
 				lastPressed = HAND_RIGHT;
 				pressContinued = 1;
@@ -178,11 +209,47 @@ public class GameMode extends ModeController {
 				pressContinued = 1;
 			}
 		}
+		float y = input.getVertical();
+		
+		Vector2 force = new Vector2(0,0);
 		if (pressContinued == 1){
-			calculateForce(lastPressed,input);
-		}else if (nextToPress != NONE) {
-			calculateForce(nextToPress,input);
+			System.out.println("PRESS CONT");
+			force.set(0,calculateForce(lastPressed,input));
+			float threshold = 1f;
+			//able to apply force if its greater than the threshold (minimum needed to have effect on the body)
+			//wont apply dampening if its > 0
+			System.out.println(force.y);
+			if (force.y > threshold){
+				//can't have too high of a force!
+				if (force.y > MAX_FORCE_THRESHOLD.y) force = MAX_FORCE_THRESHOLD;
+				//apply the force to the body part.
+				character.parts.get(lastPressed).body.applyForceToCenter(force.scl(Math.signum(y)),true);
+
+			}
+//			force wasn't strong enough to move limb. apply dampening - force
+			else{
+				Vector2 vel = character.parts.get(lastPressed).getLinearVelocity();
+				//if pos both
+				if (y > 0 && vel.y > 0) {
+					character.parts.get(lastPressed).body.applyForceToCenter(DAMPENING_Y.scl(-1).sub(force.scl(-1)) ,true);
+				}
+				//if neg both
+				else if (y < 0 && vel.y < 0){
+					character.parts.get(lastPressed).body.applyForceToCenter(DAMPENING_Y.sub(force),true);
+				}
+				//
+				else{
+
+				}
+			}
+
+
+//			character.parts.get(lastPressed).body.applyForceToCenter(0,force,false);
+
 		}
+// else if (nextToPress != NONE) {
+//			force = calculateForce(nextToPress,input);
+//		}
 		else{
 			//no movement required.
 		}
@@ -190,24 +257,54 @@ public class GameMode extends ModeController {
 		// TODO: Use inputController methods to select limbs, 
 		//       horizontal and vertical to move them
 
-		if(input.didLeftArm()){
-			character.parts.get(ARM_LEFT).body.applyForceToCenter(100f,0,false);
-		}
-		System.out.println("");
 		//move camera with character
-		canvas.translateCamera(0, character.parts.get(CHEST).getBody().getLinearVelocity().y * 18f/GAME_HEIGHT);
+		canvas.setCameraPosition(GAME_WIDTH/2,
+				character.parts.get(CHEST).getBody().getPosition().y);
 		
 		// TODO: Movements of other objects (obstacles, eventually)
 		
 		// TODO: Interactions between limbs and handholds
 		
 		// TODO: Update energy quantity (fill in these values)
-		float dEdt = calculateEnergyChange(0,0, true);
+		float dEdt = calculateEnergyChange(1,1, force, true);
 		character.setEnergy(character.getEnergy()+dEdt);
 	}
 
-	private void calculateForce(int currentLimb,InputController input) {
-	/*	ExtremityModel curPart = ((ExtremityModel)(character.parts.get(currentLimb)));
+	private void snapLimbsToHandholds(InputController input) {
+		switch(lastPressed){
+			case FOOT_LEFT:
+				if (!input.didLeftLeg()){
+					snapIfPossible(FOOT_LEFT);
+				}
+				break;
+			case FOOT_RIGHT:
+				if (!input.didRightLeg()){
+					snapIfPossible(FOOT_RIGHT);
+				}
+				break;
+			case HAND_LEFT:
+				if (!input.didLeftArm()){
+					snapIfPossible(HAND_LEFT);
+				}
+				break;
+			case HAND_RIGHT:
+				if (!input.didRightArm()){
+					snapIfPossible(HAND_RIGHT);
+				}
+				break;
+		}
+	}
+
+	private void snapIfPossible(int footLeft) {
+//		for (GameObject)
+	}
+
+	/**
+	 * calculates Y force player can use
+	 *
+	 * */
+	private float calculateForce(int currentLimb,InputController input) {
+		ExtremityModel curPart = ((ExtremityModel)(character.parts.get(currentLimb)));
 		curPart.ungrip();
 		//force NOT based off function of how far tilting joystick
 		//based on how long joystick in certain direction
@@ -220,7 +317,7 @@ public class GameMode extends ModeController {
 		//if extremity above
 		float forceFactor = 0.0f;
 //		each arm
-
+		float totalForce = 0f;
 				//check distance from center of mass for Y - its own function
 				//check distance from for X -
 
@@ -231,27 +328,49 @@ public class GameMode extends ModeController {
 			float eFactor = 0;
 			boolean pull = false;
 			boolean isLeft = false;
+			boolean isArm = false;
 			if (e.isGripping()){
 				isLeft = ex == HAND_LEFT || ex == FOOT_LEFT;
+				isArm = ex == HAND_LEFT || ex == HAND_RIGHT;
 				pull =  e.getY() > curY;
 				eFactor = pull ? e.getPush():e.getPull();
-			}
-			if (pull){
-				Vector2 distance = e.getPosition().sub(character.parts.get(CHEST).getPosition());
-				//calculate distance from shoulder for width (closer the 0 the better)
-				//
-				//what side it's on.
-				float distFromShoulder = distance.x - character.getPosition().x;
 
-			}else{
-				Vector2 distance = e.getPosition().sub(character.parts.get(CHEST).getPosition());
-				float distFromShoulder = distance.x - character.getPosition().x;
+				if (pull){
 
+					Vector2 distance = e.getPosition().sub(character.parts.get(CHEST).getPosition());
+					//calculate distance from shoulder for width (closer the 0 the better)
+					//
+					//what side it's on.
+					float shoulderOffset = isLeft? -1 * CHEST_X_ARM_OFFSET: CHEST_X_ARM_OFFSET;
+					float distFromShoulder = Math.abs(distance.x - (character.getPosition().x + shoulderOffset));
+					float distFromYCenter = Math.abs(distance.y - character.getPosition().y);
+
+
+					float pullPercY = character.calcPullPercentageY(distFromYCenter,isArm);
+
+					float pullPercX = character.calcPullPercentageX(distFromShoulder,isArm);
+					totalForce += pullPercX * pullPercY * e.getPull();
+
+
+
+
+				}else{
+					Vector2 distance = e.getPosition().sub(character.parts.get(CHEST).getPosition());
+					float distFromShoulder = Math.abs(distance.x - character.getPosition().x);
+					float distFromYCenter = Math.abs(distance.y - character.getPosition().y);
+
+					float pushPercY = character.calcPushPercentageY(distFromYCenter,isArm);
+
+					float pushPercX = character.calcPushPercentageX(distFromShoulder,isArm);
+					totalForce += pushPercX * pushPercY * e.getPush();
+
+				}
 			}
 		}
-		double tan1 = Math.atan(y/x);
+		return totalForce;
 
-*/
+//		double tan1 = Math.atan(y/x);
+
 //		boolean up = 0;
 //		boolean right = 0;
 
@@ -269,13 +388,32 @@ public class GameMode extends ModeController {
 	 * @param gainModifier Environmental Gain Modifier
 	 * @param lossModifier Environmental Loss Modifier
 	 * @param rotationGain Whether or not rotation affects gain (would be false if in space or places with low gravity)
+	 * @param force Current force being exerted by character
 	 * 
 	 * @return change in energy value
 	 */
-	private float calculateEnergyChange(float gainModifier, float lossModifier, boolean rotationGain){
-		//TODO: FILL IN THIS FUNCTION
+	private float calculateEnergyChange(float gainModifier, float lossModifier, Vector2 force, boolean rotationGain){
 		int b = rotationGain ? 1 : 0;
-		return 0;
+		float angle = character.parts.get(CHEST).getAngle();
+		float exertion = force.y; //TODO figure out what this value should be
+		
+		//Determine how many limbs are currently attached
+		int feet = character.parts.get(FOOT_LEFT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
+		feet += character.parts.get(FOOT_RIGHT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
+		int hands = character.parts.get(HAND_LEFT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
+		hands += character.parts.get(HAND_RIGHT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
+		
+		//Refer to equation in Javadoc comment
+		float gain = (float) (ENERGY_GAIN_MULTIPLIER * (1-b*Math.sin(angle/2.0)) * BASE_ENERGY_GAIN * gainModifier);
+		float loss = ENERGY_LOSS_MULTIPLIER * (exertion + 1) * lossModifier * (3-feet) * (3 - hands);
+		//you don't lose energy if you're just falling
+		loss = feet == 0 && hands == 0 ? 0 : loss;
+		float change = gain - loss - ENERGY_LOSS;
+		
+		//Energy only ranges from 0 to 100
+		//Do you still like ternary operators Meg?
+		change = character.getEnergy()>=100 && change > 0 ? 0 : character.getEnergy()<=0 && change < 0 ? 0 : change;
+		return change;
 	}
 	
 	public void draw() {
@@ -293,6 +431,10 @@ public class GameMode extends ModeController {
 		for(GameObject obj : objects) {
 			obj.draw(canvas);
 		}
+		
+		//debug energy text in top left of screen
+		canvas.drawText(((Integer)(Math.round(character.getEnergy()))).toString(), font, 0f, 
+				canvas.getCamera().position.y+GAME_HEIGHT/2-50f);
 		canvas.end();
 		
 		if (debug) {
@@ -326,5 +468,10 @@ public class GameMode extends ModeController {
 	@Override
 	public void resize(int width, int height) {
 		// TODO Auto-generated method stub
+	}
+	
+	public void dispose(){
+		font.dispose();
+		super.dispose();
 	}
 }
