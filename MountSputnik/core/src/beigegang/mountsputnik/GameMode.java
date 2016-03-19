@@ -263,7 +263,7 @@ public class GameMode extends ModeController {
 		// TODO: Interactions between limbs and handholds
 		
 		// TODO: Update energy quantity (fill in these values)
-		float dEdt = calculateEnergyChange(0,0, force, true);
+		float dEdt = calculateEnergyChange(1,1, force, true);
 		character.setEnergy(character.getEnergy()+dEdt);
 	}
 
@@ -393,20 +393,23 @@ public class GameMode extends ModeController {
 		int b = rotationGain ? 1 : 0;
 		float angle = character.parts.get(CHEST).getAngle();
 		float exertion = force.y; //TODO figure out what this value should be
+		
+		//Determine how many limbs are currently attached
 		int feet = character.parts.get(FOOT_LEFT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
 		feet += character.parts.get(FOOT_RIGHT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
 		int hands = character.parts.get(HAND_LEFT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
 		hands += character.parts.get(HAND_RIGHT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
 		
+		//Refer to equation in Javadoc comment
 		float gain = (float) (ENERGY_GAIN_MULTIPLIER * (1-b*Math.sin(angle/2.0)) * BASE_ENERGY_GAIN * gainModifier);
 		float loss = ENERGY_LOSS_MULTIPLIER * (exertion + 1) * lossModifier * (3-feet) * (3 - hands);
+		//you don't lose energy if you're just falling
+		loss = feet == 0 && hands == 0 ? 0 : loss;
 		float change = gain - loss - ENERGY_LOSS;
-		if(character.getEnergy()>=100 && change > 0)
-			return 0;
-		else if(character.getEnergy()<=0 && change < 0)
-			return 0;
-		else
-			return change;
+		
+		//Energy only ranges from 0 to 100
+		change = character.getEnergy()>=100 && change > 0 ? 0 : character.getEnergy()<=0 && change < 0 ? 0 : change;
+		return change;
 	}
 	
 	public void draw() {

@@ -138,8 +138,8 @@ public final class Constants {
 	/** Constant Multiplier on energy loss */
 	public static final float ENERGY_LOSS_MULTIPLIER = 1;
 	/** Constant of energy loss */
-	public static final float ENERGY_LOSS = 1;
+	public static final float ENERGY_LOSS = .1f;
 	/** Base energy gain */
-	public static final float BASE_ENERGY_GAIN = 1;
+	public static final float BASE_ENERGY_GAIN = 1f;
 	
 }
