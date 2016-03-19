@@ -136,6 +136,7 @@ public class GameMode extends ModeController {
 		if(input.getHorizontal()!=0){
 			character.parts.get(HEAD).body.setAngularVelocity(5*input.getHorizontal());
 		}
+		System.out.println(character.parts.get(HEAD).getAngle());
 		
 		pressContinued = 0;
 //		float force = 0f;
@@ -202,10 +203,11 @@ public class GameMode extends ModeController {
 			}
 		}
 		float y = input.getVertical();
-
+		
+		Vector2 force = new Vector2(0,0);
 		if (pressContinued == 1){
 			System.out.println("PRESS CONT");
-			Vector2 force = new Vector2(0,calculateForce(lastPressed,input));
+			force.set(0,calculateForce(lastPressed,input));
 			float threshold = 1f;
 			//able to apply force if its greater than the threshold (minimum needed to have effect on the body)
 			//wont apply dampening if its > 0
@@ -261,7 +263,7 @@ public class GameMode extends ModeController {
 		// TODO: Interactions between limbs and handholds
 		
 		// TODO: Update energy quantity (fill in these values)
-		float dEdt = calculateEnergyChange(0,0, true);
+		float dEdt = calculateEnergyChange(0,0, force, true);
 		character.setEnergy(character.getEnergy()+dEdt);
 	}
 
@@ -383,13 +385,28 @@ public class GameMode extends ModeController {
 	 * @param gainModifier Environmental Gain Modifier
 	 * @param lossModifier Environmental Loss Modifier
 	 * @param rotationGain Whether or not rotation affects gain (would be false if in space or places with low gravity)
+	 * @param force Current force being exerted by character
 	 * 
 	 * @return change in energy value
 	 */
-	private float calculateEnergyChange(float gainModifier, float lossModifier, boolean rotationGain){
-		//TODO: FILL IN THIS FUNCTION
+	private float calculateEnergyChange(float gainModifier, float lossModifier, Vector2 force, boolean rotationGain){
 		int b = rotationGain ? 1 : 0;
-		return 0;
+		float angle = character.parts.get(CHEST).getAngle();
+		float exertion = force.y; //TODO figure out what this value should be
+		int feet = character.parts.get(FOOT_LEFT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
+		feet += character.parts.get(FOOT_RIGHT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
+		int hands = character.parts.get(HAND_LEFT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
+		hands += character.parts.get(HAND_RIGHT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
+		
+		float gain = (float) (ENERGY_GAIN_MULTIPLIER * (1-b*Math.sin(angle/2.0)) * BASE_ENERGY_GAIN * gainModifier);
+		float loss = ENERGY_LOSS_MULTIPLIER * (exertion + 1) * lossModifier * (3-feet) * (3 - hands);
+		float change = gain - loss - ENERGY_LOSS;
+		if(character.getEnergy()>=100 && change > 0)
+			return 0;
+		else if(character.getEnergy()<=0 && change < 0)
+			return 0;
+		else
+			return change;
 	}
 	
 	public void draw() {
