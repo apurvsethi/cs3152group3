@@ -2,6 +2,7 @@ package beigegang.mountsputnik;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
 
 public class ExtremityModel extends PartModel{
@@ -68,12 +69,16 @@ public class ExtremityModel extends PartModel{
 	/** Sets the value of isGripping to true*/
 	public void grip(){
 		isGripping = true;
+		this.body.setType(BodyDef.BodyType.StaticBody);
+		System.out.println("regripping!!!!");
 		//TODO: change animation for gripping?
 	}
 	
 	/** Sets the value of isGripping to false*/
 	public void ungrip(){
 		isGripping = false;
+		this.body.setType(BodyDef.BodyType.DynamicBody);
+		System.out.println("dynamic body");
 		//TODO: change animation for releasing?
 	}
 	
