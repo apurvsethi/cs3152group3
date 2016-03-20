@@ -14,6 +14,10 @@ public class ExtremityModel extends PartModel{
 	protected float pullFactor;
 	/** Whether or not this extremity is gripping*/
 	protected boolean isGripping;
+	/** Texture for when extremity is gripping */ 
+	protected Texture grip; 
+	/** Texture for when extremity is not gripping */ 
+	protected Texture notGrip; 
 	
 	@Override
 	public ObjectType getType() {
@@ -68,13 +72,20 @@ public class ExtremityModel extends PartModel{
 	/** Sets the value of isGripping to true*/
 	public void grip(){
 		isGripping = true;
+		setTexture(grip); 
 		//TODO: change animation for gripping?
 	}
 	
 	/** Sets the value of isGripping to false*/
 	public void ungrip(){
 		isGripping = false;
+		setTexture(notGrip); 
 		//TODO: change animation for releasing?
+	}
+	
+	/** sets the grip texture for this extremity */ 
+	public void setGripTexture(Texture t){
+		grip = t; 
 	}
 	
 	/** Contructs an ExtremityModel
@@ -88,6 +99,7 @@ public class ExtremityModel extends PartModel{
 		pushFactor= push;
 		pullFactor = pull;
 		isGripping = false;
+		notGrip = t; 
 	}
 	
 }

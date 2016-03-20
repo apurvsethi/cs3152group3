@@ -21,12 +21,12 @@ public class GameMode extends ModeController {
 	/** Strings for files used, string[] for parts, etc. */
 	private static final String BACKGROUND_FILE = "background.png";
 	private static final String FOREGROUND_FILE = "preliminaryCharacterFilmStrip.png";
-	private static final String HANDHOLD_TEXTURES[] = {"handholds.png", "handholdsglow.png"};
+	private static final String HANDHOLD_TEXTURES[] = {"handholds.png", "handholdsglow.png", "handholdsgrabbed.png"};
 	private static final String PART_TEXTURES[] = {"Ragdoll/Corrected/Head.png","Ragdoll/Corrected/Torso.png","Ragdoll/Corrected/Hips.png",
 				"Ragdoll/Corrected/ArmLeft.png", "Ragdoll/Corrected/ArmRight.png", "Ragdoll/Corrected/ForearmLeft.png","Ragdoll/Corrected/ForearmRight.png",
 				"Ragdoll/Corrected/HandLeftUngripped.png","Ragdoll/Corrected/HandRightUngripped.png","Ragdoll/Corrected/ThighLeft.png",
 				"Ragdoll/Corrected/ThighRight.png", "Ragdoll/Corrected/CalfLeft.png", "Ragdoll/Corrected/CalfRight.png", "Ragdoll/Corrected/FeetShoeLeft.png",
-				"Ragdoll/Corrected/FeetShoeRight.png"};
+				"Ragdoll/Corrected/FeetShoeRight.png", "Ragdoll/Corrected/HandLeftGripped.png","Ragdoll/Corrected/HandRightGripped.png"};
 
 	/**font for displaying debug values to screen */
 	private static BitmapFont font = new BitmapFont();
@@ -136,22 +136,22 @@ public class GameMode extends ModeController {
 		for (int i = 0; i < HANDHOLD_NUMBER; i++){
 //			handhold = new HandholdModel(holdTextures[0].getTexture(), holdTextures[1].getTexture(), 50, 50, 100*i+500, 20*i+500);
 
-			handhold = new HandholdModel(holdTextures[0].getTexture(),holdTextures[1].getTexture(), 50, 50, 150*i+500, 500);
+			handhold = new HandholdModel(holdTextures[0].getTexture(),holdTextures[1].getTexture(),holdTextures[2].getTexture(), 50, 50, 150*i+500, 500);
 			handhold.activatePhysics(world);
 			handhold.setBodyType(BodyDef.BodyType.StaticBody);
 			handhold.geometry.setUserData("handhold");
 			objects.add(handhold);
 		}
 
-		for (int i: EXTREMITIES) {
-			PartModel i1 = character.parts.get(i);
-
-			handhold = new HandholdModel(holdTextures[0].getTexture(),holdTextures[1].getTexture(), 50, 50, i1.getX(), i1.getY());
-			handhold.activatePhysics(world);
-			handhold.setBodyType(BodyDef.BodyType.StaticBody);
-			handhold.geometry.setUserData("handhold");
-			objects.add(handhold);
-		}
+//		for (int i: EXTREMITIES) {
+//			PartModel i1 = character.parts.get(i);
+//
+//			handhold = new HandholdModel(holdTextures[0].getTexture(),holdTextures[1].getTexture(), 50, 50, i1.getX(), i1.getY());
+//			handhold.activatePhysics(world);
+//			handhold.setBodyType(BodyDef.BodyType.StaticBody);
+//			handhold.geometry.setUserData("handhold");
+//			objects.add(handhold);
+//		}
 	}
 	
 	public void update(float dt) {
@@ -173,7 +173,7 @@ public class GameMode extends ModeController {
 		if(input.getVertical()!=0){
 			character.parts.get(HAND_LEFT).setVY(input.getVertical()*100f);
 		}
-
+		
 		pressContinued = 0;
 //		float force = 0f;
 		if (input.didLeftLeg()){

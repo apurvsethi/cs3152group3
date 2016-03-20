@@ -162,6 +162,16 @@ public class CharacterModel extends GameObject{
 		partModel.activatePhysics(w);
 		if(part==7 || part == 8 || part == 13 || part == 14){
 			partModel.geometry.setUserData("extremity");
+			ExtremityModel e = (ExtremityModel)partModel; 
+			if (part == 7){
+				e.setGripTexture(partTextures[15].getTexture());
+			}
+			if (part == 8){
+				e.setGripTexture(partTextures[16].getTexture());
+			}
+			else {
+				e.setGripTexture(texture.getTexture());
+			}
 		}
 		
 		//TODO: set density in individual parts
