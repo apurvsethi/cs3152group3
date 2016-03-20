@@ -2,6 +2,7 @@ package beigegang.mountsputnik;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
 
 public class ExtremityModel extends PartModel{
@@ -13,7 +14,7 @@ public class ExtremityModel extends PartModel{
 	 *  Range from 0.0 - 1.0*/
 	protected float pullFactor;
 	/** Whether or not this extremity is gripping*/
-	protected boolean isGripping;
+	protected HandholdModel gripped;
 	/** Texture for when extremity is gripping */ 
 	protected Texture grip; 
 	/** Texture for when extremity is not gripping */ 
@@ -66,20 +67,28 @@ public class ExtremityModel extends PartModel{
 	 * @return Returns the whether or not this extremity is gripping
 	 */
 	public boolean isGripping(){
-		return isGripping;
+		return gripped != null;
 	}
 	
 	/** Sets the value of isGripping to true*/
-	public void grip(){
-		isGripping = true;
+	public void grip(HandholdModel h){
+		gripped = h;
 		setTexture(grip); 
+		this.body.setType(BodyDef.BodyType.StaticBody);
+		//System.out.println("regripping!!!!");
+		h.grip();
 		//TODO: change animation for gripping?
 	}
 	
 	/** Sets the value of isGripping to false*/
 	public void ungrip(){
-		isGripping = false;
+		if (gripped != null){
+			gripped.ungrip();
+			gripped = null;
+		}
 		setTexture(notGrip); 
+		this.body.setType(BodyDef.BodyType.DynamicBody);
+		//System.out.println("dynamic body");
 		//TODO: change animation for releasing?
 	}
 	
@@ -98,7 +107,7 @@ public class ExtremityModel extends PartModel{
 		super(x, y, t);
 		pushFactor= push;
 		pullFactor = pull;
-		isGripping = false;
+		gripped = null;
 		notGrip = t; 
 	}
 	

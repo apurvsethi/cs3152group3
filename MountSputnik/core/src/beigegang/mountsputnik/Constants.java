@@ -64,6 +64,7 @@ public final class Constants {
 	public static final int NONE = -1;
 
 	public static final int[] EXTREMITIES = new int[]{FOOT_LEFT,FOOT_RIGHT,HAND_LEFT,HAND_RIGHT};
+	public static final String[] ENAMES = new String[]{"HEAD","CHEST","HIPS","ARM_LEFT","ARM_RIGHT","FOREARM_LEFT","FOREARM_RIGHT","HAND_LEFT","HAND_RIGHT","THIGH_LEFT","THIGH_RIGHT","SHIN_LEFT","SHIN_RIGHT","FOOT_LEFT","FOOT_RIGHT"};
 	public static final float PULL_A = 1;
 	public static final float PULL_C = 0;
 	public static final float PUSH_A = 1;

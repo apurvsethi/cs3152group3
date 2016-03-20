@@ -155,7 +155,7 @@ public class HandholdModel extends GameObject{
 	}
 	public void ungrip(){
 		isGripped = 0; 
-		setTexture(gripTexture); 
+		setTexture(dullTexture); 
 	}
 	public void grip(){
 		isGripped = 1; 
