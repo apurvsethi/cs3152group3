@@ -1,0 +1,14 @@
+{   "id" : 1, 
+    "difficulty": "easy", 
+    "handholds": {
+    	"hold1": {
+    		"texture"
+    		"scale"
+    		"position"
+    		"friction"
+    		"restitution"
+    		"crumble"
+    		}
+    }
+}
+

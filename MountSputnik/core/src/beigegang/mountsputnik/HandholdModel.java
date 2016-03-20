@@ -21,6 +21,10 @@ public class HandholdModel extends GameObject{
     protected Array<Vector2> snapPoints;
 /** says if this handhold should be drawn glowing */
 	protected int glowing = 0;
+	/** The texture the handhold will have when glowing */ 
+	protected Texture glowTexture; 
+	/** The texture the handhold will have when not glowing */ 
+	protected Texture dullTexture; 
 	
 	@Override
 	public ObjectType getType() {
@@ -104,7 +108,7 @@ public class HandholdModel extends GameObject{
 	 * @param x The x position of the model
 	 * @param y The y position of the model
 	 */
-	public HandholdModel(Texture t, float width, float height, float x, float y){
+	public HandholdModel(Texture t, Texture gt, float width, float height, float x, float y){
 		super(t, width, height, 1, 1);
 		isCrumbling = false;
 		shape.setAsBox(t.getWidth() / 2, t.getHeight() / 2);
@@ -113,6 +117,8 @@ public class HandholdModel extends GameObject{
 		setY(y);
 		snapPoints = new Array<Vector2>();
 		snapPoints.add(getPosition());
+		glowTexture = gt; 
+		dullTexture = t; 
 	}
 
 
@@ -136,9 +142,11 @@ public class HandholdModel extends GameObject{
 
 	public void unglow() {
 		glowing = 0;
+		setTexture(dullTexture); 
 	}
 	public void glow() {
 		glowing = 1;
+		setTexture(glowTexture); 
 	}
 //	@Override
 //	public void draw(GameCanvas canvas) {

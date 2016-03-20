@@ -21,7 +21,7 @@ public class GameMode extends ModeController {
 	/** Strings for files used, string[] for parts, etc. */
 	private static final String BACKGROUND_FILE = "background.png";
 	private static final String FOREGROUND_FILE = "preliminaryCharacterFilmStrip.png";
-	private static final String HANDHOLD_TEXTURES[] = {"handholds.png"};
+	private static final String HANDHOLD_TEXTURES[] = {"handholds.png", "handholdsglow.png"};
 	private static final String PART_TEXTURES[] = {"Ragdoll/Corrected/Head.png","Ragdoll/Corrected/Torso.png","Ragdoll/Corrected/Hips.png",
 				"Ragdoll/Corrected/ArmLeft.png", "Ragdoll/Corrected/ArmRight.png", "Ragdoll/Corrected/ForearmLeft.png","Ragdoll/Corrected/ForearmRight.png",
 				"Ragdoll/Corrected/HandLeftUngripped.png","Ragdoll/Corrected/HandRightUngripped.png","Ragdoll/Corrected/ThighLeft.png",
@@ -134,7 +134,7 @@ public class GameMode extends ModeController {
 		// TODO: Populate level with whatever pieces and part are necessary (handholds, etc)
 		// Will probably do through a level generator later, level model access
 		for (int i = 0; i < HANDHOLD_NUMBER; i++){
-			handhold = new HandholdModel(holdTextures[0].getTexture(), 50, 50, 100*i+500, 20*i+500);
+			handhold = new HandholdModel(holdTextures[0].getTexture(), holdTextures[1].getTexture(), 50, 50, 100*i+500, 20*i+500);
 			handhold.activatePhysics(world);
 			handhold.setBodyType(BodyDef.BodyType.StaticBody);
 			handhold.geometry.setUserData("handhold");
@@ -148,13 +148,14 @@ public class GameMode extends ModeController {
 		InputController input = InputController.getInstance();
 		snapLimbsToHandholds(input);
 		glowHandholds();
-//		if(input.getHorizontal()!=0){
-//			character.parts.get(HAND_LEFT).setVX(input.getHorizontal()*100f);
-//		}
-//		if(input.getVertical()!=0){
-//			character.parts.get(HAND_LEFT).setVY(input.getVertical()*100f);
-//		}
 		
+		if(input.getHorizontal()!=0){
+			character.parts.get(HAND_LEFT).setVX(input.getHorizontal()*100f);
+		}
+		if(input.getVertical()!=0){
+			character.parts.get(HAND_LEFT).setVY(input.getVertical()*100f);
+		}
+
 		pressContinued = 0;
 //		float force = 0f;
 		if (input.didLeftLeg()){
