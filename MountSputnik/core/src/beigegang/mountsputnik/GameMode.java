@@ -24,6 +24,9 @@ public class GameMode extends ModeController {
 	 * used for tracking the game timestep - used to snap limbs to handholds on original timestep
 	 */
 	private static int timestep = 0;
+/**	both are updated every timestep with horizontal and vertical input from player */
+	private static float inx = 0f;
+	private static float iny = 0f;
 	/**
 	 * Strings for files used, string[] for parts, etc.
 	 */
@@ -40,7 +43,8 @@ public class GameMode extends ModeController {
 	 * font for displaying debug values to screen
 	 */
 	private static BitmapFont font = new BitmapFont();
-
+	//says if character is upside down
+	private static boolean upsideDown = false;
 	/**
 	 * Texture asset for files used, parts, etc.
 	 */
@@ -204,18 +208,22 @@ public class GameMode extends ModeController {
 	 *           is the limb that can be controlled.
 	 *           this method ungrips all selected limbs and then calculates the force that can be imparted on the main selected
 	 *           limb based on the forces the other limbs can impart with plenty of heuristics
-	 *           if no force is imparted, it uses dampening on all of the limbs.
+	 *           if no force is imparted, it uses dampening on all of the limbs that are not gripping a handhold.
 	 *           it then snaps limbs to a viable handhold within SNAP_RADIUS that were just released this timestep
 	 *           <p/>
-	 *           special case: on the zeroth timestep/very first call to update, it snaps limbs to any handhold in radius.
+	 *           special case: on the zeroth timestep/very first call to update at start of game,
+	 *           it snaps limbs to any handhold in radius.
 	 */
 	public void update(float dt) {
 		//System.out.println("UPDATE");
 		InputController input = InputController.getInstance();
+		inx = input.getHorizontal();
+		iny = input.getVertical();
 		//System.out.println(input.didLeftLeg() + " " + input.didRightLeg() + " " + input.didRightArm() + " " + input.didLeftArm());
 //clear all in justReleased
 		justReleased.clear();
-
+//		see if character is upsideDown
+		upsideDown = character.parts.get(HEAD).getPosition().y - character.parts.get(CHEST).getPosition().y >= 0;
 //		if(input.getHorizontal()!=0){
 //		character.parts.get(HEAD).setVX(-100f);
 //		}
@@ -237,10 +245,7 @@ public class GameMode extends ModeController {
 			character.parts.get(HAND_LEFT).setVY(input.getVertical() * 100f);
 		}
 
-//		pressContinued = 0;
-//		float force = 0f;
-//figure out whats pressed and whats been released this timestep (next ~50 lines)
-		//TODO something weird, the input controller never registers more than 2 button presses at the same time.
+		//figure out whats pressed and whats been released this timestep (next 4 lines)
 		int a = input.didLeftLeg() == true ? addToButtonsPressed((FOOT_LEFT)) : checkIfJustReleased(FOOT_LEFT);
 		int b = input.didRightLeg() == true ? addToButtonsPressed((FOOT_RIGHT)) : checkIfJustReleased(FOOT_RIGHT);
 		int c = input.didLeftArm() == true ? addToButtonsPressed((HAND_LEFT)) : checkIfJustReleased(HAND_LEFT);
@@ -249,10 +254,6 @@ public class GameMode extends ModeController {
 		float y = input.getVertical();
 
 		Vector2 force = new Vector2(0, 0);
-//		for (int i: justReleased){
-//			//System.out.print(ENAMES[i] + " BUBBLES ");
-//		}
-
 //		ungrip all selected limbs (safety measures) and apply force to limb.
 		if (nextToPress.size() > 0) {
 //			next two lines ungrip all selected extremities.
@@ -263,57 +264,33 @@ public class GameMode extends ModeController {
 				//System.out.println("ungripped " + ENAMES[i]);
 
 			}
-
-			force.set(0, calculateForce(curPart, input));
+			for (int ext:EXTREMITIES){
+				if (((ExtremityModel) (character.parts.get(ext))).isGripping()){
+					force.add(calcForce(ext,nextToPress.get(0)));
+				}
+			}
+			/*
+			No threshold AS OF now
 			float threshold = 1f;
 			//able to apply force if its greater than the threshold (minimum needed to have effect on the body)
 			//wont apply dampening if its > 0
 			if (force.y > threshold) {
-				//can't have too high of a force!
-				//needs to be in there.
-//				if (force.y > MAX_FORCE_THRESHOLD.y) force = MAX_FORCE_THRESHOLD;
-				//apply the force to the body part.
-				curPart.setVY(force.scl(Math.signum(y)).y);
-				curPart.setVX(input.getHorizontal() * 100f);
-
-
-			}
+			//can't have too high of a force!
+			//needs to be in there.
+			//				if (force.y > MAX_FORCE_THRESHOLD.y) force = MAX_FORCE_THRESHOLD;
+			//apply the force to the body part.
+			curPart.setVY(force.scl(Math.signum(y)).y);
+			curPart.setVX(input.getHorizontal() * 100f);
+			*/
+//apply force to center of the body part.
+			curPart.body.applyForceToCenter(force,true);
 		}
-//			force wasn't strong enough to move limb. apply dampening - force
-		else {
-//			nextToPress should be empty
-			Vector2 vel = character.parts.get(HEAD).getLinearVelocity();
-
-			float thisDampX = DAMPENING_X;
-			float thisDampY = DAMPENING_Y;
-
-			if (vel.y > 0) {
-				if (vel.y - DAMPENING_Y < 0) thisDampY = vel.y;
-				character.parts.get(HEAD).setVY(vel.y - thisDampY);
-			}
-			if (vel.x > 0) {
-				if (vel.x - DAMPENING_X < 0) thisDampX = vel.x;
-				character.parts.get(HEAD).setVX(vel.x - thisDampX);
-
-			}
-			//if neg both
-			if (vel.y < 0) {
-				if (vel.y + DAMPENING_Y > 0) thisDampY = -1 * vel.y;
-				character.parts.get(HEAD).setVY(vel.y + thisDampY);
-//					character.parts.get(lastPressed).body.applyForceToCenter(DAMPENING_Y.sub(force),true);
-			}
-			if (vel.x < 0) {
-				if (vel.x + DAMPENING_X > 0) thisDampX = -1 * vel.x;
-				character.parts.get(HEAD).setVX(vel.x + thisDampX);
-			}
-			//
-
+//Nothing pressed! Apply dampening to any ungripping limbs. Right now it's using velocity though.
+ 		else {
+//			nextToPress is empty - apply dampening to any limbs that aren't on a rock right now.
+			applyDampening();
 		}
-
-
 //			character.parts.get(lastPressed).body.applyForceToCenter(0,force,false);
-
-
 // else if (nextToPress != NONE) {
 //			force = calculateForce(nextToPress,input);
 //		}
@@ -331,12 +308,45 @@ public class GameMode extends ModeController {
 				character.parts.get(CHEST).getBody().getPosition().y);
 
 		// TODO: Movements of other objects (obstacles, eventually)
+		// NOWHERE CLOSE
 
 		// TODO: Interactions between limbs and handholds
+//		 DONE
 
 		// TODO: Update energy quantity (fill in these values)
+//		not tested yet
 		float dEdt = calculateEnergyChange(1, 1, force, true);
 		character.setEnergy(character.getEnergy() + dEdt);
+	}
+
+	private void applyDampening() {
+		for (int ext : EXTREMITIES){
+			if (!((ExtremityModel)(character.parts.get(ext))).isGripping()){
+				float thisDampX = DAMPENING_X;
+				float thisDampY = DAMPENING_Y;
+				Vector2 vel = character.parts.get(ext).getLinearVelocity();
+
+				if (vel.y > 0) {
+					if (vel.y - DAMPENING_Y < 0) thisDampY = vel.y;
+					character.parts.get(ext).setVY(vel.y - thisDampY);
+				}
+				if (vel.x > 0) {
+					if (vel.x - DAMPENING_X < 0) thisDampX = vel.x;
+					character.parts.get(ext).setVX(vel.x - thisDampX);
+
+				}
+				//if neg both
+				if (vel.y < 0) {
+					if (vel.y + DAMPENING_Y > 0) thisDampY = -1 * vel.y;
+					character.parts.get(ext).setVY(vel.y + thisDampY);
+					//					character.parts.get(lastPressed).body.applyForceToCenter(DAMPENING_Y.sub(force),true);
+				}
+				if (vel.x < 0) {
+					if (vel.x + DAMPENING_X > 0) thisDampX = -1 * vel.x;
+					character.parts.get(ext).setVX(vel.x + thisDampX);
+				}
+			}
+		}
 	}
 
 	/**
@@ -425,60 +435,129 @@ public class GameMode extends ModeController {
 
 
 	/**
-	 * calculates Y force player can use
+	 * @param hookedPart - calculation of force for an extremity attached to a handhold
+	 * @param freePart - part that the force will be applied to
+	 * calculates X and Y force player can use to propel their selected limb.
+	 * should use the size of the handhold in the calculation although it does not.
 	 */
-	private Vector2 calcForce(int hookedPart, int freePart, InputController input) {
-		float inx = input.getHorizontal();
-		float iny = input.getVertical();
+	private Vector2 calcForce(int hookedPart, int freePart) {
+
+
 		//does him going down actually matter to the physics??
 		//I mean, like if he reaches down
 		float forcex = 0f;
 		float forcey = 0f;
-		if (hookedPart == FOOT_LEFT || hookedPart == FOOT_RIGHT) {
+		//calculate X aspect, I think Horizontal force should simply be a constant.
+
+		forcex = inx * CONSTANT_X_FORCE;
+
+//normal calculations.
+		//these are calculations for the Y aspect of the deal
+		if (!upsideDown) {
+
 			//leg forces.
 			//push force or pull force depending on extremity location to the moving part's location
 			//then use angle of hip and angle of knee to figure out force compared
 			Vector2 hp = character.parts.get(hookedPart).getPosition();
 			Vector2 fp = character.parts.get(freePart).getPosition();
-			if (hp.y - fp.y < 0) {//lower than it
-				//first focus on if he needs it to push up.
+//			if (hp.y - fp.y < 0) {//lower than it
+			//first focus on if he needs it to push up.
+			if (hookedPart == FOOT_LEFT || hookedPart == FOOT_RIGHT) {
 				if (iny > 0) {
 					float angleKnee = 0f;
 					float footToHip = 0f;
+					float angleKneeModifier = 0f;
+					float distanceModifier = 0f;
+					float totalModifier = 0f;
 					//get angles in degrees.
-//					i think it will be easier if we use y distance of foot from hip to do calculations instead of
-//					using hip angle.
+//					use y distance of foot from hip to do calculations instead of using hip angle.
 //					still want to use knee angle.
+					//angleknee positive if hip is rotated inward for left leg, positive if rotated out for right leg?
+//					could just ABS angleKnee for now/mod by 180.
 					if (hookedPart == FOOT_LEFT) {
-						angleKnee = ((RevoluteJoint) (character.joints.get(SHIN_LEFT))).getJointAngle() * RAD_TO_DEG;
-						footToHip = hp.y - character.parts.get(HIPS).getPosition().y;
-//						angleHip = ((RevoluteJoint)(character.joints.get(THIGH_LEFT))).getJointAngle() * RAD_TO_DEG;
-//						System.out.println(angleHip);
-						//assuming that joint angle will be positive in above calculation if hip is rotated inward,
-//						//and negative if rotated outward (the stronger side)
-//						if (angleHip > 0) angleHip = angleHip * 2;
-
-
+						angleKnee = ((RevoluteJoint) (character.joints.get(SHIN_LEFT - 1))).getJointAngle() * RAD_TO_DEG;
+						//TODO modify this because not sure how angles actually work with knees.
+						angleKnee = Math.abs(angleKnee%270);
+						angleKneeModifier = angleKnee <= 90f ? angleKnee / 90f : 90f / angleKnee;
 					} else {
-						angleKnee = ((RevoluteJoint) (character.joints.get(SHIN_RIGHT))).getJointAngle() * RAD_TO_DEG % 360;
-//						angleHip = ((RevoluteJoint)(character.joints.get(THIGH_RIGHT))).getJointAngle() * RAD_TO_DEG % 360;
+						angleKnee = ((RevoluteJoint) (character.joints.get(SHIN_RIGHT - 1))).getJointAngle() * RAD_TO_DEG;
+//						//TODO modify this as necessary because not sure how angles actually work with knees.
+						angleKnee = Math.abs(angleKnee%270);
+						angleKneeModifier = angleKnee <= 90f ? angleKnee / 90f : 90f / angleKnee;
 					}
+					//in case.
+					angleKneeModifier = Math.abs(angleKneeModifier);
+					//calculate x foot distance from hip
+					footToHip = Math.abs(hp.x - character.parts.get(HIPS).getPosition().x);
 
-					//figure out what the balance here should be.
-//					float angleModifier = (angleHip
-//					forcey += MAX_PUSHFORCE_LEG * iny *
+					distanceModifier = (Math.abs(MAX_LEG_DIST) - footToHip)/Math.abs(MAX_LEG_DIST);
+//					should probably be a more complex modifier!
+					totalModifier = (angleKneeModifier + distanceModifier) / 2f;
+					//always a positive force up if input vertical is up
+					forcey = totalModifier * MAX_PUSHFORCE_LEG;
+				} else {
+					//I think that this should be basically unlimited amount force if you're lowering a limb then
+//						it should be easy, there's not much force the legs use for this but this way it always happens.
+//						return a negative number because that way the force for the limb can be channeled easily.
+					forcey = -1 * MAX_PUSHFORCE_LEG;
 				}
 
+
+			} else {
+				if (iny > 0) {
+					float angleElbow = 0f;
+					Vector2 armToShoulder;
+					float angleElbowModifier = 0f;
+					//the Y here is correct. need to subtract  ARM_OFFSET for x position for right hand,
+ 					//add it for left hand.
+					armToShoulder = hp.sub(character.parts.get(CHEST).getPosition());
+					armToShoulder.y = armToShoulder.y - ARM_Y_CHEST_OFFSET;
+					//absolute x distance of hand to shoulder.
+					if (hookedPart == HAND_LEFT) {
+						angleElbow = ((RevoluteJoint) (character.joints.get(HAND_LEFT - 1))).getJointAngle() * RAD_TO_DEG;
+						angleElbowModifier = angleElbow <= 90f ? angleElbow / 90f : 90f / angleElbow;
+						//add because hand left + offset - chest = 0 in best case.
+						armToShoulder.x = armToShoulder.x + ARM_X_CHEST_OFFSET;
+					}
+					else{
+						angleElbow = ((RevoluteJoint) (character.joints.get(HAND_RIGHT - 1))).getJointAngle() * RAD_TO_DEG;
+						angleElbowModifier = angleElbow <= 180f ? angleElbow / 180f : 180f / angleElbow;
+						armToShoulder.x = armToShoulder.x - ARM_X_CHEST_OFFSET;
+					}
+					armToShoulder.x = Math.abs(armToShoulder.x);
+					//just in case - will be something needing debugging.
+					angleElbowModifier = Math.abs(angleElbowModifier);
+
+					//TODO modify this because not sure how angles actually work with elbows.
+					//closer to 1 = the closer the hand is to the shoulder
+					float distanceModifier = (Math.abs(MAX_ARM_DIST) - armToShoulder.x) / Math.abs(MAX_ARM_DIST);
+					float totalModifier = (angleElbowModifier + distanceModifier) / 2f;
+					//if the arm is going to impart pull or push force (legs cant really do that)
+					//always a positive force up if input vertical is up
+
+					forcey = armToShoulder.y > 0 ?
+							totalModifier * MAX_PULLFORCE_ARM : totalModifier * MAX_PUSHFORCE_ARM;
+					}
+					//working with ARMS NOW!!!!
+				else {
+					//I think that this should be basically unlimited amount force if you're lowering a limb then
+//						it should be easy, there's not much force the legs use for this but this way it always happens.
+//						return a negative number because that way the force for the limb can be channeled easily.
+					forcey = -1 * MAX_PULLFORCE_ARM;
+
+
+				}
 			}
-		} else {
-			//arm forces
-			//push force or pull force depending on extremity location to the moving part's location
-			//then use angle of shoulder and angle of elbow to figure out force compared
-			//use maxforce of arm to do this
-			//
 		}
 
-	return null;
+		else {
+			//feet are only pull (if you push, your feet would fall off the handholds if you're upside-down lol
+			//
+			//JUST do nothing now - a.k.a please don't go upside down lol.
+
+		}
+
+	return new Vector2(forcex,forcey);
 
 }
 

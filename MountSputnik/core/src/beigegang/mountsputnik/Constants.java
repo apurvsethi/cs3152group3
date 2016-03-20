@@ -41,7 +41,7 @@ public final class Constants {
 	public static final float MAX_PULLFORCE_ARM = 150f;
 	public static final float MAX_PUSHFORCE_ARM = 100f;
 	public static final float MAX_PUSHFORCE_LEG = 250f;
-
+	public static final float CONSTANT_X_FORCE = 200f;
 	/** Array of the number of animation frames for each part*/
 	public static final int[] PART_FRAMES = {1,1,1,1,1,1,1,2,2,1,1,1,1,1,1};
 	
@@ -73,8 +73,8 @@ public final class Constants {
 	public static final float PULL_C = 0;
 	public static final float PUSH_A = 1;
 	public static final float PUSH_C = 0;
-	public static final float DAMPENING_Y = 10f;
-	public static final float DAMPENING_X = 10f;
+	public static final float DAMPENING_Y = .2f;
+	public static final float DAMPENING_X = .2f;
 
 	/**Giant monster section of hard coded offsets. Disgusting, but necessary*/
 	//TODO: once character assets complete, determine actual offsets
