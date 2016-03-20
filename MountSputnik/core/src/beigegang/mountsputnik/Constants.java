@@ -68,7 +68,8 @@ public final class Constants {
 	public static final float PULL_C = 0;
 	public static final float PUSH_A = 1;
 	public static final float PUSH_C = 0;
-	public static final Vector2 DAMPENING_Y = new Vector2 (0,1f);
+	public static final float DAMPENING_Y = 10f;
+	public static final float DAMPENING_X = 10f;
 
 	/**Giant monster section of hard coded offsets. Disgusting, but necessary*/
 	//TODO: once character assets complete, determine actual offsets
@@ -141,5 +142,59 @@ public final class Constants {
 	public static final float ENERGY_LOSS = .1f;
 	/** Base energy gain */
 	public static final float BASE_ENERGY_GAIN = 1f;
-	
+	public static final int PART_NONE = -1;
+	public static final int PART_BODY = 0;
+	public static final int PART_HEAD = 1;
+	public static final int PART_LEFT_ARM  = 2;
+	public static final int PART_RIGHT_ARM = 3;
+	public static final int PART_LEFT_FOREARM  = 4;
+	public static final int PART_RIGHT_FOREARM = 5;
+	public static final int PART_LEFT_THIGH  = 6;
+	public static final int PART_RIGHT_THIGH = 7;
+	public static final int PART_LEFT_SHIN  = 8;
+	public static final int PART_RIGHT_SHIN = 9;
+	public static final int PART_LEFT_HAND = 10;
+	public static final int PART_RIGHT_HAND = 11;
+	public static final int PART_LEFT_FOOT = 12;
+	public static final int PART_RIGHT_FOOT = 13;
+	public static final float TORSO_OFFSET   = 3.8f;
+	/** Y-distance between torso center and arm center */
+	public static final float ARM_YOFFSET    = 1.75f;
+	/** X-distance between torso center and arm center */
+	public static final float ARM_XOFFSET    = 3.15f;
+	/** Distance between center of arm and center of forearm */
+	public static final float FOREARM_OFFSET = 2.75f;
+	/** X-distance from center of torso to center of leg */
+	public static final float THIGH_XOFFSET  = 0.75f;
+	/** Y-distance from center of torso to center of thigh */
+	public static final float THIGH_YOFFSET  = 3.5f;
+	/** Distance between center of thigh and center of shin */
+	public static final float SHIN_OFFSET    = 2.75f;
+	/** Distance between center of forearm and center of hand */
+	public static final float HAND_OFFSET    = 1.80f;
+	/** Distance between center of shin and center of foot */
+	public static final float FOOT_OFFSET    = 1.80f;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
+
+
+
+

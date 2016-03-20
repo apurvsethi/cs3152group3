@@ -3,6 +3,7 @@ package beigegang.mountsputnik;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.utils.Array;
 
 import static beigegang.mountsputnik.Constants.*;
@@ -89,8 +90,8 @@ public class CharacterModel extends GameObject{
      * 
      * @param w			The world*/
 	protected void init(World w) {
-		
-		
+//		createJoints(w);
+
 		// HEAD
 	    makePart(HEAD, NONE, HEAD_X, 0, HEAD_Y, 0, 0,0,2f*(float)(Math.PI), 0, 0, w);
 
@@ -135,24 +136,11 @@ public class CharacterModel extends GameObject{
 				SHIN_Y_FOOT_OFFSET, 0,0,2f*(float)(Math.PI), FOOT_PUSH, FOOT_PULL, w);
 		makePart(FOOT_RIGHT, SHIN_RIGHT, FOOT_X_OFFSET, SHIN_X_FOOT_OFFSET, FOOT_Y_OFFSET,
 				SHIN_Y_FOOT_OFFSET, 0,0,2f*(float)(Math.PI), FOOT_PUSH, FOOT_PULL, w);
+
 	}
     
-	/**
-	 * Helper method to make a single body part
-	 * 
-	 * @param part The part to make
-	 * @param connect The part to connect to
-	 * @param partX The x-offset of the part RELATIVE to the connecting part's offset
-	 * @param partY	The y-offset of the part RELATIVE to the connecting part's offset
-	 * @param connectX The x-offset of the connecting part RELATIVE to the part's offset
-	 * @param connectY	The y-offset of the connecting part RELATIVE to the part's offset
-	 * @param angle The angle between this part and its connecting part
-	 * @param rotationLimitLower The minimum angle at which the joints can rotate
-	 * @param rotationLimitUpper The maximum angle at which the joints can rotate
-	 * @param w	The world this part is created in
-	 * 
-	 * @return the newly created part
-	 */
+
+
 	private PartModel makePart(int part, int connect, float partX, float connectX,
 			float partY, float connectY, float angle, float rotationLimitLower,
 			float rotationLimitUpper, float push, float pull, World w) {
@@ -190,8 +178,8 @@ public class CharacterModel extends GameObject{
 			jointDef.bodyB = parts.get(part).getBody();
 			partCache.set(-partX, -partY);
 			jointDef.localAnchorB.set(partCache);
-
-			jointDef.collideConnected = true;
+//should be false -
+			jointDef.collideConnected = false;
 			//jointDef.lowerAngle = rotationLimitLower;
 			//jointDef.upperAngle = rotationLimitUpper;
 			
@@ -229,7 +217,7 @@ public class CharacterModel extends GameObject{
 	/** Calculate percentage of pullY factor */
 	public float calcPullPercentageY(float y, boolean arm){
 
-		return arm ?  (1-(MAX_ARM_DIST - y)/MAX_ARM_DIST):  (1-(MAX_LEG_DIST - y)/MAX_LEG_DIST);
+		return arm ?  (1-(MAX_ARM_DIST + y)/MAX_ARM_DIST):  (1-(MAX_LEG_DIST + y)/MAX_LEG_DIST);
 	}
 
 	/** Calculate percentage of pushY factor */
@@ -278,5 +266,107 @@ public class CharacterModel extends GameObject{
 		for (PartModel part : parts) {
 			part.drawDebug(canvas);
 		}
+	}
+
+	/**
+	 * TEST METHOD TO MAKE SOMETHING THAT IS A RAGDOLL.
+	 */
+	public boolean createJoints(World world) {
+
+		assert parts.size > 0;
+
+		RevoluteJointDef revDef = new RevoluteJointDef();
+
+		revDef.bodyA = parts.get(PART_HEAD).getBody();
+		revDef.bodyB = parts.get(PART_BODY).getBody();
+		revDef.localAnchorA.set(0, -TORSO_OFFSET / 2);
+		revDef.localAnchorB.set(0, TORSO_OFFSET / 2);
+		Joint joint = world.createJoint(revDef);
+		joints.add(joint);
+
+		revDef.bodyA = parts.get(PART_LEFT_ARM).getBody();
+		revDef.bodyB = parts.get(PART_BODY).getBody();
+		revDef.localAnchorA.set(ARM_XOFFSET / 2, 0);
+		revDef.localAnchorB.set(-ARM_XOFFSET / 2, ARM_YOFFSET);
+		joint = world.createJoint(revDef);
+		joints.add(joint);
+
+		revDef.bodyA = parts.get(PART_RIGHT_ARM).getBody();
+		revDef.bodyB = parts.get(PART_BODY).getBody();
+		revDef.localAnchorA.set(ARM_XOFFSET / 2, 0);
+		revDef.localAnchorB.set(ARM_XOFFSET / 2, ARM_YOFFSET);
+		joint = world.createJoint(revDef);
+		joints.add(joint);
+
+		revDef.bodyA = parts.get(PART_LEFT_THIGH).getBody();
+		revDef.bodyB = parts.get(PART_BODY).getBody();
+		revDef.localAnchorA.set(0, THIGH_YOFFSET / 2);
+		revDef.localAnchorB.set(-THIGH_XOFFSET, -THIGH_YOFFSET / 2);
+		joint = world.createJoint(revDef);
+		joints.add(joint);
+
+		revDef.bodyA = parts.get(PART_RIGHT_THIGH).getBody();
+		revDef.bodyB = parts.get(PART_BODY).getBody();
+		revDef.localAnchorA.set(0, THIGH_YOFFSET / 2);
+		revDef.localAnchorB.set(THIGH_XOFFSET, -THIGH_YOFFSET / 2);
+		joint = world.createJoint(revDef);
+		joints.add(joint);
+
+		revDef.bodyA = parts.get(PART_LEFT_FOREARM).getBody();
+		revDef.bodyB = parts.get(PART_LEFT_ARM).getBody();
+		revDef.localAnchorA.set(FOREARM_OFFSET / 2, 0);
+		revDef.localAnchorB.set(-FOREARM_OFFSET / 2, 0);
+		joint = world.createJoint(revDef);
+		joints.add(joint);
+
+		revDef.bodyA = parts.get(PART_RIGHT_FOREARM).getBody();
+		revDef.bodyB = parts.get(PART_RIGHT_ARM).getBody();
+		revDef.localAnchorA.set(FOREARM_OFFSET / 2, 0);
+		revDef.localAnchorB.set(-FOREARM_OFFSET / 2, 0);
+		joint = world.createJoint(revDef);
+		joints.add(joint);
+
+		revDef.bodyA = parts.get(PART_LEFT_SHIN).getBody();
+		revDef.bodyB = parts.get(PART_LEFT_THIGH).getBody();
+		revDef.localAnchorA.set(0, SHIN_OFFSET / 2);
+		revDef.localAnchorB.set(0, -SHIN_OFFSET / 2);
+		joint = world.createJoint(revDef);
+		joints.add(joint);
+
+		revDef.bodyA = parts.get(PART_RIGHT_SHIN).getBody();
+		revDef.bodyB = parts.get(PART_RIGHT_THIGH).getBody();
+		revDef.localAnchorA.set(0, SHIN_OFFSET / 2);
+		revDef.localAnchorB.set(0, -SHIN_OFFSET / 2);
+		joint = world.createJoint(revDef);
+		joints.add(joint);
+
+		revDef.bodyA = parts.get(PART_LEFT_FOREARM).getBody();
+		revDef.bodyB = parts.get(PART_LEFT_HAND).getBody();
+		revDef.localAnchorA.set(-HAND_OFFSET, 0);
+		revDef.localAnchorB.set(0, 0);
+		joint = world.createJoint(revDef);
+		joints.add(joint);
+
+		revDef.bodyA = parts.get(PART_RIGHT_FOREARM).getBody();
+		revDef.bodyB = parts.get(PART_RIGHT_HAND).getBody();
+		revDef.localAnchorA.set(-HAND_OFFSET, 0);
+		revDef.localAnchorB.set(0, 0);
+		joint = world.createJoint(revDef);
+		joints.add(joint);
+
+		revDef.bodyA = parts.get(PART_LEFT_SHIN).getBody();
+		revDef.bodyB = parts.get(PART_LEFT_FOOT).getBody();
+		revDef.localAnchorA.set(0, -FOOT_OFFSET);
+		revDef.localAnchorB.set(0, 0);
+		joint = world.createJoint(revDef);
+		joints.add(joint);
+
+		revDef.bodyA = parts.get(PART_RIGHT_SHIN).getBody();
+		revDef.bodyB = parts.get(PART_RIGHT_FOOT).getBody();
+		revDef.localAnchorA.set(0, -FOOT_OFFSET);
+		revDef.localAnchorB.set(0, 0);
+		joint = world.createJoint(revDef);
+		joints.add(joint);
+		return true;
 	}
 }
