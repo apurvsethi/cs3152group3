@@ -160,8 +160,20 @@ public class CharacterModel extends GameObject{
 		partModel.setAngle(angle);
 		partModel.setBodyType(BodyDef.BodyType.DynamicBody);
 		partModel.activatePhysics(w);
-		if(part==7 || part == 8 || part == 13 || part == 14){
+		if(part==HAND_LEFT || part == HAND_RIGHT || part == FOOT_LEFT || part == FOOT_RIGHT){
 			partModel.geometry.setUserData("extremity");
+			ExtremityModel e = (ExtremityModel)partModel; 
+			if (part == HAND_LEFT){
+				System.out.println("left hand set");
+				e.setGripTexture(partTextures[15].getTexture());
+			}
+			if (part == HAND_RIGHT){
+				System.out.println("right hand set");
+				e.setGripTexture(partTextures[16].getTexture());
+			}
+			else {
+				e.setGripTexture(texture.getTexture());
+			}
 		}
 		
 		//TODO: set density in individual parts

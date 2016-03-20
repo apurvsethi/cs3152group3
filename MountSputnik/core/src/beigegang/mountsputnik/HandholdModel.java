@@ -21,10 +21,14 @@ public class HandholdModel extends GameObject{
     protected Array<Vector2> snapPoints;
 /** says if this handhold should be drawn glowing */
 	protected int glowing = 0;
+	/** says if the handhold is being gripped */ 
+	protected int isGripped = 0; 
 	/** The texture the handhold will have when glowing */ 
 	protected Texture glowTexture; 
 	/** The texture the handhold will have when not glowing */ 
 	protected Texture dullTexture; 
+	/** the texture the handhold will have when gripped */ 
+	protected Texture gripTexture; 
 	
 	@Override
 	public ObjectType getType() {
@@ -108,7 +112,7 @@ public class HandholdModel extends GameObject{
 	 * @param x The x position of the model
 	 * @param y The y position of the model
 	 */
-	public HandholdModel(Texture t, Texture gt, float width, float height, float x, float y){
+	public HandholdModel(Texture t, Texture gt, Texture gtt, float width, float height, float x, float y){
 		super(t, width, height, 1, 1);
 		isCrumbling = false;
 		shape.setAsBox(t.getWidth() / 2, t.getHeight() / 2);
@@ -119,6 +123,7 @@ public class HandholdModel extends GameObject{
 		snapPoints.add(getPosition());
 		glowTexture = gt; 
 		dullTexture = t; 
+		gripTexture = gtt; 
 	}
 
 
@@ -148,6 +153,15 @@ public class HandholdModel extends GameObject{
 		glowing = 1;
 		setTexture(glowTexture); 
 	}
+	public void ungrip(){
+		isGripped = 0; 
+		setTexture(dullTexture); 
+	}
+	public void grip(){
+		isGripped = 1; 
+		setTexture(gripTexture); 
+	}
+	
 //	@Override
 //	public void draw(GameCanvas canvas) {
 ////		this.getTexture().getTextureData().

@@ -22,12 +22,12 @@ public class GameMode extends ModeController {
 	/** Strings for files used, string[] for parts, etc. */
 	private static final String BACKGROUND_FILE = "background.png";
 	private static final String FOREGROUND_FILE = "preliminaryCharacterFilmStrip.png";
-	private static final String HANDHOLD_TEXTURES[] = {"handholds.png", "handholdsglow.png"};
+	private static final String HANDHOLD_TEXTURES[] = {"handholds.png", "handholdsglow.png", "handholdsgrabbed.png"};
 	private static final String PART_TEXTURES[] = {"Ragdoll/Corrected/Head.png","Ragdoll/Corrected/Torso.png","Ragdoll/Corrected/Hips.png",
 				"Ragdoll/Corrected/ArmLeft.png", "Ragdoll/Corrected/ArmRight.png", "Ragdoll/Corrected/ForearmLeft.png","Ragdoll/Corrected/ForearmRight.png",
 				"Ragdoll/Corrected/HandLeftUngripped.png","Ragdoll/Corrected/HandRightUngripped.png","Ragdoll/Corrected/ThighLeft.png",
 				"Ragdoll/Corrected/ThighRight.png", "Ragdoll/Corrected/CalfLeft.png", "Ragdoll/Corrected/CalfRight.png", "Ragdoll/Corrected/FeetShoeLeft.png",
-				"Ragdoll/Corrected/FeetShoeRight.png"};
+				"Ragdoll/Corrected/FeetShoeRight.png", "Ragdoll/Corrected/HandLeftGripped.png","Ragdoll/Corrected/HandRightGripped.png"};
 
 	/**font for displaying debug values to screen */
 	private static BitmapFont font = new BitmapFont();
@@ -78,7 +78,7 @@ public class GameMode extends ModeController {
 		if (assetState != AssetState.LOADING) return;
 		
 		background = createTexture(manager, BACKGROUND_FILE, false);
-		if (background == null) System.out.println("Wrong");
+		//if (background == null) System.out.println("Wrong");
 		foreground = createTexture(manager, FOREGROUND_FILE, false);
 		for (int i = 0; i < HANDHOLD_TEXTURES.length; i++) {
 			holdTextures[i] = createTexture(manager, HANDHOLD_TEXTURES[i], false);
@@ -139,22 +139,22 @@ public class GameMode extends ModeController {
 		for (int i = 0; i < HANDHOLD_NUMBER; i++){
 //			handhold = new HandholdModel(holdTextures[0].getTexture(), holdTextures[1].getTexture(), 50, 50, 100*i+500, 20*i+500);
 
-			handhold = new HandholdModel(holdTextures[0].getTexture(),holdTextures[1].getTexture(), 50, 50, 150*i+500, 500);
+			handhold = new HandholdModel(holdTextures[0].getTexture(),holdTextures[1].getTexture(),holdTextures[2].getTexture(), 50, 50, 150*i+500, 500);
 			handhold.activatePhysics(world);
 			handhold.setBodyType(BodyDef.BodyType.StaticBody);
 			handhold.geometry.setUserData("handhold");
 			objects.add(handhold);
 		}
 
-		for (int i: EXTREMITIES) {
-			PartModel i1 = character.parts.get(i);
-
-			handhold = new HandholdModel(holdTextures[0].getTexture(),holdTextures[1].getTexture(), 50, 50, i1.getX(), i1.getY());
-			handhold.activatePhysics(world);
-			handhold.setBodyType(BodyDef.BodyType.StaticBody);
-			handhold.geometry.setUserData("handhold");
-			objects.add(handhold);
-		}
+//		for (int i: EXTREMITIES) {
+//			PartModel i1 = character.parts.get(i);
+//
+//			handhold = new HandholdModel(holdTextures[0].getTexture(),holdTextures[1].getTexture(), 50, 50, i1.getX(), i1.getY());
+//			handhold.activatePhysics(world);
+//			handhold.setBodyType(BodyDef.BodyType.StaticBody);
+//			handhold.geometry.setUserData("handhold");
+//			objects.add(handhold);
+//		}
 	}
 
 	/**
@@ -172,7 +172,7 @@ public class GameMode extends ModeController {
 	public void update(float dt) {
 		//System.out.println("UPDATE");
 		InputController input = InputController.getInstance();
-		System.out.println(input.didLeftLeg() + " " + input.didRightLeg() + " " + input.didRightArm() + " " + input.didLeftArm());
+		//System.out.println(input.didLeftLeg() + " " + input.didRightLeg() + " " + input.didRightArm() + " " + input.didLeftArm());
 //clear all in justReleased
 		justReleased.clear();
 
@@ -190,12 +190,20 @@ public class GameMode extends ModeController {
 //			character.parts.get(HAND_LEFT).setVY(input.getVertical()*100f);
 //		}
 
+		if(input.getHorizontal()!=0){
+			character.parts.get(HAND_LEFT).setVX(input.getHorizontal()*100f);
+		}
+		if(input.getVertical()!=0){
+			character.parts.get(HAND_LEFT).setVY(input.getVertical()*100f);
+		}
+		
+//		pressContinued = 0;
 //		float force = 0f;
 //figure out whats pressed and whats been released this timestep (next ~50 lines)
 		//TODO something weird, the input controller never registers more than 2 button presses at the same time.
 
 		if (input.didLeftLeg()){
-			System.out.println("LEFT LEG");
+			//System.out.println("LEFT LEG");
 
 			if (!nextToPress.contains(FOOT_LEFT)){
 				nextToPress.add(FOOT_LEFT);
@@ -207,7 +215,7 @@ public class GameMode extends ModeController {
 			}
 		}
 		if (input.didRightLeg()){
-			System.out.println("RIGHT LEG");
+			//System.out.println("RIGHT LEG");
 
 			if (!nextToPress.contains(FOOT_RIGHT)){
 				nextToPress.add(FOOT_RIGHT);
@@ -219,7 +227,7 @@ public class GameMode extends ModeController {
 			}
 		}
 		if (input.didLeftArm()){
-			System.out.println("LEFT ARM");
+			//System.out.println("LEFT ARM");
 
 			if (!nextToPress.contains(HAND_LEFT)){
 				nextToPress.add(HAND_LEFT);
@@ -233,7 +241,7 @@ public class GameMode extends ModeController {
 
 
 		if (input.didRightArm()) {
-			System.out.println("RIGHT ARM");
+			//System.out.println("RIGHT ARM");
 
 			if (!nextToPress.contains(HAND_RIGHT)) {
 				nextToPress.add(HAND_RIGHT);
@@ -248,9 +256,9 @@ public class GameMode extends ModeController {
 		
 		Vector2 force = new Vector2(0,0);
 		for (int i: justReleased){
-			System.out.print(ENAMES[i] + " BUBBLES ");
+			//System.out.print(ENAMES[i] + " BUBBLES ");
 		}
-		System.out.println();
+		//System.out.println();
 
 //		ungrip all selected limbs (safety measures) and apply force to limb.
 		if (nextToPress.size()>0){
@@ -259,7 +267,7 @@ public class GameMode extends ModeController {
 
 			for (int i: nextToPress){
 				((ExtremityModel)(character.parts.get(i))).ungrip();
-				System.out.println("ungripped " + ENAMES[i]);
+				//System.out.println("ungripped " + ENAMES[i]);
 
 			}
 
@@ -412,7 +420,7 @@ public class GameMode extends ModeController {
 				for (Vector2 snapPoint:h.snapPoints){
 					if (closeEnough(limb,snapPoint)){
 						character.parts.get(limb).setPosition(snapPoint);
-						((ExtremityModel)character.parts.get(limb)).grip();
+						((ExtremityModel)character.parts.get(limb)).grip(h);
 						character.parts.get(limb).body.setType(BodyDef.BodyType.StaticBody);
 //						System.out.println("SNAPDADDY");
 					}
