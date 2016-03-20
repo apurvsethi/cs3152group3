@@ -17,7 +17,7 @@ public class GameMode extends ModeController {
 	/** Track asset loading from all instances and subclasses */
 	protected AssetState assetState = AssetState.EMPTY;
 	
-	
+	private static int timestep = 0;
 	/** Strings for files used, string[] for parts, etc. */
 	private static final String BACKGROUND_FILE = "background.png";
 	private static final String FOREGROUND_FILE = "preliminaryCharacterFilmStrip.png";
@@ -118,7 +118,7 @@ public class GameMode extends ModeController {
 		objects.clear();
 		addQueue.clear();
 		world.dispose();
-		
+		timestep = 0;
 		world = new World(gravity,false);
 		contactListener = new ListenerClass();
 		world.setContactListener(contactListener);
@@ -134,7 +134,18 @@ public class GameMode extends ModeController {
 		// TODO: Populate level with whatever pieces and part are necessary (handholds, etc)
 		// Will probably do through a level generator later, level model access
 		for (int i = 0; i < HANDHOLD_NUMBER; i++){
-			handhold = new HandholdModel(holdTextures[0].getTexture(), 50, 50, 100*i+500, 20*i+500);
+
+			handhold = new HandholdModel(holdTextures[0].getTexture(), 50, 50, 150*i+500, 500);
+			handhold.activatePhysics(world);
+			handhold.setBodyType(BodyDef.BodyType.StaticBody);
+			handhold.geometry.setUserData("handhold");
+			objects.add(handhold);
+		}
+
+		for (int i: EXTREMITIES) {
+			PartModel i1 = character.parts.get(i);
+
+			handhold = new HandholdModel(holdTextures[0].getTexture(), 50, 50, i1.getX(), i1.getY());
 			handhold.activatePhysics(world);
 			handhold.setBodyType(BodyDef.BodyType.StaticBody);
 			handhold.geometry.setUserData("handhold");
@@ -149,10 +160,10 @@ public class GameMode extends ModeController {
 		snapLimbsToHandholds(input);
 		glowHandholds();
 //		if(input.getHorizontal()!=0){
-//			character.parts.get(HAND_LEFT).setVX(input.getHorizontal()*100f);
+//		character.parts.get(HEAD).setVX(-100f);
 //		}
 //		if(input.getVertical()!=0){
-//			character.parts.get(HAND_LEFT).setVY(input.getVertical()*100f);
+//			character.parts.get(HEAD).setVY(100f);
 //		}
 		
 		pressContinued = 0;
@@ -229,40 +240,61 @@ public class GameMode extends ModeController {
 			//able to apply force if its greater than the threshold (minimum needed to have effect on the body)
 			//wont apply dampening if its > 0
 			System.out.println(force.y);
-			if (force.y > threshold){
+			if (force.y > threshold) {
 				//can't have too high of a force!
 				if (force.y > MAX_FORCE_THRESHOLD.y) force = MAX_FORCE_THRESHOLD;
 				//apply the force to the body part.
-				character.parts.get(lastPressed).body.applyForceToCenter(force.scl(Math.signum(y)),true);
+				character.parts.get(lastPressed).setVY(force.scl(Math.signum(y)).y);
+				character.parts.get(lastPressed).setVX(input.getHorizontal() * 100f);
+
 
 			}
+		}
 //			force wasn't strong enough to move limb. apply dampening - force
-			else{
-				Vector2 vel = character.parts.get(lastPressed).getLinearVelocity();
-				//if pos both
-				if (y > 0 && vel.y > 0) {
-					character.parts.get(lastPressed).body.applyForceToCenter(DAMPENING_Y.scl(-1).sub(force.scl(-1)) ,true);
-				}
-				//if neg both
-				else if (y < 0 && vel.y < 0){
-					character.parts.get(lastPressed).body.applyForceToCenter(DAMPENING_Y.sub(force),true);
-				}
-				//
-				else{
+		else{
+			Vector2 vel = character.parts.get(HEAD).getLinearVelocity();
+			System.out.println(vel.x + " " + vel.y);
+			//if pos both
+			float thisDampX = DAMPENING_X;
+			float thisDampY = DAMPENING_Y;
+			//applying dampening
+			character.parts.get(HEAD).setVY(5f);
+			character.parts.get(HEAD).setVX(5f);
 
-				}
+			if (vel.y > 0) {
+//					if (y > 0 && vel.y > 0) {
+				if (vel.y - DAMPENING_Y < 0) thisDampY = vel.y;
+				character.parts.get(HEAD).setVY(vel.y - thisDampY);
 			}
+			if (vel.x > 0) {
+				if (vel.x - DAMPENING_X < 0) thisDampX = vel.x;
+				character.parts.get(HEAD).setVX(vel.x - thisDampX);
+				System.out.println("HERE NOW DAMP");
+
+			}
+				//if neg both
+			if (vel.y < 0){
+				if (vel.y + DAMPENING_Y > 0) thisDampY = -1 * vel.y;
+				character.parts.get(HEAD).setVY(vel.y + thisDampY);
+//					character.parts.get(lastPressed).body.applyForceToCenter(DAMPENING_Y.sub(force),true);
+			}
+			if (vel.x < 0) {
+				if (vel.x + DAMPENING_X > 0) thisDampX = -1 * vel.x;
+				character.parts.get(HEAD).setVX(vel.x + thisDampX);
+			}
+				//
+			timestep+=1;
+
+		}
 
 
 //			character.parts.get(lastPressed).body.applyForceToCenter(0,force,false);
 
-		}
+
 // else if (nextToPress != NONE) {
 //			force = calculateForce(nextToPress,input);
 //		}
-		else{
-			//no movement required.
-		}
+
 
 		// TODO: Use inputController methods to select limbs, 
 		//       horizontal and vertical to move them
@@ -321,6 +353,14 @@ public class GameMode extends ModeController {
 					snapIfPossible(HAND_RIGHT);
 				}
 				break;
+			case -1:
+				if (timestep == 0){
+					snapIfPossible(FOOT_LEFT);
+					snapIfPossible(HAND_LEFT);
+					snapIfPossible(HAND_RIGHT);
+					snapIfPossible(FOOT_RIGHT);
+
+				}
 		}
 	}
 
@@ -333,6 +373,7 @@ public class GameMode extends ModeController {
 						character.parts.get(limb).setPosition(snapPoint);
 						((ExtremityModel)character.parts.get(limb)).grip();
 						character.parts.get(limb).body.setType(BodyDef.BodyType.StaticBody);
+						System.out.println("SNAPDADDY");
 					}
 				}
 
@@ -378,11 +419,13 @@ public class GameMode extends ModeController {
 			boolean pull = false;
 			boolean isLeft = false;
 			boolean isArm = false;
-			if (e.isGripping()){
+//			if (e.isGripping()){
+			if (1+2 < 4){
+
 				isLeft = ex == HAND_LEFT || ex == FOOT_LEFT;
 				isArm = ex == HAND_LEFT || ex == HAND_RIGHT;
 				pull =  e.getY() > curY;
-				eFactor = pull ? e.getPush():e.getPull();
+				eFactor = pull ? e.getPull():e.getPush();
 
 				if (pull){
 
@@ -390,17 +433,21 @@ public class GameMode extends ModeController {
 					//calculate distance from shoulder for width (closer the 0 the better)
 					//
 					//what side it's on.
+//					incorrect code here - does not compute distances properly in the least bit.
 					float shoulderOffset = isLeft? -1 * CHEST_X_ARM_OFFSET: CHEST_X_ARM_OFFSET;
 					float distFromShoulder = Math.abs(distance.x - (character.getPosition().x + shoulderOffset));
 					float distFromYCenter = Math.abs(distance.y - character.getPosition().y);
 
+					System.out.println(distFromShoulder + " " + distFromYCenter);
+					System.out.println(MAX_ARM_DIST + " " + MAX_LEG_DIST);
 
 					float pullPercY = character.calcPullPercentageY(distFromYCenter,isArm);
 
 					float pullPercX = character.calcPullPercentageX(distFromShoulder,isArm);
+					System.out.println(pullPercX + " " + pullPercY);
+					System.out.println(totalForce + " before Pull" );
 					totalForce += pullPercX * pullPercY * e.getPull();
-
-
+					System.out.println(totalForce + " After pull" );
 
 
 				}else{
@@ -411,7 +458,10 @@ public class GameMode extends ModeController {
 					float pushPercY = character.calcPushPercentageY(distFromYCenter,isArm);
 
 					float pushPercX = character.calcPushPercentageX(distFromShoulder,isArm);
+					System.out.println(pushPercX + " " + pushPercY);
+					System.out.println(totalForce + " before Push" );
 					totalForce += pushPercX * pushPercY * e.getPush();
+					System.out.println(totalForce + " After push" );
 
 				}
 			}
