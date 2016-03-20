@@ -7,19 +7,6 @@
 			"space": "textures/space.png"
 		}, 
 
-		"levelBlocks": {	
-			"easy":{
-				"1": "textures/easyblock1.png", 
-				"2": "textures/easyblock2.png", 
-			},
-			"medium":{
-
-			},	
-			"hard": {
-
-			}
-		},
-
 		"handholds": {
 			"1": "textures/hold1.png", 
 			"2": "textures/hold2.png"

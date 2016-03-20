@@ -25,10 +25,8 @@ public class ListenerClass implements ContactListener {
         
         if((typeA.equals("handhold")&&(typeB.contains("extremity")))){
 	    	stickies.add(new StickyInfo(fixtureB.getBody(), fixtureA.getBody(),typeB));
-	    	System.out.println("Touching");
-        }
+	    }
         else if((typeB.equals("handhold")&&(typeA.contains("extremity")))){
-        	System.out.println("Touching");
         	stickies.add(new StickyInfo(fixtureA.getBody(), fixtureB.getBody(),typeA));
         }
     }
