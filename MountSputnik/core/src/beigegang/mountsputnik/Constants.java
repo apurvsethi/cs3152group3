@@ -37,7 +37,10 @@ public final class Constants {
 	public static final float HAND_PULL = 100.0f;
 	public static final float FOOT_PUSH = 100.0f;
 	public static final float FOOT_PULL = 100.0f;
-	public static final Vector2 MAX_FORCE_THRESHOLD = new Vector2(0,100f);
+	public static final float MAX_PULLFORCE_LEG = 150f;
+	public static final float MAX_PULLFORCE_ARM = 150f;
+	public static final float MAX_PUSHFORCE_ARM = 100f;
+	public static final float MAX_PUSHFORCE_LEG = 250f;
 
 	/** Array of the number of animation frames for each part*/
 	public static final int[] PART_FRAMES = {1,1,1,1,1,1,1,2,2,1,1,1,1,1,1};
@@ -62,7 +65,8 @@ public final class Constants {
 	public static final int FOOT_LEFT = 13;
 	public static final int FOOT_RIGHT = 14;
 	public static final int NONE = -1;
-
+	public static final int HEAD_2 = 15;
+	public static final int CHEST_2 = 16;
 	public static final int[] EXTREMITIES = new int[]{FOOT_LEFT,FOOT_RIGHT,HAND_LEFT,HAND_RIGHT};
 	public static final String[] ENAMES = new String[]{"HEAD","CHEST","HIPS","ARM_LEFT","ARM_RIGHT","FOREARM_LEFT","FOREARM_RIGHT","HAND_LEFT","HAND_RIGHT","THIGH_LEFT","THIGH_RIGHT","SHIN_LEFT","SHIN_RIGHT","FOOT_LEFT","FOOT_RIGHT"};
 	public static final float PULL_A = 1;
