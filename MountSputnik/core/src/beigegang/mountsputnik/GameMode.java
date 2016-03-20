@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
 
+import java.util.ArrayList;
 
 
 public class GameMode extends ModeController {
@@ -97,9 +98,8 @@ public class GameMode extends ModeController {
 	private CharacterModel character;
 	/** A handhold */
 	private HandholdModel handhold; 
-	private int lastPressed = NONE;
 	private int pressContinued = 0;
-	private int nextToPress = NONE;
+	private ArrayList<Integer> nextToPress = new ArrayList<Integer>();
 	public GameMode() {
 		super(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_GRAVITY);
 		
@@ -170,72 +170,58 @@ public class GameMode extends ModeController {
 //		float force = 0f;
 		if (input.didLeftLeg()){
 			System.out.println("LEFT LEG");
-			if (lastPressed == NONE){
-				lastPressed = FOOT_LEFT;
-				pressContinued = 1;
+
+			if (!nextToPress.contains(FOOT_LEFT)){
+				nextToPress.add(FOOT_LEFT);
 			}
-			else if (lastPressed != FOOT_LEFT){
-				if (nextToPress == NONE){
-					nextToPress = FOOT_LEFT;
-				}
-			}
-			else{
-				pressContinued = 1;
-			}
+		}
+		else{
+			nextToPress.remove((Integer)FOOT_LEFT);
 		}
 		if (input.didRightLeg()){
 			System.out.println("RIGHT LEG");
 
-			if (lastPressed == NONE){
-				lastPressed = FOOT_RIGHT;
-				pressContinued = 1;
-			}
-			else if (lastPressed != FOOT_RIGHT){
-				if (nextToPress == NONE){
-					nextToPress = FOOT_RIGHT;
-				}
+			if (!nextToPress.contains(FOOT_RIGHT)){
+				nextToPress.add(FOOT_RIGHT);
 			}
 			else{
-				pressContinued = 1;
+				nextToPress.remove((Integer)FOOT_RIGHT);
 			}
 		}
 		if (input.didLeftArm()){
 			System.out.println("LEFT ARM");
 
-			if (lastPressed == NONE){
-				lastPressed = HAND_LEFT;
-				pressContinued = 1;
-			}else if (lastPressed != HAND_LEFT){
-				if (nextToPress == NONE){
-					nextToPress = HAND_LEFT;
-				}
+			if (!nextToPress.contains(HAND_LEFT)){
+				nextToPress.add(HAND_LEFT);
 			}
 			else{
-				pressContinued = 1;
+				nextToPress.remove((Integer)HAND_LEFT);
 			}
 		}
 
-		if (input.didRightArm()){
+		if (input.didRightArm()) {
 			System.out.println("RIGHT ARM");
 
-			if (lastPressed == NONE){
-				lastPressed = HAND_RIGHT;
-				pressContinued = 1;
-			}else if (lastPressed != HAND_RIGHT){
-				if (nextToPress == NONE){
-					nextToPress = HAND_RIGHT;
-				}
+			if (!nextToPress.contains(HAND_RIGHT)) {
+				nextToPress.add(HAND_RIGHT);
 			}
-			else{
-				pressContinued = 1;
+			else {
+				nextToPress.remove((Integer) HAND_RIGHT);
 			}
 		}
 		float y = input.getVertical();
 		
 		Vector2 force = new Vector2(0,0);
-		if (pressContinued == 1){
+		if (nextToPress.size()>0){
+//			next two lines ungrip all selected extremities.
+			for (int i: nextToPress){
+				((ExtremityModel)(character.parts.get(i))).ungrip();
+				System.out.println("ungripped " + ENAMES[i]);
+
+			}
+
 			System.out.println("PRESS CONT");
-			force.set(0,calculateForce(lastPressed,input));
+			force.set(0,calculateForce(nextToPress.get(0),input));
 			float threshold = 1f;
 			//able to apply force if its greater than the threshold (minimum needed to have effect on the body)
 			//wont apply dampening if its > 0
@@ -252,6 +238,8 @@ public class GameMode extends ModeController {
 		}
 //			force wasn't strong enough to move limb. apply dampening - force
 		else{
+			lastPressed = NONE;
+			nextToPress = NONE;
 			Vector2 vel = character.parts.get(HEAD).getLinearVelocity();
 			System.out.println(vel.x + " " + vel.y);
 			//if pos both
