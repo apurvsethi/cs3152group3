@@ -17,7 +17,7 @@ public class GameMode extends ModeController {
 
 	/** Track asset loading from all instances and subclasses */
 	protected AssetState assetState = AssetState.EMPTY;
-	
+	/** used for tracking the game timestep - used to snap limbs to handholds on original timestep */
 	private static int timestep = 0;
 	/** Strings for files used, string[] for parts, etc. */
 	private static final String BACKGROUND_FILE = "background.png";
@@ -97,11 +97,12 @@ public class GameMode extends ModeController {
 	/** Character of game */
 	private CharacterModel character;
 	/** A handhold */
-	private HandholdModel handhold; 
-	private int pressContinued = 0;
+	private HandholdModel handhold;
+	/** holds any extremities who's buttons were just released this timestep. cleared out every timestep */
 	private	 ArrayList<Integer> justReleased = new ArrayList<Integer>();
-
+	/** holds any extremities who's buttons are pressed during this timestep. keeps order of pressing intact */
 	private ArrayList<Integer> nextToPress = new ArrayList<Integer>();
+
 	public GameMode() {
 		super(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_GRAVITY);
 		
@@ -155,7 +156,19 @@ public class GameMode extends ModeController {
 			objects.add(handhold);
 		}
 	}
-	
+
+	/**
+	 * IMPORTANT METHOD. A TON OF STUFF GOES DOWN IN THIS METHOD
+	 * @param dt
+	 * This method computes an order for the selected limbs based on previous timesteps and the first limb in nextToPress
+	 * is the limb that can be controlled.
+	 * this method ungrips all selected limbs and then calculates the force that can be imparted on the main selected
+	 * limb based on the forces the other limbs can impart with plenty of heuristics
+	 * if no force is imparted, it uses dampening on all of the limbs.
+	 * it then snaps limbs to a viable handhold within SNAP_RADIUS that were just released this timestep
+	 *
+	 * special case: on the zeroth timestep/very first call to update, it snaps limbs to any handhold in radius.
+     */
 	public void update(float dt) {
 		//System.out.println("UPDATE");
 		InputController input = InputController.getInstance();
@@ -170,15 +183,17 @@ public class GameMode extends ModeController {
 //			character.parts.get(HEAD).setVY(100f);
 //		}
 		
-		if(input.getHorizontal()!=0){
-			character.parts.get(HAND_LEFT).setVX(input.getHorizontal()*100f);
-		}
-		if(input.getVertical()!=0){
-			character.parts.get(HAND_LEFT).setVY(input.getVertical()*100f);
-		}
+//		if(input.getHorizontal()!=0){
+//			character.parts.get(HAND_LEFT).setVX(input.getHorizontal()*100f);
+//		}
+//		if(input.getVertical()!=0){
+//			character.parts.get(HAND_LEFT).setVY(input.getVertical()*100f);
+//		}
 
-		pressContinued = 0;
 //		float force = 0f;
+//figure out whats pressed and whats been released this timestep (next ~50 lines)
+		//TODO something weird, the input controller never registers more than 2 button presses at the same time.
+
 		if (input.didLeftLeg()){
 			System.out.println("LEFT LEG");
 
@@ -237,6 +252,7 @@ public class GameMode extends ModeController {
 		}
 		System.out.println();
 
+//		ungrip all selected limbs (safety measures) and apply force to limb.
 		if (nextToPress.size()>0){
 //			next two lines ungrip all selected extremities.
 			ExtremityModel curPart = ((ExtremityModel)(character.parts.get(nextToPress.get(0))));
@@ -328,6 +344,11 @@ public class GameMode extends ModeController {
 		character.setEnergy(character.getEnergy()+dEdt);
 	}
 
+ 	/**
+	 * this method glows any handholds close enough for the person's extremity to grab.
+	 * //TODO there will be a possible issue if person at full extension and snaps to a handhold out of their reach.
+//	 * implement a calculation which says that handhold distance <= MAX_ARM_DIST or MAX_LEG_DIST.
+	 * */
 	private void glowHandholds() {
 		for (GameObject obj:objects) {
 			if (obj.getType() == GameObject.ObjectType.HANDHOLD) {
