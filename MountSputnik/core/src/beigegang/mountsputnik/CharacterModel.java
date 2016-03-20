@@ -167,7 +167,7 @@ public class CharacterModel extends GameObject{
 				System.out.println("left hand set");
 				e.setGripTexture(partTextures[15].getTexture());
 			}
-			if (part == HAND_RIGHT){
+			else if (part == HAND_RIGHT){
 				System.out.println("right hand set");
 				e.setGripTexture(partTextures[16].getTexture());
 			}

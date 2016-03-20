@@ -28,7 +28,8 @@ public class HandholdModel extends GameObject{
 	/** The texture the handhold will have when not glowing */ 
 	protected Texture dullTexture; 
 	/** the texture the handhold will have when gripped */ 
-	protected Texture gripTexture; 
+	protected Texture gripTexture;
+
 	
 	@Override
 	public ObjectType getType() {
@@ -146,20 +147,25 @@ public class HandholdModel extends GameObject{
 	}
 
 	public void unglow() {
-		glowing = 0;
-		setTexture(dullTexture); 
+		if (isGripped == 0) {
+			glowing = 0;
+			setTexture(dullTexture);
+		}
 	}
 	public void glow() {
-		glowing = 1;
-		setTexture(glowTexture); 
+		if (isGripped == 0) {
+			glowing = 1;
+			setTexture(glowTexture);
+		}
 	}
 	public void ungrip(){
 		isGripped = 0; 
 		setTexture(dullTexture); 
 	}
 	public void grip(){
-		isGripped = 1; 
-		setTexture(gripTexture); 
+		isGripped = 1;
+//		System.out.println("hello");
+		setTexture(gripTexture);
 	}
 	
 //	@Override

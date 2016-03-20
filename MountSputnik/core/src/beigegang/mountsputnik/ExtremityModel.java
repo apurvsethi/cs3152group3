@@ -73,7 +73,8 @@ public class ExtremityModel extends PartModel{
 	/** Sets the value of isGripping to true*/
 	public void grip(HandholdModel h){
 		gripped = h;
-		setTexture(grip); 
+		this.setTexture(grip);
+//		System.out.println(this.getTex.;
 		this.body.setType(BodyDef.BodyType.StaticBody);
 		//System.out.println("regripping!!!!");
 		h.grip();

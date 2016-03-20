@@ -146,15 +146,15 @@ public class GameMode extends ModeController {
 			objects.add(handhold);
 		}
 
-//		for (int i: EXTREMITIES) {
-//			PartModel i1 = character.parts.get(i);
-//
-//			handhold = new HandholdModel(holdTextures[0].getTexture(),holdTextures[1].getTexture(), 50, 50, i1.getX(), i1.getY());
-//			handhold.activatePhysics(world);
-//			handhold.setBodyType(BodyDef.BodyType.StaticBody);
-//			handhold.geometry.setUserData("handhold");
-//			objects.add(handhold);
-//		}
+		for (int i: EXTREMITIES) {
+			PartModel i1 = character.parts.get(i);
+
+			handhold = new HandholdModel(holdTextures[0].getTexture(),holdTextures[1].getTexture(),holdTextures[2].getTexture(), 50, 50, i1.getX(), i1.getY());
+			handhold.activatePhysics(world);
+			handhold.setBodyType(BodyDef.BodyType.StaticBody);
+			handhold.geometry.setUserData("handhold");
+			objects.add(handhold);
+		}
 	}
 
 	/**
@@ -378,7 +378,7 @@ public class GameMode extends ModeController {
 
 	private void snapLimbsToHandholds(InputController input) {
 		for (int i:justReleased){
-			System.out.println(ENAMES[i] + " is trying to grip again");
+//			System.out.println(ENAMES[i] + " is trying to grip again");
 			switch(i){
 				case FOOT_LEFT:
 
