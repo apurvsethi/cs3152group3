@@ -100,7 +100,7 @@ public class PartModel extends GameObject{
 	 * */
 	public PartModel(float x, float y, Texture t){
 		super(t, t.getWidth(), t.getHeight(), 1, 1);
-		shape.setAsBox(t.getWidth() / 2, t.getHeight() / 2);
+		shape.setAsBox(drawScale.x*t.getWidth() / 2, drawScale.y *t.getHeight() / 2);
 		setX(x);
 		setY(y);
 	}
@@ -117,8 +117,9 @@ public class PartModel extends GameObject{
 
 		// Create the fixture
 		fixtureDef.shape = shape;
+		fixtureDef.density = 0.5f;
 		geometry = body.createFixture(fixtureDef);
-		shape.dispose();
+
 		markDirty(false);
 	}
 

@@ -47,7 +47,7 @@ public abstract class GameObject {
 	/** CURRENT image for this object. May change over time. */
 	protected FilmStrip animator;
 	/** Drawing scale to convert physics units to pixels */
-	protected Vector2 drawScale = new Vector2(0.1f,0.1f);
+	protected Vector2 drawScale = new Vector2(0.5f,0.5f);
 	/** Shape information for this object */
 	protected PolygonShape shape;
 	/** Cache of the polygon vertices (for resizing) */
