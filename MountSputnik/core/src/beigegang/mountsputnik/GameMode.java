@@ -163,25 +163,25 @@ public class GameMode extends ModeController {
 		}
 		// TODO: Populate level with whatever pieces and part are necessary (handholds, etc)
 		// Will probably do through a level generator later, level model access
-		for (int i = 0; i < HANDHOLD_NUMBER; i++) {
-//			handhold = new HandholdModel(holdTextures[0].getTexture(), holdTextures[1].getTexture(), 50, 50, 100*i+500, 20*i+500);
-
-			handhold = new HandholdModel(holdTextures[0].getTexture(), holdTextures[1].getTexture(), holdTextures[2].getTexture(), 50, 50, 150 * i + 500, 500);
-			handhold.activatePhysics(world);
-			handhold.setBodyType(BodyDef.BodyType.StaticBody);
-			handhold.geometry.setUserData("handhold");
-			objects.add(handhold);
-		}
-
-		for (int i : EXTREMITIES) {
-			PartModel i1 = character.parts.get(i);
-
-			handhold = new HandholdModel(holdTextures[0].getTexture(), holdTextures[1].getTexture(), holdTextures[2].getTexture(), 50, 50, i1.getX(), i1.getY());
-			handhold.activatePhysics(world);
-			handhold.setBodyType(BodyDef.BodyType.StaticBody);
-			handhold.geometry.setUserData("handhold");
-			objects.add(handhold);
-		}
+//		for (int i = 0; i < HANDHOLD_NUMBER; i++) {
+////			handhold = new HandholdModel(holdTextures[0].getTexture(), holdTextures[1].getTexture(), 50, 50, 100*i+500, 20*i+500);
+//
+//			handhold = new HandholdModel(holdTextures[0].getTexture(), holdTextures[1].getTexture(), holdTextures[2].getTexture(), 50, 50, 150 * i + 500, 500);
+//			handhold.activatePhysics(world);
+//			handhold.setBodyType(BodyDef.BodyType.StaticBody);
+//			handhold.geometry.setUserData("handhold");
+//			objects.add(handhold);
+//		}
+//
+//		for (int i : EXTREMITIES) {
+//			PartModel i1 = character.parts.get(i);
+//
+//			handhold = new HandholdModel(holdTextures[0].getTexture(), holdTextures[1].getTexture(), holdTextures[2].getTexture(), 50, 50, i1.getX(), i1.getY());
+//			handhold.activatePhysics(world);
+//			handhold.setBodyType(BodyDef.BodyType.StaticBody);
+//			handhold.geometry.setUserData("handhold");
+//			objects.add(handhold);
+//		}
 	}
 
 
@@ -215,108 +215,108 @@ public class GameMode extends ModeController {
 	 *           it snaps limbs to any handhold in radius.
 	 */
 	public void update(float dt) {
-		//System.out.println("UPDATE");
-		InputController input = InputController.getInstance();
-		inx = input.getHorizontal();
-		iny = input.getVertical();
-		//System.out.println(input.didLeftLeg() + " " + input.didRightLeg() + " " + input.didRightArm() + " " + input.didLeftArm());
-//clear all in justReleased
-		justReleased.clear();
-//		see if character is upsideDown
-		upsideDown = character.parts.get(HEAD).getPosition().y - character.parts.get(CHEST).getPosition().y >= 0;
-//		if(input.getHorizontal()!=0){
-//		character.parts.get(HEAD).setVX(-100f);
+//		//System.out.println("UPDATE");
+//		InputController input = InputController.getInstance();
+//		inx = input.getHorizontal();
+//		iny = input.getVertical();
+//		//System.out.println(input.didLeftLeg() + " " + input.didRightLeg() + " " + input.didRightArm() + " " + input.didLeftArm());
+////clear all in justReleased
+//		justReleased.clear();
+////		see if character is upsideDown
+//		upsideDown = character.parts.get(HEAD).getPosition().y - character.parts.get(CHEST).getPosition().y >= 0;
+////		if(input.getHorizontal()!=0){
+////		character.parts.get(HEAD).setVX(-100f);
+////		}
+////		if(input.getVertical()!=0){
+////			character.parts.get(HEAD).setVY(100f);
+////		}
+//
+////		if(input.getHorizontal()!=0){
+////			character.parts.get(HAND_LEFT).setVX(input.getHorizontal()*100f);
+////		}
+////		if(input.getVertical()!=0){
+////			character.parts.get(HAND_LEFT).setVY(input.getVertical()*100f);
+////		}
+//
+//		if (input.getHorizontal() != 0) {
+//			character.parts.get(HAND_LEFT).setVX(input.getHorizontal() * 100f);
 //		}
-//		if(input.getVertical()!=0){
-//			character.parts.get(HEAD).setVY(100f);
+//		if (input.getVertical() != 0) {
+//			character.parts.get(HAND_LEFT).setVY(input.getVertical() * 100f);
 //		}
-
-//		if(input.getHorizontal()!=0){
-//			character.parts.get(HAND_LEFT).setVX(input.getHorizontal()*100f);
+//
+//		//figure out whats pressed and whats been released this timestep (next 4 lines)
+//		int a = input.didLeftLeg() == true ? addToButtonsPressed((FOOT_LEFT)) : checkIfJustReleased(FOOT_LEFT);
+//		int b = input.didRightLeg() == true ? addToButtonsPressed((FOOT_RIGHT)) : checkIfJustReleased(FOOT_RIGHT);
+//		int c = input.didLeftArm() == true ? addToButtonsPressed((HAND_LEFT)) : checkIfJustReleased(HAND_LEFT);
+//		int d = input.didRightArm() == true ? addToButtonsPressed((HAND_RIGHT)) : checkIfJustReleased(HAND_RIGHT);
+//
+//		float y = input.getVertical();
+//
+//		Vector2 force = new Vector2(0, 0);
+////		ungrip all selected limbs (safety measures) and apply force to limb.
+//		if (nextToPress.size() > 0) {
+////			next two lines ungrip all selected extremities.
+//			ExtremityModel curPart = ((ExtremityModel) (character.parts.get(nextToPress.get(0))));
+//
+//			for (int i : nextToPress) {
+//				((ExtremityModel) (character.parts.get(i))).ungrip();
+//				//System.out.println("ungripped " + ENAMES[i]);
+//
+//			}
+//			for (int ext:EXTREMITIES){
+//				if (((ExtremityModel) (character.parts.get(ext))).isGripping()){
+//					force.add(calcForce(ext,nextToPress.get(0)));
+//				}
+//			}
+//			/*
+//			No threshold AS OF now
+//			float threshold = 1f;
+//			//able to apply force if its greater than the threshold (minimum needed to have effect on the body)
+//			//wont apply dampening if its > 0
+//			if (force.y > threshold) {
+//			//can't have too high of a force!
+//			//needs to be in there.
+//			//				if (force.y > MAX_FORCE_THRESHOLD.y) force = MAX_FORCE_THRESHOLD;
+//			//apply the force to the body part.
+//			curPart.setVY(force.scl(Math.signum(y)).y);
+//			curPart.setVX(input.getHorizontal() * 100f);
+//			*/
+////apply force to center of the body part.
+//			curPart.body.applyForceToCenter(force,true);
 //		}
-//		if(input.getVertical()!=0){
-//			character.parts.get(HAND_LEFT).setVY(input.getVertical()*100f);
+////Nothing pressed! Apply dampening to any ungripping limbs. Right now it's using velocity though.
+// 		else {
+////			nextToPress is empty - apply dampening to any limbs that aren't on a rock right now.
+//			applyDampening();
 //		}
-
-		if (input.getHorizontal() != 0) {
-			character.parts.get(HAND_LEFT).setVX(input.getHorizontal() * 100f);
-		}
-		if (input.getVertical() != 0) {
-			character.parts.get(HAND_LEFT).setVY(input.getVertical() * 100f);
-		}
-
-		//figure out whats pressed and whats been released this timestep (next 4 lines)
-		int a = input.didLeftLeg() == true ? addToButtonsPressed((FOOT_LEFT)) : checkIfJustReleased(FOOT_LEFT);
-		int b = input.didRightLeg() == true ? addToButtonsPressed((FOOT_RIGHT)) : checkIfJustReleased(FOOT_RIGHT);
-		int c = input.didLeftArm() == true ? addToButtonsPressed((HAND_LEFT)) : checkIfJustReleased(HAND_LEFT);
-		int d = input.didRightArm() == true ? addToButtonsPressed((HAND_RIGHT)) : checkIfJustReleased(HAND_RIGHT);
-
-		float y = input.getVertical();
-
-		Vector2 force = new Vector2(0, 0);
-//		ungrip all selected limbs (safety measures) and apply force to limb.
-		if (nextToPress.size() > 0) {
-//			next two lines ungrip all selected extremities.
-			ExtremityModel curPart = ((ExtremityModel) (character.parts.get(nextToPress.get(0))));
-
-			for (int i : nextToPress) {
-				((ExtremityModel) (character.parts.get(i))).ungrip();
-				//System.out.println("ungripped " + ENAMES[i]);
-
-			}
-			for (int ext:EXTREMITIES){
-				if (((ExtremityModel) (character.parts.get(ext))).isGripping()){
-					force.add(calcForce(ext,nextToPress.get(0)));
-				}
-			}
-			/*
-			No threshold AS OF now
-			float threshold = 1f;
-			//able to apply force if its greater than the threshold (minimum needed to have effect on the body)
-			//wont apply dampening if its > 0
-			if (force.y > threshold) {
-			//can't have too high of a force!
-			//needs to be in there.
-			//				if (force.y > MAX_FORCE_THRESHOLD.y) force = MAX_FORCE_THRESHOLD;
-			//apply the force to the body part.
-			curPart.setVY(force.scl(Math.signum(y)).y);
-			curPart.setVX(input.getHorizontal() * 100f);
-			*/
-//apply force to center of the body part.
-			curPart.body.applyForceToCenter(force,true);
-		}
-//Nothing pressed! Apply dampening to any ungripping limbs. Right now it's using velocity though.
- 		else {
-//			nextToPress is empty - apply dampening to any limbs that aren't on a rock right now.
-			applyDampening();
-		}
-//			character.parts.get(lastPressed).body.applyForceToCenter(0,force,false);
-// else if (nextToPress != NONE) {
-//			force = calculateForce(nextToPress,input);
+////			character.parts.get(lastPressed).body.applyForceToCenter(0,force,false);
+//// else if (nextToPress != NONE) {
+////			force = calculateForce(nextToPress,input);
+////		}
+//		if (justReleased.size() > 0 || timestep == 0) {
+//			snapLimbsToHandholds(input);
 //		}
-		if (justReleased.size() > 0 || timestep == 0) {
-			snapLimbsToHandholds(input);
-		}
-		glowHandholds();
-		timestep += 1;
-
-		// TODO: Use inputController methods to select limbs, 
-		//       horizontal and vertical to move them
-
-		//move camera with character
-		canvas.setCameraPosition(GAME_WIDTH / 2,
-				character.parts.get(CHEST).getBody().getPosition().y);
-
-		// TODO: Movements of other objects (obstacles, eventually)
-		// NOWHERE CLOSE
-
-		// TODO: Interactions between limbs and handholds
-//		 DONE
-
-		// TODO: Update energy quantity (fill in these values)
-//		not tested yet
-		float dEdt = calculateEnergyChange(1, 1, force, true);
-		character.setEnergy(character.getEnergy() + dEdt);
+//		glowHandholds();
+//		timestep += 1;
+//
+//		// TODO: Use inputController methods to select limbs,
+//		//       horizontal and vertical to move them
+//
+//		//move camera with character
+//		canvas.setCameraPosition(GAME_WIDTH / 2,
+//				character.parts.get(CHEST).getBody().getPosition().y);
+//
+//		// TODO: Movements of other objects (obstacles, eventually)
+//		// NOWHERE CLOSE
+//
+//		// TODO: Interactions between limbs and handholds
+////		 DONE
+//
+//		// TODO: Update energy quantity (fill in these values)
+////		not tested yet
+//		float dEdt = calculateEnergyChange(1, 1, force, true);
+//		character.setEnergy(character.getEnergy() + dEdt);
 	}
 
 	private void applyDampening() {
