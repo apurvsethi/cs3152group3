@@ -2,7 +2,7 @@ package beigegang.mountsputnik;
 import com.badlogic.gdx.math.Vector2;
 
 public final class Constants {
-	
+
 	/**Constants for the window size*/
 	public static final int GAME_WIDTH = 1920;
 	public static final int GAME_HEIGHT = 1080;

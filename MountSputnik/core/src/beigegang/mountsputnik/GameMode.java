@@ -244,7 +244,7 @@ public class GameMode extends ModeController {
 //			next two lines ungrip all selected extremities.
 			ExtremityModel curPart = ((ExtremityModel) (character.parts.get(nextToPress.get(0))));
 			for (int i : nextToPress) {
-				System.out.println(ENAMES[i]);
+//				System.out.println(ENAMES[i]);
 				((ExtremityModel) (character.parts.get(i))).ungrip();
 				//System.out.println("ungripped " + ENAMES[i]);
 			}
@@ -252,7 +252,7 @@ public class GameMode extends ModeController {
 				if (((ExtremityModel) (character.parts.get(ext))).isGripping())
 					force.add(calcForce(ext,nextToPress.get(0)));
 			}
-			applyForce(nextToPress.get(0),force,true);
+			applyForce(nextToPress.get(0),force.scl(1000000),true);
 
 			for (int extr :EXTREMITIES){
 				Vector2 vect =  character.parts.get(extr).getLinearVelocity();
@@ -274,7 +274,7 @@ public class GameMode extends ModeController {
 
 		//move camera with character
 		canvas.setCameraPosition(GAME_WIDTH / 2,
-				character.parts.get(CHEST).getBody().getPosition().y);
+						character.parts.get(CHEST).getBody().getPosition().y);
 //move camera with character
 
 //		canvas.setCameraPosition(canvas.getWidth()/2,
