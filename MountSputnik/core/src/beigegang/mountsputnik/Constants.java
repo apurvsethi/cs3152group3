@@ -49,6 +49,21 @@ public final class Constants {
 	public static final int BODY_TEXTURE_COUNT = 15;
 	
 	/** Indices of specific part locations in the array*/
+//	public static final int PART_NONE = -1;
+//	public static final int PART_BODY = 0;
+//	public static final int PART_HEAD = 1;
+//	public static final int PART_LEFT_ARM  = 2;
+//	public static final int PART_RIGHT_ARM = 3;
+//	public static final int PART_LEFT_FOREARM  = 4;
+//	public static final int PART_RIGHT_FOREARM = 5;
+//	public static final int PART_LEFT_THIGH  = 6;
+//	public static final int PART_RIGHT_THIGH = 7;
+//	public static final int PART_LEFT_SHIN  = 8;
+//	public static final int PART_RIGHT_SHIN = 9;
+//	public static final int PART_LEFT_HAND = 10;
+//	public static final int PART_RIGHT_HAND = 11;
+//	public static final int PART_LEFT_FOOT = 12;
+//	public static final int PART_RIGHT_FOOT = 13;
 	public static final int HEAD = 0;
 	public static final int CHEST = 1;
 	public static final int HIPS = 2;
@@ -65,8 +80,7 @@ public final class Constants {
 	public static final int FOOT_LEFT = 13;
 	public static final int FOOT_RIGHT = 14;
 	public static final int NONE = -1;
-	public static final int HEAD_2 = 15;
-	public static final int CHEST_2 = 16;
+
 	public static final int[] EXTREMITIES = new int[]{FOOT_LEFT,FOOT_RIGHT,HAND_LEFT,HAND_RIGHT};
 	public static final String[] ENAMES = new String[]{"HEAD","CHEST","HIPS","ARM_LEFT","ARM_RIGHT","FOREARM_LEFT","FOREARM_RIGHT","HAND_LEFT","HAND_RIGHT","THIGH_LEFT","THIGH_RIGHT","SHIN_LEFT","SHIN_RIGHT","FOOT_LEFT","FOOT_RIGHT"};
 	public static final float PULL_A = 1;
@@ -147,21 +161,7 @@ public final class Constants {
 	public static final float ENERGY_LOSS = .1f;
 	/** Base energy gain */
 	public static final float BASE_ENERGY_GAIN = 1f;
-	public static final int PART_NONE = -1;
-	public static final int PART_BODY = 0;
-	public static final int PART_HEAD = 1;
-	public static final int PART_LEFT_ARM  = 2;
-	public static final int PART_RIGHT_ARM = 3;
-	public static final int PART_LEFT_FOREARM  = 4;
-	public static final int PART_RIGHT_FOREARM = 5;
-	public static final int PART_LEFT_THIGH  = 6;
-	public static final int PART_RIGHT_THIGH = 7;
-	public static final int PART_LEFT_SHIN  = 8;
-	public static final int PART_RIGHT_SHIN = 9;
-	public static final int PART_LEFT_HAND = 10;
-	public static final int PART_RIGHT_HAND = 11;
-	public static final int PART_LEFT_FOOT = 12;
-	public static final int PART_RIGHT_FOOT = 13;
+
 	public static final float TORSO_OFFSET   = 3.8f;
 	/** Y-distance between torso center and arm center */
 	public static final float ARM_YOFFSET    = 1.75f;
@@ -179,7 +179,10 @@ public final class Constants {
 	public static final float HAND_OFFSET    = 1.80f;
 	/** Distance between center of shin and center of foot */
 	public static final float FOOT_OFFSET    = 1.80f;
-
+	/** max X velocity of any extremity. used for bounding purposes */
+	public static final float MAX_X_VELOCITY = 20f;
+	/** max Y velocity of any extremity. used for bounding purposes */
+	public static final float MAX_Y_VELOCITY = 20f;
 
 
 

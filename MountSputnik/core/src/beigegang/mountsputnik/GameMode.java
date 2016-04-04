@@ -155,6 +155,9 @@ public class GameMode extends ModeController {
 		populateLevel();
 	}
 
+	/**
+	 * TODO add javadoc
+	 */
 	public void populateLevel() {
 		character = new CharacterModel(partTextures, world);
 		objects.add(character);
@@ -179,16 +182,27 @@ public class GameMode extends ModeController {
 		}
 	}
 
-	//TODO: add a Javadoc comment whoever wrote this
+	/**
+	 * @author Jacob
+	 * if button was not pressed on the previous turn but is pressed now, add to nextToPress
+	 * note: cannot use set because order must be preserved for accurate/predictive control by player
+	 * @param part
+     * @return true if part was just pressed, false otherwise
+     */
 	public boolean addToButtonsPressed(int part) {
 		boolean notRedundant = !nextToPress.contains(part);
 		if(notRedundant)
 			nextToPress.add(part);
 		return notRedundant;
 	}
-	
-	//TODO: add a Javadoc comment whoever wrote this
-	public boolean checkIfJustReleased(int part) {
+
+	/**
+	 * @author Jacob
+	 * checks if that extremity was released on this timestep by player, if so adds to justReleased
+ 	 * @param part
+	 * @return true if part was just released, false otherwise
+     */
+    public boolean checkIfJustReleased(int part) {
 		boolean present = nextToPress.remove((Integer) part);
 		if (present)
 			justReleased.add(part);
@@ -196,6 +210,7 @@ public class GameMode extends ModeController {
 	}
 
 	/**
+	 * @authors Jacob, Daniel
 	 * @param dt This method computes an order for the selected limbs based on previous timesteps and the first limb in nextToPress
 	 *           is the limb that can be controlled.
 	 *           this method ungrips all selected limbs and then calculates the force that can be imparted on the main selected
@@ -213,22 +228,23 @@ public class GameMode extends ModeController {
 		iny = input.getVertical();
 
 		justReleased.clear();
-		upsideDown = character.parts.get(HEAD).getPosition().y - character.parts.get(CHEST).getPosition().y >= 0;
-		
+		upsideDown = character.parts.get(HEAD).getPosition().y - character.parts.get(CHEST).getPosition().y <= 0;
 		//TODO: unused code?, should be removed
 		//figure out whats pressed and whats been released this timestep (next 4 lines)
-		boolean a = input.didLeftLeg() == true ? addToButtonsPressed((FOOT_LEFT)) : checkIfJustReleased(FOOT_LEFT);
-		boolean b = input.didRightLeg() == true ? addToButtonsPressed((FOOT_RIGHT)) : checkIfJustReleased(FOOT_RIGHT);
-		boolean c = input.didLeftArm() == true ? addToButtonsPressed((HAND_LEFT)) : checkIfJustReleased(HAND_LEFT);
-		boolean d = input.didRightArm() == true ? addToButtonsPressed((HAND_RIGHT)) : checkIfJustReleased(HAND_RIGHT);
+		boolean a = input.didLeftLeg() ? addToButtonsPressed((FOOT_LEFT)) : checkIfJustReleased(FOOT_LEFT);
+		boolean b = input.didRightLeg() ? addToButtonsPressed((FOOT_RIGHT)) : checkIfJustReleased(FOOT_RIGHT);
+		boolean c = input.didLeftArm() ? addToButtonsPressed((HAND_LEFT)) : checkIfJustReleased(HAND_LEFT);
+		boolean d = input.didRightArm() ? addToButtonsPressed((HAND_RIGHT)) : checkIfJustReleased(HAND_RIGHT);
 
-		float y = input.getVertical();
+//		float y = input.getVertical();
 
 		Vector2 force = new Vector2(0, 0);
 		if (nextToPress.size() > 0) {
+//			System.out.println(ENAMES[nextToPress.get(0)]);
 //			next two lines ungrip all selected extremities.
 			ExtremityModel curPart = ((ExtremityModel) (character.parts.get(nextToPress.get(0))));
 			for (int i : nextToPress) {
+				System.out.println(ENAMES[i]);
 				((ExtremityModel) (character.parts.get(i))).ungrip();
 				//System.out.println("ungripped " + ENAMES[i]);
 			}
@@ -236,7 +252,13 @@ public class GameMode extends ModeController {
 				if (((ExtremityModel) (character.parts.get(ext))).isGripping())
 					force.add(calcForce(ext,nextToPress.get(0)));
 			}
-			curPart.body.applyForceToCenter(force,true);
+			applyForce(nextToPress.get(0),force,true);
+
+			for (int extr :EXTREMITIES){
+				Vector2 vect =  character.parts.get(extr).getLinearVelocity();
+				character.parts.get(extr).setLinearVelocity(boundVelocity(vect));
+			}
+
 		}
  		else {
 			applyDampening();
@@ -253,24 +275,54 @@ public class GameMode extends ModeController {
 		//move camera with character
 		canvas.setCameraPosition(GAME_WIDTH / 2,
 				character.parts.get(CHEST).getBody().getPosition().y);
+//move camera with character
+
+//		canvas.setCameraPosition(canvas.getWidth()/2,
+//				character.parts.get(CHEST).getBody().getPosition().y * canvas.getHeight()/DEFAULT_HEIGHT);
+//		if(canvas.getCamera().position.y > backgroundTexture.getTexture().getHeight()-canvas.getHeight()){
+//			canvas.setCameraPosition(canvas.getWidth()/2, backgroundTexture.getTexture().getHeight()-canvas.getHeight());
+//		}
+		if(canvas.getCamera().position.y < canvas.getHeight()/2){
+			canvas.setCameraPosition(canvas.getWidth()/2, canvas.getHeight()/2);
+//			System.out.println("here");
+		}
 
 		// TODO: Movements of other objects (obstacles, eventually)
 
 		// TODO: Update energy quantity (fill in these values)
-		float dEdt = calculateEnergyChange(1, 1, force, true);
-		float newEnergy = character.getEnergy() < 0 ? 0 : character.getEnergy() > 100 ? 100 : character.getEnergy() + dEdt;
-		character.setEnergy(newEnergy);
-		if (newEnergy <= 0){
-			for(int e : EXTREMITIES){
-				 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
-				 extremity.ungrip();
-				 extremity.body.setType(BodyDef.BodyType.DynamicBody);
-				 extremity.setTexture(partTextures[e].getTexture());
-			}
-		}
+		//TODO: MAKE THIS NOT UNGRIP EVERY LIMB ALL THE TIME
+//		float dEdt = calculateEnergyChange(1, 1, force, true);
+//		float newEnergy = character.getEnergy() < 0 ? 0 : character.getEnergy() > 100 ? 100 : character.getEnergy() + dEdt;
+//		character.setEnergy(newEnergy);
+//		if (newEnergy <= 0){
+//			for(int e : EXTREMITIES){
+//				 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
+//				 extremity.ungrip();
+//				 extremity.body.setType(BodyDef.BodyType.DynamicBody);
+//				 extremity.setTexture(partTextures[e].getTexture());
+//			}
+//		}
 	}
-	
-	//TODO: add Javadoc comment whoever wrote this
+
+
+	/**
+	 * @author Jacob
+	 * @param vect - current linear velocity vector of an extremity
+     * @return bounded linear velocity vector
+     */
+	private Vector2 boundVelocity(Vector2 vect) {
+		if (vect.x>0) vect.x = Math.min(MAX_X_VELOCITY,vect.x);
+		else vect.x = Math.max(-1 * MAX_X_VELOCITY,vect.x);
+		if (vect.y>0) vect.y = Math.min(MAX_Y_VELOCITY,vect.y);
+		else vect.y = Math.max(-1 * MAX_Y_VELOCITY,vect.y);
+		return vect;
+	}
+	/**
+	 * @author Jacob
+	 * !!!currently not functioning!!!
+	 * will apply dampening to any limb not currently controlled by the player & are unattached to a handhold
+	 * will help limbs not swing around wildly after player releases them.
+ 	 */
 	private void applyDampening() {
 		for (int ext : EXTREMITIES){
 			if (!((ExtremityModel)(character.parts.get(ext))).isGripping()){
@@ -301,11 +353,11 @@ public class GameMode extends ModeController {
 	}
 
 	/**
+	 * @author Jacob
 	 * this method glows any handholds close enough for the person's extremity to grab.
 	 * //TODO there will be a possible issue if person at full extension and snaps to a handhold out of their reach.
 	 * //	 * implement a calculation which says that handhold distance <= MAX_ARM_DIST or MAX_LEG_DIST.
 	 * 
-		//TODO: add Javadoc comment whoever wrote this
 	 */
 	private void glowHandholds() {
 		for (GameObject obj : objects) {
@@ -324,7 +376,12 @@ public class GameMode extends ModeController {
 		}
 	}
 
-	//TODO: add Javadoc comment whoever wrote this
+	/**
+	 * @author Jacob
+	 * snaps any limbs in justReleased (limbs player controlled last timestep but no longer does) to closest handhold
+	 * if possible
+	 * @param input
+     */
 	private void snapLimbsToHandholds(InputController input) {
 		for (int i : justReleased) {
 			snapIfPossible(i);
@@ -338,7 +395,11 @@ public class GameMode extends ModeController {
 		}
 	}
 	
-	//TODO: add Javadoc comment whoever wrote this
+	/**
+	 * @author Jacob
+	 * snaps limb to handhold if possible.
+	 * @param limb - limb to snap if possible
+	 * */
 	private void snapIfPossible(int limb) {
 		for (GameObject obj : objects) {
 			if (obj.getType() == GameObject.ObjectType.HANDHOLD) {
@@ -356,11 +417,16 @@ public class GameMode extends ModeController {
 	}
 
 	/**
+	 * @author Jacob
 	 * helper function to check if limb is close enough to a snapPoint on a handhold
 	 * used for both snapping limbs to handholds and glowing handholds showing player they're close enough to snap
-	 */
+	 *
+	 * @param limb - limb to check for closeness
+	 * @param snapPoint - point on handhold to check distance to
+	 *
+	 *
+	*/
 
-	//TODO: add Javadoc comment whoever wrote this
 	private boolean closeEnough(int limb, Vector2 snapPoint) {
 		Vector2 dist = character.parts.get(limb).getPosition().sub(snapPoint);
 		return (Math.sqrt(dist.x * dist.x + dist.y * dist.y) <= SNAP_RADIUS);
@@ -368,13 +434,13 @@ public class GameMode extends ModeController {
 
 
 	/**
+	 * @author Jacob
 	 * @param hookedPart - calculation of force for an extremity attached to a handhold
 	 * @param freePart - part that the force will be applied to
 	 * calculates X and Y force player can use to propel their selected limb.
 	 * should use the size of the handhold in the calculation although it does not.
 	 */
 
-	//TODO: add Javadoc comment whoever wrote this
 	//TODO: refactor this method, get rid of the nested ifs, I'd do it but im not sure exactly how it works
 	private Vector2 calcForce(int hookedPart, int freePart) {
 		float forcex = 0f;
@@ -463,6 +529,50 @@ public class GameMode extends ModeController {
 }
 
 	/**
+	 * TODO play around with & modify this method
+	 * @author Jacob
+	 * method applies force in a "natural" and theoretically predictable way
+	 * on the limb selected. Does need to be modified to find best "natural" balance of moving.
+	 * whatever we decide natural should be
+	 * @param limb - player's currently selected limb to apply force to
+	 * @param force - force to apply
+	 * @param wake - boolean to wake limb up (currently always passed in as true)
+	 */
+	private void applyForce(int limb,Vector2 force,boolean wake) {
+//		character.parts.get(CHEST).body.applyForceToCenter(force.x,force.y,wake);
+		switch(limb){
+			case FOOT_LEFT:
+				character.parts.get(THIGH_LEFT).body.applyForceToCenter(force.x,force.y,wake);
+				character.parts.get(SHIN_LEFT).body.applyForceToCenter(force.x,force.y * (.5f),wake);
+				character.parts.get(FOOT_LEFT).body.applyForceToCenter(force.x, force.y * .25f,wake);
+//				character.parts.get(THIGH_LEFT).body.applyForceToCenter(force,wake);
+//				character.parts.get(SHIN_LEFT).body.applyForceToCenter(force.scl(.5f),wake);
+//				character.parts.get(FOOT_LEFT).body.applyForceToCenter(force.scl(.25f),wake);
+				break;
+			case FOOT_RIGHT:
+				character.parts.get(THIGH_RIGHT).body.applyForceToCenter(force.x,force.y,wake);
+				character.parts.get(SHIN_RIGHT).body.applyForceToCenter(force.x,force.y * (.5f),wake);
+				character.parts.get(FOOT_RIGHT).body.applyForceToCenter(force.x, force.y * .25f,wake);
+				break;
+			case HAND_LEFT:
+				character.parts.get(HAND_LEFT).body.applyForceToCenter(force.x,force.y,wake);
+				character.parts.get(FOREARM_LEFT).body.applyForceToCenter(force.x,force.y,wake);
+				character.parts.get(ARM_LEFT).body.applyForceToCenter(force.x, force.y * .25f,wake);
+				break;
+			case HAND_RIGHT:
+				character.parts.get(HAND_RIGHT).body.applyForceToCenter(force.x,force.y,wake);
+				character.parts.get(FOREARM_RIGHT).body.applyForceToCenter(force.x,force.y,wake);
+				character.parts.get(ARM_RIGHT).body.applyForceToCenter(force.x, force.y * .25f,wake);
+				break;
+			default:
+				//do nothing
+				break;
+
+		}
+	}
+
+	/**
+	 * @author Daniel
 	 * dE/dt = A (1-B*sin(angle/2))(Base energy gain)(Environmental Gain Modifier) - 
 	 * - C (Exertion+1)(Environmental Loss Modifier)(3-feet)(3-hands) - D 
 	 * 

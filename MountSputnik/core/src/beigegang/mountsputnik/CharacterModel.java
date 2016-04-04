@@ -280,105 +280,105 @@ public class CharacterModel extends GameObject{
 		}
 	}
 
-	/**
-	 * TEST METHOD TO MAKE SOMETHING THAT IS A RAGDOLL.
-	 */
-	public boolean createJoints(World world) {
-
-		assert parts.size > 0;
-
-		RevoluteJointDef revDef = new RevoluteJointDef();
-
-		revDef.bodyA = parts.get(PART_HEAD).getBody();
-		revDef.bodyB = parts.get(PART_BODY).getBody();
-		revDef.localAnchorA.set(0, -TORSO_OFFSET / 2);
-		revDef.localAnchorB.set(0, TORSO_OFFSET / 2);
-		Joint joint = world.createJoint(revDef);
-		joints.add(joint);
-
-		revDef.bodyA = parts.get(PART_LEFT_ARM).getBody();
-		revDef.bodyB = parts.get(PART_BODY).getBody();
-		revDef.localAnchorA.set(ARM_XOFFSET / 2, 0);
-		revDef.localAnchorB.set(-ARM_XOFFSET / 2, ARM_YOFFSET);
-		joint = world.createJoint(revDef);
-		joints.add(joint);
-
-		revDef.bodyA = parts.get(PART_RIGHT_ARM).getBody();
-		revDef.bodyB = parts.get(PART_BODY).getBody();
-		revDef.localAnchorA.set(ARM_XOFFSET / 2, 0);
-		revDef.localAnchorB.set(ARM_XOFFSET / 2, ARM_YOFFSET);
-		joint = world.createJoint(revDef);
-		joints.add(joint);
-
-		revDef.bodyA = parts.get(PART_LEFT_THIGH).getBody();
-		revDef.bodyB = parts.get(PART_BODY).getBody();
-		revDef.localAnchorA.set(0, THIGH_YOFFSET / 2);
-		revDef.localAnchorB.set(-THIGH_XOFFSET, -THIGH_YOFFSET / 2);
-		joint = world.createJoint(revDef);
-		joints.add(joint);
-
-		revDef.bodyA = parts.get(PART_RIGHT_THIGH).getBody();
-		revDef.bodyB = parts.get(PART_BODY).getBody();
-		revDef.localAnchorA.set(0, THIGH_YOFFSET / 2);
-		revDef.localAnchorB.set(THIGH_XOFFSET, -THIGH_YOFFSET / 2);
-		joint = world.createJoint(revDef);
-		joints.add(joint);
-
-		revDef.bodyA = parts.get(PART_LEFT_FOREARM).getBody();
-		revDef.bodyB = parts.get(PART_LEFT_ARM).getBody();
-		revDef.localAnchorA.set(FOREARM_OFFSET / 2, 0);
-		revDef.localAnchorB.set(-FOREARM_OFFSET / 2, 0);
-		joint = world.createJoint(revDef);
-		joints.add(joint);
-
-		revDef.bodyA = parts.get(PART_RIGHT_FOREARM).getBody();
-		revDef.bodyB = parts.get(PART_RIGHT_ARM).getBody();
-		revDef.localAnchorA.set(FOREARM_OFFSET / 2, 0);
-		revDef.localAnchorB.set(-FOREARM_OFFSET / 2, 0);
-		joint = world.createJoint(revDef);
-		joints.add(joint);
-
-		revDef.bodyA = parts.get(PART_LEFT_SHIN).getBody();
-		revDef.bodyB = parts.get(PART_LEFT_THIGH).getBody();
-		revDef.localAnchorA.set(0, SHIN_OFFSET / 2);
-		revDef.localAnchorB.set(0, -SHIN_OFFSET / 2);
-		joint = world.createJoint(revDef);
-		joints.add(joint);
-
-		revDef.bodyA = parts.get(PART_RIGHT_SHIN).getBody();
-		revDef.bodyB = parts.get(PART_RIGHT_THIGH).getBody();
-		revDef.localAnchorA.set(0, SHIN_OFFSET / 2);
-		revDef.localAnchorB.set(0, -SHIN_OFFSET / 2);
-		joint = world.createJoint(revDef);
-		joints.add(joint);
-
-		revDef.bodyA = parts.get(PART_LEFT_FOREARM).getBody();
-		revDef.bodyB = parts.get(PART_LEFT_HAND).getBody();
-		revDef.localAnchorA.set(-HAND_OFFSET, 0);
-		revDef.localAnchorB.set(0, 0);
-		joint = world.createJoint(revDef);
-		joints.add(joint);
-
-		revDef.bodyA = parts.get(PART_RIGHT_FOREARM).getBody();
-		revDef.bodyB = parts.get(PART_RIGHT_HAND).getBody();
-		revDef.localAnchorA.set(-HAND_OFFSET, 0);
-		revDef.localAnchorB.set(0, 0);
-		joint = world.createJoint(revDef);
-		joints.add(joint);
-
-		revDef.bodyA = parts.get(PART_LEFT_SHIN).getBody();
-		revDef.bodyB = parts.get(PART_LEFT_FOOT).getBody();
-		revDef.localAnchorA.set(0, -FOOT_OFFSET);
-		revDef.localAnchorB.set(0, 0);
-		joint = world.createJoint(revDef);
-		joints.add(joint);
-
-		revDef.bodyA = parts.get(PART_RIGHT_SHIN).getBody();
-		revDef.bodyB = parts.get(PART_RIGHT_FOOT).getBody();
-		revDef.localAnchorA.set(0, -FOOT_OFFSET);
-		revDef.localAnchorB.set(0, 0);
-		joint = world.createJoint(revDef);
-		joints.add(joint);
-		return true;
-	}
+//	/**
+//	 * TEST METHOD TO MAKE SOMETHING THAT IS A RAGDOLL.
+//	 */
+//	public boolean createJoints(World world) {
+//
+//		assert parts.size > 0;
+//
+//		RevoluteJointDef revDef = new RevoluteJointDef();
+//
+//		revDef.bodyA = parts.get(PART_HEAD).getBody();
+//		revDef.bodyB = parts.get(PART_BODY).getBody();
+//		revDef.localAnchorA.set(0, -TORSO_OFFSET / 2);
+//		revDef.localAnchorB.set(0, TORSO_OFFSET / 2);
+//		Joint joint = world.createJoint(revDef);
+//		joints.add(joint);
+//
+//		revDef.bodyA = parts.get(PART_LEFT_ARM).getBody();
+//		revDef.bodyB = parts.get(PART_BODY).getBody();
+//		revDef.localAnchorA.set(ARM_XOFFSET / 2, 0);
+//		revDef.localAnchorB.set(-ARM_XOFFSET / 2, ARM_YOFFSET);
+//		joint = world.createJoint(revDef);
+//		joints.add(joint);
+//
+//		revDef.bodyA = parts.get(PART_RIGHT_ARM).getBody();
+//		revDef.bodyB = parts.get(PART_BODY).getBody();
+//		revDef.localAnchorA.set(ARM_XOFFSET / 2, 0);
+//		revDef.localAnchorB.set(ARM_XOFFSET / 2, ARM_YOFFSET);
+//		joint = world.createJoint(revDef);
+//		joints.add(joint);
+//
+//		revDef.bodyA = parts.get(PART_LEFT_THIGH).getBody();
+//		revDef.bodyB = parts.get(PART_BODY).getBody();
+//		revDef.localAnchorA.set(0, THIGH_YOFFSET / 2);
+//		revDef.localAnchorB.set(-THIGH_XOFFSET, -THIGH_YOFFSET / 2);
+//		joint = world.createJoint(revDef);
+//		joints.add(joint);
+//
+//		revDef.bodyA = parts.get(PART_RIGHT_THIGH).getBody();
+//		revDef.bodyB = parts.get(PART_BODY).getBody();
+//		revDef.localAnchorA.set(0, THIGH_YOFFSET / 2);
+//		revDef.localAnchorB.set(THIGH_XOFFSET, -THIGH_YOFFSET / 2);
+//		joint = world.createJoint(revDef);
+//		joints.add(joint);
+//
+//		revDef.bodyA = parts.get(PART_LEFT_FOREARM).getBody();
+//		revDef.bodyB = parts.get(PART_LEFT_ARM).getBody();
+//		revDef.localAnchorA.set(FOREARM_OFFSET / 2, 0);
+//		revDef.localAnchorB.set(-FOREARM_OFFSET / 2, 0);
+//		joint = world.createJoint(revDef);
+//		joints.add(joint);
+//
+//		revDef.bodyA = parts.get(PART_RIGHT_FOREARM).getBody();
+//		revDef.bodyB = parts.get(PART_RIGHT_ARM).getBody();
+//		revDef.localAnchorA.set(FOREARM_OFFSET / 2, 0);
+//		revDef.localAnchorB.set(-FOREARM_OFFSET / 2, 0);
+//		joint = world.createJoint(revDef);
+//		joints.add(joint);
+//
+//		revDef.bodyA = parts.get(PART_LEFT_SHIN).getBody();
+//		revDef.bodyB = parts.get(PART_LEFT_THIGH).getBody();
+//		revDef.localAnchorA.set(0, SHIN_OFFSET / 2);
+//		revDef.localAnchorB.set(0, -SHIN_OFFSET / 2);
+//		joint = world.createJoint(revDef);
+//		joints.add(joint);
+//
+//		revDef.bodyA = parts.get(PART_RIGHT_SHIN).getBody();
+//		revDef.bodyB = parts.get(PART_RIGHT_THIGH).getBody();
+//		revDef.localAnchorA.set(0, SHIN_OFFSET / 2);
+//		revDef.localAnchorB.set(0, -SHIN_OFFSET / 2);
+//		joint = world.createJoint(revDef);
+//		joints.add(joint);
+//
+//		revDef.bodyA = parts.get(PART_LEFT_FOREARM).getBody();
+//		revDef.bodyB = parts.get(PART_LEFT_HAND).getBody();
+//		revDef.localAnchorA.set(-HAND_OFFSET, 0);
+//		revDef.localAnchorB.set(0, 0);
+//		joint = world.createJoint(revDef);
+//		joints.add(joint);
+//
+//		revDef.bodyA = parts.get(PART_RIGHT_FOREARM).getBody();
+//		revDef.bodyB = parts.get(PART_RIGHT_HAND).getBody();
+//		revDef.localAnchorA.set(-HAND_OFFSET, 0);
+//		revDef.localAnchorB.set(0, 0);
+//		joint = world.createJoint(revDef);
+//		joints.add(joint);
+//
+//		revDef.bodyA = parts.get(PART_LEFT_SHIN).getBody();
+//		revDef.bodyB = parts.get(PART_LEFT_FOOT).getBody();
+//		revDef.localAnchorA.set(0, -FOOT_OFFSET);
+//		revDef.localAnchorB.set(0, 0);
+//		joint = world.createJoint(revDef);
+//		joints.add(joint);
+//
+//		revDef.bodyA = parts.get(PART_RIGHT_SHIN).getBody();
+//		revDef.bodyB = parts.get(PART_RIGHT_FOOT).getBody();
+//		revDef.localAnchorA.set(0, -FOOT_OFFSET);
+//		revDef.localAnchorB.set(0, 0);
+//		joint = world.createJoint(revDef);
+//		joints.add(joint);
+//		return true;
+//	}
 }
