@@ -1,6 +1,6 @@
 {   "id" : 1, 
     "difficulty": "easy", 
-    "handholds": {
+   "handholds": {
     	"hold1": {
     		"texture"
     		"scale"
@@ -8,7 +8,32 @@
     		"friction"
     		"restitution"
     		"crumble"
+    		}, 
+    	"hold2": {
+    		"texture"
+    		"scale"
+    		"position"
+    		"friction"
+    		"restitution"
+    		"crumble"
+    		}, 
+    	"hold3": {
+    		"texture"
+    		"scale"
+    		"position"
+    		"friction"
+    		"restitution"
+    		"crumble"
     		}
-    }
+    },
+
+    "obstacles": {
+    	"boulder1": {
+    		"pos"
+    		"size"
+    		"texture"
+    		"trigger"
+    		"maxspeed"
+    	}
 }
 

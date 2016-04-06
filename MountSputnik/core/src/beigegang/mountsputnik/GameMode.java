@@ -1,18 +1,22 @@
 package beigegang.mountsputnik;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import static beigegang.mountsputnik.Constants.*;
+import beigegang.util.*;
+
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
+import com.badlogic.gdx.utils.*;
 
 import java.util.ArrayList;
-
 
 public class GameMode extends ModeController {
 
@@ -30,8 +34,11 @@ public class GameMode extends ModeController {
 	/**
 	 * Strings for files used, string[] for parts, etc.
 	 */
+	//We need to preload every single texture, regardless of which level we're currently using. Loading can't be
+	//dynamically
 	private static final String BACKGROUND_FILE = "background.png";
 	private static final String FOREGROUND_FILE = "preliminaryCharacterFilmStrip.png";
+	
 	private static final String HANDHOLD_TEXTURES[] = {"handholds.png", "handholdsglow.png", "handholdsgrabbed.png"};
 	private static final String PART_TEXTURES[] = {"Ragdoll/Corrected/Head.png", "Ragdoll/Corrected/Torso.png", "Ragdoll/Corrected/Hips.png",
 			"Ragdoll/Corrected/ArmLeft.png", "Ragdoll/Corrected/ArmRight.png", "Ragdoll/Corrected/ForearmLeft.png", "Ragdoll/Corrected/ForearmRight.png",
@@ -50,8 +57,16 @@ public class GameMode extends ModeController {
 	 */
 	private static TextureRegion background;
 	private static TextureRegion foreground;
-	private static TextureRegion[] holdTextures = new TextureRegion[HANDHOLD_TEXTURES.length];
 	private static TextureRegion[] partTextures = new TextureRegion[PART_TEXTURES.length];
+	
+	/** The reader to process JSON files */
+	private JsonReader jsonReader;
+	/** The JSON defining the level model */
+	private JsonValue levelFormat;
+	/** The level's oxygen concentration (environmental energy gain modifier"*/
+	private float oxygen;
+	/** AssetManager for loading textures for Handholds*/
+	private AssetManager assetManager;
 
 	/**
 	 * Preloads the assets for this controller.
@@ -63,6 +78,7 @@ public class GameMode extends ModeController {
 	 * @param manager Reference to global asset manager.
 	 */
 	public void preLoadContent(AssetManager manager) {
+		assetManager = manager;
 		if (assetState != AssetState.EMPTY) return;
 
 		assetState = AssetState.LOADING;
@@ -70,10 +86,12 @@ public class GameMode extends ModeController {
 		assets.add(BACKGROUND_FILE);
 		manager.load(FOREGROUND_FILE, Texture.class);
 		assets.add(FOREGROUND_FILE);
+		
 		for (int i = 0; i < HANDHOLD_TEXTURES.length; i++) {
 			manager.load(HANDHOLD_TEXTURES[i], Texture.class);
 			assets.add(HANDHOLD_TEXTURES[i]);
 		}
+		
 		for (int i = 0; i < PART_TEXTURES.length; i++) {
 			manager.load(PART_TEXTURES[i], Texture.class);
 			assets.add(PART_TEXTURES[i]);
@@ -93,15 +111,25 @@ public class GameMode extends ModeController {
 		if (assetState != AssetState.LOADING) return;
 
 		background = createTexture(manager, BACKGROUND_FILE, false);
-		//if (background == null) System.out.println("Wrong");
 		foreground = createTexture(manager, FOREGROUND_FILE, false);
-		for (int i = 0; i < HANDHOLD_TEXTURES.length; i++) {
-			holdTextures[i] = createTexture(manager, HANDHOLD_TEXTURES[i], false);
-		}
+		
 		for (int i = 0; i < PART_TEXTURES.length; i++) {
 			partTextures[i] = createTexture(manager, PART_TEXTURES[i], false);
 		}
 		assetState = AssetState.COMPLETE;
+	}
+
+	/** 
+	 * Unloads the assets for this game.
+	 * 
+	 * This method erases the static variables.  It also deletes the associated textures 
+	 * from the asset manager. If no assets are loaded, this method does nothing.
+	 * 
+	 * @param manager Reference to global asset manager.
+	 */
+	public void unloadContent() {
+		JsonAssetManager.getInstance().unloadDirectory();
+		JsonAssetManager.clearInstance();
 	}
 
 	/**
@@ -140,8 +168,6 @@ public class GameMode extends ModeController {
 
 	@Override
 	public void reset() {
-		Vector2 gravity = new Vector2(world.getGravity());
-
 		for (GameObject obj : objects) {
 			obj.deactivatePhysics(world);
 		}
@@ -149,39 +175,96 @@ public class GameMode extends ModeController {
 		addQueue.clear();
 		world.dispose();
 		timestep = 0;
-		world = new World(gravity, false);
-		contactListener = new ListenerClass();
-		world.setContactListener(contactListener);
-		populateLevel();
+		//TODO: make this based on current level, rather than hardcoded test
+		populateLevel("test");
 	}
 
 	/**
-	 * TODO add javadoc
+	 * Creates the character, and then generates the level according to specified environment. 
+	 * Currently, all level assets should be stored in the appropriate location according to this 
+	 * path within the assets folder: the general level description will be in "Levels/[levelName]/level.json" 
+	 * and the individual blocks will be in "Levels/[levelName]/block[x].json" where x is a whole number.
+	 * 
+	 * The general level description contains such things as the phsyics constants like gravity or oxygen
+	 * the desired height of the level, the total number of different blocks usable in generation, and 
+	 * descriptors of certain level-wide obstacles like rising lava, if they exist. 
+	 * 
+	 * The blocks will describe individual building blocks. They will contain a height in units (1 unit = 10 meters), to be 
+	 * determined by their size when created by the level editor, and a difficulty rating. They will also contain two 
+	 * important objects:
+	 * 
+	 * 1) Handholds will be a list of handhold objects, which in turn will contain location, friction, restitution,  
+	 * crumble and size values, as well as a texture.
+	 * 
+	 * 2) Obstacles will be a list of locations in which falling obstacles like rocks or meteors will be described. Each obstacle
+	 * object will include a specific region in which falling obstacles can spawn (they will only spawn when they are offscreen to 
+	 * the player
+	 * 
+	 * Levels are generated by adding randomly selected building blocks on top of the previous level generated until the desired 
+	 * height of the level (in units) is reached.
+	 * 
+	 * @author Daniel
+	 * 
+	 * @param levelName: the level to be generated
 	 */
-	public void populateLevel() {
+	public void populateLevel(String levelName) {
+		jsonReader = new JsonReader();
+		levelFormat = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/level.json"));
+		JsonAssetManager.getInstance().loadDirectory(levelFormat);
+		JsonAssetManager.getInstance().allocateDirectory();
+		Vector2 gravity = new Vector2(0,levelFormat.getFloat("gravity"));
+		oxygen = levelFormat.getFloat("oxygen");
+		float[] pSize = levelFormat.get("physicsSize").asFloatArray();
+		int[] gSize = levelFormat.get("graphicSize").asIntArray();
+		int remainingHeight = levelFormat.getInt("height");
+		int currentHeight=0;
+		int diffBlocks = levelFormat.getInt("distinctBlocks");
+		
+		world = new World(gravity, false);
+		contactListener = new ListenerClass();
+		world.setContactListener(contactListener);
+		bounds = new Rectangle(0,0,pSize[0],pSize[1]);
+		scale.x = gSize[0]/pSize[0];
+		scale.y = gSize[1]/pSize[1];
+
+		
+		//add blocks to level
+		while(currentHeight < remainingHeight){
+			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
+			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
+			JsonAssetManager.getInstance().loadDirectory(levelPiece);
+			JsonAssetManager.getInstance().allocateDirectory();
+			JsonValue handholdDesc = levelPiece.get("handholds").child();
+			//JsonValue obstacleDesc = levelPiece.get("obstacles").child();
+			
+			while(handholdDesc != null){
+				handhold = new HandholdModel(
+						createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(), 
+						createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(), 
+						createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(), 
+						handholdDesc.getInt("width"), handholdDesc.getInt("height"),
+						handholdDesc.getFloat("positionX"),
+						handholdDesc.getFloat("positionY")+currentHeight*10);
+				handhold.activatePhysics(world);
+				handhold.setBodyType(BodyDef.BodyType.StaticBody);
+				handhold.geometry.setUserData("handhold");
+				objects.add(handhold);
+				handholdDesc = handholdDesc.next();
+			}
+			
+			//TODO: add obstacle generation
+			
+			currentHeight += levelPiece.getInt("size");
+		}
+		
 		character = new CharacterModel(partTextures, world);
 		objects.add(character);
 		for (PartModel p : character.parts) {
 			objects.add(p);
 		}
-		// TODO: Change to a level generator
-		for (int i = 0; i < HANDHOLD_NUMBER; i++) {
-			handhold = new HandholdModel(holdTextures[0].getTexture(), holdTextures[1].getTexture(), holdTextures[2].getTexture(), 50, 50, 150 * i + 500, 500);
-			handhold.activatePhysics(world);
-			handhold.setBodyType(BodyDef.BodyType.StaticBody);
-			handhold.geometry.setUserData("handhold");
-			objects.add(handhold);
-		}
-		for (int i : EXTREMITIES) {
-			PartModel i1 = character.parts.get(i);
-			handhold = new HandholdModel(holdTextures[0].getTexture(), holdTextures[1].getTexture(), holdTextures[2].getTexture(), 50, 50, i1.getX(), i1.getY());
-			handhold.activatePhysics(world);
-			handhold.setBodyType(BodyDef.BodyType.StaticBody);
-			handhold.geometry.setUserData("handhold");
-			objects.add(handhold);
-		}
+		
 	}
-
+	
 	/**
 	 * @author Jacob
 	 * if button was not pressed on the previous turn but is pressed now, add to nextToPress
@@ -210,8 +293,7 @@ public class GameMode extends ModeController {
 	}
 
 	/**
-	 * @authors Jacob, Daniel
-	 * @param dt This method computes an order for the selected limbs based on previous timesteps and the first limb in nextToPress
+	 * This method computes an order for the selected limbs based on previous timesteps and the first limb in nextToPress
 	 *           is the limb that can be controlled.
 	 *           this method ungrips all selected limbs and then calculates the force that can be imparted on the main selected
 	 *           limb based on the forces the other limbs can impart with plenty of heuristics
@@ -220,6 +302,9 @@ public class GameMode extends ModeController {
 	 *           <p/>
 	 *           special case: on the zeroth timestep/very first call to update at start of game,
 	 *           it snaps limbs to any handhold in radius.
+	 * 
+	 * @authors Jacob, Daniel
+	 * @param dt 
 	 */
 	public void update(float dt) {
 		//System.out.println("UPDATE");
@@ -291,7 +376,7 @@ public class GameMode extends ModeController {
 
 		// TODO: Update energy quantity (fill in these values)
 		//TODO: MAKE THIS NOT UNGRIP EVERY LIMB ALL THE TIME
-//		float dEdt = calculateEnergyChange(1, 1, force, true);
+//		float dEdt = calculateEnergyChange(oxygen, 1, force, true);
 //		float newEnergy = character.getEnergy() < 0 ? 0 : character.getEnergy() > 100 ? 100 : character.getEnergy() + dEdt;
 //		character.setEnergy(newEnergy);
 //		if (newEnergy <= 0){
