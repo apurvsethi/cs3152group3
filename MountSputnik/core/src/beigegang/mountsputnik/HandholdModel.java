@@ -1,6 +1,5 @@
 package beigegang.mountsputnik;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -19,10 +18,10 @@ public class HandholdModel extends GameObject{
     protected boolean isCrumbling;
     /** array of all snap points for this handhold*/
     protected Array<Vector2> snapPoints;
-/** says if this handhold should be drawn glowing */
-	protected int glowing = 0;
+	/** says if this handhold should be drawn glowing */
+	private boolean glowing = false;
 	/** says if the handhold is being gripped */ 
-	protected int isGripped = 0; 
+	private boolean isGripped = false;
 	/** The texture the handhold will have when glowing */ 
 	protected Texture glowTexture; 
 	/** The texture the handhold will have when not glowing */ 
@@ -117,7 +116,7 @@ public class HandholdModel extends GameObject{
 		super(t, width, height, 1, 1);
 		isCrumbling = false;
 		shape.setAsBox(t.getWidth() / 2, t.getHeight() / 2);
-		setDrawScale(width/t.getWidth(), height/t.getHeight());
+		setDrawPositionScale(width/t.getWidth(), height/t.getHeight());
 		setX(x);
 		setY(y);
 		snapPoints = new Array<Vector2>();
@@ -147,32 +146,23 @@ public class HandholdModel extends GameObject{
 	}
 
 	public void unglow() {
-		if (isGripped == 0) {
-			glowing = 0;
+		if (!isGripped) {
+			glowing = false;
 			setTexture(dullTexture);
 		}
 	}
 	public void glow() {
-		if (isGripped == 0) {
-			glowing = 1;
+		if (!isGripped) {
+			glowing = true;
 			setTexture(glowTexture);
 		}
 	}
 	public void ungrip(){
-		isGripped = 0; 
+		isGripped = false;
 		setTexture(dullTexture); 
 	}
 	public void grip(){
-		isGripped = 1;
-//		System.out.println("hello");
+		isGripped = true;
 		setTexture(gripTexture);
 	}
-	
-//	@Override
-//	public void draw(GameCanvas canvas) {
-////		this.getTexture().getTextureData().
-//		canvas.draw(animator, Color.WHITE, this.getPosition().x-1, this.getPosition().y - 1,
-//				getX(), getY(), getAngle(), drawScale.x, drawScale.y,glowing);
-//
-//	}
 }

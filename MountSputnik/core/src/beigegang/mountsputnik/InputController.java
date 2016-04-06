@@ -216,7 +216,7 @@ public class InputController {
 		leftArmPressed = xbox.getLB();
 		rightArmPressed = xbox.getRB();
 		leftLegPressed = xbox.getLeftTrigger() > 0.5;
-		rightLegPressed = xbox.getRightTrigger() > 0.5;
+		rightLegPressed = xbox.getRightTrigger() < -0.5;
 		
 		// Movement based on change
 		horizontal = xbox.getLeftX();

@@ -576,7 +576,7 @@ public class XBox360Controller implements ControllerListener {
 	/**
 	 * Returns the value of the right trigger.
 	 *
-	 * This is a value between 0 and 1, where 0 is no pressure.
+	 * This is a value between 0 and -1, where 0 is no pressure.
 	 *
 	 * This is a polling operation.  If the player pressed the button faster
 	 * than an animation frame (unlikely), the input will be lost.
@@ -586,6 +586,7 @@ public class XBox360Controller implements ControllerListener {
 	public float getRightTrigger() {
 		float value = controller.getAxis(axis_right_trigger);
 		// Workaround for bug in Mac driver
+		if (this.macosx) value = -value;
 		if (right_trigger_begin) {
 			if (value != 0) {
 				right_trigger_begin = false;

@@ -1,6 +1,7 @@
 package beigegang.mountsputnik;
 
 import beigegang.util.ScreenListener;
+import static beigegang.mountsputnik.Constants.*;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -8,7 +9,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
@@ -16,14 +16,12 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 
 public class GameEngine extends Game implements ScreenListener {
 	/** AssetManager to load game assets (textures, sounds, etc.) */
-	AssetManager manager;
+	private AssetManager manager;
 	
 	/** Drawing context to display graphics (VIEW CLASS) */
-	GameCanvas  canvas;
+	private GameCanvas  canvas;
 	/** Controllers for loading, menu, game, pause */
-	ModeController[] controllers;
-	/** Current controller being used */
-	int current;
+	private ModeController[] controllers;
 	
 	public GameEngine() {
 		// Start loading with the asset manager
@@ -39,17 +37,16 @@ public class GameEngine extends Game implements ScreenListener {
 	public void create() {
 		canvas = new GameCanvas();
 		controllers = new ModeController[4];
-		controllers[0] = new LoadingMode(manager);
-		controllers[1] = new MenuMode();
-		controllers[2] = new GameMode();
-		controllers[3] = new PauseMode();
+		controllers[LOADING_SCREEN] = new LoadingMode(manager);
+		controllers[MENU_SCREEN] = new MenuMode();
+		controllers[GAME_SCREEN] = new GameMode();
+		controllers[PAUSE_SCREEN] = new PauseMode();
 		for(int ii = 1; ii < controllers.length; ii++) {
 			controllers[ii].preLoadContent(manager);
 		}
-		current = 0;
-		controllers[current].setCanvas(canvas);
-		controllers[current].setScreenListener(this);
-		setScreen(controllers[current]);
+		controllers[LOADING_SCREEN].setCanvas(canvas);
+		controllers[LOADING_SCREEN].setScreenListener(this);
+		setScreen(controllers[LOADING_SCREEN]);
 	}
 	
 	@Override
@@ -92,32 +89,27 @@ public class GameEngine extends Game implements ScreenListener {
 	 * @param exitCode The state of the screen upon exit
 	 */
 	public void exitScreen(Screen screen, int exitCode) {
-		if (screen == controllers[0]) {
-			for(int ii = 1; ii < controllers.length; ii++) {
-				controllers[ii].loadContent(manager);
-				controllers[ii].setScreenListener(this);
-				controllers[ii].setCanvas(canvas);
+		if (screen == controllers[LOADING_SCREEN]) {
+			for(int controllerIndex = 1; controllerIndex < controllers.length; controllerIndex++) {
+				controllers[controllerIndex].loadContent(manager);
+				controllers[controllerIndex].setScreenListener(this);
+				controllers[controllerIndex].setCanvas(canvas);
 			}
-			current = 2;
-			controllers[current].reset();
-			setScreen(controllers[current]);
-		} else if (exitCode == ModeController.EXIT_MENU) {
-			current = 1;
-			controllers[current].reset();
-			setScreen(controllers[current]);
-		} else if (exitCode != ModeController.EXIT_GAME_NEW) {
-			current = 2;
-			controllers[current].reset();
-			setScreen(controllers[current]);
-		} else if (exitCode == ModeController.EXIT_PAUSE) {
-			current = 3;
-			controllers[current].reset();
-			setScreen(controllers[current]);
-		} else if (exitCode == ModeController.EXIT_GAME_RESUME) {
-			current = 2;
-			setScreen(controllers[current]);
+			controllers[GAME_SCREEN].reset();
+			setScreen(controllers[GAME_SCREEN]);
+		} else if (exitCode == EXIT_MENU) {
+			controllers[MENU_SCREEN].reset();
+			setScreen(controllers[MENU_SCREEN]);
+		} else if (exitCode != EXIT_GAME_NEW_LEVEL) {
+			controllers[GAME_SCREEN].reset();
+			setScreen(controllers[GAME_SCREEN]);
+		} else if (exitCode == EXIT_PAUSE) {
+			controllers[PAUSE_SCREEN].reset();
+			setScreen(controllers[PAUSE_SCREEN]);
+		} else if (exitCode == EXIT_GAME_RESUME_LEVEL) {
+			setScreen(controllers[GAME_SCREEN]);
 		}
-		else if (exitCode == ModeController.EXIT_QUIT) {
+		else if (exitCode == EXIT_QUIT) {
 			// We quit the main application
 			Gdx.app.exit();
 		}

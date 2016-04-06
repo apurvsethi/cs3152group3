@@ -1,11 +1,7 @@
 package beigegang.mountsputnik;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.World;
 
 public class PartModel extends GameObject{
 
@@ -100,7 +96,7 @@ public class PartModel extends GameObject{
 	 * */
 	public PartModel(float x, float y, Texture t){
 		super(t, t.getWidth(), t.getHeight(), 1, 1);
-		shape.setAsBox(drawScale.x*t.getWidth() / 2, drawScale.y *t.getHeight() / 2);
+		shape.setAsBox(t.getWidth() / 2, t.getHeight() / 2);
 		setX(x);
 		setY(y);
 	}

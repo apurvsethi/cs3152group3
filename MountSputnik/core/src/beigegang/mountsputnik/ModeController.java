@@ -19,6 +19,7 @@ import java.util.Iterator;
 import beigegang.util.FilmStrip;
 import beigegang.util.PooledList;
 import beigegang.util.ScreenListener;
+import static beigegang.mountsputnik.Constants.*;
 
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
@@ -141,31 +142,6 @@ public abstract class ModeController implements Screen {
 		for (String s : assets)
 			if (manager.isLoaded(s)) manager.unload(s);
 	}
-	
-	/** Exit code for starting new level */
-	public static final int EXIT_GAME_NEW = 0;
-	/** Exit code for quitting to menu */
-	public static final int EXIT_MENU = 1;
-	/** Exit code for resuming game */
-	public static final int EXIT_GAME_RESUME = 2;
-	/** Exit code for pause */
-	public static final int EXIT_PAUSE = 3;
-	/** Exit code for quitting the game */
-	public static final int EXIT_QUIT = 4;
-
-	/** The amount of time for a physics engine step. */
-	public static final float WORLD_STEP = 1/60.0f;
-	/** Number of velocity iterations for the constrain solvers */
-	public static final int WORLD_VELOC = 6;
-	/** Number of position iterations for the constrain solvers */
-	public static final int WORLD_POSIT = 2;
-	
-	/** Width of the game world in Box2d units */
-	protected static final float DEFAULT_WIDTH  = 32.0f;
-	/** Height of the game world in Box2d units */
-	protected static final float DEFAULT_HEIGHT = 18.0f;
-	/** The default value of gravity (going down) */
-	protected static final float DEFAULT_GRAVITY = -9.8f; 
 
 	/** Reference to the game canvas */
 	protected GameCanvas canvas;
@@ -227,7 +203,7 @@ public abstract class ModeController implements Screen {
 	 *
 	 * The canvas is shared across all controllers
 	 *
-	 * @param the canvas associated with this controller
+	 * @return the canvas associated with this controller
 	 */
 	public GameCanvas getCanvas() {
 		return canvas;
@@ -239,7 +215,7 @@ public abstract class ModeController implements Screen {
 	 * The canvas is shared across all controllers.  Setting this value will compute
 	 * the drawing scale from the canvas size.
 	 *
-	 * @param value the canvas associated with this controller
+	 * @param canvas the canvas associated with this controller
 	 */
 	public void setCanvas(GameCanvas canvas) {
 		this.canvas = canvas;
@@ -292,7 +268,6 @@ public abstract class ModeController implements Screen {
 		this.scale = new Vector2(1,1);
 		debug  = false;
 		active = false;
-		
 	}
 
 	/**
@@ -349,7 +324,7 @@ public abstract class ModeController implements Screen {
 	 * to switch to a new game mode.  If not, the update proceeds
 	 * normally.
 	 *
-	 * @param delta Number of seconds since last animation frame
+	 * @param dt Number of seconds since last animation frame
 	 * 
 	 * @return whether to process the update loop
 	 */
@@ -381,7 +356,7 @@ public abstract class ModeController implements Screen {
 	 * This method is called after input is read, but before collisions are resolved.
 	 * The very last thing that it should do is apply forces to the appropriate objects.
 	 *
-	 * @param delta Number of seconds since last animation frame
+	 * @param dt Number of seconds since last animation frame
 	 */
 	public abstract void update(float dt);
 	
@@ -392,7 +367,7 @@ public abstract class ModeController implements Screen {
 	 * physics.  The primary method is the step() method in world.  This implementation
 	 * works for all applications and should not need to be overwritten.
 	 *
-	 * @param delta Number of seconds since last animation frame
+	 * @param dt Number of seconds since last animation frame
 	 */
 	public void postUpdate(float dt) {
 		// Add any objects created by actions
@@ -427,8 +402,6 @@ public abstract class ModeController implements Screen {
 	 * to be overriden if the world needs fancy backgrounds or the like.
 	 *
 	 * The method draws all objects in the order that they were added.
-	 *
-	 * @param canvas The drawing context
 	 */
 	public void draw() {
 		canvas.clear();
@@ -487,10 +460,10 @@ public abstract class ModeController implements Screen {
 	 */
 	public void render(float delta) {
 		if (active) {
-			if (preUpdate(delta)) {
-				update(delta); // This is the one that must be defined.
-				postUpdate(delta);
-			}
+//			if (preUpdate(delta)) {
+//				update(delta); // This is the one that must be defined.
+//				postUpdate(delta);
+//			}
 			draw();
 		}
 	}

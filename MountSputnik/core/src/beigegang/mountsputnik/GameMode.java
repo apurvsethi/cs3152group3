@@ -33,7 +33,7 @@ public class GameMode extends ModeController {
 	private static final String BACKGROUND_FILE = "background.png";
 	private static final String FOREGROUND_FILE = "preliminaryCharacterFilmStrip.png";
 	private static final String HANDHOLD_TEXTURES[] = {"handholds.png", "handholdsglow.png", "handholdsgrabbed.png"};
-	private static final String PART_TEXTURES[] = {"Ragdoll/Corrected/Head.png", "Ragdoll/Corrected/Torso.png", "Ragdoll/Corrected/Hips.png",
+	private static final String PART_TEXTURES[] = {"Ragdoll/Corrected/Torso.png", "Ragdoll/Corrected/Head.png", "Ragdoll/Corrected/Hips.png",
 			"Ragdoll/Corrected/ArmLeft.png", "Ragdoll/Corrected/ArmRight.png", "Ragdoll/Corrected/ForearmLeft.png", "Ragdoll/Corrected/ForearmRight.png",
 			"Ragdoll/Corrected/HandLeftUngripped.png", "Ragdoll/Corrected/HandRightUngripped.png", "Ragdoll/Corrected/ThighLeft.png",
 			"Ragdoll/Corrected/ThighRight.png", "Ragdoll/Corrected/CalfLeft.png", "Ragdoll/Corrected/CalfRight.png", "Ragdoll/Corrected/FeetShoeLeft.png",
@@ -70,13 +70,13 @@ public class GameMode extends ModeController {
 		assets.add(BACKGROUND_FILE);
 		manager.load(FOREGROUND_FILE, Texture.class);
 		assets.add(FOREGROUND_FILE);
-		for (int i = 0; i < HANDHOLD_TEXTURES.length; i++) {
-			manager.load(HANDHOLD_TEXTURES[i], Texture.class);
-			assets.add(HANDHOLD_TEXTURES[i]);
+		for (String HANDHOLD_TEXTURE : HANDHOLD_TEXTURES) {
+			manager.load(HANDHOLD_TEXTURE, Texture.class);
+			assets.add(HANDHOLD_TEXTURE);
 		}
-		for (int i = 0; i < PART_TEXTURES.length; i++) {
-			manager.load(PART_TEXTURES[i], Texture.class);
-			assets.add(PART_TEXTURES[i]);
+		for (String PART_TEXTURE : PART_TEXTURES) {
+			manager.load(PART_TEXTURE, Texture.class);
+			assets.add(PART_TEXTURE);
 		}
 	}
 
@@ -158,28 +158,31 @@ public class GameMode extends ModeController {
 	/**
 	 * TODO add javadoc
 	 */
-	public void populateLevel() {
-		character = new CharacterModel(partTextures, world);
-		objects.add(character);
+	private void populateLevel() {
+		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 4);
 		for (PartModel p : character.parts) {
+			p.setDrawPositionScale(scale);
+			p.setDrawSizeScale(0.4f, 0.4f);
 			objects.add(p);
 		}
-		// TODO: Change to a level generator
-		for (int i = 0; i < HANDHOLD_NUMBER; i++) {
-			handhold = new HandholdModel(holdTextures[0].getTexture(), holdTextures[1].getTexture(), holdTextures[2].getTexture(), 50, 50, 150 * i + 500, 500);
-			handhold.activatePhysics(world);
-			handhold.setBodyType(BodyDef.BodyType.StaticBody);
-			handhold.geometry.setUserData("handhold");
-			objects.add(handhold);
-		}
-		for (int i : EXTREMITIES) {
-			PartModel i1 = character.parts.get(i);
-			handhold = new HandholdModel(holdTextures[0].getTexture(), holdTextures[1].getTexture(), holdTextures[2].getTexture(), 50, 50, i1.getX(), i1.getY());
-			handhold.activatePhysics(world);
-			handhold.setBodyType(BodyDef.BodyType.StaticBody);
-			handhold.geometry.setUserData("handhold");
-			objects.add(handhold);
-		}
+//		// TODO: Change to a level generator
+//		for (int i = 0; i < HANDHOLD_NUMBER; i++) {
+//			handhold = new HandholdModel(holdTextures[0].getTexture(), holdTextures[1].getTexture(), holdTextures[2].getTexture(), 50, 50, 150 * i + 500, 500);
+//			handhold.activatePhysics(world);
+//			handhold.setBodyType(BodyDef.BodyType.StaticBody);
+//			handhold.geometry.setUserData("handhold");
+//			handhold.setDrawPositionScale(scale);
+//			objects.add(handhold);
+//		}
+//		for (int i : EXTREMITIES) {
+//			PartModel i1 = character.parts.get(i);
+//			handhold = new HandholdModel(holdTextures[0].getTexture(), holdTextures[1].getTexture(), holdTextures[2].getTexture(), 50, 50, i1.getX(), i1.getY());
+//			handhold.activatePhysics(world);
+//			handhold.setBodyType(BodyDef.BodyType.StaticBody);
+//			handhold.geometry.setUserData("handhold");
+//			handhold.setDrawPositionScale(scale);
+//			objects.add(handhold);
+//		}
 	}
 
 	/**
@@ -216,7 +219,7 @@ public class GameMode extends ModeController {
 	 *           this method ungrips all selected limbs and then calculates the force that can be imparted on the main selected
 	 *           limb based on the forces the other limbs can impart with plenty of heuristics
 	 *           if no force is imparted, it uses dampening on all of the limbs that are not gripping a handhold.
-	 *           it then snaps limbs to a viable handhold within SNAP_RADIUS that were just released this timestep
+	 *           it then snaps limbs to a viable handhold within HANDHOLD_SNAP_RADIUS that were just released this timestep
 	 *           <p/>
 	 *           special case: on the zeroth timestep/very first call to update at start of game,
 	 *           it snaps limbs to any handhold in radius.
@@ -273,7 +276,7 @@ public class GameMode extends ModeController {
 		//       horizontal and vertical to move them
 
 		//move camera with character
-		canvas.setCameraPosition(GAME_WIDTH / 2,
+		canvas.setCameraPosition(canvas.width / 2,
 						character.parts.get(CHEST).getBody().getPosition().y);
 //move camera with character
 
@@ -311,10 +314,10 @@ public class GameMode extends ModeController {
      * @return bounded linear velocity vector
      */
 	private Vector2 boundVelocity(Vector2 vect) {
-		if (vect.x>0) vect.x = Math.min(MAX_X_VELOCITY,vect.x);
-		else vect.x = Math.max(-1 * MAX_X_VELOCITY,vect.x);
-		if (vect.y>0) vect.y = Math.min(MAX_Y_VELOCITY,vect.y);
-		else vect.y = Math.max(-1 * MAX_Y_VELOCITY,vect.y);
+		if (vect.x>0) vect.x = Math.min(EXTREMITY_MAX_X_VELOCITY,vect.x);
+		else vect.x = Math.max(-1 * EXTREMITY_MAX_X_VELOCITY,vect.x);
+		if (vect.y>0) vect.y = Math.min(EXTREMITY_MAX_Y_VELOCITY,vect.y);
+		else vect.y = Math.max(-1 * EXTREMITY_MAX_Y_VELOCITY,vect.y);
 		return vect;
 	}
 	/**
@@ -407,7 +410,7 @@ public class GameMode extends ModeController {
 				for (Vector2 snapPoint : h.snapPoints) {
 					if (closeEnough(limb, snapPoint)) {
 						character.parts.get(limb).setPosition(snapPoint);
-						((ExtremityModel) character.parts.get(limb)).grip(h);
+						((ExtremityModel) character.parts.get(limb)).grip();
 						character.parts.get(limb).body.setType(BodyDef.BodyType.StaticBody);
 					}
 				}
@@ -429,7 +432,7 @@ public class GameMode extends ModeController {
 
 	private boolean closeEnough(int limb, Vector2 snapPoint) {
 		Vector2 dist = character.parts.get(limb).getPosition().sub(snapPoint);
-		return (Math.sqrt(dist.x * dist.x + dist.y * dist.y) <= SNAP_RADIUS);
+		return (Math.sqrt(dist.x * dist.x + dist.y * dist.y) <= HANDHOLD_SNAP_RADIUS);
 	}
 
 
@@ -545,9 +548,6 @@ public class GameMode extends ModeController {
 				character.parts.get(THIGH_LEFT).body.applyForceToCenter(force.x,force.y,wake);
 				character.parts.get(SHIN_LEFT).body.applyForceToCenter(force.x,force.y * (.5f),wake);
 				character.parts.get(FOOT_LEFT).body.applyForceToCenter(force.x, force.y * .25f,wake);
-//				character.parts.get(THIGH_LEFT).body.applyForceToCenter(force,wake);
-//				character.parts.get(SHIN_LEFT).body.applyForceToCenter(force.scl(.5f),wake);
-//				character.parts.get(FOOT_LEFT).body.applyForceToCenter(force.scl(.25f),wake);
 				break;
 			case FOOT_RIGHT:
 				character.parts.get(THIGH_RIGHT).body.applyForceToCenter(force.x,force.y,wake);
@@ -613,25 +613,23 @@ public class GameMode extends ModeController {
 	
 	public void draw() {
 		canvas.clear();
-		canvas.setBackground(background.getTexture());
-//		canvas.begin();
-//		canvas.draw(background, Color.WHITE, 0, 0,canvas.getWidth(),canvas.getHeight());
-//		canvas.end();
-//		
-//		canvas.begin();
-//		canvas.draw(foreground, Color.WHITE, canvas.getWidth()/5, 0,canvas.getWidth()*3/5,canvas.getHeight());
-//		canvas.end();
-		
+
 		canvas.begin();
-		for(GameObject obj : objects) {
-			obj.draw(canvas);
-		}
-		
-		//debug energy text in top left of screen
-		canvas.drawText(((Integer)(Math.round(character.getEnergy()))).toString(), font, 0f, 
-				canvas.getCamera().position.y+GAME_HEIGHT/2-50f);
+		canvas.draw(background, Color.WHITE, 0, 0,canvas.getWidth(),canvas.getHeight());
 		canvas.end();
-		
+
+		canvas.begin();
+		objects.get(2).draw(canvas);
+		objects.get(1).draw(canvas);
+		objects.get(0).draw(canvas);
+		canvas.end();
+
+//		//debug energy text in top left of screen
+//		canvas.begin();
+//		canvas.drawText(((Integer)(Math.round(character.getEnergy()))).toString(), font, 0f,
+//				canvas.getCamera().position.y+canvas.height/2-50f);
+//		canvas.end();
+
 		if (debug) {
 			canvas.beginDebug();
 			for(GameObject obj : objects) {

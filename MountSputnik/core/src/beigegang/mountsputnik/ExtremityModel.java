@@ -1,24 +1,22 @@
 package beigegang.mountsputnik;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.World;
 
 public class ExtremityModel extends PartModel{
 
 	/** How hard this extremity can push
 	 *  Range from 0.0 - 1.0*/
-	protected float pushFactor;
+	private float pushFactor;
 	/** How hard this extremity can pull
 	 *  Range from 0.0 - 1.0*/
-	protected float pullFactor;
+	private float pullFactor;
 	/** Whether or not this extremity is gripping*/
-	protected HandholdModel gripped;
+	private boolean gripped;
 	/** Texture for when extremity is gripping */ 
-	protected Texture grip; 
+	private Texture grip;
 	/** Texture for when extremity is not gripping */ 
-	protected Texture notGrip; 
+	private Texture notGrip;
 	
 	@Override
 	public ObjectType getType() {
@@ -67,30 +65,21 @@ public class ExtremityModel extends PartModel{
 	 * @return Returns the whether or not this extremity is gripping
 	 */
 	public boolean isGripping(){
-		return gripped != null;
+		return gripped;
 	}
 	
 	/** Sets the value of isGripping to true*/
-	public void grip(HandholdModel h){
-		gripped = h;
+	public void grip(){
+		gripped = true;
 		this.setTexture(grip);
-//		System.out.println(this.getTex.;
 		this.body.setType(BodyDef.BodyType.StaticBody);
-		//System.out.println("regripping!!!!");
-		h.grip();
-		//TODO: change animation for gripping?
 	}
 	
 	/** Sets the value of isGripping to false*/
 	public void ungrip(){
-		if (gripped != null){
-			gripped.ungrip();
-			gripped = null;
-		}
+		gripped = false;
 		setTexture(notGrip); 
 		this.body.setType(BodyDef.BodyType.DynamicBody);
-		//System.out.println("dynamic body");
-		//TODO: change animation for releasing?
 	}
 	
 	/** sets the grip texture for this extremity */ 
@@ -100,16 +89,13 @@ public class ExtremityModel extends PartModel{
 	
 	/** Contructs an ExtremityModel
 	 * 
-	 * @param push the push factor of this extremity
-	 * @param pull the pull factor of this extremity
-	 * @param t	the texture of this extremity
+	 * @param x the x position of this extremity
+	 * @param y the y position of this extremity
+	 * @param ungripTexture	the texture of this extremity
 	 */
-	public ExtremityModel(float push, float pull, float x, float y, Texture t){
-		super(x, y, t);
-		pushFactor= push;
-		pullFactor = pull;
-		gripped = null;
-		notGrip = t; 
+	public ExtremityModel(float x, float y, Texture ungripTexture){
+		super(x, y, ungripTexture);
+		gripped = false;
+		notGrip = ungripTexture;
 	}
-	
 }

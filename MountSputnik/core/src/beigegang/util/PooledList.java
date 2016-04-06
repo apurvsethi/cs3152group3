@@ -300,7 +300,7 @@ public class PooledList<E> extends AbstractSequentialList<E> implements Iterable
 			tail = entry;
 		} else {	
 			Entry curr = head;
-			for (int ii = 1; ii < index; ii++) {
+			for (int ii = 0; ii < index; ii++) {
 				curr = curr.next;
 			}
 			curr.prev.next = entry;
@@ -325,7 +325,7 @@ public class PooledList<E> extends AbstractSequentialList<E> implements Iterable
 			return tail.value;
 		} else {	
 			Entry curr = head;
-			for (int ii = 1; ii < index; ii++) {
+			for (int ii = 0; ii < index; ii++) {
 				curr = curr.next;
 			}
 			return curr.value;
@@ -362,7 +362,7 @@ public class PooledList<E> extends AbstractSequentialList<E> implements Iterable
 			}
 		} else {	
 			Entry curr = head;
-			for (int ii = 1; ii < index; ii++) {
+			for (int ii = 0; ii < index; ii++) {
 				curr = curr.next;
 			}
 			last = curr;
@@ -397,7 +397,7 @@ public class PooledList<E> extends AbstractSequentialList<E> implements Iterable
 			tail.value = element;
 		} else {	
 			Entry curr = head;
-			for (int ii = 1; ii < index; ii++) {
+			for (int ii = 0; ii < index; ii++) {
 				curr = curr.next;
 			}
 			value = curr.value;

@@ -6,7 +6,6 @@ import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.graphics.*;
 
 import beigegang.util.*;
-import static beigegang.mountsputnik.Constants.*;
 
 
 /** Base model class that is the parent class to all other models
@@ -47,7 +46,9 @@ public abstract class GameObject {
 	/** CURRENT image for this object. May change over time. */
 	protected FilmStrip animator;
 	/** Drawing scale to convert physics units to pixels */
-	protected Vector2 drawScale = new Vector2(0.5f,0.5f);
+	protected Vector2 drawPositionScale = new Vector2();
+	/** Drawing scale to change scaled size of drawn image */
+	protected Vector2 drawSizeScale = new Vector2();
 	/** Shape information for this object */
 	protected PolygonShape shape;
 	/** Cache of the polygon vertices (for resizing) */
@@ -383,53 +384,79 @@ public abstract class GameObject {
 	}
 
 	/**
-     * @return the drawing scale for this physics object
+     * @return the draw position scale for this physics object
      */
-    public Vector2 getDrawScale() { 
-    	return drawScale; 
+    public Vector2 getDrawPositionScale() {
+    	return drawPositionScale;
     }
     
     /**
-     * Sets the drawing scale for this physics object
+     * Sets the draw position scale for this physics object
      *
-     * The drawing scale is the number of pixels to draw before Box2D unit. Because
+     * The draw position scale is the number of pixels to draw before Box2D unit. Because
      * mass is a function of area in Box2D, we typically want the physics objects
      * to be small.  So we decouple that scale from the physics object.  However,
      * we must track the scale difference to communicate with the scene graph.
      *
      * We allow for the scaling factor to be non-uniform.
      *
-     * @param value  the drawing scale for this physics object
+     * @param value  the draw position scale for this physics object
      */
-    public void setDrawScale(Vector2 value) { 
-    	setDrawScale(value.x,value.y); 
+    public void setDrawPositionScale(Vector2 value) {
+    	setDrawPositionScale(value.x,value.y);
 	}
     
     /**
-     * Sets the drawing scale for this physics object
-     *
-     * The drawing scale is the number of pixels to draw before Box2D unit. Because
-     * mass is a function of area in Box2D, we typically want the physics objects
-     * to be small.  So we decouple that scale from the physics object.  However,
-     * we must track the scale difference to communicate with the scene graph.
-     *
-     * We allow for the scaling factor to be non-uniform.
+	 * Sets the draw position scale for this physics object
+	 *
+	 * The draw position scale is the number of pixels to draw before Box2D unit. Because
+	 * mass is a function of area in Box2D, we typically want the physics objects
+	 * to be small.  So we decouple that scale from the physics object.  However,
+	 * we must track the scale difference to communicate with the scene graph.
+	 *
+	 * We allow for the scaling factor to be non-uniform.
      *
      * @param x  the x-axis scale for this physics object
      * @param y  the y-axis scale for this physics object
      */
-    public void setDrawScale(float x, float y) {
-    	drawScale.set(x,y);
+    public void setDrawPositionScale(float x, float y) {
+    	drawPositionScale.set(x,y);
     }
+
+	/**
+	 * @return the draw size scale for this physics object
+	 */
+	public Vector2 getDrawSizeScale() {
+		return drawSizeScale;
+	}
+
+	/**
+	 * Sets the draw size scale for this physics object
+	 *
+	 * @param value  the draw size scale for this physics object
+	 */
+	public void setDrawSizeScale(Vector2 value) {
+		setDrawSizeScale(value.x,value.y);
+	}
+
+	/**
+	 * Sets the draw size scale for this physics object
+	 *
+	 * @param x  the x-axis scale for this physics object
+	 * @param y  the y-axis scale for this physics object
+	 */
+	public void setDrawSizeScale(float x, float y) {
+		drawSizeScale.set(x,y);
+	}
     
     /** Returns the height that this texture is drawn at*/
     public float getDrawHeight(){
-    	return animator.getTexture().getHeight()/drawScale.y;
+    	return animator.getTexture().getHeight()/ drawPositionScale.y;
     }
     
     /** Returns the width that this texture is drawn at*/
     public float getDrawWidth(){
-    	return animator.getTexture().getWidth()/drawScale.x;
+    	return animator.getTexture().getWidth()/ drawPositionScale.x;
     }
 	
 	/**
@@ -536,7 +563,8 @@ public abstract class GameObject {
 	 */
 	public void draw(GameCanvas canvas) {
 		canvas.draw(animator, Color.WHITE, origin.x, origin.y,
-				getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+				getX() * drawPositionScale.x, getY() * drawPositionScale.y,
+				getAngle(), drawSizeScale.x, drawSizeScale.y);
 	}
 
 	/**
@@ -547,7 +575,8 @@ public abstract class GameObject {
 	 * @param canvas Drawing context
 	 */
 	public void drawDebug(GameCanvas canvas) {
-		canvas.drawPhysics(shape, Color.YELLOW, getX(), getY(), getAngle(),1,1);
+		canvas.drawPhysics(shape, Color.YELLOW, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
+				getAngle(),1,1);
 	}
 }
 	

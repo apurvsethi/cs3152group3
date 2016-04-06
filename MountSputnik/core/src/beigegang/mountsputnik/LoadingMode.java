@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+import static beigegang.mountsputnik.Constants.*;
+
 public class LoadingMode extends ModeController {
 	// Textures necessary to support the loading screen 
 	private static final String BACKGROUND_FILE = "loading.png";
@@ -112,7 +114,7 @@ public class LoadingMode extends ModeController {
 		input.readInput(bounds, scale);
 		
 		if (playButton != null && input.didSelect()) {
-			listener.exitScreen(this, EXIT_GAME_NEW);
+			listener.exitScreen(this, EXIT_GAME_NEW_LEVEL);
 		}
 		
 		if (playButton == null) {
