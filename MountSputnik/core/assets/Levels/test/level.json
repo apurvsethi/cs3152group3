@@ -1,0 +1,14 @@
+{
+	"physicsSize":    [16.0,12.0],
+	"graphicSize":    [ 800, 600],
+	"height": 20,
+	"distinctBlocks": 3,
+    "oxygen": 1,
+    "gravity": -9.8,
+    "background": "canyon", 
+	"lava": {
+		"present": false,
+		"texture": null,
+		"speed":null
+	}
+}

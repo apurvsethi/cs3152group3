@@ -1,0 +1,46 @@
+{   
+"id" : 3, 
+	"size":1,
+    "difficulty": "easy", 
+   "handholds": {
+    	"hold1": {
+    		"texture": handholds.png,
+			"glowTexture": handholdsglow.png, 
+			"gripTexture": handholdsgrabbed.png,
+    		"width": 50,
+			"height": 50,
+    		"positionX": 12,
+			"positionY": 9,
+    		"friction": 1,
+    		"restitution": 1,
+    		"crumble": false
+    		}, 
+    	"hold2": {
+    		"texture": "handholds.png",
+			"glowTexture": "handholdsglow.png", 
+			"gripTexture": "handholdsgrabbed.png",
+    		"width": 50,
+			"height": 50,
+    		"positionX": 2,
+			"positionY": 4.6,
+    		"friction": 1,
+    		"restitution": 1,
+    		"crumble": false
+    		}, 
+    	"hold3": {
+    		"texture": "handholds.png",
+			"glowTexture": "handholdsglow.png", 
+			"gripTexture": "handholdsgrabbed.png",
+    		"width": 50,
+			"height": 50,
+    		"positionX": 3.4,
+			"positionY": 6.7,
+    		"friction": 1,
+    		"restitution": 1,
+    		"crumble": false
+    		}
+    },
+
+    "obstacles": {
+	}
+}
