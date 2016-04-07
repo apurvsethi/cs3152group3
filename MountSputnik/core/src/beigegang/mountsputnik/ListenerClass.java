@@ -1,7 +1,5 @@
 package beigegang.mountsputnik;
 
-
-import static beigegang.mountsputnik.Constants.*;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 

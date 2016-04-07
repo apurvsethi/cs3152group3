@@ -1,7 +1,6 @@
 package beigegang.mountsputnik;
 
 import com.badlogic.gdx.physics.box2d.Body;
-import static beigegang.mountsputnik.Constants.*;
 
 public class StickyInfo{
 	public Body bodyA;

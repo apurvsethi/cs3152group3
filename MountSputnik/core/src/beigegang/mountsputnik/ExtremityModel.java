@@ -1,9 +1,7 @@
 package beigegang.mountsputnik;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.World;
 
 public class ExtremityModel extends PartModel{
 

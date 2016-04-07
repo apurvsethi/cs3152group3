@@ -50,7 +50,6 @@ public class GameMode extends ModeController {
 	 * font for displaying debug values to screen
 	 */
 	private static BitmapFont font = new BitmapFont();
-	//says if character is upside down
 	private static boolean upsideDown = false;
 	/**
 	 * Texture asset for files used, parts, etc.
@@ -218,7 +217,9 @@ public class GameMode extends ModeController {
 		int[] gSize = levelFormat.get("graphicSize").asIntArray();
 		int remainingHeight = levelFormat.getInt("height");
 		int currentHeight=0;
-		int diffBlocks = levelFormat.getInt("distinctBlocks");
+		int diffBlocks = levelFormat.getInt("uniqueBlocks");
+		int filler = levelFormat.getInt("generalFillerSize");
+		int fillerSize = levelFormat.getInt("fillerBlocks");
 		
 		world = new World(gravity, false);
 		contactListener = new ListenerClass();
@@ -227,34 +228,20 @@ public class GameMode extends ModeController {
 		scale.x = gSize[0]/pSize[0];
 		scale.y = gSize[1]/pSize[1];
 
-		
-		//add blocks to level
 		while(currentHeight < remainingHeight){
+			//TODO: account for difficulty
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
-			JsonAssetManager.getInstance().loadDirectory(levelPiece);
-			JsonAssetManager.getInstance().allocateDirectory();
-			JsonValue handholdDesc = levelPiece.get("handholds").child();
-			//JsonValue obstacleDesc = levelPiece.get("obstacles").child();
 			
-			while(handholdDesc != null){
-				handhold = new HandholdModel(
-						createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(), 
-						createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(), 
-						createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(), 
-						handholdDesc.getInt("width"), handholdDesc.getInt("height"),
-						handholdDesc.getFloat("positionX"),
-						handholdDesc.getFloat("positionY")+currentHeight*10);
-				handhold.activatePhysics(world);
-				handhold.setBodyType(BodyDef.BodyType.StaticBody);
-				handhold.geometry.setUserData("handhold");
-				objects.add(handhold);
-				handholdDesc = handholdDesc.next();
-			}
-			
-			//TODO: add obstacle generation
-			
+			addChunk(levelPiece, currentHeight);
 			currentHeight += levelPiece.getInt("size");
+			
+			for(int i = 0; i < filler; i++){
+				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
+				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/general/block"+blockNumber+".json"));
+				addChunk(levelPiece, currentHeight);
+				currentHeight += levelPiece.getInt("size");
+			}
 		}
 		
 		character = new CharacterModel(partTextures, world);
@@ -263,6 +250,36 @@ public class GameMode extends ModeController {
 			objects.add(p);
 		}
 		
+	}
+	
+	/** 
+	 * Adds blocks to the level based on JSON block description
+	 * 
+	 * @param levelPiece: The block description
+	 * @param currentHeight: y offset from the bottom of the screen
+	 * @author Daniel
+	 */
+	private void addChunk(JsonValue levelPiece, int currentHeight){
+		JsonAssetManager.getInstance().loadDirectory(levelPiece);
+		JsonAssetManager.getInstance().allocateDirectory();
+		JsonValue handholdDesc = levelPiece.get("handholds").child();
+		
+		while(handholdDesc != null){
+			handhold = new HandholdModel(
+					createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(), 
+					createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(), 
+					createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(), 
+					handholdDesc.getInt("width"), handholdDesc.getInt("height"),
+					handholdDesc.getFloat("positionX"),
+					handholdDesc.getFloat("positionY")+currentHeight*10);
+			handhold.activatePhysics(world);
+			handhold.setBodyType(BodyDef.BodyType.StaticBody);
+			handhold.geometry.setUserData("handhold");
+			objects.add(handhold);
+			handholdDesc = handholdDesc.next();
+		}
+		
+		//TODO: add obstacle generation
 	}
 	
 	/**
@@ -303,7 +320,7 @@ public class GameMode extends ModeController {
 	 *           special case: on the zeroth timestep/very first call to update at start of game,
 	 *           it snaps limbs to any handhold in radius.
 	 * 
-	 * @authors Jacob, Daniel
+	 * @author Jacob, Daniel
 	 * @param dt 
 	 */
 	public void update(float dt) {
@@ -375,11 +392,8 @@ public class GameMode extends ModeController {
 		// TODO: Movements of other objects (obstacles, eventually)
 
 		// TODO: Update energy quantity (fill in these values)
-		//TODO: MAKE THIS NOT UNGRIP EVERY LIMB ALL THE TIME
-//		float dEdt = calculateEnergyChange(oxygen, 1, force, true);
-//		float newEnergy = character.getEnergy() < 0 ? 0 : character.getEnergy() > 100 ? 100 : character.getEnergy() + dEdt;
-//		character.setEnergy(newEnergy);
-//		if (newEnergy <= 0){
+		character.updateEnergy(oxygen, 1, force, true);
+//		if (character.getEnergy <= 0){
 //			for(int e : EXTREMITIES){
 //				 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
 //				 extremity.ungrip();
@@ -655,46 +669,6 @@ public class GameMode extends ModeController {
 
 		}
 	}
-
-	/**
-	 * @author Daniel
-	 * dE/dt = A (1-B*sin(angle/2))(Base energy gain)(Environmental Gain Modifier) - 
-	 * - C (Exertion+1)(Environmental Loss Modifier)(3-feet)(3-hands) - D 
-	 * 
-	 * A, C and D are playtested constants
-	 * B allows for rotation to not effect energy gain
-	 * Base energy gain is a value in the character
-	 * 
-	 * @param gainModifier Environmental Gain Modifier
-	 * @param lossModifier Environmental Loss Modifier
-	 * @param rotationGain Whether or not rotation affects gain (would be false if in space or places with low gravity)
-	 * @param force Current force being exerted by character
-	 * 
-	 * @return change in energy value
-	 */
-	private float calculateEnergyChange(float gainModifier, float lossModifier, Vector2 force, boolean rotationGain){
-		int b = rotationGain ? 1 : 0;
-		float angle = character.parts.get(CHEST).getAngle();
-		float exertion = Math.abs(force.y/600); //TODO: value needs adjusting based on new physics
-		
-		//Determine how many limbs are currently attached
-		int feet = character.parts.get(FOOT_LEFT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
-		feet += character.parts.get(FOOT_RIGHT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
-		int hands = character.parts.get(HAND_LEFT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
-		hands += character.parts.get(HAND_RIGHT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
-		
-		//Refer to equation in Javadoc comment
-		float gain = (float) (ENERGY_GAIN_MULTIPLIER * (1-b*Math.sin(angle/2.0)) * BASE_ENERGY_GAIN * gainModifier);
-		float loss = ENERGY_LOSS_MULTIPLIER * (exertion + 1) * lossModifier * (3-feet) * (3 - hands);
-		//you don't lose energy if you're just falling
-		loss = feet == 0 && hands == 0 ? 0 : loss;
-		float change = gain - loss - ENERGY_LOSS;
-		
-		//Energy only ranges from 0 to 100
-		//Do you still like ternary operators Meg?
-		change = character.getEnergy()>=100 && change > 0 ? 0 : character.getEnergy()<=0 && change < 0 ? 0 : change;
-		return change;
-	}
 	
 	public void draw() {
 		canvas.clear();
@@ -747,7 +721,6 @@ public class GameMode extends ModeController {
 
 	@Override
 	public void resize(int width, int height) {
-		// TODO Auto-generated method stub
 	}
 	
 	public void dispose(){

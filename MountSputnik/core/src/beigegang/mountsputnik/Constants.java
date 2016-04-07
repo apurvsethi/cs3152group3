@@ -1,5 +1,4 @@
 package beigegang.mountsputnik;
-import com.badlogic.gdx.math.Vector2;
 
 public final class Constants {
 
