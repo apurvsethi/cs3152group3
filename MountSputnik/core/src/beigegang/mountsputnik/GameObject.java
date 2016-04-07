@@ -6,6 +6,7 @@ import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.graphics.*;
 
 import beigegang.util.*;
+import static beigegang.mountsputnik.Constants.*;
 
 
 /** Base model class that is the parent class to all other models
@@ -51,8 +52,6 @@ public abstract class GameObject {
 	protected Vector2 drawSizeScale = new Vector2();
 	/** Shape information for this object */
 	protected PolygonShape shape;
-	/** Cache of the polygon vertices (for resizing) */
-	protected float[] vertices;
 	/** A root body for this box 2d. */
 	protected Body body;
 	/** A cache value for the fixture (for resizing) */
@@ -302,6 +301,15 @@ public abstract class GameObject {
 		else
 			bDef.type = type;
 	}
+
+	/**
+	 * Returns the body of this object.
+	 *
+	 * @return the body of this object.
+	 */
+	public Body getBody(){
+		return body;
+	}
 	
 	/**
 	 * Returns the type of this object.
@@ -376,11 +384,14 @@ public abstract class GameObject {
 	 *
 	 * @param texture the texture of this object
 	 */
-	public GameObject(Texture texture, float width, float height, float box_width, float box_height) {
-		vertices = new float[8];
-		shape = new PolygonShape();
-
+	public GameObject(Texture texture, float drawSizeScale, Vector2 drawPositionScale) {
 		setTexture(texture);
+		setDrawPositionScale(drawPositionScale);
+		setDrawSizeScale(drawSizeScale, drawSizeScale);
+
+		shape = new PolygonShape();
+		shape.setAsBox(texture.getWidth() * this.drawSizeScale.x / (2 * this.drawPositionScale.x),
+				texture.getHeight() * this.drawSizeScale.y / (2 * this.drawPositionScale.y));
 	}
 
 	/**
@@ -575,8 +586,8 @@ public abstract class GameObject {
 	 * @param canvas Drawing context
 	 */
 	public void drawDebug(GameCanvas canvas) {
-		canvas.drawPhysics(shape, Color.YELLOW, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
-				getAngle(),1,1);
+		canvas.drawPhysics(shape, Color.YELLOW, getX(), getY(),
+				getAngle(),drawPositionScale.x,drawPositionScale.y);
 	}
 }
 	

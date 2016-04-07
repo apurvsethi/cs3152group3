@@ -33,11 +33,11 @@ public class GameMode extends ModeController {
 	private static final String BACKGROUND_FILE = "background.png";
 	private static final String FOREGROUND_FILE = "preliminaryCharacterFilmStrip.png";
 	private static final String HANDHOLD_TEXTURES[] = {"handholds.png", "handholdsglow.png", "handholdsgrabbed.png"};
-	private static final String PART_TEXTURES[] = {"Ragdoll/Corrected/Torso.png", "Ragdoll/Corrected/Head.png", "Ragdoll/Corrected/Hips.png",
-			"Ragdoll/Corrected/ArmLeft.png", "Ragdoll/Corrected/ArmRight.png", "Ragdoll/Corrected/ForearmLeft.png", "Ragdoll/Corrected/ForearmRight.png",
-			"Ragdoll/Corrected/HandLeftUngripped.png", "Ragdoll/Corrected/HandRightUngripped.png", "Ragdoll/Corrected/ThighLeft.png",
-			"Ragdoll/Corrected/ThighRight.png", "Ragdoll/Corrected/CalfLeft.png", "Ragdoll/Corrected/CalfRight.png", "Ragdoll/Corrected/FeetShoeLeft.png",
-			"Ragdoll/Corrected/FeetShoeRight.png", "Ragdoll/Corrected/HandLeftGripped.png", "Ragdoll/Corrected/HandRightGripped.png"};
+	private static final String PART_TEXTURES[] = {"Ragdoll/Corrected/Corrected/Torso.png", "Ragdoll/Corrected/Corrected/Head.png", "Ragdoll/Corrected/Corrected/Hips.png",
+			"Ragdoll/Corrected/Corrected/ArmLeft.png", "Ragdoll/Corrected/Corrected/ArmRight.png", "Ragdoll/Corrected/Corrected/ForearmLeft.png", "Ragdoll/Corrected/Corrected/ForearmRight.png",
+			"Ragdoll/Corrected/Corrected/HandLeftUngripped.png", "Ragdoll/Corrected/Corrected/HandRightUngripped.png", "Ragdoll/Corrected/Corrected/ThighLeft.png",
+			"Ragdoll/Corrected/Corrected/ThighRight.png", "Ragdoll/Corrected/Corrected/CalfLeft.png", "Ragdoll/Corrected/Corrected/CalfRight.png", "Ragdoll/Corrected/Corrected/FeetShoeLeft.png",
+			"Ragdoll/Corrected/Corrected/FeetShoeRight.png", "Ragdoll/Corrected/Corrected/HandLeftGripped.png", "Ragdoll/Corrected/Corrected/HandRightGripped.png"};
 
 	/**
 	 * font for displaying debug values to screen
@@ -159,10 +159,8 @@ public class GameMode extends ModeController {
 	 * TODO add javadoc
 	 */
 	private void populateLevel() {
-		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 4);
+		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale);
 		for (PartModel p : character.parts) {
-			p.setDrawPositionScale(scale);
-			p.setDrawSizeScale(0.4f, 0.4f);
 			objects.add(p);
 		}
 //		// TODO: Change to a level generator
@@ -619,9 +617,7 @@ public class GameMode extends ModeController {
 		canvas.end();
 
 		canvas.begin();
-		objects.get(2).draw(canvas);
-		objects.get(1).draw(canvas);
-		objects.get(0).draw(canvas);
+		for (GameObject obj : objects) obj.draw(canvas);
 		canvas.end();
 
 //		//debug energy text in top left of screen

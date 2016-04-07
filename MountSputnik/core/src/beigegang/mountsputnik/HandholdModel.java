@@ -106,24 +106,26 @@ public class HandholdModel extends GameObject{
 	/**
 	 * Constructs HandholdModel
 	 *  
-	 * @param t Texture
-	 * @param width The width of the model
-	 * @param height The height of the model
+	 * @param t Normal texture for handhold
+	 * @param glowTexture The glow texture for handhold
+	 * @param gripTexture The grip texture for handhold
 	 * @param x The x position of the model
 	 * @param y The y position of the model
+	 * @param drawSizeScale the scaling between object size and drawn size
+	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
 	 */
-	public HandholdModel(Texture t, Texture gt, Texture gtt, float width, float height, float x, float y){
-		super(t, width, height, 1, 1);
-		isCrumbling = false;
-		shape.setAsBox(t.getWidth() / 2, t.getHeight() / 2);
-		setDrawPositionScale(width/t.getWidth(), height/t.getHeight());
+	public HandholdModel(Texture t, Texture glowTexture, Texture gripTexture,
+						 float x, float y, float drawSizeScale, Vector2 drawPositionScale){
+		super(t, drawSizeScale, drawPositionScale);
 		setX(x);
 		setY(y);
+
+		isCrumbling = false;
 		snapPoints = new Array<Vector2>();
 		snapPoints.add(getPosition());
-		glowTexture = gt; 
+		this.glowTexture = glowTexture;
 		dullTexture = t; 
-		gripTexture = gtt; 
+		this.gripTexture = gripTexture;
 	}
 
 

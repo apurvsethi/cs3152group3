@@ -1,6 +1,7 @@
 package beigegang.mountsputnik;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 
 public class ExtremityModel extends PartModel{
@@ -82,20 +83,19 @@ public class ExtremityModel extends PartModel{
 		this.body.setType(BodyDef.BodyType.DynamicBody);
 	}
 	
-	/** sets the grip texture for this extremity */ 
-	public void setGripTexture(Texture t){
-		grip = t; 
-	}
-	
 	/** Contructs an ExtremityModel
 	 * 
 	 * @param x the x position of this extremity
 	 * @param y the y position of this extremity
 	 * @param ungripTexture	the texture of this extremity
+	 * @param gripTexture the gripped texture of this extremity
+	 * @param drawSizeScale the scaling between object size and drawn size
+	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
 	 */
-	public ExtremityModel(float x, float y, Texture ungripTexture){
-		super(x, y, ungripTexture);
+	public ExtremityModel(float x, float y, Texture ungripTexture, Texture gripTexture, float drawSizeScale, Vector2 drawPositionScale){
+		super(x, y, ungripTexture, drawSizeScale, drawPositionScale);
 		gripped = false;
 		notGrip = ungripTexture;
+		grip = gripTexture;
 	}
 }
