@@ -209,8 +209,6 @@ public class GameMode extends ModeController {
 		JsonAssetManager.getInstance().allocateDirectory();
 		Vector2 gravity = new Vector2(0,levelFormat.getFloat("gravity"));
 		oxygen = levelFormat.getFloat("oxygen");
-		float[] pSize = levelFormat.get("physicsSize").asFloatArray();
-		int[] gSize = levelFormat.get("graphicSize").asIntArray();
 		int remainingHeight = levelFormat.getInt("height");
 		int currentHeight=0;
 		int diffBlocks = levelFormat.getInt("uniqueBlocks");
@@ -220,9 +218,6 @@ public class GameMode extends ModeController {
 		world = new World(gravity, false);
 		contactListener = new ListenerClass();
 		world.setContactListener(contactListener);
-		bounds = new Rectangle(0,0,pSize[0],pSize[1]);
-		scale.x = gSize[0]/pSize[0];
-		scale.y = gSize[1]/pSize[1];
 
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
@@ -259,18 +254,18 @@ public class GameMode extends ModeController {
 		JsonAssetManager.getInstance().allocateDirectory();
 		JsonValue handholdDesc = levelPiece.get("handholds").child();
 
-		// TODO: Need drawSizeScale for handholds in some way
-		float handholdDrawSizeScale = 1.0f;
 		while(handholdDesc != null){
 			handhold = new HandholdModel(
 					createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(), 
 					createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(), 
 					createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
 					handholdDesc.getFloat("positionX"), handholdDesc.getFloat("positionY")+currentHeight*10,
-					handholdDrawSizeScale, scale);
+					new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
 			handhold.activatePhysics(world);
 			handhold.setBodyType(BodyDef.BodyType.StaticBody);
 			handhold.geometry.setUserData("handhold");
+			handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
+			handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
 			objects.add(handhold);
 			handholdDesc = handholdDesc.next();
 		}

@@ -392,6 +392,21 @@ public abstract class GameObject {
 		shape.setAsBox(texture.getWidth() * this.drawSizeScale.x / (2 * this.drawPositionScale.x),
 				texture.getHeight() * this.drawSizeScale.y / (2 * this.drawPositionScale.y));
 	}
+	
+	/**
+	 * Constructs a game object
+	 *
+	 * @param texture the texture of this object
+	 */
+	public GameObject(Texture texture, Vector2 dimensions, Vector2 drawPositionScale) {
+		setTexture(texture);
+		setDrawPositionScale(drawPositionScale);
+		setDrawSizeScale(dimensions.x, dimensions.y);
+
+		shape = new PolygonShape();
+		shape.setAsBox(texture.getWidth() * this.drawSizeScale.x / (2 * this.drawPositionScale.x),
+				texture.getHeight() * this.drawSizeScale.y / (2 * this.drawPositionScale.y));
+	}
 
 	/**
      * @return the draw position scale for this physics object
