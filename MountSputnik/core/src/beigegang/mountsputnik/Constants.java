@@ -26,7 +26,7 @@ public final class Constants {
 	/** Height of the game world in Box2d units */
 	public static final float DEFAULT_HEIGHT = 18.0f;
 	/** The default value of gravity (going down) */
-	protected static final float DEFAULT_GRAVITY = -1.0f;
+	protected static final float DEFAULT_GRAVITY = -9.8f;
 
 	public static final int HANDHOLD_SNAP_RADIUS = 30;
 
