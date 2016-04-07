@@ -282,4 +282,37 @@ public class CharacterModel {
 		init(w, initialPositionX, initialPositionY, drawPositionScale);
 		energy = 100f;
 	}
+	
+	/**
+	 * @author Daniel
+	 * dE/dt = A (1-B*sin(angle/2))(Base energy gain)(Environmental Gain Modifier) - 
+	 * - C (Exertion+1)(Environmental Loss Modifier)(3-feet)(3-hands) - D 
+	 * 
+	 * A, C and D are playtested constants
+	 * B allows for rotation to not effect energy gain
+	 * Base energy gain is a value in the character
+	 * 
+	 * @param gainModifier Environmental Gain Modifier
+	 * @param lossModifier Environmental Loss Modifier
+	 * @param rotationGain Whether or not rotation affects gain (would be false if in space or places with low gravity)
+	 * @param force Current force being exerted by character
+	 */
+	public void updateEnergy(float gainModifier, float lossModifier, Vector2 force, boolean rotationGain){
+		int b = rotationGain ? 1 : 0;
+		float angle = parts.get(CHEST).getAngle();
+		float exertion = Math.abs(force.y/600); //TODO: value needs adjusting based on new physics
+		
+		int feet = parts.get(FOOT_LEFT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
+		feet += parts.get(FOOT_RIGHT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
+		int hands = parts.get(HAND_LEFT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
+		hands += parts.get(HAND_RIGHT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
+		
+		float gain = (float) (ENERGY_GAIN_MULTIPLIER * (1-b*Math.sin(angle/2.0)) * BASE_ENERGY_GAIN * gainModifier);
+		float loss = ENERGY_LOSS_MULTIPLIER * (exertion + 1) * lossModifier * (3 - feet) * (3 - hands);
+		loss = feet == 0 && hands == 0 ? 0 : loss;
+		float dEdt = gain - loss - ENERGY_LOSS;
+		
+		float newEnergy = getEnergy() < 0 ? 0 : getEnergy() > 100 ? 100 : getEnergy() + dEdt;
+		setEnergy(newEnergy);
+	}
 }

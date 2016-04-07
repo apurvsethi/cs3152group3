@@ -1,0 +1,17 @@
+{
+	"physicsSize":    [16.0,12.0],
+	"graphicSize":    [ 800, 600],
+	"difficulty": "easy",
+	"height": 20,
+	"uniqueBlocks": 3,
+	"generalFillerSize": 2, 
+	"fillerBlocks": 1,
+    "oxygen": 1,
+    "gravity": -9.8,
+    "background": "canyon", 
+	"lava": {
+		"present": false,
+		"texture": null,
+		"speed":null
+	}
+}

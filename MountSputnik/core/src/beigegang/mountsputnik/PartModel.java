@@ -3,8 +3,6 @@ package beigegang.mountsputnik;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 
-import static beigegang.mountsputnik.Constants.*;
-
 public class PartModel extends GameObject{
 
 	@Override

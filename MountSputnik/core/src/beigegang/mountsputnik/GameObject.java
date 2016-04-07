@@ -6,7 +6,6 @@ import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.graphics.*;
 
 import beigegang.util.*;
-import static beigegang.mountsputnik.Constants.*;
 
 
 /** Base model class that is the parent class to all other models

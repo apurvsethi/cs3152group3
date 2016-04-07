@@ -51,7 +51,7 @@ public final class Constants {
 
 	public static final int[] BODY_PART_ANIMATION_FRAMES = {1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1};
 	public static final int BODY_TEXTURE_COUNT = 15;
-	
+
 	/** Indices of specific part locations in the array */
 	public static final int CHEST = 0;
 	public static final int HEAD = 1;
