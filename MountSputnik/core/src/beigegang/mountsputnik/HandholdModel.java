@@ -113,10 +113,11 @@ public class HandholdModel extends GameObject{
 	 * @param y The y position of the model
 	 * @param drawSizeScale the scaling between object size and drawn size
 	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
+	 * @param dimensions the dimensions of the handhold in box2d coordinates
 	 */
 	public HandholdModel(Texture t, Texture glowTexture, Texture gripTexture,
-						 float x, float y, float drawSizeScale, Vector2 drawPositionScale){
-		super(t, drawSizeScale, drawPositionScale);
+						 float x, float y,  Vector2 dimensions, Vector2 drawPositionScale){
+		super(t, dimensions, drawPositionScale);
 		setX(x);
 		setY(y);
 
@@ -138,7 +139,7 @@ public class HandholdModel extends GameObject{
 		// Create the fixture
 		fixtureDef.shape = shape;
 		geometry = body.createFixture(fixtureDef);
-		shape.dispose();
+		//shape.dispose(); 
 		markDirty(false);
 	}
 
