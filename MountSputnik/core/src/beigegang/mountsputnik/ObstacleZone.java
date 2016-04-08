@@ -13,7 +13,7 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public class ObstacleZone {
 	
-	private int minSpawnHeight;
+	private float minSpawnHeight;
 	private int spawnFrequency;
 	private Rectangle bounds;
 	private Texture obstacleTexture;
@@ -23,14 +23,14 @@ public class ObstacleZone {
 	/**
 	 * @return the minSpawnHeight
 	 */
-	public int getMinSpawnHeight() {
+	public float getMinSpawnHeight() {
 		return minSpawnHeight;
 	}
 
 	/**
 	 * @param minSpawnHeight the minSpawnHeight to set
 	 */
-	public void setMinSpawnHeight(int minSpawnHeight) {
+	public void setMinSpawnHeight(float minSpawnHeight) {
 		this.minSpawnHeight = minSpawnHeight;
 	}
 
@@ -56,7 +56,7 @@ public class ObstacleZone {
 	 * @param freq obstacle spawn frequency (in frames)
 	 * @param bounds the bounds of this zone
 	 */
-	public ObstacleZone(Texture t, int minHeight, int freq, Rectangle bounds){
+	public ObstacleZone(Texture t, float minHeight, int freq, Rectangle bounds){
 		minSpawnHeight = minHeight;
 		spawnFrequency = freq;
 		this.bounds = bounds;
@@ -71,7 +71,7 @@ public class ObstacleZone {
 	 * @param freq obstacle spawn frequency (in seconds)
 	 * @param bounds the bounds of this zone
 	 */
-	public ObstacleZone(Texture t, int minHeight, float freq, Rectangle bounds){
+	public ObstacleZone(Texture t, float minHeight, float freq, Rectangle bounds){
 		minSpawnHeight = minHeight;
 		spawnFrequency = (int)(freq/WORLD_STEP);
 		this.bounds = bounds;

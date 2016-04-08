@@ -125,7 +125,8 @@ public class GameMode extends ModeController {
 		JsonAssetManager.clearInstance();
 	}
 	
-	private ObstacleZone obstacle;
+	private ObstacleZone obstacleZone;
+	private ObstacleModel obstacle;
 	private Array<ObstacleZone> obstacles = new Array<ObstacleZone>();
 	/**
 	 * Whether we have completed this level
@@ -277,8 +278,8 @@ public class GameMode extends ModeController {
 			bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY"),
 					obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
 			//TODO: Set texture to something other than null once we have textures for obstacles
-			obstacle = new ObstacleZone(null, currentHeight, obstacleDesc.getInt("frequency"), bound);
-			obstacles.add(obstacle);
+			obstacleZone = new ObstacleZone(null, currentHeight, obstacleDesc.getInt("frequency"), bound);
+			obstacles.add(obstacleZone);
 			obstacleDesc = obstacleDesc.next();
 		}
 	}
@@ -325,31 +326,21 @@ public class GameMode extends ModeController {
 	 * @param dt 
 	 */
 	public void update(float dt) {
-		//System.out.println("UPDATE");
 		InputController input = InputController.getInstance();
 		inx = input.getHorizontal();
 		iny = input.getVertical();
 
 		justReleased.clear();
 		upsideDown = character.parts.get(HEAD).getPosition().y - character.parts.get(CHEST).getPosition().y <= 0;
-		//TODO: unused code?, should be removed
-		//figure out whats pressed and whats been released this timestep (next 4 lines)
 		boolean a = input.didLeftLeg() ? addToButtonsPressed((FOOT_LEFT)) : checkIfJustReleased(FOOT_LEFT);
 		boolean b = input.didRightLeg() ? addToButtonsPressed((FOOT_RIGHT)) : checkIfJustReleased(FOOT_RIGHT);
 		boolean c = input.didLeftArm() ? addToButtonsPressed((HAND_LEFT)) : checkIfJustReleased(HAND_LEFT);
 		boolean d = input.didRightArm() ? addToButtonsPressed((HAND_RIGHT)) : checkIfJustReleased(HAND_RIGHT);
 
-//		float y = input.getVertical();
-
 		Vector2 force = new Vector2(0, 0);
 		if (nextToPress.size > 0) {
-//			System.out.println(ENAMES[nextToPress.get(0)]);
-//			next two lines ungrip all selected extremities.
-			ExtremityModel curPart = ((ExtremityModel) (character.parts.get(nextToPress.get(0))));
 			for (int i : nextToPress) {
-//				System.out.println(ENAMES[i]);
 				((ExtremityModel) (character.parts.get(i))).ungrip();
-				//System.out.println("ungripped " + ENAMES[i]);
 			}
 			for (int ext:EXTREMITIES){
 				if (((ExtremityModel) (character.parts.get(ext))).isGripping())
@@ -372,26 +363,19 @@ public class GameMode extends ModeController {
 		glowHandholds();
 		timestep += 1;
 
-		// TODO: Use inputController methods to select limbs,
-		//       horizontal and vertical to move them
-
-		//move camera with character
-		canvas.setCameraPosition(canvas.width / 2,
-						character.parts.get(CHEST).getBody().getPosition().y);
-//move camera with character
-
-//		canvas.setCameraPosition(canvas.getWidth()/2,
-//				character.parts.get(CHEST).getBody().getPosition().y * canvas.getHeight()/DEFAULT_HEIGHT);
-//		if(canvas.getCamera().position.y > backgroundTexture.getTexture().getHeight()-canvas.getHeight()){
-//			canvas.setCameraPosition(canvas.getWidth()/2, backgroundTexture.getTexture().getHeight()-canvas.getHeight());
-//		}
+		canvas.setCameraPosition(canvas.getWidth() / 2,
+						character.parts.get(CHEST).getBody().getPosition().y*SCREEN_HEIGHT/DEFAULT_HEIGHT);
 		if(canvas.getCamera().position.y < canvas.getHeight()/2){
 			canvas.setCameraPosition(canvas.getWidth()/2, canvas.getHeight()/2);
-//			System.out.println("here");
 		}
-
-		// TODO: Movements of other objects (obstacles, eventually)
-
+		
+		spawnObstacles();
+		for(GameObject g : objects){
+			if(g instanceof ObstacleModel && 
+					g.getBody().getPosition().y  < character.parts.get(CHEST).getBody().getPosition().y){
+				objects.remove(g);
+			}
+		}
 		// TODO: Update energy quantity (fill in these values)
 		character.updateEnergy(oxygen, 1, force, true);
 //		if (character.getEnergy <= 0){
@@ -400,11 +384,26 @@ public class GameMode extends ModeController {
 //				 extremity.ungrip();
 //				 extremity.body.setType(BodyDef.BodyType.DynamicBody);
 //				 extremity.setTexture(partTextures[e].getTexture());
-//			}
+//			}s
 //		}
 	}
 
-
+	private void spawnObstacles(){
+		for(ObstacleZone oz : obstacles){
+			float viewHeight = (canvas.getCamera().position.x + canvas.height/2) * DEFAULT_HEIGHT/SCREEN_HEIGHT;
+			if(oz.canSpawnObstacle() && viewHeight < oz.getBounds().y && 
+					character.parts.get(CHEST).getBody().getPosition().y >= oz.getMinSpawnHeight()){
+				obstacle = new ObstacleModel(oz.getObstacleTexture(), 1f, scale); //TODO: determine obstacle drawSizeScale
+				obstacle.activatePhysics(world);
+				obstacle.setBodyType(BodyDef.BodyType.DynamicBody);
+				objects.add(obstacle);
+				oz.resetSpawnTimer();
+			}
+			else
+				oz.incrementSpawnTimer();
+		}
+	}
+	
 	/**
 	 * @author Jacob
 	 * @param vect - current linear velocity vector of an extremity
