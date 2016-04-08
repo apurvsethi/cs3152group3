@@ -42,5 +42,12 @@
     },
 
     "obstacles": {
+		"obstacle1":{
+		"originX": 5,
+		"originY": 7,
+		"width": 5,
+		"height": 5,
+		"frequency" : 5
+		}
 	}
 }

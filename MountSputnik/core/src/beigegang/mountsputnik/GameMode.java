@@ -16,8 +16,6 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
 import com.badlogic.gdx.utils.*;
 
-import java.util.ArrayList;
-
 public class GameMode extends ModeController {
 
 	/**
@@ -126,7 +124,9 @@ public class GameMode extends ModeController {
 		JsonAssetManager.getInstance().unloadDirectory();
 		JsonAssetManager.clearInstance();
 	}
-
+	
+	private ObstacleZone obstacle;
+	private Array<ObstacleZone> obstacles = new Array<ObstacleZone>();
 	/**
 	 * Whether we have completed this level
 	 */
@@ -147,11 +147,11 @@ public class GameMode extends ModeController {
 	/**
 	 * holds any extremities who's buttons were just released this timestep. cleared out every timestep
 	 */
-	private ArrayList<Integer> justReleased = new ArrayList<Integer>();
+	private Array<Integer> justReleased = new Array<Integer>();
 	/**
 	 * holds any extremities who's buttons are pressed during this timestep. keeps order of pressing intact
 	 */
-	private ArrayList<Integer> nextToPress = new ArrayList<Integer>();
+	private Array<Integer> nextToPress = new Array<Integer>();
 
 	public GameMode() {
 		super(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_GRAVITY);
@@ -167,6 +167,7 @@ public class GameMode extends ModeController {
 			obj.deactivatePhysics(world);
 		}
 		objects.clear();
+		obstacles.clear();
 		addQueue.clear();
 		world.dispose();
 		timestep = 0;
@@ -270,7 +271,16 @@ public class GameMode extends ModeController {
 			handholdDesc = handholdDesc.next();
 		}
 		
-		//TODO: add obstacle generation
+		JsonValue obstacleDesc = levelPiece.get("obstacles").child();
+		Rectangle bound;
+		while(obstacleDesc != null){
+			bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY"),
+					obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
+			//TODO: Set texture to something other than null once we have textures for obstacles
+			obstacle = new ObstacleZone(null, currentHeight, obstacleDesc.getInt("frequency"), bound);
+			obstacles.add(obstacle);
+			obstacleDesc = obstacleDesc.next();
+		}
 	}
 	
 	/**
@@ -281,7 +291,7 @@ public class GameMode extends ModeController {
      * @return true if part was just pressed, false otherwise
      */
 	public boolean addToButtonsPressed(int part) {
-		boolean notRedundant = !nextToPress.contains(part);
+		boolean notRedundant = !nextToPress.contains(part, true);
 		if(notRedundant)
 			nextToPress.add(part);
 		return notRedundant;
@@ -294,7 +304,7 @@ public class GameMode extends ModeController {
 	 * @return true if part was just released, false otherwise
      */
     public boolean checkIfJustReleased(int part) {
-		boolean present = nextToPress.remove((Integer) part);
+		boolean present = nextToPress.removeValue(part, true);
 		if (present)
 			justReleased.add(part);
 		return present;
@@ -332,7 +342,7 @@ public class GameMode extends ModeController {
 //		float y = input.getVertical();
 
 		Vector2 force = new Vector2(0, 0);
-		if (nextToPress.size() > 0) {
+		if (nextToPress.size > 0) {
 //			System.out.println(ENAMES[nextToPress.get(0)]);
 //			next two lines ungrip all selected extremities.
 			ExtremityModel curPart = ((ExtremityModel) (character.parts.get(nextToPress.get(0))));
@@ -356,7 +366,7 @@ public class GameMode extends ModeController {
  		else {
 			applyDampening();
 		}
-		if (justReleased.size() > 0 || timestep == 0) {
+		if (justReleased.size > 0 || timestep == 0) {
 			snapLimbsToHandholds(input);
 		}
 		glowHandholds();
