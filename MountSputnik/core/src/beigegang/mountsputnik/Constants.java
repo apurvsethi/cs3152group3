@@ -31,7 +31,7 @@ public final class Constants {
 	public static final int SCREEN_WIDTH = 1920;
 	public static final int SCREEN_HEIGHT = 1080;
 
-	public static final int HANDHOLD_SNAP_RADIUS = 30;
+	public static final int HANDHOLD_SNAP_RADIUS = 1;
 
 	/** The number of handholds on the given level. TODO: remove. For testing purposes only */
 	public static final int HANDHOLD_NUMBER = 5;
