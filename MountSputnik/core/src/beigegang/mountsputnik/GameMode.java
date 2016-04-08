@@ -255,6 +255,51 @@ public class GameMode extends ModeController {
 		JsonAssetManager.getInstance().loadDirectory(levelPiece);
 		JsonAssetManager.getInstance().allocateDirectory();
 		JsonValue handholdDesc = levelPiece.get("handholds").child();
+		//adding handholds for him to stick to originally
+
+		handhold = new HandholdModel(
+				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
+				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
+				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
+				13, 10,
+				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
+		handhold.fixtureDef.filter.maskBits = 0;
+		handhold.activatePhysics(world);
+		handhold.setBodyType(BodyDef.BodyType.StaticBody);
+		handhold.geometry.setUserData("handhold");
+		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
+		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
+		objects.add(handhold);
+
+		handhold = new HandholdModel(
+				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
+				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
+				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
+				19, 10,
+				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
+		handhold.fixtureDef.filter.maskBits = 0;
+		handhold.activatePhysics(world);
+
+		handhold.setBodyType(BodyDef.BodyType.StaticBody);
+		handhold.geometry.setUserData("handhold");
+		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
+		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
+		objects.add(handhold);
+
+		handhold = new HandholdModel(
+				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
+				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
+				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
+				16, 5,
+				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
+		handhold.fixtureDef.filter.maskBits = 0;
+		handhold.activatePhysics(world);
+		handhold.setBodyType(BodyDef.BodyType.StaticBody);
+		handhold.geometry.setUserData("handhold");
+		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
+		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
+
+		objects.add(handhold);
 
 		while(handholdDesc != null){
 			handhold = new HandholdModel(
@@ -271,6 +316,7 @@ public class GameMode extends ModeController {
 			objects.add(handhold);
 			handholdDesc = handholdDesc.next();
 		}
+
 		
 		JsonValue obstacleDesc = levelPiece.get("obstacles").child();
 		Rectangle bound;
@@ -346,7 +392,7 @@ public class GameMode extends ModeController {
 				if (((ExtremityModel) (character.parts.get(ext))).isGripping())
 					force.add(calcForce(ext,nextToPress.get(0)));
 			}
-			applyForce(nextToPress.get(0),force.scl(1000000),true);
+			applyForce(nextToPress.get(0),force.scl(.01f),true);
 
 			for (int extr :EXTREMITIES){
 				Vector2 vect =  character.parts.get(extr).getLinearVelocity();
@@ -641,14 +687,14 @@ public class GameMode extends ModeController {
 //		character.parts.get(CHEST).body.applyForceToCenter(force.x,force.y,wake);
 		switch(limb){
 			case FOOT_LEFT:
-				character.parts.get(THIGH_LEFT).body.applyForceToCenter(force.x,force.y,wake);
-				character.parts.get(SHIN_LEFT).body.applyForceToCenter(force.x,force.y * (.5f),wake);
+//				character.parts.get(THIGH_LEFT).body.applyForceToCenter(force.x,force.y,wake);
+//				character.parts.get(SHIN_LEFT).body.applyForceToCenter(force.x,force.y * (.5f),wake);
 				character.parts.get(FOOT_LEFT).body.applyForceToCenter(force.x, force.y * .25f,wake);
 				break;
 			case FOOT_RIGHT:
-				character.parts.get(THIGH_RIGHT).body.applyForceToCenter(force.x,force.y,wake);
+//				character.parts.get(THIGH_RIGHT).body.applyForceToCenter(force.x,force.y,wake);
 				character.parts.get(SHIN_RIGHT).body.applyForceToCenter(force.x,force.y * (.5f),wake);
-				character.parts.get(FOOT_RIGHT).body.applyForceToCenter(force.x, force.y * .25f,wake);
+//				character.parts.get(FOOT_RIGHT).body.applyForceToCenter(force.x, force.y * .25f,wake);
 				break;
 			case HAND_LEFT:
 				character.parts.get(HAND_LEFT).body.applyForceToCenter(force.x,force.y,wake);
