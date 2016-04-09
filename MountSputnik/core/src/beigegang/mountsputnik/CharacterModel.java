@@ -127,10 +127,8 @@ public class CharacterModel {
 		TextureRegion texture = partTextures[part];
 
 		if (connect != NONE) {
-//			partCache.set(-partX, -partY);
 			partCache.set(-partX * SCREEN_WIDTH / canvasSize.x, -partY * SCREEN_HEIGHT / canvasSize.y);
 			partCache.add(parts.get(connect).getPosition());
-//			partCache.add(connectX, connectY);
 			partCache.add(connectX * SCREEN_WIDTH / canvasSize.x, connectY * SCREEN_HEIGHT / canvasSize.y);
 		}
 		else partCache.set(partX, partY);
@@ -162,10 +160,8 @@ public class CharacterModel {
 		TextureRegion texture = partTextures[part];
 
 		if (connect != NONE) {
-//			partCache.set(-partX, -partY);
 			partCache.set(-partX * SCREEN_WIDTH / canvasSize.x, -partY * SCREEN_HEIGHT / canvasSize.y);
 			partCache.add(parts.get(connect).getPosition());
-//			partCache.add(connectX, connectY);
 			partCache.add(connectX * SCREEN_WIDTH / canvasSize.x, connectY * SCREEN_HEIGHT / canvasSize.y);
 		}
 		else partCache.set(partX, partY);
@@ -258,7 +254,6 @@ public class CharacterModel {
 	private void makeJoint(int part, int connect, float partX, float partY,
 						   float referenceAngle, Vector2 canvasSize) {
 		partCache.set(parts.get(part).getX(), parts.get(part).getY());
-//		partCache.add(partX, partY);
 		partCache.add(partX * SCREEN_WIDTH / canvasSize.x, partY * SCREEN_HEIGHT / canvasSize.y);
 		jointDef.initialize(parts.get(part).getBody(), parts.get(connect).getBody(),
 				partCache);
