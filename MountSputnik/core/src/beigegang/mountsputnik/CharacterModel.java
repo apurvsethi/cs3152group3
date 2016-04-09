@@ -103,6 +103,7 @@ public class CharacterModel {
 				SHIN_Y_FOOT_OFFSET, drawPositionScale);
 		makeExtremity(FOOT_RIGHT, SHIN_RIGHT, -FOOT_X_OFFSET, -SHIN_X_FOOT_OFFSET, FOOT_Y_OFFSET,
 				SHIN_Y_FOOT_OFFSET, drawPositionScale);
+
 	}
 
 	/**
@@ -183,7 +184,7 @@ public class CharacterModel {
 		makeJoint(ARM_LEFT, CHEST, ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0);
 		setJointAngleLimits(-90, 90);
 		addJoint(world);
-		makeJoint(ARM_RIGHT, CHEST, -ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0);
+		makeJoint(ARM_RIGHT, CHEST, -ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 180);
 		setJointAngleLimits(-90, 90);
 		addJoint(world);
 
@@ -250,15 +251,16 @@ public class CharacterModel {
 	}
 
 	private void setJointMotor(float motorSpeed, float maxTorque) {
+		jointDef.enableMotor = true;
 		jointDef.motorSpeed = motorSpeed * DEG_TO_RAD;
 		jointDef.maxMotorTorque = maxTorque;
-		jointDef.enableMotor = true;
 	}
 
 	private void setJointAngleLimits(float rotationLimitLower, float rotationLimitUpper) {
+		jointDef.enableLimit = true;
+
 		jointDef.lowerAngle = rotationLimitLower * DEG_TO_RAD;
 		jointDef.upperAngle = rotationLimitUpper * DEG_TO_RAD;
-		jointDef.enableLimit = true;
 	}
 
 	private void addJoint(World world) {

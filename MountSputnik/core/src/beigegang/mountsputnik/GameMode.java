@@ -256,7 +256,7 @@ public class GameMode extends ModeController {
 		JsonAssetManager.getInstance().allocateDirectory();
 		JsonValue handholdDesc = levelPiece.get("handholds").child();
 		//adding handholds for him to stick to originally
-
+		makeTestLevel(handholdDesc);
 		handhold = new HandholdModel(
 				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
 				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
@@ -329,7 +329,84 @@ public class GameMode extends ModeController {
 			obstacleDesc = obstacleDesc.next();
 		}
 	}
-	
+
+	private void makeTestLevel(JsonValue handholdDesc) {
+		handhold = new HandholdModel(
+				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
+				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
+				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
+				13, 10,
+				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
+		handhold.fixtureDef.filter.maskBits = 0;
+		handhold.activatePhysics(world);
+		handhold.setBodyType(BodyDef.BodyType.StaticBody);
+		handhold.geometry.setUserData("handhold");
+		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
+		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
+		objects.add(handhold);
+
+		handhold = new HandholdModel(
+				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
+				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
+				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
+				19, 10,
+				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
+		handhold.fixtureDef.filter.maskBits = 0;
+		handhold.activatePhysics(world);
+
+		handhold.setBodyType(BodyDef.BodyType.StaticBody);
+		handhold.geometry.setUserData("handhold");
+		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
+		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
+		objects.add(handhold);
+
+		handhold = new HandholdModel(
+				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
+				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
+				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
+				16, 5,
+				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
+		handhold.fixtureDef.filter.maskBits = 0;
+		handhold.activatePhysics(world);
+		handhold.setBodyType(BodyDef.BodyType.StaticBody);
+		handhold.geometry.setUserData("handhold");
+		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
+		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
+
+		objects.add(handhold);
+
+		handhold = new HandholdModel(
+				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
+				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
+				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
+				16, 7,
+				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
+		handhold.fixtureDef.filter.maskBits = 0;
+		handhold.activatePhysics(world);
+		handhold.setBodyType(BodyDef.BodyType.StaticBody);
+		handhold.geometry.setUserData("handhold");
+		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
+		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
+
+		objects.add(handhold);
+
+		handhold = new HandholdModel(
+				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
+				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
+				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
+				16, 10,
+				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
+		handhold.fixtureDef.filter.maskBits = 0;
+		handhold.activatePhysics(world);
+		handhold.setBodyType(BodyDef.BodyType.StaticBody);
+		handhold.geometry.setUserData("handhold");
+		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
+		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
+
+		objects.add(handhold);
+
+	}
+
 	/**
 	 * @author Jacob
 	 * if button was not pressed on the previous turn but is pressed now, add to nextToPress
@@ -373,8 +450,8 @@ public class GameMode extends ModeController {
 	 */
 	public void update(float dt) {
 		InputController input = InputController.getInstance();
-		inx = input.getHorizontal();
-		iny = input.getVertical();
+		inx = input.getHorizontalL();
+		iny = input.getVerticalL();
 
 		justReleased.clear();
 		upsideDown = character.parts.get(HEAD).getPosition().y - character.parts.get(CHEST).getPosition().y <= 0;
@@ -383,25 +460,36 @@ public class GameMode extends ModeController {
 		boolean c = input.didLeftArm() ? addToButtonsPressed((HAND_LEFT)) : checkIfJustReleased(HAND_LEFT);
 		boolean d = input.didRightArm() ? addToButtonsPressed((HAND_RIGHT)) : checkIfJustReleased(HAND_RIGHT);
 
-		Vector2 force = new Vector2(0, 0);
+		Vector2 forceL = new Vector2(0, 0);
+		Vector2 forceR = new Vector2(0, 0);
+
 		if (nextToPress.size > 0) {
 			for (int i : nextToPress) {
 				((ExtremityModel) (character.parts.get(i))).ungrip();
 			}
 			for (int ext:EXTREMITIES){
 				if (((ExtremityModel) (character.parts.get(ext))).isGripping())
-					force.add(calcForce(ext,nextToPress.get(0)));
-			}
-			applyForce(nextToPress.get(0),force.scl(.01f),true);
+					forceL.add(calcForce(ext,nextToPress.get(0),input.getHorizontalL(),input.getVerticalL()));
+				//change so its pretty
 
-			for (int extr :EXTREMITIES){
-				Vector2 vect =  character.parts.get(extr).getLinearVelocity();
-				character.parts.get(extr).setLinearVelocity(boundVelocity(vect));
+			}
+			applyForce(nextToPress.get(0),forceL.scl(.5f),true);
+
+			if (nextToPress.size > 1 && TWO_LIMB_MODE) {
+				for (int ext:EXTREMITIES){
+					forceR.add(calcForce(ext, nextToPress.get(1),input.getHorizontalR(),input.getVerticalR()));
+				}
+				applyForce(nextToPress.get(1),forceR.scl(.5f),true);
+
 			}
 
 		}
  		else {
 			applyDampening();
+		}
+		for (PartModel p:character.parts){
+			Vector2 vect =  p.getLinearVelocity();
+			p.setLinearVelocity(boundVelocity(vect));
 		}
 		if (justReleased.size > 0 || timestep == 0) {
 			snapLimbsToHandholds(input);
@@ -423,7 +511,8 @@ public class GameMode extends ModeController {
 			}
 		}
 		// TODO: Update energy quantity (fill in these values)
-		character.updateEnergy(oxygen, 1, force, true);
+		//TODO : change if character is in TWO_LIMB_MODE?
+		character.updateEnergy(oxygen, 1, forceL, true);
 //		if (character.getEnergy <= 0){
 //			for(int e : EXTREMITIES){
 //				 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
@@ -456,10 +545,12 @@ public class GameMode extends ModeController {
      * @return bounded linear velocity vector
      */
 	private Vector2 boundVelocity(Vector2 vect) {
-		if (vect.x>0) vect.x = Math.min(EXTREMITY_MAX_X_VELOCITY,vect.x);
-		else vect.x = Math.max(-1 * EXTREMITY_MAX_X_VELOCITY,vect.x);
-		if (vect.y>0) vect.y = Math.min(EXTREMITY_MAX_Y_VELOCITY,vect.y);
-		else vect.y = Math.max(-1 * EXTREMITY_MAX_Y_VELOCITY,vect.y);
+		if (Math.abs(vect.x) > 1 || Math.abs(vect.y) > 1) {
+		}
+		vect.x = (vect.x>0) ? Math.min(PART_MAX_X_VELOCITY,vect.x) : Math.max(-1 * PART_MAX_X_VELOCITY,vect.x);
+		vect.y = (vect.y>0) ? Math.min(PART_MAX_Y_VELOCITY,vect.y) : Math.max(-1 * PART_MAX_Y_VELOCITY,vect.y);
+
+
 		return vect;
 	}
 	/**
@@ -587,14 +678,14 @@ public class GameMode extends ModeController {
 	 */
 
 	//TODO: refactor this method, get rid of the nested ifs, I'd do it but im not sure exactly how it works
-	private Vector2 calcForce(int hookedPart, int freePart) {
+	private Vector2 calcForce(int hookedPart, int freePart,float xval,float yval) {
 		float forcex = 0f;
 		float forcey = 0f;
-		forcex = inx * CONSTANT_X_FORCE;
+		forcex = xval * CONSTANT_X_FORCE;
 		
 		if (!upsideDown) {
 			Vector2 hp = character.parts.get(hookedPart).getPosition();
-			Vector2 fp = character.parts.get(freePart).getPosition();
+//			Vector2 fp = character.parts.get(freePart).getPosition();
 			if (hookedPart == FOOT_LEFT || hookedPart == FOOT_RIGHT) {
 				if (iny > 0) {
 					float angleKnee = 0f;
@@ -684,27 +775,30 @@ public class GameMode extends ModeController {
 	 * @param wake - boolean to wake limb up (currently always passed in as true)
 	 */
 	private void applyForce(int limb,Vector2 force,boolean wake) {
-//		character.parts.get(CHEST).body.applyForceToCenter(force.x,force.y,wake);
+
+		applyTorsoForceIfApplicable();
+
+
 		switch(limb){
 			case FOOT_LEFT:
-//				character.parts.get(THIGH_LEFT).body.applyForceToCenter(force.x,force.y,wake);
-//				character.parts.get(SHIN_LEFT).body.applyForceToCenter(force.x,force.y * (.5f),wake);
+				character.parts.get(THIGH_LEFT).body.applyForceToCenter(force.x,force.y,wake);
+				character.parts.get(SHIN_LEFT).body.applyForceToCenter(force.x,force.y * (.5f),wake);
 				character.parts.get(FOOT_LEFT).body.applyForceToCenter(force.x, force.y * .25f,wake);
 				break;
 			case FOOT_RIGHT:
-//				character.parts.get(THIGH_RIGHT).body.applyForceToCenter(force.x,force.y,wake);
+				character.parts.get(THIGH_RIGHT).body.applyForceToCenter(force.x,force.y,wake);
 				character.parts.get(SHIN_RIGHT).body.applyForceToCenter(force.x,force.y * (.5f),wake);
-//				character.parts.get(FOOT_RIGHT).body.applyForceToCenter(force.x, force.y * .25f,wake);
+				character.parts.get(FOOT_RIGHT).body.applyForceToCenter(force.x, force.y * .25f,wake);
 				break;
 			case HAND_LEFT:
 				character.parts.get(HAND_LEFT).body.applyForceToCenter(force.x,force.y,wake);
 				character.parts.get(FOREARM_LEFT).body.applyForceToCenter(force.x,force.y,wake);
-				character.parts.get(ARM_LEFT).body.applyForceToCenter(force.x, force.y * .25f,wake);
+				character.parts.get(ARM_LEFT).body.applyForceToCenter(force.x, force.y * 1f,wake);
 				break;
 			case HAND_RIGHT:
 				character.parts.get(HAND_RIGHT).body.applyForceToCenter(force.x,force.y,wake);
 				character.parts.get(FOREARM_RIGHT).body.applyForceToCenter(force.x,force.y,wake);
-				character.parts.get(ARM_RIGHT).body.applyForceToCenter(force.x, force.y * .25f,wake);
+				character.parts.get(ARM_RIGHT).body.applyForceToCenter(force.x, force.y * 1f,wake);
 				break;
 			default:
 				//do nothing
@@ -712,7 +806,18 @@ public class GameMode extends ModeController {
 
 		}
 	}
-	
+
+	private void applyTorsoForceIfApplicable() {
+		if (TORSO_MODE){
+			InputController input = InputController.getInstance();
+			float h = input.getHorizontalR();
+			float v = input.getVerticalR();
+			character.parts.get(CHEST).body.applyForceToCenter(h*CONSTANT_X_FORCE,v*CONSTANT_X_FORCE,true);
+		}
+	}
+
+	//	a Draw Note: If two parts are crossing each other, and one part is on a handhold, the other part
+//	should be drawn ON TOP of the hooked part.
 	public void draw() {
 		canvas.clear();
 
