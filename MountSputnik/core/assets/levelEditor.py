@@ -283,7 +283,7 @@ class LinePlayground(FloatLayout):
                 'positionX': (hold.pos[0]-Window.size[0]/3)/10, 
                 'positionY': (hold.pos[1]-80)/10, 
                 "friction": 1, 
-                "restituion": 1, 
+                "restitution": 1, 
                 "crumble": False
             }
 

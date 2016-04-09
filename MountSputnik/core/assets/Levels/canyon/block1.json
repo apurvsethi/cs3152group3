@@ -1,0 +1,58 @@
+{
+"difficulty": "notRanked", 
+"id": 1, 
+"handholds": {
+	"hold8": {
+		"width": 0.5, 
+		"positionX": 8.4, 
+		"positionY": 11.5, 
+		"crumble": False, 
+		"friction": 1, 
+		"gripTexture": "canyon/handholdgrabbed.png", 
+		"restitution": 1, 
+		"glowTexture": "canyon/handholdglow.png", 
+		"texture": "canyon/handhold.png", 
+		"height": 0.5}, 
+	"hold9": {
+		"width": 0.5, 
+		"positionX": 12.2, 
+		"positionY": 4.3, 
+		"crumble": False, 
+		"friction": 1, 
+		"gripTexture": "canyon/handholdgrabbed.png", 
+		"restitution": 1, 
+		"glowTexture": "canyon/handholdglow.png", 
+		"texture": "canyon/handhold.png", 
+		"height": 0.5}, 
+	"hold0": {
+		"width": 0.5, 
+		"positionX": 13.5, 
+		"positionY": 17.1, 
+		"crumble": False, 
+		"friction": 1, 
+		"gripTexture": "canyon/handholdgrabbed.png", 
+		"restitution": 1, 
+		"glowTexture": "canyon/handholdglow.png", 
+		"texture": "canyon/handhold.png", 
+		"height": 0.5}, 
+	"hold1": {
+		"width": 0.5, 
+		"positionX": 6.4, 
+		"positionY": 17.5, 
+		"crumble": False, 
+		"friction": 1, 
+		"gripTexture": 
+		"canyon/handholdgrabbed.png", 
+		"restitution": 1, 
+		"glowTexture": 
+		"canyon/handholdglow.png", 
+		"texture": "canyon/handhold.png", 
+		"height": 0.5}, 
+	"hold2": {
+		"width": 0.5, 
+		"positionX": 8.4, 
+		"positionY": 29.7, 
+		"crumble": False, 
+		"friction": 1, 
+		"gripTexture": 
+		"canyon/handholdgrabbed.png", "restitution": 1, "glowTexture": "canyon/handholdglow.png", "texture": "canyon/handhold.png", "height": 0.5}, "hold3": {"width": 0.5, "positionX": 16.4, "positionY": 20.899999999999995, "crumble": False, "friction": 1, "gripTexture": "canyon/handholdgrabbed.png", "restitution": 1, "glowTexture": "canyon/handholdglow.png", "texture": "canyon/handhold.png", "height": 0.5}, "hold4": {"width": 0.5, "positionX": 21.0, "positionY": 25.900000000000006, "crumble": False, "friction": 1, "gripTexture": "canyon/handholdgrabbed.png", "restitution": 1, "glowTexture": "canyon/handholdglow.png", "texture": "canyon/handhold.png", "height": 0.5}, "hold5": {"width": 0.5, "positionX": 24.6, "positionY": 15.0, "crumble": False, "friction": 1, "gripTexture": "canyon/handholdgrabbed.png", "restitution": 1, "glowTexture": "canyon/handholdglow.png", "texture": "canyon/handhold.png", "height": 0.5}, "hold6": {"width": 0.5, "positionX": 18.299999999999994, "positionY": 31.2, "crumble": False, "friction": 1, "gripTexture": "canyon/handholdgrabbed.png", "restitution": 1, "glowTexture": "canyon/handholdglow.png", "texture": "canyon/handhold.png", "height": 0.5}, "hold7": {"width": 0.5, "positionX": 12.4, "positionY": 39.2, "crumble": False, "friction": 1, "gripTexture": "canyon/handholdgrabbed.png", "restitution": 1, "glowTexture": "canyon/handholdglow.png", "texture": "canyon/handhold.png", "height": 0.5}, "hold10": {"width": 0.5, "positionX": 20.900000000000006, "positionY": 2.799999999999997, "crumble": False, "friction": 1, "gripTexture": "canyon/handholdgrabbed.png", "restitution": 1, "glowTexture": "canyon/handholdglow.png", "texture": "canyon/handhold.png", "height": 0.5}, "hold11": {"width": 0.5, "positionX": 19.599999999999994, "positionY": 10.4, "crumble": False, "friction": 1, "gripTexture": "canyon/handholdgrabbed.png", "restitution": 1, "glowTexture": "canyon/handholdglow.png", "texture": "canyon/handhold.png", "height": 0.5}}, "size": 44.271844660194176}

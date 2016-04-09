@@ -1,12 +1,10 @@
+
+
 {
 	"levels": {
-		 "canyon": { 
-			"complete": "false", 
-			"file": "level.json"
-		}, 
-
-		"mountain": {
-			"complete": "false", 
-			"file": "level.json"
-		}
+		"canyon": false, 
+		"mountain": false
+	}
 }
+
+

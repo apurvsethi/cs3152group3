@@ -7,6 +7,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import static beigegang.mountsputnik.Constants.*;
+
+import java.io.File;
+
 import beigegang.util.*;
 
 import com.badlogic.gdx.math.Rectangle;
@@ -37,7 +40,7 @@ public class GameMode extends ModeController {
 	private static final String BACKGROUND_FILE = "background.png";
 	private static final String FOREGROUND_FILE = "preliminaryCharacterFilmStrip.png";
 	
-	private static final String HANDHOLD_TEXTURES[] = {"handholds.png", "handholdsglow.png", "handholdsgrabbed.png"};
+	private static final String HANDHOLD_TEXTURES[] = {"assets/canyon/handhold.png", "assets/canyon/handholdglow.png", "assets/canyon/handholdgrabbed.png"};
 	private static final String PART_TEXTURES[] = {"Ragdoll/Corrected/Corrected/Torso.png", "Ragdoll/Corrected/Corrected/Head.png", "Ragdoll/Corrected/Corrected/Hips.png",
 			"Ragdoll/Corrected/Corrected/ArmLeft.png", "Ragdoll/Corrected/Corrected/ArmRight.png", "Ragdoll/Corrected/Corrected/ForearmLeft.png", "Ragdoll/Corrected/Corrected/ForearmRight.png",
 			"Ragdoll/Corrected/Corrected/HandLeftUngripped.png", "Ragdoll/Corrected/Corrected/HandRightUngripped.png", "Ragdoll/Corrected/Corrected/ThighLeft.png",
@@ -173,7 +176,7 @@ public class GameMode extends ModeController {
 		world.dispose();
 		timestep = 0;
 		//TODO: make this based on current level, rather than hardcoded test
-		populateLevel("test");
+		populateLevel("canyon");
 	}
 
 	/**
@@ -186,7 +189,7 @@ public class GameMode extends ModeController {
 	 * the desired height of the level, the total number of different blocks usable in generation, and 
 	 * descriptors of certain level-wide obstacles like rising lava, if they exist. 
 	 * 
-	 * The blocks will describe individual building blocks. They will contain a height in units (1 unit = 10 meters), to be 
+	 * The blocks will describe individual building blocks. They will contain a height in meters, to be 
 	 * determined by their size when created by the level editor, and a difficulty rating. They will also contain two 
 	 * important objects:
 	 * 
@@ -211,8 +214,8 @@ public class GameMode extends ModeController {
 		JsonAssetManager.getInstance().allocateDirectory();
 		Vector2 gravity = new Vector2(0,levelFormat.getFloat("gravity"));
 		oxygen = levelFormat.getFloat("oxygen");
-		int remainingHeight = levelFormat.getInt("height");
-		int currentHeight=0;
+		float remainingHeight = levelFormat.getFloat("height");
+		float currentHeight=0f;
 		int diffBlocks = levelFormat.getInt("uniqueBlocks");
 		int filler = levelFormat.getInt("generalFillerSize");
 		int fillerSize = levelFormat.getInt("fillerBlocks");
@@ -226,13 +229,13 @@ public class GameMode extends ModeController {
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
 
-			addChunk(levelPiece, currentHeight);
-			currentHeight += levelPiece.getInt("size");
+			addChunk(levelPiece, currentHeight, levelName);
+			currentHeight += levelPiece.getFloat("size");
 
 			for(int i = 0; i < filler; i++){
 				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
 				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/general/block"+blockNumber+".json"));
-				addChunk(levelPiece, currentHeight);
+				addChunk(levelPiece, currentHeight, "general");
 				currentHeight += levelPiece.getInt("size");
 			}
 		}
@@ -251,63 +254,22 @@ public class GameMode extends ModeController {
 	 * @param currentHeight: y offset from the bottom of the screen
 	 * @author Daniel
 	 */
-	private void addChunk(JsonValue levelPiece, int currentHeight){
+	private void addChunk(JsonValue levelPiece, float currentHeight, String levelName){
 		JsonAssetManager.getInstance().loadDirectory(levelPiece);
 		JsonAssetManager.getInstance().allocateDirectory();
+		
 		JsonValue handholdDesc = levelPiece.get("handholds").child();
-		//adding handholds for him to stick to originally
+		
 		makeTestLevel(handholdDesc);
-		handhold = new HandholdModel(
-				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
-				13, 10,
-				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
-		handhold.fixtureDef.filter.maskBits = 0;
-		handhold.activatePhysics(world);
-		handhold.setBodyType(BodyDef.BodyType.StaticBody);
-		handhold.geometry.setUserData("handhold");
-		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
-		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
-		objects.add(handhold);
-
-		handhold = new HandholdModel(
-				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
-				19, 10,
-				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
-		handhold.fixtureDef.filter.maskBits = 0;
-		handhold.activatePhysics(world);
-
-		handhold.setBodyType(BodyDef.BodyType.StaticBody);
-		handhold.geometry.setUserData("handhold");
-		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
-		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
-		objects.add(handhold);
-
-		handhold = new HandholdModel(
-				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
-				16, 5,
-				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
-		handhold.fixtureDef.filter.maskBits = 0;
-		handhold.activatePhysics(world);
-		handhold.setBodyType(BodyDef.BodyType.StaticBody);
-		handhold.geometry.setUserData("handhold");
-		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
-		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
-
-		objects.add(handhold);
-
+		
 		while(handholdDesc != null){
 			handhold = new HandholdModel(
-					createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(), 
-					createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(), 
-					createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
-					handholdDesc.getFloat("positionX"), handholdDesc.getFloat("positionY")+currentHeight*10,
+					createTexture(assetManager, "assets/"+handholdDesc.getString("texture"), false).getTexture(), 
+					createTexture(assetManager, "assets/"+handholdDesc.getString("glowTexture"), false).getTexture(), 
+					createTexture(assetManager, "assets/"+handholdDesc.getString("gripTexture"), false).getTexture(),
+					handholdDesc.getFloat("positionX"), handholdDesc.getFloat("positionY")+currentHeight,
 					new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
+			handhold.fixtureDef.filter.maskBits = 0;
 			handhold.activatePhysics(world);
 			handhold.setBodyType(BodyDef.BodyType.StaticBody);
 			handhold.geometry.setUserData("handhold");
@@ -317,8 +279,13 @@ public class GameMode extends ModeController {
 			handholdDesc = handholdDesc.next();
 		}
 
-		
-		JsonValue obstacleDesc = levelPiece.get("obstacles").child();
+		JsonValue obstacleDesc;
+		try{
+			obstacleDesc = levelPiece.get("obstacles").child();
+		}
+		catch(Exception e){
+			return;
+		}
 		Rectangle bound;
 		while(obstacleDesc != null){
 			bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY"),
@@ -332,9 +299,9 @@ public class GameMode extends ModeController {
 
 	private void makeTestLevel(JsonValue handholdDesc) {
 		handhold = new HandholdModel(
-				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
+				createTexture(assetManager,  "assets/"+handholdDesc.getString("texture"), false).getTexture(),
+				createTexture(assetManager,  "assets/"+handholdDesc.getString("glowTexture"), false).getTexture(),
+				createTexture(assetManager,  "assets/"+handholdDesc.getString("gripTexture"), false).getTexture(),
 				13, 10,
 				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
 		handhold.fixtureDef.filter.maskBits = 0;
@@ -346,9 +313,9 @@ public class GameMode extends ModeController {
 		objects.add(handhold);
 
 		handhold = new HandholdModel(
-				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
+				createTexture(assetManager,  "assets/"+handholdDesc.getString("texture"), false).getTexture(),
+				createTexture(assetManager,  "assets/"+handholdDesc.getString("glowTexture"), false).getTexture(),
+				createTexture(assetManager,  "assets/"+handholdDesc.getString("gripTexture"), false).getTexture(),
 				19, 10,
 				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
 		handhold.fixtureDef.filter.maskBits = 0;
@@ -361,9 +328,9 @@ public class GameMode extends ModeController {
 		objects.add(handhold);
 
 		handhold = new HandholdModel(
-				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
+				createTexture(assetManager,  "assets/"+handholdDesc.getString("texture"), false).getTexture(),
+				createTexture(assetManager,  "assets/"+handholdDesc.getString("glowTexture"), false).getTexture(),
+				createTexture(assetManager,  "assets/"+handholdDesc.getString("gripTexture"), false).getTexture(),
 				16, 5,
 				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
 		handhold.fixtureDef.filter.maskBits = 0;
@@ -376,9 +343,9 @@ public class GameMode extends ModeController {
 		objects.add(handhold);
 
 		handhold = new HandholdModel(
-				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
+				createTexture(assetManager,  "assets/"+handholdDesc.getString("texture"), false).getTexture(),
+				createTexture(assetManager,  "assets/"+handholdDesc.getString("glowTexture"), false).getTexture(),
+				createTexture(assetManager,  "assets/"+handholdDesc.getString("gripTexture"), false).getTexture(),
 				16, 7,
 				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
 		handhold.fixtureDef.filter.maskBits = 0;
@@ -391,9 +358,9 @@ public class GameMode extends ModeController {
 		objects.add(handhold);
 
 		handhold = new HandholdModel(
-				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
+				createTexture(assetManager,  "assets/"+handholdDesc.getString("texture"), false).getTexture(),
+				createTexture(assetManager, "assets/"+ handholdDesc.getString("glowTexture"), false).getTexture(),
+				createTexture(assetManager, "assets/"+ handholdDesc.getString("gripTexture"), false).getTexture(),
 				16, 10,
 				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
 		handhold.fixtureDef.filter.maskBits = 0;
@@ -829,11 +796,10 @@ public class GameMode extends ModeController {
 		for (GameObject obj : objects) obj.draw(canvas);
 		canvas.end();
 
-//		//debug energy text in top left of screen
-//		canvas.begin();
-//		canvas.drawText(((Integer)(Math.round(character.getEnergy()))).toString(), font, 0f,
-//				canvas.getCamera().position.y+canvas.height/2-50f);
-//		canvas.end();
+		canvas.begin();
+		canvas.drawText(((Integer)(Math.round(character.getEnergy()))).toString(), font, 0f,
+				canvas.getCamera().position.y+canvas.height/2-50f);
+		canvas.end();
 
 		if (debug) {
 			canvas.beginDebug();
