@@ -126,6 +126,6 @@ public final class Constants {
 
 	public static final float PART_MAX_X_VELOCITY = 1f;
 	public static final float PART_MAX_Y_VELOCITY = 1f;
-	public static boolean TORSO_MODE = false;
+	public static boolean TORSO_MODE = true;
 	public static boolean TWO_LIMB_MODE = false;
 }

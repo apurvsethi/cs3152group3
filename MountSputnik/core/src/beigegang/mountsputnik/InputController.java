@@ -290,8 +290,9 @@ public class InputController {
 		 if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
 		 	verticalL -= 1.0f;
 		 }
-		horizontalR = 0;
-		verticalR = 0;
+
+		horizontalR = (secondary? horizontalR :0);
+		verticalR = (secondary? verticalR :0);
 		//because not available with keypad.
 //		Constants.TORSO_MODE = false;
 //		Constants.TWO_LIMB_MODE = false;

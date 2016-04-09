@@ -462,6 +462,7 @@ public class GameMode extends ModeController {
 
 		Vector2 forceL = new Vector2(0, 0);
 		Vector2 forceR = new Vector2(0, 0);
+		applyTorsoForceIfApplicable();
 
 		if (nextToPress.size > 0) {
 			for (int i : nextToPress) {
@@ -776,7 +777,6 @@ public class GameMode extends ModeController {
 	 */
 	private void applyForce(int limb,Vector2 force,boolean wake) {
 
-		applyTorsoForceIfApplicable();
 
 
 		switch(limb){
@@ -812,7 +812,7 @@ public class GameMode extends ModeController {
 			InputController input = InputController.getInstance();
 			float h = input.getHorizontalR();
 			float v = input.getVerticalR();
-			character.parts.get(CHEST).body.applyForceToCenter(h*CONSTANT_X_FORCE,v*CONSTANT_X_FORCE,true);
+			character.parts.get(CHEST).body.applyForceToCenter(h*CONSTANT_X_FORCE*10,10*v*CONSTANT_X_FORCE,true);
 		}
 	}
 
