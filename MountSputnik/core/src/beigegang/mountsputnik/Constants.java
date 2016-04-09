@@ -30,7 +30,8 @@ public final class Constants {
 	/** Height of the game world in Box2d units */
 	public static final float DEFAULT_HEIGHT = 18.0f;
 	/** The default value of gravity (going down) */
-	protected static final float DEFAULT_GRAVITY = -9.8f;
+	//TODO change gravity back
+	protected static final float DEFAULT_GRAVITY = -5f;
 
 	public static final int HANDHOLD_SNAP_RADIUS = 1;
 
@@ -123,6 +124,8 @@ public final class Constants {
 	public static final float ENERGY_LOSS = .1f;
 	public static final float BASE_ENERGY_GAIN = 1f;
 
-	public static final float EXTREMITY_MAX_X_VELOCITY = 20f;
-	public static final float EXTREMITY_MAX_Y_VELOCITY = 20f;
+	public static final float PART_MAX_X_VELOCITY = 1f;
+	public static final float PART_MAX_Y_VELOCITY = 1f;
+	public static boolean TORSO_MODE = true;
+	public static boolean TWO_LIMB_MODE = false;
 }

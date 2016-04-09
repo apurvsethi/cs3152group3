@@ -46,34 +46,60 @@ public class InputController {
 	/** Whether the right leg action button was pressed. */
 	private boolean rightLegPressed;
 	
-	/** How much did we move horizontally? */
-	private float horizontal;
-	/** How much did we move vertically? */
-	private float vertical;
-	
+	/** How much did we move horizontally left stick? */
+	private float horizontalL;
+	/** How much did we move vertically left stick? */
+	private float verticalL;
+
+	/** How much did we move horizontally right stick? */
+	private float horizontalR;
+	/** How much did we move vertically right stick? */
+	private float verticalR;
+
 	/** An X-Box controller (if it is connected) */
 	XBox360Controller xbox;
 	
 	/**
-	 * Returns the amount of sideways movement. 
+	 * Returns the amount of sideways movement from left stick.
 	 *
 	 * -1 = left, 1 = right, 0 = still
 	 *
-	 * @return the amount of sideways movement. 
+	 * @return the amount of sideways movement from left stick.
 	 */
-	public float getHorizontal() {
-		return horizontal;
+	public float getHorizontalL() {
+		return horizontalL;
 	}
 	
 	/**
-	 * Returns the amount of vertical movement. 
+	 * Returns the amount of vertical movement from left stick.
 	 *
 	 * -1 = down, 1 = up, 0 = still
 	 *
-	 * @return the amount of vertical movement. 
+	 * @return the amount of vertical movement from left stick.
 	 */
-	public float getVertical() {
-		return vertical;
+	public float getVerticalL() {
+		return verticalL;
+	}
+	/**
+	 * Returns the amount of sideways movement from right stick.
+	 *
+	 * -1 = left, 1 = right, 0 = still
+	 *
+	 * @return the amount of sideways movement from right stick.
+	 */
+	public float getHorizontalR() {
+		return horizontalR;
+	}
+
+	/**
+	 * Returns the amount of vertical movement from right stick.
+	 *
+	 * -1 = down, 1 = up, 0 = still
+	 *
+	 * @return the amount of vertical movement from right stick.
+	 */
+	public float getVerticalR() {
+		return verticalR;
 	}
 
 	/**
@@ -219,8 +245,13 @@ public class InputController {
 		rightLegPressed = xbox.getRightTrigger() < -0.5;
 		
 		// Movement based on change
-		horizontal = xbox.getLeftX();
-		vertical = -xbox.getLeftY();
+		horizontalL = xbox.getLeftX();
+		verticalL = -xbox.getLeftY();
+
+		if (Constants.TORSO_MODE || Constants.TWO_LIMB_MODE) {
+			horizontalR = xbox.getRightX();
+			verticalR = -xbox.getRightY();
+		}
 	}
 
 	/**
@@ -244,20 +275,26 @@ public class InputController {
 		leftLegPressed = (secondary && leftLegPressed) || (Gdx.input.isKeyPressed(Input.Keys.A));
 		rightLegPressed = (secondary && rightLegPressed) || (Gdx.input.isKeyPressed(Input.Keys.S));
 		
-		horizontal = (secondary ? horizontal : 0.0f);
+		horizontalL = (secondary ? horizontalL : 0.0f);
 		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			horizontal += 1.0f;
+			horizontalL += 1.0f;
 		 }
 		 if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-		 	horizontal -= 1.0f;
+		 	horizontalL -= 1.0f;
 		 }
 		 
-		 vertical = (secondary ? vertical : 0.0f);
+		 verticalL = (secondary ? verticalL : 0.0f);
 		 if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-		 	vertical += 1.0f;
+		 	verticalL += 1.0f;
 		 }
 		 if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-		 	vertical -= 1.0f;
+		 	verticalL -= 1.0f;
 		 }
+
+		horizontalR = (secondary? horizontalR :0);
+		verticalR = (secondary? verticalR :0);
+		//because not available with keypad.
+//		Constants.TORSO_MODE = false;
+//		Constants.TWO_LIMB_MODE = false;
 	}
 }
