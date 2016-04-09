@@ -237,7 +237,7 @@ public class GameMode extends ModeController {
 			}
 		}
 
-		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale);
+		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
 		for (PartModel p : character.parts) {
 			objects.add(p);
 		}
