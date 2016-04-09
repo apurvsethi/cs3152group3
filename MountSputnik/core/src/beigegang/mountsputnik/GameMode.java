@@ -257,49 +257,6 @@ public class GameMode extends ModeController {
 		JsonValue handholdDesc = levelPiece.get("handholds").child();
 		//adding handholds for him to stick to originally
 		makeTestLevel(handholdDesc);
-		handhold = new HandholdModel(
-				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
-				13, 10,
-				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
-		handhold.fixtureDef.filter.maskBits = 0;
-		handhold.activatePhysics(world);
-		handhold.setBodyType(BodyDef.BodyType.StaticBody);
-		handhold.geometry.setUserData("handhold");
-		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
-		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
-		objects.add(handhold);
-
-		handhold = new HandholdModel(
-				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
-				19, 10,
-				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
-		handhold.fixtureDef.filter.maskBits = 0;
-		handhold.activatePhysics(world);
-
-		handhold.setBodyType(BodyDef.BodyType.StaticBody);
-		handhold.geometry.setUserData("handhold");
-		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
-		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
-		objects.add(handhold);
-
-		handhold = new HandholdModel(
-				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("glowTexture"), false).getTexture(),
-				createTexture(assetManager, handholdDesc.getString("gripTexture"), false).getTexture(),
-				16, 5,
-				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
-		handhold.fixtureDef.filter.maskBits = 0;
-		handhold.activatePhysics(world);
-		handhold.setBodyType(BodyDef.BodyType.StaticBody);
-		handhold.geometry.setUserData("handhold");
-		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
-		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
-
-		objects.add(handhold);
 
 		while(handholdDesc != null){
 			handhold = new HandholdModel(
@@ -329,7 +286,7 @@ public class GameMode extends ModeController {
 			obstacleDesc = obstacleDesc.next();
 		}
 	}
-
+	//TODO delete when there are actually levels!!!
 	private void makeTestLevel(JsonValue handholdDesc) {
 		handhold = new HandholdModel(
 				createTexture(assetManager, handholdDesc.getString("texture"), false).getTexture(),
@@ -408,11 +365,11 @@ public class GameMode extends ModeController {
 	}
 
 	/**
-	 * @author Jacob
 	 * if button was not pressed on the previous turn but is pressed now, add to nextToPress
 	 * note: cannot use set because order must be preserved for accurate/predictive control by player
 	 * @param part
      * @return true if part was just pressed, false otherwise
+	 * @author Jacob
      */
 	public boolean addToButtonsPressed(int part) {
 		boolean notRedundant = !nextToPress.contains(part, true);
@@ -422,10 +379,10 @@ public class GameMode extends ModeController {
 	}
 
 	/**
-	 * @author Jacob
 	 * checks if that extremity was released on this timestep by player, if so adds to justReleased
  	 * @param part
 	 * @return true if part was just released, false otherwise
+	 * @author Jacob
      */
     public boolean checkIfJustReleased(int part) {
 		boolean present = nextToPress.removeValue(part, true);
@@ -445,8 +402,8 @@ public class GameMode extends ModeController {
 	 *           special case: on the zeroth timestep/very first call to update at start of game,
 	 *           it snaps limbs to any handhold in radius.
 	 * 
+	 * @param dt
 	 * @author Jacob, Daniel
-	 * @param dt 
 	 */
 	public void update(float dt) {
 		InputController input = InputController.getInstance();
@@ -462,7 +419,6 @@ public class GameMode extends ModeController {
 
 		Vector2 forceL = new Vector2(0, 0);
 		Vector2 forceR = new Vector2(0, 0);
-		applyTorsoForceIfApplicable();
 
 		if (nextToPress.size > 0) {
 			for (int i : nextToPress) {
@@ -474,18 +430,31 @@ public class GameMode extends ModeController {
 				//change so its pretty
 
 			}
-			applyForce(nextToPress.get(0),forceL.scl(.5f),true);
+			applyForce(nextToPress.get(0),forceL.scl(.5f),true,input.getHorizontalL(),input.getVerticalL());
 
-			if (nextToPress.size > 1 && TWO_LIMB_MODE) {
+			if (nextToPress.size > 1 && (TWO_LIMB_MODE)) {
 				for (int ext:EXTREMITIES){
-					forceR.add(calcForce(ext, nextToPress.get(1),input.getHorizontalR(),input.getVerticalR()));
+					if (((ExtremityModel) (character.parts.get(ext))).isGripping())
+						forceR.add(calcForce(ext, nextToPress.get(1),input.getHorizontalR(),input.getVerticalR()));
 				}
-				applyForce(nextToPress.get(1),forceR.scl(.5f),true);
+
+
+				 applyForce(nextToPress.get(1),forceR.scl(.5f),true,input.getHorizontalR(),input.getVerticalR());
 
 			}
 
 		}
- 		else {
+		if (TORSO_MODE){
+			forceR.x = 0;
+			forceR.y = 0;
+			for (int ext:EXTREMITIES){
+				if (((ExtremityModel) (character.parts.get(ext))).isGripping())
+					forceR.add(calcForce(ext, CHEST,input.getHorizontalR(),input.getVerticalR()));
+			}
+			applyTorsoForceIfApplicable(forceR);
+		}
+
+		else {
 			applyDampening();
 		}
 		for (PartModel p:character.parts){
@@ -541,9 +510,10 @@ public class GameMode extends ModeController {
 	}
 	
 	/**
-	 * @author Jacob
-	 * @param vect - current linear velocity vector of an extremity
+	 * @param vect - current linear velocity vector of any body part
      * @return bounded linear velocity vector
+	 * @author Jacob
+
      */
 	private Vector2 boundVelocity(Vector2 vect) {
 		if (Math.abs(vect.x) > 1 || Math.abs(vect.y) > 1) {
@@ -555,10 +525,10 @@ public class GameMode extends ModeController {
 		return vect;
 	}
 	/**
-	 * @author Jacob
 	 * !!!currently not functioning!!!
 	 * will apply dampening to any limb not currently controlled by the player & are unattached to a handhold
 	 * will help limbs not swing around wildly after player releases them.
+	 * @author Jacob
  	 */
 	private void applyDampening() {
 		for (int ext : EXTREMITIES){
@@ -590,11 +560,10 @@ public class GameMode extends ModeController {
 	}
 
 	/**
-	 * @author Jacob
 	 * this method glows any handholds close enough for the person's extremity to grab.
 	 * //TODO there will be a possible issue if person at full extension and snaps to a handhold out of their reach.
 	 * //	 * implement a calculation which says that handhold distance <= MAX_ARM_DIST or MAX_LEG_DIST.
-	 * 
+	 * @author Jacob
 	 */
 	private void glowHandholds() {
 		for (GameObject obj : objects) {
@@ -614,9 +583,10 @@ public class GameMode extends ModeController {
 	}
 
 	/**
-	 * @author Jacob
 	 * snaps any limbs in justReleased (limbs player controlled last timestep but no longer does) to closest handhold
 	 * if possible
+	 * @author Jacob
+
 	 * @param input
      */
 	private void snapLimbsToHandholds(InputController input) {
@@ -633,9 +603,9 @@ public class GameMode extends ModeController {
 	}
 	
 	/**
-	 * @author Jacob
 	 * snaps limb to handhold if possible.
 	 * @param limb - limb to snap if possible
+	 * @author Jacob
 	 * */
 	private void snapIfPossible(int limb) {
 		for (GameObject obj : objects) {
@@ -654,12 +624,12 @@ public class GameMode extends ModeController {
 	}
 
 	/**
-	 * @author Jacob
 	 * helper function to check if limb is close enough to a snapPoint on a handhold
 	 * used for both snapping limbs to handholds and glowing handholds showing player they're close enough to snap
 	 *
 	 * @param limb - limb to check for closeness
 	 * @param snapPoint - point on handhold to check distance to
+	 * @author Jacob
 	 *
 	 *
 	*/
@@ -671,134 +641,72 @@ public class GameMode extends ModeController {
 
 
 	/**
-	 * @author Jacob
 	 * @param hookedPart - calculation of force for an extremity attached to a handhold
 	 * @param freePart - part that the force will be applied to
 	 * calculates X and Y force player can use to propel their selected limb.
 	 * should use the size of the handhold in the calculation although it does not.
+	 * @author Jacob
 	 */
-
-	//TODO: refactor this method, get rid of the nested ifs, I'd do it but im not sure exactly how it works
 	private Vector2 calcForce(int hookedPart, int freePart,float xval,float yval) {
 		float forcex = 0f;
 		float forcey = 0f;
 		forcex = xval * CONSTANT_X_FORCE;
-		
+
 		if (!upsideDown) {
 			Vector2 hp = character.parts.get(hookedPart).getPosition();
 //			Vector2 fp = character.parts.get(freePart).getPosition();
 			if (hookedPart == FOOT_LEFT || hookedPart == FOOT_RIGHT) {
-				if (iny > 0) {
-					float angleKnee = 0f;
-					float footToHip = 0f;
-					float angleKneeModifier = 0f;
-					float distanceModifier = 0f;
-					float totalModifier = 0f;
-					if (hookedPart == FOOT_LEFT) {
-						angleKnee = ((RevoluteJoint) (character.joints.get(SHIN_LEFT - 1))).getJointAngle() * RAD_TO_DEG;
-						//TODO modify this because not sure how angles actually work with knees.
-						angleKnee = Math.abs(angleKnee%270);
-						angleKneeModifier = angleKnee <= 90f ? angleKnee / 90f : 90f / angleKnee;
-					} else {
-						angleKnee = ((RevoluteJoint) (character.joints.get(SHIN_RIGHT - 1))).getJointAngle() * RAD_TO_DEG;
-						//TODO modify this as necessary because not sure how angles actually work with knees.
-						angleKnee = Math.abs(angleKnee%270);
-						angleKneeModifier = angleKnee <= 90f ? angleKnee / 90f : 90f / angleKnee;
-					}
-					angleKneeModifier = Math.abs(angleKneeModifier);
-					footToHip = Math.abs(hp.x - character.parts.get(HIPS).getPosition().x);
-
-					distanceModifier = (Math.abs(MAX_LEG_DIST) - footToHip)/Math.abs(MAX_LEG_DIST);
-					//TODO: should probably be a more complex modifier!
-					totalModifier = (angleKneeModifier + distanceModifier) / 2f;
-					forcey = totalModifier * MAX_PUSHFORCE_LEG;
-				} else {
-					forcey = -1 * MAX_PUSHFORCE_LEG;
-				}
-			} else {
-				if (iny > 0) {
-					float angleElbow = 0f;
-					Vector2 armToShoulder;
-					float angleElbowModifier = 0f;
-					//the Y here is correct. need to subtract  ARM_OFFSET for x position for right hand,
- 					//add it for left hand.
-					armToShoulder = hp.sub(character.parts.get(CHEST).getPosition());
-					armToShoulder.y = armToShoulder.y - ARM_Y_CHEST_OFFSET;
-					//absolute x distance of hand to shoulder.
-					if (hookedPart == HAND_LEFT) {
-						angleElbow = ((RevoluteJoint) (character.joints.get(HAND_LEFT - 1))).getJointAngle() * RAD_TO_DEG;
-						angleElbowModifier = angleElbow <= 90f ? angleElbow / 90f : 90f / angleElbow;
-						//add because hand left + offset - chest = 0 in best case.
-						armToShoulder.x = armToShoulder.x + ARM_X_CHEST_OFFSET;
-					}
-					else{
-						angleElbow = ((RevoluteJoint) (character.joints.get(HAND_RIGHT - 1))).getJointAngle() * RAD_TO_DEG;
-						angleElbowModifier = angleElbow <= 180f ? angleElbow / 180f : 180f / angleElbow;
-						armToShoulder.x = armToShoulder.x - ARM_X_CHEST_OFFSET;
-					}
-					armToShoulder.x = Math.abs(armToShoulder.x);
-					//just in case - will be something needing debugging.
-					angleElbowModifier = Math.abs(angleElbowModifier);
-
-					//TODO modify this because not sure how angles actually work with elbows.
-					//closer to 1 = the closer the hand is to the shoulder
-					float distanceModifier = (Math.abs(MAX_ARM_DIST) - armToShoulder.x) / Math.abs(MAX_ARM_DIST);
-					float totalModifier = (angleElbowModifier + distanceModifier) / 2f;
-					//if the arm is going to impart pull or push force (legs cant really do that)
-					//always a positive force up if input vertical is up
-
-					forcey = armToShoulder.y > 0 ?
-							totalModifier * MAX_PULLFORCE_ARM : totalModifier * MAX_PUSHFORCE_ARM;
-					}
-					//working with ARMS NOW!!!!
-				else {
-					//I think that this should be basically unlimited amount force if you're lowering a limb then
-//						it should be easy, there's not much force the legs use for this but this way it always happens.
-//						return a negative number because that way the force for the limb can be channeled easily.
-					forcey = -1 * MAX_PULLFORCE_ARM;
-
-
-				}
+				forcey = calcLegForce(yval,hookedPart);
+			}
+			else {
+				forcey = calcArmForce(yval,hookedPart);
 			}
 		}
-	return new Vector2(forcex,forcey);
+		return new Vector2(forcex,forcey);
 
-}
+	}
 
 	/**
 	 * TODO play around with & modify this method
-	 * @author Jacob
 	 * method applies force in a "natural" and theoretically predictable way
 	 * on the limb selected. Does need to be modified to find best "natural" balance of moving.
 	 * whatever we decide natural should be
 	 * @param limb - player's currently selected limb to apply force to
 	 * @param force - force to apply
 	 * @param wake - boolean to wake limb up (currently always passed in as true)
+	 * @author Jacob
 	 */
-	private void applyForce(int limb,Vector2 force,boolean wake) {
+	private void applyForce(int limb,Vector2 force,boolean wake, float h, float v) {
 
 
 
 		switch(limb){
 			case FOOT_LEFT:
-				character.parts.get(THIGH_LEFT).body.applyForceToCenter(force.x,force.y,wake);
-				character.parts.get(SHIN_LEFT).body.applyForceToCenter(force.x,force.y * (.5f),wake);
-				character.parts.get(FOOT_LEFT).body.applyForceToCenter(force.x, force.y * .25f,wake);
+				applyIfUnderLimit(THIGH_LEFT,force, h, v);
+				force.y *= .5;
+				applyIfUnderLimit(SHIN_LEFT,force, h, v);
+				force.y *= .5;
+				applyIfUnderLimit(FOOT_LEFT,force, h, v);
 				break;
 			case FOOT_RIGHT:
-				character.parts.get(THIGH_RIGHT).body.applyForceToCenter(force.x,force.y,wake);
-				character.parts.get(SHIN_RIGHT).body.applyForceToCenter(force.x,force.y * (.5f),wake);
-				character.parts.get(FOOT_RIGHT).body.applyForceToCenter(force.x, force.y * .25f,wake);
+				applyIfUnderLimit(THIGH_RIGHT,force, h, v);
+				force.y *= .5;
+				applyIfUnderLimit(SHIN_RIGHT,force, h, v);
+				force.y *= .5;
+				applyIfUnderLimit(FOOT_RIGHT,force, h, v);
 				break;
 			case HAND_LEFT:
-				character.parts.get(HAND_LEFT).body.applyForceToCenter(force.x,force.y,wake);
-				character.parts.get(FOREARM_LEFT).body.applyForceToCenter(force.x,force.y,wake);
-				character.parts.get(ARM_LEFT).body.applyForceToCenter(force.x, force.y * 1f,wake);
+				applyIfUnderLimit(HAND_LEFT,force, h, v);
+				applyIfUnderLimit(FOREARM_LEFT,force, h, v);
+				force.y *= .5;
+				applyIfUnderLimit(ARM_LEFT,force, h, v);
 				break;
 			case HAND_RIGHT:
-				character.parts.get(HAND_RIGHT).body.applyForceToCenter(force.x,force.y,wake);
-				character.parts.get(FOREARM_RIGHT).body.applyForceToCenter(force.x,force.y,wake);
-				character.parts.get(ARM_RIGHT).body.applyForceToCenter(force.x, force.y * 1f,wake);
+				applyIfUnderLimit(HAND_RIGHT,force, h, v);
+				applyIfUnderLimit(FOREARM_RIGHT,force, h, v);
+				force.y *= .5;
+				applyIfUnderLimit(ARM_RIGHT,force, h, v);
+
 				break;
 			default:
 				//do nothing
@@ -807,12 +715,26 @@ public class GameMode extends ModeController {
 		}
 	}
 
-	private void applyTorsoForceIfApplicable() {
+	private void applyTorsoForceIfApplicable(Vector2 force) {
 		if (TORSO_MODE){
 			InputController input = InputController.getInstance();
 			float h = input.getHorizontalR();
 			float v = input.getVerticalR();
-			character.parts.get(CHEST).body.applyForceToCenter(h*CONSTANT_X_FORCE*10,10*v*CONSTANT_X_FORCE,true);
+			applyIfUnderLimit(CHEST,new Vector2(force.x,force.y),h,v);
+
+		}
+	}
+
+	private void applyIfUnderLimit(int part, Vector2 force, float h, float v){
+		Vector2 vect = character.parts.get(part).body.getLinearVelocity();
+
+		if (Math.signum(h) != Math.signum(vect.x) || Math.abs(vect.x) < PART_MAX_X_VELOCITY){
+			character.parts.get(part).body.applyForceToCenter(force.x,0,true);
+
+		}
+		if (Math.signum(v) != Math.signum(vect.y) || Math.abs(vect.y) < PART_MAX_Y_VELOCITY) {
+			character.parts.get(part).body.applyForceToCenter(0,force.y,true);
+
 		}
 	}
 
@@ -871,4 +793,94 @@ public class GameMode extends ModeController {
 		font.dispose();
 		super.dispose();
 	}
+
+
+	private float calcLegForce(float yval, int hookedPart){
+		float forcey = 0f;
+		float angleKnee = 0f;
+		float footToHip = 0f;
+		float angleKneeModifier = 0f;
+		float distanceModifier = 0f;
+		float totalModifier = 0f;
+		Vector2 hp = character.parts.get(hookedPart).getPosition();
+
+		if (yval > 0) {
+			if (hookedPart == FOOT_LEFT) {
+				angleKnee = ((RevoluteJoint) (character.joints.get(SHIN_LEFT - 1))).getJointAngle() * RAD_TO_DEG;
+				//TODO modify this because not sure how angles actually work with knees.
+				angleKnee = Math.abs(angleKnee%270);
+				angleKneeModifier = angleKnee <= 90f ? angleKnee / 90f : 90f / angleKnee;
+			} else {
+				angleKnee = ((RevoluteJoint) (character.joints.get(SHIN_RIGHT - 1))).getJointAngle() * RAD_TO_DEG;
+				//TODO modify this as necessary because not sure how angles actually work with knees.
+				angleKnee = Math.abs(angleKnee%270);
+				angleKneeModifier = angleKnee <= 90f ? angleKnee / 90f : 90f / angleKnee;
+			}
+			angleKneeModifier = Math.abs(angleKneeModifier);
+			footToHip = Math.abs(hp.x - character.parts.get(HIPS).getPosition().x);
+
+			distanceModifier = (Math.abs(MAX_LEG_DIST) - footToHip)/Math.abs(MAX_LEG_DIST);
+			//TODO: should probably be a more complex modifier!
+			totalModifier = (angleKneeModifier + distanceModifier) / 2f;
+			forcey = totalModifier * MAX_PUSHFORCE_LEG * yval;
+		} else {
+			forcey = MAX_PUSHFORCE_LEG * yval;
+		}
+		return forcey;
+	}
+
+
+
+	private float calcArmForce(float yval, int hookedPart) {
+		float forcey = 0f;
+		float angleElbow = 0f;
+		Vector2 armToShoulder;
+		float angleElbowModifier = 0f;
+		Vector2 hp = character.parts.get(hookedPart).getPosition();
+		if (yval > 0) {
+			//the Y here is correct. need to subtract  ARM_OFFSET for x position for right hand,
+			//add it for left hand.
+			armToShoulder = hp.sub(character.parts.get(CHEST).getPosition());
+			armToShoulder.y = armToShoulder.y - ARM_Y_CHEST_OFFSET;
+			//absolute x distance of hand to shoulder.
+			if (hookedPart == HAND_LEFT) {
+				angleElbow = ((RevoluteJoint) (character.joints.get(HAND_LEFT - 1))).getJointAngle() * RAD_TO_DEG;
+				angleElbowModifier = angleElbow <= 90f ? angleElbow / 90f : 90f / angleElbow;
+				//add because hand left + offset - chest = 0 in best case.
+				armToShoulder.x = armToShoulder.x + ARM_X_CHEST_OFFSET;
+			}
+			else{
+				angleElbow = ((RevoluteJoint) (character.joints.get(HAND_RIGHT - 1))).getJointAngle() * RAD_TO_DEG;
+				angleElbowModifier = angleElbow <= 180f ? angleElbow / 180f : 180f / angleElbow;
+				armToShoulder.x = armToShoulder.x - ARM_X_CHEST_OFFSET;
+			}
+			armToShoulder.x = Math.abs(armToShoulder.x);
+			//just in case - will be something needing debugging.
+			angleElbowModifier = Math.abs(angleElbowModifier);
+
+			//TODO modify this because not sure how angles actually work with elbows.
+			//closer to 1 = the closer the hand is to the shoulder
+			float distanceModifier = (Math.abs(MAX_ARM_DIST) - armToShoulder.x) / Math.abs(MAX_ARM_DIST);
+			float totalModifier = (angleElbowModifier + distanceModifier) / 2f;
+			//if the arm is going to impart pull or push force (legs cant really do that)
+			//always a positive force up if input vertical is up
+
+			forcey = armToShoulder.y > 0 ?
+					totalModifier * MAX_PULLFORCE_ARM : totalModifier * MAX_PUSHFORCE_ARM;
+			forcey *= yval;
+		}
+		//working with ARMS NOW!!!!
+		else {
+			//I think that this should be basically unlimited amount force if you're lowering a limb then
+//						it should be easy, there's not much force the legs use for this but this way it always happens.
+//						return a negative number because that way the force for the limb can be channeled easily.
+			forcey =  MAX_PULLFORCE_ARM * yval;
+
+
+		}
+		return forcey;
+	}
 }
+
+
+

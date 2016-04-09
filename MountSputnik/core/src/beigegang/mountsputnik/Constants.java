@@ -124,8 +124,10 @@ public final class Constants {
 	public static final float ENERGY_LOSS = .1f;
 	public static final float BASE_ENERGY_GAIN = 1f;
 
-	public static final float PART_MAX_X_VELOCITY = 1f;
-	public static final float PART_MAX_Y_VELOCITY = 1f;
+	public static final float PART_MAX_X_VELOCITY = 5f;
+	public static final float PART_MAX_Y_VELOCITY = 5f;
+	/** if player can control torso */
 	public static boolean TORSO_MODE = true;
+	/** if player can control multiple limbs */
 	public static boolean TWO_LIMB_MODE = false;
 }
