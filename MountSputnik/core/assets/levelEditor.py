@@ -162,7 +162,7 @@ Builder.load_string('''
 ''')
 
 blockWidth = 32 
-handhold_width = 2
+handhold_width = 0.5
 
 handholds = []
 selected = -1
@@ -201,7 +201,7 @@ class LinePlayground(FloatLayout):
             Color(1,1,1, 0.3)
             Rectangle(pos=[Window.size[0]/3,80],size=[blockWidth*10,self.blockHeight*10], source=self.directory + 'background.png')
             Color(1,1,1,1)
-            Rectangle(pos=[(Window.size[0]+blockWidth*10)/3, 80], size=[320/5, 320/3], source='assets/character.png')
+            Rectangle(pos=[(Window.size[0]+blockWidth*12)/3, 80], size=[320/20, 320/12], source='assets/character.png')
         self.removeBadHandholds()
         self.drawHandholds()
 
@@ -210,7 +210,7 @@ class LinePlayground(FloatLayout):
         if self.withinCanvas(touch.x, touch.y):
             self.doSelection(touch)
             if selected == -1: 
-                handholds.append(Handhold(touch.x-15*self.handHoldScale, touch.y-15*self.handHoldScale, self.handHoldScale))
+                handholds.append(Handhold(touch.x-2*self.handHoldScale, touch.y-2*self.handHoldScale, self.handHoldScale))
             else: 
                 self.updateSelected()
             self.resize()
@@ -234,13 +234,13 @@ class LinePlayground(FloatLayout):
                 hold = handholds[i]
                 r = Rectangle(pos=[hold.pos[0],hold.pos[1]],size=[10*handhold_width*hold.scale,10*handhold_width*hold.scale],source=self.directory + 'handhold.png')
                 if i == selected: 
-                    r.source = self.directory + 'handholdselected.png'
+                    r.source = self.directory + 'handholdgrabbed.png'
 
     def doSelection(self, touch): 
         global selected
         for i in range(len(handholds)): 
             hold = handholds[i]
-            if distance(hold.pos[0],hold.pos[1],touch.x-15*hold.scale,touch.y-15*hold.scale) < 15*hold.scale: 
+            if distance(hold.pos[0],hold.pos[1],touch.x-2*hold.scale,touch.y-2*hold.scale) < 3*hold.scale: 
                 selected = i
                 return 
         selected = -1
