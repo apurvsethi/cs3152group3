@@ -9,8 +9,8 @@ import static beigegang.mountsputnik.Constants.*;
  */
 public class Movement {
     public static CharacterModel character;
-    public void setCharacter(CharacterModel c){
-        this.character = c;
+    public static void setCharacter(CharacterModel c){
+        character = c;
     }
 
 
@@ -52,6 +52,7 @@ public class Movement {
             Vector2 root = character.joints.get(FOREARM_RIGHT - 1).getAnchorA();
             Vector2 shoot = character.joints.get(HAND_RIGHT - 1).getAnchorA();
             float absoluteAngle = findAbsoluteAngleOfPart(root,shoot);
+            System.out.println("abs angle" + absoluteAngle);
             if (absoluteAngle >= -180 && absoluteAngle <= -90) {
                 //forcex is -1 at -180 (moves left) and 0 at -90.
                 forcex = (absoluteAngle + 90f)/ 90f;
@@ -65,9 +66,9 @@ public class Movement {
                 forcey = -1 - forcex;
             }else if (absoluteAngle >0 && absoluteAngle <=90){
                 //forcex is 1 at 0 and 0 at 90
-                forcex = -1 * (absoluteAngle-90f)/90f;
+                forcex = (90f - absoluteAngle)/90f;
                 //forcey is 0 at 0 and 1 at 90 (moves up)
-                forcey = -1 + forcex;
+                forcey = 1 - forcex;
                 //changed!
             }else{ //absoluteAngle >90 && absoluteAngle <=180
                 //forcex is 0 at 90 and -1 at 180
@@ -124,8 +125,8 @@ public class Movement {
             if (v>0){ //up direction
                 if (armJointAngle<45f){
                     vect = forearmTo90(left);
-                    forcexV = -vect.x;
-                    forceyV = -vect.y;
+                    forcexV = vect.x;
+                    forceyV = vect.y;
                 }else{
                     //move joint to 0 degree angle
                     vect = forearmTo90(left);
@@ -148,6 +149,7 @@ public class Movement {
                 }
             }
             if (h>0){//right direction
+                System.out.println("here...");
                 if (armJointAngle>-45f){
                     vect = forearmTo90(left);
                     forcexH = -vect.x;
@@ -184,7 +186,7 @@ public class Movement {
     }
 
 
-    
+
     public static float[] getPhysicallyCorrectForceMultipliersLeftForearm(float jointAngle, float v, float h,boolean left){
         float armJointAngle = ((RevoluteJoint) character.joints.get(ARM_LEFT-1)).getJointAngle() * RAD_TO_DEG;
         //assuming forearm joint limitations are from 0 to 120 degrees or whatever.
@@ -199,6 +201,7 @@ public class Movement {
         if(((RevoluteJoint)character.joints.get(FOREARM_LEFT-1)).getUpperLimit()*RAD_TO_DEG == FOREARM_PULLING_UPPER_LIMIT){
 //			System.out.println("truth");
             if (v>0){ //up direction
+                System.out.println(armJointAngle + "armjoint");
                 if (armJointAngle<45f){
                     vect = forearmTo90(left);
                     forcexV = vect.x;
@@ -210,7 +213,7 @@ public class Movement {
                     forceyV = -vect.y;
                 }
             }else{ //down direction
-                if (armJointAngle>-45f){
+                if (armJointAngle>0f){
                     vect = forearmTo90(left);
                     forcexV = vect.x;
                     forceyV = vect.y;
@@ -225,6 +228,7 @@ public class Movement {
                 }
             }
             if (h>0){//right direction
+//                System.out.println("HERE");
                 if (armJointAngle>-45f){
                     vect = forearmTo90(left);
                     forcexH = vect.x;
@@ -237,11 +241,12 @@ public class Movement {
                 }
                 //otherwise do nothing
             }else {//left direction
-                if (armJointAngle < 5f) {
+                if (armJointAngle < 45f) {
                     vect = forearmTo90(left);
                     //move joint to 0 degree angle
                     forcexH = -vect.x;
                     forceyH = -vect.y;
+                    System.out.println(forcexH + " " + forceyH);
                 }
                 else {
                     vect = forearmTo90(left);
@@ -325,6 +330,7 @@ public class Movement {
     }
     //LEFT ARM FINALLY CORRECT
     public static float[] getPhysicallyCorrectForceMultipliersLeftArm(float jointAngle, float v, float h){
+
         Vector2 root = character.joints.get(ARM_LEFT - 1).getAnchorA();
         Vector2 shoot = character.joints.get(FOREARM_LEFT - 1).getAnchorA();
         float forcexV = 0f;
