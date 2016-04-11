@@ -180,10 +180,14 @@ public class CharacterModel {
 	private void makeJoints(World world, Vector2 canvasSize) {
 		makeJoint(CHEST, HEAD, 0, CHEST_HEAD_OFFSET, 0, canvasSize);
 		setJointAngleLimits(-10, 10);
+//		setJointMotor(0, 0);
+
 		addJoint(world);
 
 		makeJoint(HIPS, CHEST, 0, HIP_CHEST_OFFSET, 0, canvasSize);
 		setJointAngleLimits(-45, 45);
+		setJointMotor(0, 5);
+
 		addJoint(world);
 
 		makeJoint(ARM_LEFT, CHEST, ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0, canvasSize);
@@ -202,18 +206,22 @@ public class CharacterModel {
 //		setJointMotor(0, 100);
 		addJoint(world);
 
-		makeJoint(FOREARM_RIGHT, ARM_RIGHT, -FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, 0, canvasSize);
+		makeJoint(FOREARM_RIGHT, ARM_RIGHT, -FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, -90, canvasSize);
 		setJointAngleLimits(FOREARM_PULLING_LOWER_LIMIT, FOREARM_PULLING_UPPER_LIMIT);
 //		setJointMotor(0, 100);
 		addJoint(world);
 
 		makeJoint(HAND_LEFT, FOREARM_LEFT, HAND_X_OFFSET, HAND_Y_OFFSET, 0, canvasSize);
 		setJointAngleLimits(-20, 60);
+		setJointMotor(0, 100);
+
 //		setJointMotor(0, 100);
 		addJoint(world);
 
 		makeJoint(HAND_RIGHT, FOREARM_RIGHT, -HAND_X_OFFSET, HAND_Y_OFFSET, 0, canvasSize);
 		setJointAngleLimits(-20, 60);
+		setJointMotor(0, 100);
+
 //		setJointMotor(0, 100);
 		addJoint(world);
 
