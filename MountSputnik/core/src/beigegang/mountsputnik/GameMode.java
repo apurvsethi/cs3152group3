@@ -15,8 +15,10 @@ import beigegang.util.*;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.utils.*;
 
 public class GameMode extends ModeController {
@@ -37,16 +39,26 @@ public class GameMode extends ModeController {
 	 */
 	//We need to preload every single texture, regardless of which level we're currently using. Loading can't be
 	//dynamically
-	private static final String BACKGROUND_FILE = "background.png";
-	private static final String FOREGROUND_FILE = "preliminaryCharacterFilmStrip.png";
+	private static final String BACKGROUND_FILE = "assets/canyon/background.png";
+	//private static final String FOREGROUND_FILE = "preliminaryCharacterFilmStrip.png";
 	
 	private static final String HANDHOLD_TEXTURES[] = {"assets/canyon/handhold.png", "assets/canyon/handholdglow.png", "assets/canyon/handholdgrabbed.png"};
-	private static final String PART_TEXTURES[] = {"Ragdoll/Corrected/Corrected/Torso.png", "Ragdoll/Corrected/Corrected/Head.png", "Ragdoll/Corrected/Corrected/Hips.png",
-			"Ragdoll/Corrected/Corrected/ArmLeft.png", "Ragdoll/Corrected/Corrected/ArmRight.png", "Ragdoll/Corrected/Corrected/ForearmLeft.png", "Ragdoll/Corrected/Corrected/ForearmRight.png",
-			"Ragdoll/Corrected/Corrected/HandLeftUngripped.png", "Ragdoll/Corrected/Corrected/HandRightUngripped.png", "Ragdoll/Corrected/Corrected/ThighLeft.png",
-			"Ragdoll/Corrected/Corrected/ThighRight.png", "Ragdoll/Corrected/Corrected/CalfLeft.png", "Ragdoll/Corrected/Corrected/CalfRight.png", "Ragdoll/Corrected/Corrected/FeetShoeLeft.png",
-			"Ragdoll/Corrected/Corrected/FeetShoeRight.png", "Ragdoll/Corrected/Corrected/HandLeftGripped.png", "Ragdoll/Corrected/Corrected/HandRightGripped.png"};
-
+	private static final String PART_TEXTURES[] = {"Ragdoll/Torso.png", "Ragdoll/Head.png", "Ragdoll/Hips.png",
+			"Ragdoll/ArmLeft.png", "Ragdoll/ArmRight.png", "Ragdoll/ForearmLeft.png", "Ragdoll/ForearmRight.png",
+			"Ragdoll/HandLeftUngripped.png", "Ragdoll/HandRightUngripped.png", "Ragdoll/ThighLeft.png",
+			"Ragdoll/ThighRight.png", "Ragdoll/CalfLeft.png", "Ragdoll/CalfRight.png", "Ragdoll/FeetShoeLeft.png",
+			"Ragdoll/FeetShoeRight.png", "Ragdoll/HandLeftGripped.png", "Ragdoll/HandRightGripped.png"};
+	private static final String TUTORIAL_TEXTURES[] = {
+			"Ragdoll/controls/360_LB.png", 
+			"Ragdoll/controls/360_RB.png", 
+			"Ragdoll/controls/360_LT.png", 
+			"Ragdoll/controls/360_RT.png", 
+			"Ragdoll/controls/360_LB_selected.png", 
+			"Ragdoll/controls/360_RB_selected.png", 
+			"Ragdoll/controls/360_LT_selected.png", 
+			"Ragdoll/controls/360_RT_selected.png"
+	}; 
+	
 	/**
 	 * font for displaying debug values to screen
 	 */
@@ -56,8 +68,9 @@ public class GameMode extends ModeController {
 	 * Texture asset for files used, parts, etc.
 	 */
 	private static TextureRegion background;
-	private static TextureRegion foreground;
+	//private static TextureRegion;
 	private static TextureRegion[] partTextures = new TextureRegion[PART_TEXTURES.length];
+	private static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length]; 
 	
 	/** The reader to process JSON files */
 	private JsonReader jsonReader;
@@ -84,8 +97,8 @@ public class GameMode extends ModeController {
 		assetState = AssetState.LOADING;
 		manager.load(BACKGROUND_FILE, Texture.class);
 		assets.add(BACKGROUND_FILE);
-		manager.load(FOREGROUND_FILE, Texture.class);
-		assets.add(FOREGROUND_FILE);
+		//manager.load(FOREGROUND_FILE, Texture.class);
+		//assets.add(FOREGROUND_FILE);
 		for (String HANDHOLD_TEXTURE : HANDHOLD_TEXTURES) {
 			manager.load(HANDHOLD_TEXTURE, Texture.class);
 			assets.add(HANDHOLD_TEXTURE);
@@ -93,6 +106,10 @@ public class GameMode extends ModeController {
 		for (String PART_TEXTURE : PART_TEXTURES) {
 			manager.load(PART_TEXTURE, Texture.class);
 			assets.add(PART_TEXTURE);
+		}
+		for(String TUTORIAL_TEXTURE : TUTORIAL_TEXTURES){
+			manager.load(TUTORIAL_TEXTURE, Texture.class);
+			assets.add(TUTORIAL_TEXTURE);
 		}
 	}
 
@@ -109,10 +126,14 @@ public class GameMode extends ModeController {
 		if (assetState != AssetState.LOADING) return;
 
 		background = createTexture(manager, BACKGROUND_FILE, false);
-		foreground = createTexture(manager, FOREGROUND_FILE, false);
+		//foreground = createTexture(manager, FOREGROUND_FILE, false);
 		
 		for (int i = 0; i < PART_TEXTURES.length; i++) {
 			partTextures[i] = createTexture(manager, PART_TEXTURES[i], false);
+		}
+		
+		for (int i = 0; i < TUTORIAL_TEXTURES.length; i++) {
+			tutorialTextures[i] = createTexture(manager, TUTORIAL_TEXTURES[i], false);
 		}
 		assetState = AssetState.COMPLETE;
 	}
@@ -156,7 +177,14 @@ public class GameMode extends ModeController {
 	 * holds any extremities who's buttons are pressed during this timestep. keeps order of pressing intact
 	 */
 	private Array<Integer> nextToPress = new Array<Integer>();
-
+	/**
+	 * A list of all the blocks that were chosen for this generated level. Allows for debugging 
+	 */
+	private Array<String> levelBlocks = new Array<String>(); 
+	
+	/** A boolean indicating the toggle of the tutorial view, where limbs have their corresponding buttons shown*/ 
+	private boolean tutorialToggle = false; 
+	
 	public GameMode() {
 		super(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_GRAVITY);
 
@@ -224,9 +252,11 @@ public class GameMode extends ModeController {
 		contactListener = new ListenerClass();
 		world.setContactListener(contactListener);
 
+		levelBlocks.clear();
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
+			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json"); 
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
 
 			addChunk(levelPiece, currentHeight, levelName);
@@ -235,11 +265,13 @@ public class GameMode extends ModeController {
 			for(int i = 0; i < filler; i++){
 				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
 				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/general/block"+blockNumber+".json"));
+				levelBlocks.add("Levels/general/block"+blockNumber+".json"); 
 				addChunk(levelPiece, currentHeight, "general");
 				currentHeight += levelPiece.getInt("size");
 			}
 		}
 
+		//System.out.println(levelBlocks.toString()); <- this string is important for debugging 
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
 		for (PartModel p : character.parts) {
 			objects.add(p);
@@ -426,13 +458,16 @@ public class GameMode extends ModeController {
 		boolean b = input.didRightLeg() ? addToButtonsPressed((FOOT_RIGHT)) : checkIfJustReleased(FOOT_RIGHT);
 		boolean c = input.didLeftArm() ? addToButtonsPressed((HAND_LEFT)) : checkIfJustReleased(HAND_LEFT);
 		boolean d = input.didRightArm() ? addToButtonsPressed((HAND_RIGHT)) : checkIfJustReleased(HAND_RIGHT);
-
+		
+		if(input.didSelect()) tutorialToggle = !tutorialToggle; 
+		
 		Vector2 forceL = new Vector2(0, 0);
 		Vector2 forceR = new Vector2(0, 0);
 
 		if (nextToPress.size > 0) {
 			for (int i : nextToPress) {
 				((ExtremityModel) (character.parts.get(i))).ungrip();
+				ungrip(((ExtremityModel) (character.parts.get(i)))); 
 			}
 			for (int ext:EXTREMITIES){
 				if (((ExtremityModel) (character.parts.get(ext))).isGripping())
@@ -496,12 +531,32 @@ public class GameMode extends ModeController {
 //		if (character.getEnergy <= 0){
 //			for(int e : EXTREMITIES){
 //				 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
-//				 extremity.ungrip();
+//				 extremity.ungrip(world);
 //				 extremity.body.setType(BodyDef.BodyType.DynamicBody);
 //				 extremity.setTexture(partTextures[e].getTexture());
 //			}s
 //		}
 	}
+	
+	/** Grips a handhold by adding a revolute joint between the handhold and the extremity **/ 
+	public void grip(ExtremityModel e, HandholdModel h){
+		if (e.getJoint() == null){
+			RevoluteJointDef jointD = new RevoluteJointDef(); 
+			jointD.initialize(e.getBody(), h.getBody(), e.getPosition());
+			jointD.collideConnected = false; 
+			Joint j = world.createJoint(jointD);
+			e.setJoint(j); 
+		}
+	}
+	
+	public void ungrip(ExtremityModel e){
+		if (e.getJoint() != null){
+			world.destroyJoint(e.getJoint());
+			e.setJoint(null); 
+			
+		}
+	}
+	
 
 	private void spawnObstacles(){
 		for(ObstacleZone oz : obstacles){
@@ -625,7 +680,7 @@ public class GameMode extends ModeController {
 					if (closeEnough(limb, snapPoint)) {
 						character.parts.get(limb).setPosition(snapPoint);
 						((ExtremityModel) character.parts.get(limb)).grip();
-						character.parts.get(limb).body.setType(BodyDef.BodyType.StaticBody);
+						grip(((ExtremityModel) character.parts.get(limb)), h); 
 					}
 				}
 
@@ -747,6 +802,37 @@ public class GameMode extends ModeController {
 
 		}
 	}
+	
+	private void drawToggles(){
+		Vector2 pos = character.parts.get(HAND_LEFT).getPosition(); 
+		TextureRegion t; 
+		if (nextToPress.contains(HAND_LEFT, true))
+			t = tutorialTextures[4]; 
+		else
+			t = tutorialTextures[0]; 
+		canvas.draw(t, Color.WHITE, (pos.x*scale.x)-10, (pos.y*scale.y),50,50);
+		
+		pos = character.parts.get(HAND_RIGHT).getPosition(); 
+		if (nextToPress.contains(HAND_RIGHT, true))
+			t = tutorialTextures[5]; 
+		else
+			t = tutorialTextures[1]; 
+		canvas.draw(t, Color.WHITE, (pos.x*scale.x)+10, (pos.y*scale.y),50,50);
+		
+		pos = character.parts.get(FOOT_LEFT).getPosition(); 
+		if (nextToPress.contains(FOOT_LEFT, true))
+			t = tutorialTextures[6]; 
+		else
+			t = tutorialTextures[2]; 
+		canvas.draw(t, Color.WHITE, (pos.x*scale.x)-10, (pos.y*scale.y),40,40);
+		
+		pos = character.parts.get(FOOT_RIGHT).getPosition(); 
+		if (nextToPress.contains(FOOT_RIGHT, true))
+			t = tutorialTextures[7]; 
+		else
+			t = tutorialTextures[3]; 
+		canvas.draw(t, Color.WHITE, (pos.x*scale.x)+10, (pos.y*scale.y),40,40);
+	}
 
 	//	a Draw Note: If two parts are crossing each other, and one part is on a handhold, the other part
 //	should be drawn ON TOP of the hooked part.
@@ -754,11 +840,13 @@ public class GameMode extends ModeController {
 		canvas.clear();
 
 		canvas.begin();
-		canvas.draw(background, Color.WHITE, 0, 0,canvas.getWidth(),canvas.getHeight());
+		canvas.draw(background, Color.WHITE, 0, 0,canvas.getWidth(),background.getRegionHeight());
 		canvas.end();
 
 		canvas.begin();
 		for (GameObject obj : objects) obj.draw(canvas);
+		System.out.println("tutorialToggle: " + tutorialToggle);
+		if (tutorialToggle) drawToggles(); 
 		canvas.end();
 
 		canvas.begin();
