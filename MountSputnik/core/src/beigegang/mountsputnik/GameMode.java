@@ -15,8 +15,10 @@ import beigegang.util.*;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.utils.*;
 
 public class GameMode extends ModeController {
@@ -433,6 +435,7 @@ public class GameMode extends ModeController {
 		if (nextToPress.size > 0) {
 			for (int i : nextToPress) {
 				((ExtremityModel) (character.parts.get(i))).ungrip();
+				ungrip(((ExtremityModel) (character.parts.get(i)))); 
 			}
 			for (int ext:EXTREMITIES){
 				if (((ExtremityModel) (character.parts.get(ext))).isGripping())
@@ -496,12 +499,32 @@ public class GameMode extends ModeController {
 //		if (character.getEnergy <= 0){
 //			for(int e : EXTREMITIES){
 //				 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
-//				 extremity.ungrip();
+//				 extremity.ungrip(world);
 //				 extremity.body.setType(BodyDef.BodyType.DynamicBody);
 //				 extremity.setTexture(partTextures[e].getTexture());
 //			}s
 //		}
 	}
+	
+	/** Grips a handhold by adding a revolute joint between the handhold and the extremity **/ 
+	public void grip(ExtremityModel e, HandholdModel h){
+		if (e.getJoint() == null){
+			RevoluteJointDef jointD = new RevoluteJointDef(); 
+			jointD.initialize(e.getBody(), h.getBody(), e.getPosition());
+			jointD.collideConnected = false; 
+			Joint j = world.createJoint(jointD);
+			e.setJoint(j); 
+		}
+	}
+	
+	public void ungrip(ExtremityModel e){
+		if (e.getJoint() != null){
+			world.destroyJoint(e.getJoint());
+			e.setJoint(null); 
+			
+		}
+	}
+	
 
 	private void spawnObstacles(){
 		for(ObstacleZone oz : obstacles){
@@ -625,7 +648,7 @@ public class GameMode extends ModeController {
 					if (closeEnough(limb, snapPoint)) {
 						character.parts.get(limb).setPosition(snapPoint);
 						((ExtremityModel) character.parts.get(limb)).grip();
-						character.parts.get(limb).body.setType(BodyDef.BodyType.StaticBody);
+						grip(((ExtremityModel) character.parts.get(limb)), h); 
 					}
 				}
 
