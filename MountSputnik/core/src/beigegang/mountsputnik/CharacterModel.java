@@ -188,31 +188,33 @@ public class CharacterModel {
 
 		makeJoint(ARM_LEFT, CHEST, ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0, canvasSize);
 		setJointAngleLimits(-90, 90);
-		setJointMotor(0, 100);
+//		setJointMotor(0, 100);
 
 		addJoint(world);
-		makeJoint(ARM_RIGHT, CHEST, -ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 180, canvasSize);
+		makeJoint(ARM_RIGHT, CHEST, -ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, -180, canvasSize);
 		setJointAngleLimits(-90, 90);
-		setJointMotor(0, 100);
+//		setJointMotor(0, 100);
 
 		addJoint(world);
 
 		makeJoint(FOREARM_LEFT, ARM_LEFT, FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, 0, canvasSize);
-		setJointAngleLimits(-45, 90);
-		setJointMotor(0, 100);
+		setJointAngleLimits(FOREARM_PULLING_LOWER_LIMIT, FOREARM_PULLING_UPPER_LIMIT);
+//		setJointMotor(0, 100);
 		addJoint(world);
+
 		makeJoint(FOREARM_RIGHT, ARM_RIGHT, -FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, 0, canvasSize);
-		setJointAngleLimits(-45, 90);
-		setJointMotor(0, 100);
+		setJointAngleLimits(FOREARM_PULLING_LOWER_LIMIT, FOREARM_PULLING_UPPER_LIMIT);
+//		setJointMotor(0, 100);
 		addJoint(world);
 
 		makeJoint(HAND_LEFT, FOREARM_LEFT, HAND_X_OFFSET, HAND_Y_OFFSET, 0, canvasSize);
 		setJointAngleLimits(-20, 60);
-		setJointMotor(0, 100);
+//		setJointMotor(0, 100);
 		addJoint(world);
+
 		makeJoint(HAND_RIGHT, FOREARM_RIGHT, -HAND_X_OFFSET, HAND_Y_OFFSET, 0, canvasSize);
 		setJointAngleLimits(-20, 60);
-		setJointMotor(0, 100);
+//		setJointMotor(0, 100);
 		addJoint(world);
 
 		makeJoint(THIGH_LEFT, HIPS, THIGH_X_HIP_OFFSET, THIGH_Y_HIP_OFFSET, 0, canvasSize);
