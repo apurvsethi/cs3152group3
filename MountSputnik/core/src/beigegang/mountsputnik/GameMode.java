@@ -758,6 +758,7 @@ public class GameMode extends ModeController {
 				forcey = calcLegForce(yval,hookedPart);
 			}
 			else {
+				
 				forcey = calcArmForce(yval,hookedPart);
 			}
 		}
