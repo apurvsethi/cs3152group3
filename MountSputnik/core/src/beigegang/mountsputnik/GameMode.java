@@ -288,7 +288,7 @@ public class GameMode extends ModeController {
 		}
 		Rectangle bound;
 		while(obstacleDesc != null){
-			bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY"),
+			bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY")+currentHeight,
 					obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
 			//TODO: Set texture to something other than null once we have textures for obstacles
 			obstacleZone = new ObstacleZone(null, currentHeight, obstacleDesc.getInt("frequency"), bound);
