@@ -158,6 +158,10 @@ public class GameMode extends ModeController {
 	 * holds any extremities who's buttons are pressed during this timestep. keeps order of pressing intact
 	 */
 	private Array<Integer> nextToPress = new Array<Integer>();
+	/**
+	 * A list of all the blocks that were chosen for this generated level. Allows for debugging 
+	 */
+	private Array<String> levelBlocks = new Array<String>(); 
 
 	public GameMode() {
 		super(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_GRAVITY);
@@ -226,9 +230,11 @@ public class GameMode extends ModeController {
 		contactListener = new ListenerClass();
 		world.setContactListener(contactListener);
 
+		levelBlocks.clear();
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
+			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json"); 
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
 
 			addChunk(levelPiece, currentHeight, levelName);
@@ -237,11 +243,13 @@ public class GameMode extends ModeController {
 			for(int i = 0; i < filler; i++){
 				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
 				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/general/block"+blockNumber+".json"));
+				levelBlocks.add("Levels/general/block"+blockNumber+".json"); 
 				addChunk(levelPiece, currentHeight, "general");
 				currentHeight += levelPiece.getInt("size");
 			}
 		}
 
+		//System.out.println(levelBlocks.toString()); <- this string is important for debugging 
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
 		for (PartModel p : character.parts) {
 			objects.add(p);
@@ -777,7 +785,7 @@ public class GameMode extends ModeController {
 		canvas.clear();
 
 		canvas.begin();
-		canvas.draw(background, Color.WHITE, 0, 0,canvas.getWidth(),canvas.getHeight());
+		canvas.draw(background, Color.WHITE, 0, 0,canvas.getWidth(),background.getRegionHeight());
 		canvas.end();
 
 		canvas.begin();
