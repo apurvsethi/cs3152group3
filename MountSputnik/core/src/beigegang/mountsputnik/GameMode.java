@@ -440,19 +440,36 @@ public class GameMode extends ModeController {
 			float v = input.getVerticalL();
 			float h = input.getHorizontalL();
 			if (nextToPress.get(0) == HAND_LEFT){
-
 				forceL = new Vector2(CONSTANT_X_FORCE,CONSTANT_X_FORCE);
 				float lArmAngle = ((RevoluteJoint) character.joints.get(ARM_LEFT - 1)).getJointAngle();
 				float[] fs = Movement.getPhysicallyCorrectForceMultipliersLeftArm(lArmAngle,v,h);
 //				for (float f: fs) System.out.print(f + " " );
 				applyNewTestForcesLeftArm(fs,forceL,ARM_LEFT,v,h);
-//				System.out.println("THOSE WERE ARM FORCES");
 
-				float lForearmAngle = ((RevoluteJoint) character.joints.get(FOREARM_LEFT - 1)).getJointAngle();
-				float[] fs2 = Movement.getPhysicallyCorrectForceMultipliersLeftForearm(lForearmAngle,v,h,true);
-//				for (float f: fs2) System.out.print(f + " " );
-				applyNewTestForcesLeftForearm(fs2,forceL,FOREARM_LEFT,v,h);
-//				System.out.println("THOSE WERE FOREARM FORCES");
+				Movement.getMultipliersLeftForearm2(v,h);
+
+
+
+
+
+//				RevoluteJoint forearmJoint = ((RevoluteJoint) character.joints.get(FOREARM_LEFT-1));
+//				forearmJoint.setMotorSpeed(1);
+//				forearmJoint.setMaxMotorTorque(1000);
+//				RevoluteJoint armJoint = ((RevoluteJoint) character.joints.get(ARM_LEFT-1));
+//				armJoint.setMotorSpeed(0);
+//				armJoint.setMaxMotorTorque(1000);
+//				forceL = new Vector2(CONSTANT_X_FORCE,CONSTANT_X_FORCE);
+//				float lArmAngle = ((RevoluteJoint) character.joints.get(ARM_LEFT - 1)).getJointAngle();
+//				float[] fs = Movement.getPhysicallyCorrectForceMultipliersLeftArm(lArmAngle,v,h);
+////				for (float f: fs) System.out.print(f + " " );
+//				applyNewTestForcesLeftArm(fs,forceL,ARM_LEFT,v,h);
+////				System.out.println("THOSE WERE ARM FORCES");
+//
+//				float lForearmAngle = ((RevoluteJoint) character.joints.get(FOREARM_LEFT - 1)).getJointAngle();
+//				float[] fs2 = Movement.getPhysicallyCorrectForceMultipliersLeftForearm(lForearmAngle,v,h,true);
+////				for (float f: fs2) System.out.print(f + " " );
+//				applyNewTestForcesLeftForearm(fs2,forceL,FOREARM_LEFT,v,h);
+////				System.out.println("THOSE WERE FOREARM FORCES");
 
 			}else if (nextToPress.get(0) == HAND_RIGHT){
 				forceL = new Vector2(CONSTANT_X_FORCE,CONSTANT_X_FORCE);
@@ -758,7 +775,7 @@ public class GameMode extends ModeController {
 				forcey = calcLegForce(yval,hookedPart);
 			}
 			else {
-				
+
 				forcey = calcArmForce(yval,hookedPart);
 			}
 		}
