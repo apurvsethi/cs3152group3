@@ -7,9 +7,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import static beigegang.mountsputnik.Constants.*;
-import beigegang.mountsputnik.Movement.*;
-
-import java.io.File;
 
 import beigegang.util.*;
 
@@ -18,7 +15,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.utils.*;
 
@@ -272,7 +268,6 @@ public class GameMode extends ModeController {
 			}
 		}
 
-		//System.out.println(levelBlocks.toString()); <- this string is important for debugging 
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
 			//arms
 		objects.add(character.parts.get(ARM_LEFT));
@@ -309,7 +304,7 @@ public class GameMode extends ModeController {
 		
 		JsonValue handholdDesc = levelPiece.get("handholds").child();
 		
-		makeTestLevel(handholdDesc);
+		//makeTestLevel(handholdDesc);
 		
 		while(handholdDesc != null){
 			handhold = new HandholdModel(
@@ -481,6 +476,7 @@ public class GameMode extends ModeController {
 		
 		Vector2 forceL = new Vector2(0, 0);
 		Vector2 forceR = new Vector2(0, 0);
+		float[] forces = null;
 		if (nextToPress.size > 0) {
 			for (int i : nextToPress) {
 				((ExtremityModel) (character.parts.get(i))).ungrip();
@@ -488,12 +484,12 @@ public class GameMode extends ModeController {
 			}
 			float v = input.getVerticalL();
 			float h = input.getHorizontalL();
-			Movement.findAndApplyForces(nextToPress.get(0),v,h);
+			forces = Movement.findAndApplyForces(nextToPress.get(0),v,h);
 
 			if (nextToPress.size > 1 && (TWO_LIMB_MODE)) {
 				v = input.getVerticalR();
 				h = input.getHorizontalR();
-				Movement.findAndApplyForces(nextToPress.get(1),v,h);
+				forces = Movement.findAndApplyForces(nextToPress.get(1),v,h);
 			}
 
 		}
@@ -535,16 +531,21 @@ public class GameMode extends ModeController {
 			}
 		}
 		// TODO: Update energy quantity (fill in these values)
-		//TODO : change if character is in TWO_LIMB_MODE?
-		character.updateEnergy(oxygen, 1, forceL, true);
-//		if (character.getEnergy <= 0){
-//			for(int e : EXTREMITIES){
-//				 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
-//				 extremity.ungrip(world);
-//				 extremity.body.setType(BodyDef.BodyType.DynamicBody);
-//				 extremity.setTexture(partTextures[e].getTexture());
-//			}s
-//		}
+		float exertion = 0;
+		if(forces!=null)
+			for(int i = 0; i < forces.length; i++){
+				exertion+=Math.abs(forces[i]);
+			}
+		character.updateEnergy(oxygen, 1, exertion, true);
+		if (character.getEnergy() <= 0){
+			for(int e : EXTREMITIES){
+				 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
+				 ungrip(extremity);
+				 extremity.ungrip();
+				 extremity.body.setType(BodyDef.BodyType.DynamicBody);
+				 extremity.setTexture(partTextures[e].getTexture());
+			}
+		}
 	}
 	
 	/** Grips a handhold by adding a revolute joint between the handhold and the extremity **/ 
@@ -731,7 +732,6 @@ public class GameMode extends ModeController {
 		float forcex = 0f;
 		float forcey = 0f;
 		forcex = xval * CONSTANT_X_FORCE;
-//		System.out.println(upsideDown);
 
 		if (!upsideDown) {
 			Vector2 hp = character.parts.get(hookedPart).getPosition();
@@ -810,13 +810,12 @@ public class GameMode extends ModeController {
 
 		canvas.begin();
 		for (GameObject obj : objects) obj.draw(canvas);
-//		System.out.println("tutorialToggle: " + tutorialToggle);
 		if (tutorialToggle) drawToggles(); 
 		canvas.end();
 
 		canvas.begin();
 		canvas.drawText(((Integer)(Math.round(character.getEnergy()))).toString(), font, 0f,
-				canvas.getCamera().position.y+canvas.height/2-50f);
+				canvas.getCamera().position.y+canvas.getHeight()/2-10f);
 		canvas.end();
 
 		if (debug) {
