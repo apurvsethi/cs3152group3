@@ -459,7 +459,9 @@ public class GameMode extends ModeController {
 		boolean c = input.didLeftArm() ? addToButtonsPressed((HAND_LEFT)) : checkIfJustReleased(HAND_LEFT);
 		boolean d = input.didRightArm() ? addToButtonsPressed((HAND_RIGHT)) : checkIfJustReleased(HAND_RIGHT);
 		
-		if(input.didSelect()) tutorialToggle = !tutorialToggle; 
+		if(input.didSelect()) tutorialToggle = !tutorialToggle;
+
+		if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
 		
 		Vector2 forceL = new Vector2(0, 0);
 		Vector2 forceR = new Vector2(0, 0);
@@ -705,6 +707,12 @@ public class GameMode extends ModeController {
 	}
 
 
+	public PooledList<GameObject> getGameObjects(){
+		return objects;
+	}
+
+	public TextureRegion getGameBackground() { return background; }
+
 	/**
 	 * @param hookedPart - calculation of force for an extremity attached to a handhold
 	 * @param freePart - part that the force will be applied to
@@ -845,7 +853,6 @@ public class GameMode extends ModeController {
 
 		canvas.begin();
 		for (GameObject obj : objects) obj.draw(canvas);
-		System.out.println("tutorialToggle: " + tutorialToggle);
 		if (tutorialToggle) drawToggles(); 
 		canvas.end();
 

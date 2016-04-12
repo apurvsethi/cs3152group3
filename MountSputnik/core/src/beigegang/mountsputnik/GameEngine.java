@@ -95,15 +95,19 @@ public class GameEngine extends Game implements ScreenListener {
 				controllers[controllerIndex].setScreenListener(this);
 				controllers[controllerIndex].setCanvas(canvas);
 			}
-			controllers[GAME_SCREEN].reset();
-			setScreen(controllers[GAME_SCREEN]);
+			controllers[MENU_SCREEN].reset();
+			setScreen(controllers[MENU_SCREEN]);
 		} else if (exitCode == EXIT_MENU) {
 			controllers[MENU_SCREEN].reset();
 			setScreen(controllers[MENU_SCREEN]);
-		} else if (exitCode != EXIT_GAME_NEW_LEVEL) {
+		} else if (exitCode == EXIT_GAME_NEW_LEVEL) {
 			controllers[GAME_SCREEN].reset();
 			setScreen(controllers[GAME_SCREEN]);
 		} else if (exitCode == EXIT_PAUSE) {
+			PauseMode pause = (PauseMode) controllers[PAUSE_SCREEN];
+			GameMode game = (GameMode) controllers[GAME_SCREEN];
+			pause.setGameBackground(game.getGameBackground());
+			pause.setGameObjects(game.getGameObjects());
 			controllers[PAUSE_SCREEN].reset();
 			setScreen(controllers[PAUSE_SCREEN]);
 		} else if (exitCode == EXIT_GAME_RESUME_LEVEL) {
