@@ -259,7 +259,7 @@ public class GameMode extends ModeController {
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json"); 
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
-
+			
 			addChunk(levelPiece, currentHeight, levelName);
 			currentHeight += levelPiece.getFloat("size");
 
@@ -271,8 +271,8 @@ public class GameMode extends ModeController {
 				currentHeight += levelPiece.getInt("size");
 			}
 		}
-
-		//System.out.println(levelBlocks.toString()); <- this string is important for debugging 
+		//Use this string to see which level blocks you are currently testing
+		//System.out.println(levelBlocks.toString()); 
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
 			//arms
 		objects.add(character.parts.get(ARM_LEFT));
