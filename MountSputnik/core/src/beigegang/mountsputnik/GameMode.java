@@ -552,12 +552,17 @@ public class GameMode extends ModeController {
 		if (e.getJoint() == null){
 			RevoluteJointDef jointD = new RevoluteJointDef(); 
 			jointD.initialize(e.getBody(), h.getBody(), e.getPosition());
-			jointD.collideConnected = false; 
+			jointD.collideConnected = false;
+			setJointMotor(jointD,0,10);
 			Joint j = world.createJoint(jointD);
 			e.setJoint(j); 
 		}
 	}
-	
+	private void setJointMotor(RevoluteJointDef jd, float motorSpeed, float maxTorque) {
+		jd.enableMotor = true;
+		jd.motorSpeed = motorSpeed * DEG_TO_RAD;
+		jd.maxMotorTorque = maxTorque;
+	}
 	public void ungrip(ExtremityModel e){
 		if (e.getJoint() != null){
 			world.destroyJoint(e.getJoint());
