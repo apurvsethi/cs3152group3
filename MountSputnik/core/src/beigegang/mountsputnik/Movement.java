@@ -432,8 +432,7 @@ public class Movement {
         float forcexH = 0f;
         float forceyH = 0f;
         float absoluteAngle = findAbsoluteAngleOfPart(root,shoot);
-        float jA= ((RevoluteJoint)(character.joints.get(THIGH_RIGHT - 1))).getJointAngle() * RAD_TO_DEG;
-        
+
         //TODO this doesn't pull the player up much, this just manuevers the arm into the correct position...
 
         if (absoluteAngle > -180 && absoluteAngle <= -90) {
@@ -449,7 +448,7 @@ public class Movement {
             forcexV = (absoluteAngle - 90) / 90;
             forceyV = 1 - forcexV;
         }
-        if (v<0){
+        if (v<0){ //flip the values for down
             forcexV *= -1;
             forceyV *= -1;
         }
