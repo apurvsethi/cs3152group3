@@ -35,6 +35,10 @@ public final class Constants {
 
 	public static final int HANDHOLD_SNAP_RADIUS = 1;
 
+	public static final int START_MENU_DRAW_LOCATION = SCREEN_HEIGHT / 2;
+	public static final int MENU_ITEM_HEIGHT = 80;
+	public static final int MENU_CHANGE_COOLDOWN = 12;
+
 	/** The number of handholds on the given level. TODO: remove. For testing purposes only */
 	public static final int HANDHOLD_NUMBER = 5;
 

@@ -1,7 +1,12 @@
 {
 	"difficulty": "easy",
+<<<<<<< HEAD
 	"height": 50,
 	"uniqueBlocks": 9,
+=======
+	"height": 300,
+	"uniqueBlocks": 1,
+>>>>>>> 3f3b9bea48c55b2e79276b4ad3031cc61075dad4
 	"generalFillerSize": 0, 
 	"fillerBlocks": 0,
     "oxygen": 1,

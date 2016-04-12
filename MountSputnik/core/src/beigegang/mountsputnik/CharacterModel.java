@@ -213,14 +213,14 @@ public class CharacterModel {
 
 		makeJoint(HAND_LEFT, FOREARM_LEFT, HAND_X_OFFSET, HAND_Y_OFFSET, 0, canvasSize);
 		setJointAngleLimits(-20, 60);
-		setJointMotor(0, 100);
+		setJointMotor(0, 5);
 
 //		setJointMotor(0, 100);
 		addJoint(world);
 
 		makeJoint(HAND_RIGHT, FOREARM_RIGHT, -HAND_X_OFFSET, HAND_Y_OFFSET, 0, canvasSize);
 		setJointAngleLimits(-20, 60);
-		setJointMotor(0, 100);
+		setJointMotor(0, 5);
 
 //		setJointMotor(0, 100);
 		addJoint(world);
@@ -277,7 +277,7 @@ public class CharacterModel {
 		jointDef.referenceAngle = referenceAngle * DEG_TO_RAD;
 	}
 
-	private void setJointMotor(float motorSpeed, float maxTorque) {
+	public void setJointMotor(float motorSpeed, float maxTorque) {
 		jointDef.enableMotor = true;
 		jointDef.motorSpeed = motorSpeed * DEG_TO_RAD;
 		jointDef.maxMotorTorque = maxTorque;
@@ -325,24 +325,25 @@ public class CharacterModel {
 	 * @param gainModifier Environmental Gain Modifier
 	 * @param lossModifier Environmental Loss Modifier
 	 * @param rotationGain Whether or not rotation affects gain (would be false if in space or places with low gravity)
-	 * @param force Current force being exerted by character
+	 * @param exterion Current force being exerted by character
 	 */
-	public void updateEnergy(float gainModifier, float lossModifier, Vector2 force, boolean rotationGain){
+	public void updateEnergy(float gainModifier, float lossModifier, float exertion, boolean rotationGain){
 		int b = rotationGain ? 1 : 0;
 		float angle = parts.get(CHEST).getAngle();
-		float exertion = Math.abs(force.y/600); //TODO: value needs adjusting based on new physics
 		
-		int feet = parts.get(FOOT_LEFT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
-		feet += parts.get(FOOT_RIGHT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
-		int hands = parts.get(HAND_LEFT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
-		hands += parts.get(HAND_RIGHT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
+		int feet = ((ExtremityModel)(parts.get(FOOT_LEFT))).isGripping() ? 1 : 0;
+		feet += ((ExtremityModel)(parts.get(FOOT_RIGHT))).isGripping() ? 1 : 0;
+		int hands = ((ExtremityModel)(parts.get(HAND_LEFT))).isGripping()? 1 : 0;
+		hands += ((ExtremityModel)(parts.get(HAND_RIGHT))).isGripping()? 1 : 0;
+		
 		
 		float gain = (float) (ENERGY_GAIN_MULTIPLIER * (1-b*Math.sin(angle/2.0)) * BASE_ENERGY_GAIN * gainModifier);
-		float loss = ENERGY_LOSS_MULTIPLIER * (exertion + 1) * lossModifier * (3 - feet) * (3 - hands);
+		float loss = ENERGY_LOSS_MULTIPLIER * (exertion*123 + 1) * lossModifier * (3 - feet) * (3 - hands);
 		loss = feet == 0 && hands == 0 ? 0 : loss;
 		float dEdt = gain - loss - ENERGY_LOSS;
 		
-		float newEnergy = getEnergy() < 0 ? 0 : getEnergy() > 100 ? 100 : getEnergy() + dEdt;
+		float newEnergy = getEnergy() + dEdt;
+				//getEnergy() < 0 ? 0 : getEnergy() > 100 ? 100 : getEnergy() + dEdt;
 		setEnergy(newEnergy);
 	}
 }
