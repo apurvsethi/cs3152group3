@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.utils.*;
 
@@ -473,7 +474,9 @@ public class GameMode extends ModeController {
 		boolean d = input.didRightArm() ? addToButtonsPressed((HAND_RIGHT)) : checkIfJustReleased(HAND_RIGHT);
 		
 		if(input.didSelect()) tutorialToggle = !tutorialToggle; 
-		
+
+		Movement.makeHookedJointsMovable(nextToPress);
+
 		Vector2 forceL = new Vector2(0, 0);
 		Vector2 forceR = new Vector2(0, 0);
 		float[] forces = null;
@@ -558,8 +561,9 @@ public class GameMode extends ModeController {
 			jointD.collideConnected = false;
 			setJointMotor(jointD,0,10);
 			Joint j = world.createJoint(jointD);
-			e.setJoint(j); 
+			e.setJoint(j);
 		}
+		e.grip();
 	}
 	private void setJointMotor(RevoluteJointDef jd, float motorSpeed, float maxTorque) {
 		jd.enableMotor = true;
@@ -572,6 +576,7 @@ public class GameMode extends ModeController {
 			e.setJoint(null); 
 			
 		}
+		e.ungrip();
 	}
 	
 
@@ -752,12 +757,18 @@ public class GameMode extends ModeController {
 
 	private void applyTorsoForceIfApplicable(Vector2 force) {
 		if (TORSO_MODE){
-			InputController input = InputController.getInstance();
-			float h = input.getHorizontalR();
-			float v = input.getVerticalR();
-			applyIfUnderLimit(CHEST,new Vector2(force.x,force.y),h,v);
+			if (isGripping(FOOT_LEFT)|| isGripping(FOOT_RIGHT) || isGripping(HAND_LEFT) || isGripping(HAND_RIGHT)){
+				InputController input = InputController.getInstance();
+				float h = input.getHorizontalR();
+				float v = input.getVerticalR();
+				applyIfUnderLimit(CHEST,new Vector2(force.x,force.y),h,v);
+			}
 
 		}
+	}
+
+	private boolean isGripping(int part) {
+		return ((ExtremityModel)(character.parts.get(part))).isGripped();
 	}
 
 	private void applyIfUnderLimit(int part, Vector2 force, float h, float v) {

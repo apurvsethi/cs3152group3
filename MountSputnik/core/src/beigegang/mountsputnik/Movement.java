@@ -2,6 +2,7 @@ package beigegang.mountsputnik;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
+import com.badlogic.gdx.utils.Array;
 
 import static beigegang.mountsputnik.Constants.*;
 /**
@@ -119,18 +120,18 @@ public class Movement {
         if (v>.2){//up
             if (aa>=0f){
                 if (aa > 45f){
-                    forearmJoint.setMotorSpeed(1);
+                    forearmJoint.setMotorSpeed(FOREARM_JOINT_SPEED);
                 }else{ //special box case
-                    forearmJoint.setMotorSpeed(-1);
+                    forearmJoint.setMotorSpeed(-FOREARM_JOINT_SPEED);
                 }
             }else{
                 //aa<0
                 //special box case
                 //correct nt
                 if (aa>-45f){
-                    forearmJoint.setMotorSpeed(-1);
+                    forearmJoint.setMotorSpeed(-FOREARM_JOINT_SPEED);
                 }else{
-                    forearmJoint.setMotorSpeed(1);
+                    forearmJoint.setMotorSpeed(FOREARM_JOINT_SPEED);
                     forearmJoint.setMaxMotorTorque(100);
                     }
                 }
@@ -139,43 +140,43 @@ public class Movement {
 
             if (aa<=0f){
                 if (aa > -135f){
-                   forearmJoint.setMotorSpeed(1);
+                   forearmJoint.setMotorSpeed(FOREARM_JOINT_SPEED);
                 }else{ //special box case <-135f
-                    forearmJoint.setMotorSpeed(-1);
+                    forearmJoint.setMotorSpeed(-FOREARM_JOINT_SPEED);
                 }
             }else{//aa<0
                 //special box case
                 if (aa>135f){
-                    forearmJoint.setMotorSpeed(-1);
+                    forearmJoint.setMotorSpeed(-FOREARM_JOINT_SPEED);
                 }else{
-                    forearmJoint.setMotorSpeed(1);
+                    forearmJoint.setMotorSpeed(FOREARM_JOINT_SPEED);
 //
                 }
             }
         }
         if (h<-.2){//left
             if (aa<0f){
-                forearmJoint.setMotorSpeed(-1);
+                forearmJoint.setMotorSpeed(-FOREARM_JOINT_SPEED);
             }else{
-                forearmJoint.setMotorSpeed(-1);
+                forearmJoint.setMotorSpeed(-FOREARM_JOINT_SPEED);
             }
         }else if (h>.2){
             if (aa<0f){
                 if (aa>-90f){
                     //rotate?
-                    forearmJoint.setMotorSpeed(1);
+                    forearmJoint.setMotorSpeed(FOREARM_JOINT_SPEED);
 
                 }else if (aa > -135f){
-                    forearmJoint.setMotorSpeed(1);
+                    forearmJoint.setMotorSpeed(FOREARM_JOINT_SPEED);
                 }else{
-                    forearmJoint.setMotorSpeed(-1);
+                    forearmJoint.setMotorSpeed(-FOREARM_JOINT_SPEED);
 
                 }
             }else{
-                if (aa<45) forearmJoint.setMotorSpeed(1);
-                else if (aa > 135) forearmJoint.setMotorSpeed(1);
+                if (aa<45) forearmJoint.setMotorSpeed(FOREARM_JOINT_SPEED);
+                else if (aa > 135) forearmJoint.setMotorSpeed(FOREARM_JOINT_SPEED);
                 else{
-                    forearmJoint.setMotorSpeed(-1);
+                    forearmJoint.setMotorSpeed(-FOREARM_JOINT_SPEED);
                     forearmJoint.setMaxMotorTorque(100);
 
                 }
@@ -196,57 +197,57 @@ public class Movement {
         if (v>.2){//up
             if (aa>=0f){
                 if (aa > 45f){
-                    forearmJoint.setMotorSpeed(-1);
+                    forearmJoint.setMotorSpeed(-FOREARM_JOINT_SPEED);
                     forearmJoint.setMaxMotorTorque(100);
 
                 }else{ //special box case
-                    forearmJoint.setMotorSpeed(1);
+                    forearmJoint.setMotorSpeed(FOREARM_JOINT_SPEED);
                 }
             }else{//aa<0
                 //special box case
                 if (aa>-45f){
-                    forearmJoint.setMotorSpeed(1);
+                    forearmJoint.setMotorSpeed(FOREARM_JOINT_SPEED);
                 }else{
-                    forearmJoint.setMotorSpeed(-1);
+                    forearmJoint.setMotorSpeed(-FOREARM_JOINT_SPEED);
                 }
             }
         }
         else if (v<-.2){ //down
             if (aa<=0f){
                 if (aa > -135f){
-                    forearmJoint.setMotorSpeed(-1);
+                    forearmJoint.setMotorSpeed(-FOREARM_JOINT_SPEED);
                 }else{ //special box case.
-                    forearmJoint.setMotorSpeed(1);
+                    forearmJoint.setMotorSpeed(FOREARM_JOINT_SPEED);
                 }
             }else{//aa<0
                 //special box case
                 if (aa>135f){
-                    forearmJoint.setMotorSpeed(1);
+                    forearmJoint.setMotorSpeed(FOREARM_JOINT_SPEED);
                 }else{
-                    forearmJoint.setMotorSpeed(-1);
+                    forearmJoint.setMotorSpeed(-FOREARM_JOINT_SPEED);
 //
                 }
             }
         }
         if (h>.2){//right
             if (aa<0f){
-                forearmJoint.setMotorSpeed(1);
+                forearmJoint.setMotorSpeed(FOREARM_JOINT_SPEED);
             }else{
-                forearmJoint.setMotorSpeed(1);
+                forearmJoint.setMotorSpeed(FOREARM_JOINT_SPEED);
             }
         }else if (h<-.2){
             if (aa<0f){
                 if (aa>-90f){
                     //rotate?
-                    forearmJoint.setMotorSpeed(1);
+                    forearmJoint.setMotorSpeed(FOREARM_JOINT_SPEED);
 
                 }else if (aa > -135f){
-                    forearmJoint.setMotorSpeed(1);
+                    forearmJoint.setMotorSpeed(FOREARM_JOINT_SPEED);
                 }else{
-                    forearmJoint.setMotorSpeed(1);
+                    forearmJoint.setMotorSpeed(FOREARM_JOINT_SPEED);
                 }
             }else{
-                forearmJoint.setMotorSpeed(-1);
+                forearmJoint.setMotorSpeed(-FOREARM_JOINT_SPEED);
             }
         }
         return null;
@@ -486,20 +487,20 @@ public class Movement {
         if (v>.2){//up
             if (aa>=0f){
                 if (aa > 45f){
-                    shinJoint.setMotorSpeed(-1);
+                    shinJoint.setMotorSpeed(-SHIN_JOINT_SPEED);
 //                    cuz this bending works AGAINST gravity
                     shinJoint.setMaxMotorTorque(100);
 
                 }else{ //special box case
-                    shinJoint.setMotorSpeed(1);
+                    shinJoint.setMotorSpeed(SHIN_JOINT_SPEED);
 
                 }
             }else{//aa<0
                 //special box case
                 if (aa>-45f){
-                    shinJoint.setMotorSpeed(1);
+                    shinJoint.setMotorSpeed(SHIN_JOINT_SPEED);
                 }else{
-                    shinJoint.setMotorSpeed(-1);
+                    shinJoint.setMotorSpeed(-SHIN_JOINT_SPEED);
                 }
 //
             }
@@ -509,43 +510,43 @@ public class Movement {
 
             if (aa<=0f){
                 if (aa > -135f){
-                    shinJoint.setMotorSpeed(-1);
+                    shinJoint.setMotorSpeed(-SHIN_JOINT_SPEED);
                 }else{ //special box case <-135f, arm goes straight downward bound ho stuff.
-                    shinJoint.setMotorSpeed(1);
+                    shinJoint.setMotorSpeed(SHIN_JOINT_SPEED);
                 }
             }else{//aa<0
                 //special box case
                 if (aa>135f){
-                    shinJoint.setMotorSpeed(1);
+                    shinJoint.setMotorSpeed(SHIN_JOINT_SPEED);
                 }else{
-                    shinJoint.setMotorSpeed(-1);
+                    shinJoint.setMotorSpeed(-SHIN_JOINT_SPEED);
 //
                 }
             }
         }
         if (h>.2){//right
             if (aa<0f){
-                shinJoint.setMotorSpeed(1);
+                shinJoint.setMotorSpeed(SHIN_JOINT_SPEED);
             }else{
-                shinJoint.setMotorSpeed(1);
+                shinJoint.setMotorSpeed(SHIN_JOINT_SPEED);
             }
         }else if (h<-.2){//left
             if (aa<0f){
                 if (aa>-90f){
                     //rotate?
-                    shinJoint.setMotorSpeed(1);
+                    shinJoint.setMotorSpeed(SHIN_JOINT_SPEED);
 
                 }else if (aa > -135f){
-                    shinJoint.setMotorSpeed(1);
+                    shinJoint.setMotorSpeed(SHIN_JOINT_SPEED);
                 }else{
-                    shinJoint.setMotorSpeed(-1);
+                    shinJoint.setMotorSpeed(-SHIN_JOINT_SPEED);
 
                 }
             }else{
-                if (aa<45) shinJoint.setMotorSpeed(1);
-                else if (aa > 135) shinJoint.setMotorSpeed(1);
+                if (aa<45) shinJoint.setMotorSpeed(SHIN_JOINT_SPEED);
+                else if (aa > 135) shinJoint.setMotorSpeed(SHIN_JOINT_SPEED);
                 else{
-                    shinJoint.setMotorSpeed(-1);
+                    shinJoint.setMotorSpeed(-SHIN_JOINT_SPEED);
                 }
             }
         }
@@ -565,20 +566,20 @@ public class Movement {
                 //correct nt.
                 if (aa > 45f){
                     //rotate the joint using the MOTOR SPEED.
-                    shinJoint.setMotorSpeed(1);
+                    shinJoint.setMotorSpeed(SHIN_JOINT_SPEED);
 //                    cuz this bending works AGAINST gravity
                     shinJoint.setMaxMotorTorque(100);
 
                 }else{ //special box case
-                    shinJoint.setMotorSpeed(-1);
+                    shinJoint.setMotorSpeed(-SHIN_JOINT_SPEED);
 
                 }
             }else{
                 //special box case
                 if (aa>-45f){
-                    shinJoint.setMotorSpeed(-1);
+                    shinJoint.setMotorSpeed(-SHIN_JOINT_SPEED);
                 }else{ //shin should rotate to max degrees
-                    shinJoint.setMotorSpeed(1);
+                    shinJoint.setMotorSpeed(SHIN_JOINT_SPEED);
                 }
 //
             }
@@ -589,44 +590,44 @@ public class Movement {
             if (aa<=0f){
                 //correct nt.
                 if (aa > -135f){
-                    shinJoint.setMotorSpeed(1);
+                    shinJoint.setMotorSpeed(SHIN_JOINT_SPEED);
                     shinJoint.setMaxMotorTorque(30);
                 }else{ //special box case <-135f, arm goes straight downward bound ho stuff.
-                    shinJoint.setMotorSpeed(-1);
+                    shinJoint.setMotorSpeed(-SHIN_JOINT_SPEED);
                 }
             }else{//aa<0
                 //special box case
                 if (aa>135f){
-                    shinJoint.setMotorSpeed(-1);
+                    shinJoint.setMotorSpeed(-SHIN_JOINT_SPEED);
                 }else{
-                    shinJoint.setMotorSpeed(1);
+                    shinJoint.setMotorSpeed(SHIN_JOINT_SPEED);
                 }
             }
         }
         if (h<-.2){//right
             if (aa<0f){
-                shinJoint.setMotorSpeed(-1);
+                shinJoint.setMotorSpeed(-SHIN_JOINT_SPEED);
 //
             }else{
-                shinJoint.setMotorSpeed(-1);
+                shinJoint.setMotorSpeed(-SHIN_JOINT_SPEED);
             }
         }else if (h>.2){//right
             if (aa<0f){
                 if (aa>-90f){
                     //rotate?
-                    shinJoint.setMotorSpeed(-1);
+                    shinJoint.setMotorSpeed(-SHIN_JOINT_SPEED);
 
                 }else if (aa > -135f){
-                    shinJoint.setMotorSpeed(1);
+                    shinJoint.setMotorSpeed(SHIN_JOINT_SPEED);
                 }else{
-                    shinJoint.setMotorSpeed(-1);
+                    shinJoint.setMotorSpeed(-SHIN_JOINT_SPEED);
 
                 }
             }else{
-                if (aa<45) shinJoint.setMotorSpeed(1);
-                else if (aa > 135) shinJoint.setMotorSpeed(1);
+                if (aa<45) shinJoint.setMotorSpeed(SHIN_JOINT_SPEED);
+                else if (aa > 135) shinJoint.setMotorSpeed(SHIN_JOINT_SPEED);
                 else{
-                    shinJoint.setMotorSpeed(-1);
+                    shinJoint.setMotorSpeed(-SHIN_JOINT_SPEED);
 
                 }
             }
@@ -737,6 +738,19 @@ public class Movement {
 
         }
         return forcey;
+    }
+
+    public static void makeHookedJointsMovable(Array<Integer> nextToPress) {
+        if (!nextToPress.contains(FOOT_LEFT,true)){
+            ((RevoluteJoint)character.joints.get(FOREARM_LEFT-1)).setMaxMotorTorque(100);
+        }
+        if (!nextToPress.contains(FOOT_RIGHT,true)){
+            ((RevoluteJoint)character.joints.get(FOREARM_RIGHT-1)).setMaxMotorTorque(100);
+        }if (!nextToPress.contains(HAND_LEFT,true)){
+            ((RevoluteJoint)character.joints.get(SHIN_LEFT-1)).setMaxMotorTorque(100);
+        }if (!nextToPress.contains(HAND_RIGHT,true)){
+            ((RevoluteJoint)character.joints.get(SHIN_RIGHT-1)).setMaxMotorTorque(100);
+        }
     }
     //I need to use the modifiers from calcArmForce and calcLegForce multiplied by the max force multiplied by these constant things.
 
