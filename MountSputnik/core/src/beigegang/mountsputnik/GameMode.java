@@ -805,7 +805,7 @@ public class GameMode extends ModeController {
 
 		canvas.begin();
 		for (GameObject obj : objects) obj.draw(canvas);
-		System.out.println("tutorialToggle: " + tutorialToggle);
+//		System.out.println("tutorialToggle: " + tutorialToggle);
 		if (tutorialToggle) drawToggles(); 
 		canvas.end();
 
