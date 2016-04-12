@@ -537,15 +537,15 @@ public class GameMode extends ModeController {
 				exertion+=Math.abs(forces[i]);
 			}
 		character.updateEnergy(oxygen, 1, exertion, true);
-		if (character.getEnergy() <= 0){
-			for(int e : EXTREMITIES){
-				 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
-				 ungrip(extremity);
-				 extremity.ungrip();
-				 extremity.body.setType(BodyDef.BodyType.DynamicBody);
-				 extremity.setTexture(partTextures[e].getTexture());
-			}
-		}
+//		if (character.getEnergy() <= 0){
+//			for(int e : EXTREMITIES){
+//				 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
+//				 ungrip(extremity);
+//				 extremity.ungrip();
+//				 extremity.body.setType(BodyDef.BodyType.DynamicBody);
+//				 extremity.setTexture(partTextures[e].getTexture());
+//			}
+//		}
 	}
 	
 	/** Grips a handhold by adding a revolute joint between the handhold and the extremity **/ 
