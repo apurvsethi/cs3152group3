@@ -48,11 +48,11 @@ public final class Constants {
 	public static final float FOOT_PUSH = 1.0f;
 	public static final float FOOT_PULL = 1.0f;
 
-	public static final float MAX_PULLFORCE_LEG = 150f;
-	public static final float MAX_PULLFORCE_ARM = 150f;
-	public static final float MAX_PUSHFORCE_ARM = 100f;
-	public static final float MAX_PUSHFORCE_LEG = 250f;
-	public static final float CONSTANT_X_FORCE = 200f;
+	public static final float MAX_PULLFORCE_LEG = 50f;
+	public static final float MAX_PULLFORCE_ARM = 50f;
+	public static final float MAX_PUSHFORCE_ARM = 80f;
+	public static final float MAX_PUSHFORCE_LEG = 1000f;
+	public static final float CONSTANT_X_FORCE = 70f;
 
 	public static final int[] BODY_PART_ANIMATION_FRAMES = {1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1};
 	public static final int BODY_TEXTURE_COUNT = 15;
@@ -124,10 +124,21 @@ public final class Constants {
 	public static final float ENERGY_LOSS = .1f;
 	public static final float BASE_ENERGY_GAIN = 1f;
 
-	public static final float PART_MAX_X_VELOCITY = 5f;
-	public static final float PART_MAX_Y_VELOCITY = 5f;
+	public static final float PART_MAX_X_VELOCITY = -DEFAULT_GRAVITY;
+	public static final float PART_MAX_Y_VELOCITY = -DEFAULT_GRAVITY;
 	/** if player can control torso */
 	public static boolean TORSO_MODE = true;
 	/** if player can control multiple limbs */
 	public static boolean TWO_LIMB_MODE = false;
+
+
+	public static float FOREARM_PUSHING_LOWER_LIMIT = -90f;
+	public static float FOREARM_PUSHING_UPPER_LIMIT = .5f;
+	public static float FOREARM_PULLING_LOWER_LIMIT = -.5f;
+	public static float FOREARM_PULLING_UPPER_LIMIT = 90f;
+	//to make sure it could
+	public static float FOREARM_SWITCHING_EITHER_WAY = 0f;
+
+
+
 }
