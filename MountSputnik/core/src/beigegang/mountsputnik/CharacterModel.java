@@ -235,11 +235,11 @@ public class CharacterModel {
 
 		makeJoint(SHIN_LEFT,  THIGH_LEFT, SHIN_X_THIGH_OFFSET, SHIN_Y_THIGH_OFFSET, 0, canvasSize);
 		setJointAngleLimits(-150, 0);
-//		setJointMotor(10, 30);
+		setJointMotor(0, 30);
 		addJoint(world);
 		makeJoint(SHIN_RIGHT, THIGH_RIGHT, -SHIN_X_THIGH_OFFSET, SHIN_Y_THIGH_OFFSET, 0, canvasSize);
 		setJointAngleLimits(0, 150);
-//		setJointMotor(10, 30);
+		setJointMotor(0, 30);
 		addJoint(world);
 
 		makeJoint(FOOT_LEFT, SHIN_LEFT, FOOT_X_OFFSET, FOOT_Y_OFFSET, 0, canvasSize);

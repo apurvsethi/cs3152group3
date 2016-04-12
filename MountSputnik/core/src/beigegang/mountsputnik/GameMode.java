@@ -444,7 +444,7 @@ public class GameMode extends ModeController {
 				float lArmAngle = ((RevoluteJoint) character.joints.get(ARM_LEFT - 1)).getJointAngle();
 				float[] fs = Movement.getPhysicallyCorrectForceMultipliersLeftArm(lArmAngle,v,h);
 //				for (float f: fs) System.out.print(f + " " );
-				applyNewTestForcesLeftArm(fs,forceL,ARM_LEFT,v,h);
+				applyNewTestForces(fs,forceL,ARM_LEFT,v,h);
 
 				Movement.getMultipliersLeftForearm(v,h);
 
@@ -452,23 +452,37 @@ public class GameMode extends ModeController {
 
 
 
-			}else if (nextToPress.get(0) == HAND_RIGHT){
+			}else if (nextToPress.get(0) == HAND_RIGHT) {
 
 
-				forceL = new Vector2(CONSTANT_X_FORCE,CONSTANT_X_FORCE);
+				forceL = new Vector2(CONSTANT_X_FORCE, CONSTANT_X_FORCE);
 				float rArmAngle = ((RevoluteJoint) character.joints.get(ARM_RIGHT - 1)).getJointAngle();
-				float[] fs = Movement.getPhysicallyCorrectForceMultipliersRightArm(rArmAngle,v,h);
-				applyNewTestForcesRightArm(fs,forceL,ARM_RIGHT,v,h);
+				float[] fs = Movement.getPhysicallyCorrectForceMultipliersRightArm(rArmAngle, v, h);
+				applyNewTestForces(fs, forceL, ARM_RIGHT, v, h);
 //				RevoluteJoint forearmJoint = ((RevoluteJoint) character.joints.get(FOREARM_RIGHT-1));
 
-				Movement.getMultipliersRightForearm(v,h);
+				Movement.getMultipliersRightForearm(v, h);
 
 
-//				float rForearmAngle = ((RevoluteJoint) character.joints.get(FOREARM_RIGHT - 1)).getJointAngle();
-//				float[] fs2 = Movement.getPhysicallyCorrectForceMultipliersRightForearm(rForearmAngle,v,h);
-//				for (float f: fs2) System.out.print(f + " " );
-//				applyNewTestForcesRightForearm(fs2,forceL,FOREARM_RIGHT,v,h);
-//				System.out.println("THOSE WERE FOREARM FORCES");
+			}else if (nextToPress.get(0) == FOOT_LEFT){
+
+				forceL = new Vector2(CONSTANT_X_FORCE,CONSTANT_X_FORCE);
+				float lLegAngle = ((RevoluteJoint) character.joints.get(THIGH_LEFT - 1)).getJointAngle();
+				float[] fs = Movement.getPhysicallyCorrectForceMultipliersLeftLeg(lLegAngle,v,h);
+				applyNewTestForces(fs,forceL,THIGH_LEFT,v,h);
+//				shinJoint.setMotorSpeed(-1);
+				Movement.getMultipliersLeftShin(v,h);
+
+			}else if (nextToPress.get(0) == FOOT_RIGHT){
+				forceL = new Vector2(CONSTANT_X_FORCE,CONSTANT_X_FORCE);
+				float lLegAngle = ((RevoluteJoint) character.joints.get(THIGH_RIGHT - 1)).getJointAngle();
+				float[] fs = Movement.getPhysicallyCorrectForceMultipliersRightLeg(lLegAngle,v,h);
+				applyNewTestForces(fs,forceL,THIGH_RIGHT,v,h);
+				RevoluteJoint shinJoint = ((RevoluteJoint) character.joints.get(SHIN_RIGHT-1));
+				Movement.getMultipliersRightShin(v,h);
+
+//			//unused right now
+
 			}else {
 				for (int i : nextToPress) {
 					((ExtremityModel) (character.parts.get(i))).ungrip();
@@ -542,7 +556,7 @@ public class GameMode extends ModeController {
 //		}
 	}
 
-	private void applyNewTestForcesLeftArm(float[] fs, Vector2 forceL,int part,float v, float h) {
+	private void applyNewTestForces(float[] fs, Vector2 forceL,int part,float v, float h) {
 		float x = forceL.x;
 		float y = forceL.y;
 		float forcexV = fs[0];
@@ -554,43 +568,43 @@ public class GameMode extends ModeController {
 		character.parts.get(part).body.applyForceToCenter(forcexV*x*v,forceyV*y*v,true);
 		character.parts.get(part).body.applyForceToCenter(forcexH*x*h,forceyH*y*h,true);
 	}
-	private void applyNewTestForcesLeftForearm(float[] fs, Vector2 forceL,int part,float v, float h) {
-		float x = forceL.x;
-		float y = forceL.y;
-		float forcexV = fs[0];
-		float forceyV = fs[1];
-		float forcexH = fs[2];
-		float forceyH = fs[3];
-		v = Math.abs(v);
-		h = Math.abs(h);
-		character.parts.get(part).body.applyForceToCenter(forcexV*x*v,forceyV*y*v,true);
-		character.parts.get(part).body.applyForceToCenter(forcexH*x*h,forceyH*y*h,true);
-	}
-	private void applyNewTestForcesRightArm(float[] fs, Vector2 forceL,int part,float v, float h) {
-		float x = forceL.x;
-		float y = forceL.y;
-		float forcexV = fs[0];
-		float forceyV = fs[1];
-		float forcexH = fs[2];
-		float forceyH = fs[3];
-		v = Math.abs(v);
-		h = Math.abs(h);
-//		h = -(h);
-		character.parts.get(part).body.applyForceToCenter(forcexV*x*v,forceyV*y*v,true);
-		character.parts.get(part).body.applyForceToCenter(forcexH*x*h,forceyH*y*h,true);
-	}
-	private void applyNewTestForcesRightForearm(float[] fs, Vector2 forceL,int part,float v, float h) {
-		float x = forceL.x;
-		float y = forceL.y;
-		float forcexV = fs[0];
-		float forceyV = fs[1];
-		float forcexH = fs[2];
-		float forceyH = fs[3];
-		v = Math.abs(v);
-		h = Math.abs(h);
-		character.parts.get(part).body.applyForceToCenter(forcexV*x*v,forceyV*y*v,true);
-		character.parts.get(part).body.applyForceToCenter(forcexH*x*h,forceyH*y*h,true);
-	}
+//	private void applyNewTestForcesLeftForearm(float[] fs, Vector2 forceL,int part,float v, float h) {
+//		float x = forceL.x;
+//		float y = forceL.y;
+//		float forcexV = fs[0];
+//		float forceyV = fs[1];
+//		float forcexH = fs[2];
+//		float forceyH = fs[3];
+//		v = Math.abs(v);
+//		h = Math.abs(h);
+//		character.parts.get(part).body.applyForceToCenter(forcexV*x*v,forceyV*y*v,true);
+//		character.parts.get(part).body.applyForceToCenter(forcexH*x*h,forceyH*y*h,true);
+//	}
+//	private void applyNewTestForcesRightArm(float[] fs, Vector2 forceL,int part,float v, float h) {
+//		float x = forceL.x;
+//		float y = forceL.y;
+//		float forcexV = fs[0];
+//		float forceyV = fs[1];
+//		float forcexH = fs[2];
+//		float forceyH = fs[3];
+//		v = Math.abs(v);
+//		h = Math.abs(h);
+////		h = -(h);
+//		character.parts.get(part).body.applyForceToCenter(forcexV*x*v,forceyV*y*v,true);
+//		character.parts.get(part).body.applyForceToCenter(forcexH*x*h,forceyH*y*h,true);
+//	}
+//	private void applyNewTestForcesRightForearm(float[] fs, Vector2 forceL,int part,float v, float h) {
+//		float x = forceL.x;
+//		float y = forceL.y;
+//		float forcexV = fs[0];
+//		float forceyV = fs[1];
+//		float forcexH = fs[2];
+//		float forceyH = fs[3];
+//		v = Math.abs(v);
+//		h = Math.abs(h);
+//		character.parts.get(part).body.applyForceToCenter(forcexV*x*v,forceyV*y*v,true);
+//		character.parts.get(part).body.applyForceToCenter(forcexH*x*h,forceyH*y*h,true);
+//	}
 
 
 	private void spawnObstacles(){
@@ -781,7 +795,7 @@ public class GameMode extends ModeController {
 	private void applyForce(int limb,Vector2 force,boolean wake, float h, float v) {
 //TODO delete these lines.
 		float jointAngle = ((RevoluteJoint) character.joints.get(FOREARM_LEFT-1)).getJointAngle() * RAD_TO_DEG;
-		System.out.println(jointAngle);
+//		System.out.println(jointAngle);
 //
 		switch(limb){
 			case FOOT_LEFT:

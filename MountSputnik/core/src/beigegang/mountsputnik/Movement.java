@@ -239,8 +239,8 @@ public class Movement {
         Vector2 shoot = character.joints.get(FOREARM_RIGHT - 1).getAnchorA();
         float aa = findAbsoluteAngleOfPart(root,shoot);
         if (v>.2){//up
-            System.out.println(v + " " + h);
-            System.out.println(aa);
+//            System.out.println(v + " " + h);
+//            System.out.println(aa);
             if (aa>=0f){
                 //correct nt.
                 if (aa > 45f){
@@ -249,7 +249,7 @@ public class Movement {
                     forearmJoint.setMaxMotorTorque(100);
 
                 }else{ //special box case
-                    System.out.println("HERE");
+//                    System.out.println("HERE");
                     forearmJoint.setMotorSpeed(1);
                 }
             }else{
@@ -437,23 +437,328 @@ public class Movement {
             forceyH *= -1;
         }
 
-
-//		float jointAngle = ((RevoluteJoint) character.joints.get(ARM_LEFT-1)).getJointAngle() * RAD_TO_DEG;
-//		System.out.println(jointAngle);
-        //left arm (upper) only.
-        //applying force vertically upwards: - based on sketches i did.
-        //not sure if this is the case, but this is assuming both f.x and f.y are positive.
-//		probably a misplaced assumption which means that something would need to be changed - negative sign
-//		in calculating forcexV.
-        //
-        //SHIT SHIT SHIT -
-        // this "joint angle" thing i think is relevant to the absolute position of the arm on the screen.
-        //I'm not sure how it would work if the chest was, say, sorta sideways for example.
-        //something to ponder further.
-
-
         return new float[]{forcexV,forceyV,forcexH,forceyH};
     }
+
+    public static float[] getPhysicallyCorrectForceMultipliersLeftLeg(float lLegAngle, float v, float h) {
+        Vector2 root = character.joints.get(THIGH_LEFT - 1).getAnchorA();
+        Vector2 shoot = character.joints.get(SHIN_LEFT- 1).getAnchorA();
+        float forcexV = 0f;
+        float forceyV = 0f;
+        float forcexH = 0f;
+        float forceyH = 0f;
+        float absoluteAngle = findAbsoluteAngleOfPart(root,shoot);
+//        System.out.println(absoluteAngle + " abs angle ");
+        //VERTICAL DIRECTION
+        System.out.println(absoluteAngle);
+        //TODO this doesn't pull the player up at all, this just manuevers the arm into the correct position... is okay?
+        if (absoluteAngle > -180 && absoluteAngle <= -90) {
+
+            forcexV = (absoluteAngle + 90) / 90;
+            forceyV = 1 + forcexV;
+        } else if (absoluteAngle > -90 && absoluteAngle < 0) {
+            forcexV = (absoluteAngle + 90) / 90;
+            forceyV = 1 - forcexV;
+        } else if (absoluteAngle >= 0 && absoluteAngle <= 90) {
+
+            forcexV = (absoluteAngle - 90) / 90;
+            forceyV = 1 + forcexV;
+        } else { // (absoluteAngle > 90 && absoluteAngle < 180)
+            forcexV = (absoluteAngle - 90) / 90;
+            forceyV = 1 - forcexV;
+        }
+        if (v<0){
+            forcexV *= -1;
+            forceyV *= -1;
+        }
+
+        //HORIZONTAL DIRECTION
+        if (absoluteAngle > -180 && absoluteAngle <= -90) {
+            forcexH = (absoluteAngle + 90) / 90;
+            forceyH = 1 + forcexH;
+        } else if (absoluteAngle > -90 && absoluteAngle < 0) {
+            forcexH = -(absoluteAngle + 90) / 90;
+            forceyH = -(1 - forcexH);
+        } else if (absoluteAngle >= 0 && absoluteAngle <= 90) {
+            forcexH = (absoluteAngle - 90) / 90;
+            forceyH = 1 + forcexH;
+        } else { // (absoluteAngle > 90 && absoluteAngle < 180)
+            forcexH = -(absoluteAngle - 90) / 90;
+            forceyH = - (1 - forcexH);
+        }
+        if (h>0){
+            forcexH *= -1;
+            forceyH *= -1;
+        }
+
+        return new float[]{forcexV,forceyV,forcexH,forceyH};
+
+
+    }
+
+    public static float[] getPhysicallyCorrectForceMultipliersRightLeg(float lLegAngle, float v, float h) {
+        Vector2 root = character.joints.get(THIGH_RIGHT - 1).getAnchorA();
+        Vector2 shoot = character.joints.get(SHIN_RIGHT - 1).getAnchorA();
+        float forcexV = 0f;
+        float forceyV = 0f;
+        float forcexH = 0f;
+        float forceyH = 0f;
+        float absoluteAngle = findAbsoluteAngleOfPart(root,shoot);
+
+        //TODO this doesn't pull the player up much, this just manuevers the arm into the correct position...
+
+        if (absoluteAngle > -180 && absoluteAngle <= -90) {
+            forcexV = (absoluteAngle + 90) / 90;
+            forceyV = 1 + forcexV;
+        } else if (absoluteAngle > -90 && absoluteAngle < 0) {
+            forcexV = (absoluteAngle + 90) / 90;
+            forceyV = 1 - forcexV;
+        } else if (absoluteAngle >= 0 && absoluteAngle <= 90) {
+            forcexV = (absoluteAngle - 90) / 90;
+            forceyV = 1 + forcexV;
+        } else { // (absoluteAngle > 90 && absoluteAngle < 180)
+            forcexV = (absoluteAngle - 90) / 90;
+            forceyV = 1 - forcexV;
+        }
+        if (v<0){
+            forcexV *= -1;
+            forceyV *= -1;
+        }
+
+        //HORIZONTAL DIRECTION
+        if (absoluteAngle > -180 && absoluteAngle <= -90) {
+            forcexH = (absoluteAngle + 90) / 90;
+            forceyH = 1 + forcexH;
+        } else if (absoluteAngle > -90 && absoluteAngle < 0) {
+            forcexH = -(absoluteAngle + 90) / 90;
+            forceyH = -(1 - forcexH);
+        } else if (absoluteAngle >= 0 && absoluteAngle <= 90) {
+            forcexH = (absoluteAngle - 90) / 90;
+            forceyH = 1 + forcexH;
+        } else { // (absoluteAngle > 90 && absoluteAngle < 180)
+            forcexH = -(absoluteAngle - 90) / 90;
+            forceyH = - (1 - forcexH);
+        }
+        if (h>0){
+            forcexH *= -1;
+            forceyH *= -1;
+        }
+        return new float[]{forcexV,forceyV,forcexH,forceyH};
+
+
+    }
+
+    public static float[] getMultipliersLeftShin(float v, float h) {
+
+//        RevoluteJoint armJoint = ((RevoluteJoint) character.joints.get(THIGH_LEFT-1));
+        RevoluteJoint shinJoint = ((RevoluteJoint) character.joints.get(SHIN_LEFT-1));
+//        RevoluteJoint handJoint = ((RevoluteJoint) character.joints.get(FOOT_LEFT-1));
+        shinJoint.setMaxMotorTorque(30);
+        Vector2 root = character.joints.get(THIGH_LEFT - 1).getAnchorA();
+        Vector2 shoot = character.joints.get(SHIN_LEFT - 1).getAnchorA();
+        float aa = findAbsoluteAngleOfPart(root,shoot);
+//        float aaForearm = findAbsoluteAngleOfPart(forearmJoint.getLocalAnchorA(),handJoint.getLocalAnchorA());
+        if (v>.2){//up
+//            System.out.println(v + " " + h);
+//            System.out.println(aa);
+            //what happens if user presses left and up while person has aaForearm > 90? i guess just telescopes.
+            if (aa>=0f){
+                //correct nt.
+                if (aa > 45f){
+                    //rotate the joint using the MOTOR SPEED.
+                    shinJoint.setMotorSpeed(-1);
+//                    cuz this bending works AGAINST gravity
+                    shinJoint.setMaxMotorTorque(100);
+
+                }else{ //special box case
+                    shinJoint.setMotorSpeed(1);
+
+                }
+            }else{
+                //aa<0
+                //special box case
+                //correct nt
+                if (aa>-45f){
+//                    System.out.println("HERE");
+                    shinJoint.setMotorSpeed(1);
+//                    return null;
+                }else{
+                    //shin should rotate to max degrees
+                    //correct nt
+                    shinJoint.setMotorSpeed(-1);
+//                    armJoint.setMotorSpeed(20);
+                }
+//
+            }
+        }
+        //temporary limits for now for testing usage.
+        else if (v<-.2){ //down
+
+            if (aa<=0f){
+                //correct nt.
+                if (aa > -135f){
+                    shinJoint.setMotorSpeed(-1);
+                }else{ //special box case <-135f, arm goes straight downward bound ho stuff.
+                    shinJoint.setMotorSpeed(1);
+                }
+            }else{
+                //aa<0
+                //special box case
+                //correct nt
+                if (aa>135f){
+                    shinJoint.setMotorSpeed(1);
+                }else{
+                    //forearm should rotate to 90 degrees
+                    //correct nt
+                    //need to check if pressing LEFT and UP
+                    shinJoint.setMotorSpeed(-1);
+//
+                }
+            }
+        }
+        if (h>.2){//right
+            if (aa<0f){
+                //just telescope for left?
+                shinJoint.setMotorSpeed(1);
+//                }else{
+//                    forearmJoint.setMotorSpeed(-1);
+//                }
+            }else{
+                shinJoint.setMotorSpeed(1);
+            }
+        }else if (h<-.2){//left
+            if (aa<0f){
+                if (aa>-90f){
+                    //rotate?
+                    shinJoint.setMotorSpeed(1);
+
+                }else if (aa > -135f){
+                    shinJoint.setMotorSpeed(1);
+                }else{
+                    shinJoint.setMotorSpeed(-1);
+
+                }
+            }else{
+                if (aa<45) shinJoint.setMotorSpeed(1);
+                else if (aa > 135) shinJoint.setMotorSpeed(1);
+                else{
+                    shinJoint.setMotorSpeed(-1);
+//                    shinJoint.setMaxMotorTorque(100);
+
+                }
+            }
+        }
+
+        return null;
+
+    }
+    public static float[] getMultipliersRightShin(float v, float h) {
+
+//        RevoluteJoint armJoint = ((RevoluteJoint) character.joints.get(THIGH_LEFT-1));
+        RevoluteJoint shinJoint = ((RevoluteJoint) character.joints.get(SHIN_RIGHT-1));
+//        RevoluteJoint handJoint = ((RevoluteJoint) character.joints.get(FOOT_LEFT-1));
+        shinJoint.setMaxMotorTorque(30);
+        Vector2 root = character.joints.get(THIGH_RIGHT - 1).getAnchorA();
+        Vector2 shoot = character.joints.get(SHIN_RIGHT - 1).getAnchorA();
+        float aa = findAbsoluteAngleOfPart(root,shoot);
+//        float aaForearm = findAbsoluteAngleOfPart(forearmJoint.getLocalAnchorA(),handJoint.getLocalAnchorA());
+        if (v>.2){//up
+//            System.out.println(v + " " + h);
+//            System.out.println(aa);
+            //what happens if user presses left and up while person has aaForearm > 90? i guess just telescopes.
+            if (aa>=0f){
+                //correct nt.
+                if (aa > 45f){
+                    //rotate the joint using the MOTOR SPEED.
+                    shinJoint.setMotorSpeed(1);
+//                    cuz this bending works AGAINST gravity
+                    shinJoint.setMaxMotorTorque(100);
+
+                }else{ //special box case
+                    shinJoint.setMotorSpeed(-1);
+
+                }
+            }else{
+                //aa<0
+                //special box case
+                //correct nt
+                if (aa>-45f){
+//                    System.out.println("HERE");
+                    shinJoint.setMotorSpeed(-1);
+//                    return null;
+                }else{
+                    //shin should rotate to max degrees
+                    //correct nt
+                    shinJoint.setMotorSpeed(1);
+//                    armJoint.setMotorSpeed(20);
+                }
+//
+            }
+        }
+        //temporary limits for now for testing usage.
+        else if (v<-.2){ //down
+
+            if (aa<=0f){
+                //correct nt.
+                if (aa > -135f){
+                    shinJoint.setMotorSpeed(1);
+                    shinJoint.setMaxMotorTorque(30);
+                }else{ //special box case <-135f, arm goes straight downward bound ho stuff.
+                    shinJoint.setMotorSpeed(-1);
+                }
+            }else{
+                //aa<0
+                //special box case
+                //correct nt
+                if (aa>135f){
+                    shinJoint.setMotorSpeed(-1);
+                }else{
+                    //forearm should rotate to 90 degrees
+                    //correct nt
+                    //need to check if pressing LEFT and UP
+                    shinJoint.setMotorSpeed(1);
+//
+                }
+            }
+        }
+        if (h<-.2){//right
+            if (aa<0f){
+                //just telescope for left?
+                shinJoint.setMotorSpeed(-1);
+//                }else{
+//                    forearmJoint.setMotorSpeed(-1);
+//                }
+            }else{
+                shinJoint.setMotorSpeed(-1);
+            }
+        }else if (h>.2){//right
+            if (aa<0f){
+                if (aa>-90f){
+                    //rotate?
+                    shinJoint.setMotorSpeed(-1);
+
+                }else if (aa > -135f){
+                    shinJoint.setMotorSpeed(1);
+                }else{
+                    shinJoint.setMotorSpeed(-1);
+
+                }
+            }else{
+                if (aa<45) shinJoint.setMotorSpeed(1);
+                else if (aa > 135) shinJoint.setMotorSpeed(1);
+                else{
+                    shinJoint.setMotorSpeed(-1);
+//                    shinJoint.setMaxMotorTorque(100);
+
+                }
+            }
+        }
+
+        return null;
+
+    }
+
+
 //previously used methods that could still be helpful
 //    public static float[] getPhysicallyCorrectForceMultipliersRightForearm(float jointAngle, float v, float h){
 ////		jointAngle *= -1;
