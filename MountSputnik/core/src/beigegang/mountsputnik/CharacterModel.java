@@ -180,56 +180,72 @@ public class CharacterModel {
 	private void makeJoints(World world, Vector2 canvasSize) {
 		makeJoint(CHEST, HEAD, 0, CHEST_HEAD_OFFSET, 0, canvasSize);
 		setJointAngleLimits(-10, 10);
+//		setJointMotor(0, 0);
+
 		addJoint(world);
 
 		makeJoint(HIPS, CHEST, 0, HIP_CHEST_OFFSET, 0, canvasSize);
 		setJointAngleLimits(-45, 45);
+		setJointMotor(0, 5);
+
 		addJoint(world);
 
 		makeJoint(ARM_LEFT, CHEST, ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0, canvasSize);
 		setJointAngleLimits(-90, 90);
-		setJointMotor(0, 100);
+//		setJointMotor(0, 100);
 
 		addJoint(world);
-		makeJoint(ARM_RIGHT, CHEST, -ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 180, canvasSize);
+		makeJoint(ARM_RIGHT, CHEST, -ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, -180, canvasSize);
 		setJointAngleLimits(-90, 90);
-		setJointMotor(0, 100);
+//		setJointMotor(0, 100);
 
 		addJoint(world);
 
 		makeJoint(FOREARM_LEFT, ARM_LEFT, FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, 0, canvasSize);
-		setJointAngleLimits(-45, 90);
-		setJointMotor(0, 100);
+		setJointAngleLimits(FOREARM_PULLING_LOWER_LIMIT, FOREARM_PULLING_UPPER_LIMIT);
+		setJointMotor(0, 0);
 		addJoint(world);
-		makeJoint(FOREARM_RIGHT, ARM_RIGHT, -FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, 0, canvasSize);
-		setJointAngleLimits(-45, 90);
-		setJointMotor(0, 100);
+
+		makeJoint(FOREARM_RIGHT, ARM_RIGHT, -FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, -90, canvasSize);
+		setJointAngleLimits(FOREARM_PULLING_LOWER_LIMIT, FOREARM_PULLING_UPPER_LIMIT);
+//		setJointMotor(0, 100);
 		addJoint(world);
 
 		makeJoint(HAND_LEFT, FOREARM_LEFT, HAND_X_OFFSET, HAND_Y_OFFSET, 0, canvasSize);
 		setJointAngleLimits(-20, 60);
-		setJointMotor(0, 100);
+		setJointMotor(0, 5);
+
+//		setJointMotor(0, 100);
 		addJoint(world);
+
 		makeJoint(HAND_RIGHT, FOREARM_RIGHT, -HAND_X_OFFSET, HAND_Y_OFFSET, 0, canvasSize);
 		setJointAngleLimits(-20, 60);
-		setJointMotor(0, 100);
+		setJointMotor(0, 5);
+
+//		setJointMotor(0, 100);
 		addJoint(world);
 
 		makeJoint(THIGH_LEFT, HIPS, THIGH_X_HIP_OFFSET, THIGH_Y_HIP_OFFSET, 0, canvasSize);
+		setJointMotor(0, 30);
 		setJointAngleLimits(-45, 90);
 
 		addJoint(world);
+
 		makeJoint(THIGH_RIGHT, HIPS, THIGH_X_HIP_OFFSET, THIGH_Y_HIP_OFFSET, 0, canvasSize);
+		setJointMotor(0, 30);
+
 		setJointAngleLimits(-90, 45);
 		addJoint(world);
 
 		makeJoint(SHIN_LEFT,  THIGH_LEFT, SHIN_X_THIGH_OFFSET, SHIN_Y_THIGH_OFFSET, 0, canvasSize);
+
 		setJointAngleLimits(-150, 0);
-//		setJointMotor(10, 30);
+
+		setJointMotor(0, 30);
 		addJoint(world);
 		makeJoint(SHIN_RIGHT, THIGH_RIGHT, -SHIN_X_THIGH_OFFSET, SHIN_Y_THIGH_OFFSET, 0, canvasSize);
 		setJointAngleLimits(0, 150);
-//		setJointMotor(10, 30);
+		setJointMotor(0, 30);
 		addJoint(world);
 
 		makeJoint(FOOT_LEFT, SHIN_LEFT, FOOT_X_OFFSET, FOOT_Y_OFFSET, 0, canvasSize);
@@ -261,7 +277,7 @@ public class CharacterModel {
 		jointDef.referenceAngle = referenceAngle * DEG_TO_RAD;
 	}
 
-	private void setJointMotor(float motorSpeed, float maxTorque) {
+	public void setJointMotor(float motorSpeed, float maxTorque) {
 		jointDef.enableMotor = true;
 		jointDef.motorSpeed = motorSpeed * DEG_TO_RAD;
 		jointDef.maxMotorTorque = maxTorque;
@@ -309,24 +325,25 @@ public class CharacterModel {
 	 * @param gainModifier Environmental Gain Modifier
 	 * @param lossModifier Environmental Loss Modifier
 	 * @param rotationGain Whether or not rotation affects gain (would be false if in space or places with low gravity)
-	 * @param force Current force being exerted by character
+	 * @param exterion Current force being exerted by character
 	 */
-	public void updateEnergy(float gainModifier, float lossModifier, Vector2 force, boolean rotationGain){
+	public void updateEnergy(float gainModifier, float lossModifier, float exertion, boolean rotationGain){
 		int b = rotationGain ? 1 : 0;
 		float angle = parts.get(CHEST).getAngle();
-		float exertion = Math.abs(force.y/600); //TODO: value needs adjusting based on new physics
 		
-		int feet = parts.get(FOOT_LEFT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
-		feet += parts.get(FOOT_RIGHT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
-		int hands = parts.get(HAND_LEFT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
-		hands += parts.get(HAND_RIGHT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
+		int feet = ((ExtremityModel)(parts.get(FOOT_LEFT))).isGripping() ? 1 : 0;
+		feet += ((ExtremityModel)(parts.get(FOOT_RIGHT))).isGripping() ? 1 : 0;
+		int hands = ((ExtremityModel)(parts.get(HAND_LEFT))).isGripping()? 1 : 0;
+		hands += ((ExtremityModel)(parts.get(HAND_RIGHT))).isGripping()? 1 : 0;
+		
 		
 		float gain = (float) (ENERGY_GAIN_MULTIPLIER * (1-b*Math.sin(angle/2.0)) * BASE_ENERGY_GAIN * gainModifier);
-		float loss = ENERGY_LOSS_MULTIPLIER * (exertion + 1) * lossModifier * (3 - feet) * (3 - hands);
+		float loss = ENERGY_LOSS_MULTIPLIER * (exertion*123 + 1) * lossModifier * (3 - feet) * (3 - hands);
 		loss = feet == 0 && hands == 0 ? 0 : loss;
 		float dEdt = gain - loss - ENERGY_LOSS;
 		
-		float newEnergy = getEnergy() < 0 ? 0 : getEnergy() > 100 ? 100 : getEnergy() + dEdt;
+		float newEnergy = getEnergy() + dEdt;
+				//getEnergy() < 0 ? 0 : getEnergy() > 100 ? 100 : getEnergy() + dEdt;
 		setEnergy(newEnergy);
 	}
 }
