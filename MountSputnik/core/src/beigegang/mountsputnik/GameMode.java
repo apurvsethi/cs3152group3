@@ -497,10 +497,12 @@ public class GameMode extends ModeController {
 		if (TORSO_MODE){
 			forceR.x = 0;
 			forceR.y = 0;
-			for (int ext:EXTREMITIES){
-				if (((ExtremityModel) (character.parts.get(ext))).isGripping())
-					forceR.add(calcForce(ext, CHEST,input.getHorizontalR(),input.getVerticalR()));
-			}
+//			for (int ext:EXTREMITIES){
+//				if (((ExtremityModel) (character.parts.get(ext))).isGripping())
+//					forceR.add(calcForce(ext, CHEST,input.getHorizontalR(),input.getVerticalR()));
+//			}
+			forceR.x = CONSTANT_X_FORCE * 3;
+			forceR.y = CONSTANT_X_FORCE * 3;
 			applyTorsoForceIfApplicable(forceR);
 		}
 
@@ -760,8 +762,8 @@ public class GameMode extends ModeController {
 
 	private void applyIfUnderLimit(int part, Vector2 force, float h, float v) {
 		Vector2 vect = character.parts.get(part).body.getLinearVelocity();
-		character.parts.get(part).body.applyForceToCenter(force.x, 0, true);
-		character.parts.get(part).body.applyForceToCenter(0, force.y, true);
+		character.parts.get(part).body.applyForceToCenter(force.x*h, 0, true);
+		character.parts.get(part).body.applyForceToCenter(0, force.y*v, true);
 	}
 	
 	private void drawToggles(){
