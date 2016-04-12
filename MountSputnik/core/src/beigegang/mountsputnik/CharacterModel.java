@@ -213,14 +213,14 @@ public class CharacterModel {
 
 		makeJoint(HAND_LEFT, FOREARM_LEFT, HAND_X_OFFSET, HAND_Y_OFFSET, 0, canvasSize);
 		setJointAngleLimits(-20, 60);
-		setJointMotor(0, 100);
+		setJointMotor(0, 5);
 
 //		setJointMotor(0, 100);
 		addJoint(world);
 
 		makeJoint(HAND_RIGHT, FOREARM_RIGHT, -HAND_X_OFFSET, HAND_Y_OFFSET, 0, canvasSize);
 		setJointAngleLimits(-20, 60);
-		setJointMotor(0, 100);
+		setJointMotor(0, 5);
 
 //		setJointMotor(0, 100);
 		addJoint(world);
@@ -277,7 +277,7 @@ public class CharacterModel {
 		jointDef.referenceAngle = referenceAngle * DEG_TO_RAD;
 	}
 
-	private void setJointMotor(float motorSpeed, float maxTorque) {
+	public void setJointMotor(float motorSpeed, float maxTorque) {
 		jointDef.enableMotor = true;
 		jointDef.motorSpeed = motorSpeed * DEG_TO_RAD;
 		jointDef.maxMotorTorque = maxTorque;
