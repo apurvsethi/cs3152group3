@@ -331,13 +331,14 @@ public class CharacterModel {
 		int b = rotationGain ? 1 : 0;
 		float angle = parts.get(CHEST).getAngle();
 		
-		int feet = parts.get(FOOT_LEFT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
-		feet += parts.get(FOOT_RIGHT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
-		int hands = parts.get(HAND_LEFT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
-		hands += parts.get(HAND_RIGHT).getBody().getType() == BodyDef.BodyType.StaticBody ? 1 : 0;
+		int feet = ((ExtremityModel)(parts.get(FOOT_LEFT))).isGripping() ? 1 : 0;
+		feet += ((ExtremityModel)(parts.get(FOOT_RIGHT))).isGripping() ? 1 : 0;
+		int hands = ((ExtremityModel)(parts.get(HAND_LEFT))).isGripping()? 1 : 0;
+		hands += ((ExtremityModel)(parts.get(HAND_RIGHT))).isGripping()? 1 : 0;
+		
 		
 		float gain = (float) (ENERGY_GAIN_MULTIPLIER * (1-b*Math.sin(angle/2.0)) * BASE_ENERGY_GAIN * gainModifier);
-		float loss = ENERGY_LOSS_MULTIPLIER * (exertion*4 + 1) * lossModifier * (3 - feet) * (3 - hands);
+		float loss = ENERGY_LOSS_MULTIPLIER * (exertion*123 + 1) * lossModifier * (3 - feet) * (3 - hands);
 		loss = feet == 0 && hands == 0 ? 0 : loss;
 		float dEdt = gain - loss - ENERGY_LOSS;
 		
