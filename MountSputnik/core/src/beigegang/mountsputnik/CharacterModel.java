@@ -229,6 +229,7 @@ public class CharacterModel {
 		setJointAngleLimits(-45, 90);
 
 		addJoint(world);
+
 		makeJoint(THIGH_RIGHT, HIPS, THIGH_X_HIP_OFFSET, THIGH_Y_HIP_OFFSET, 0, canvasSize);
 		setJointAngleLimits(-90, 45);
 		addJoint(world);
