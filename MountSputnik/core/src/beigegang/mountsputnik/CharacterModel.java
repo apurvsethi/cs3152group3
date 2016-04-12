@@ -226,16 +226,21 @@ public class CharacterModel {
 		addJoint(world);
 
 		makeJoint(THIGH_LEFT, HIPS, THIGH_X_HIP_OFFSET, THIGH_Y_HIP_OFFSET, 0, canvasSize);
+		setJointMotor(0, 30);
 		setJointAngleLimits(-45, 90);
 
 		addJoint(world);
 
 		makeJoint(THIGH_RIGHT, HIPS, THIGH_X_HIP_OFFSET, THIGH_Y_HIP_OFFSET, 0, canvasSize);
+		setJointMotor(0, 30);
+
 		setJointAngleLimits(-90, 45);
 		addJoint(world);
 
 		makeJoint(SHIN_LEFT,  THIGH_LEFT, SHIN_X_THIGH_OFFSET, SHIN_Y_THIGH_OFFSET, 0, canvasSize);
+
 		setJointAngleLimits(-150, 0);
+
 		setJointMotor(0, 30);
 		addJoint(world);
 		makeJoint(SHIN_RIGHT, THIGH_RIGHT, -SHIN_X_THIGH_OFFSET, SHIN_Y_THIGH_OFFSET, 0, canvasSize);

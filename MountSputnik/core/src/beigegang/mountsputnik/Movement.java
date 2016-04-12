@@ -27,6 +27,8 @@ public class Movement {
         float forceyH = fs[3];
         v = Math.abs(v);
         h = Math.abs(h);
+        System.out.println(v + " " + h);
+        System.out.println(forcexV+ " " + forceyV + " " + forcexH + " " + forceyH);
         character.parts.get(part).body.applyForceToCenter(forcexV*x*v,forceyV*y*v,true);
         character.parts.get(part).body.applyForceToCenter(forcexH*x*h,forceyH*y*h,true);
     }
@@ -48,7 +50,6 @@ public class Movement {
         switch(part){
             case HAND_LEFT:
                 forceL = new Vector2(CONSTANT_X_FORCE,CONSTANT_X_FORCE);
-                jointAngle = ((RevoluteJoint) character.joints.get(ARM_LEFT - 1)).getJointAngle();
                 fs = Movement.getPhysicallyCorrectForceMultipliersLeftArm(v,h);
                 Movement.applyNewTestForces(fs,forceL,ARM_LEFT,v,h);
                 Movement.getMultipliersLeftForearm(v,h);
@@ -56,7 +57,6 @@ public class Movement {
 
             case HAND_RIGHT:
                 forceL = new Vector2(CONSTANT_X_FORCE, CONSTANT_X_FORCE);
-                jointAngle = ((RevoluteJoint) character.joints.get(ARM_RIGHT - 1)).getJointAngle();
                 fs = Movement.getPhysicallyCorrectForceMultipliersRightArm(v, h);
                 Movement.applyNewTestForces(fs, forceL, ARM_RIGHT, v, h);
                 Movement.getMultipliersRightForearm(v, h);
@@ -64,7 +64,6 @@ public class Movement {
 
             case FOOT_LEFT:
                 forceL = new Vector2(CONSTANT_X_FORCE,CONSTANT_X_FORCE);
-                jointAngle = ((RevoluteJoint) character.joints.get(THIGH_LEFT - 1)).getJointAngle();
                 fs = Movement.getPhysicallyCorrectForceMultipliersLeftLeg(v,h);
                 Movement.applyNewTestForces(fs,forceL,THIGH_LEFT,v,h);
                 Movement.getMultipliersLeftShin(v,h);
@@ -72,7 +71,6 @@ public class Movement {
 
             case FOOT_RIGHT:
                 forceL = new Vector2(CONSTANT_X_FORCE,CONSTANT_X_FORCE);
-                jointAngle = ((RevoluteJoint) character.joints.get(THIGH_RIGHT - 1)).getJointAngle();
                 fs = Movement.getPhysicallyCorrectForceMultipliersRightLeg(v,h);
                 Movement.applyNewTestForces(fs,forceL,THIGH_RIGHT,v,h);
                 Movement.getMultipliersRightShin(v,h);
@@ -435,7 +433,8 @@ public class Movement {
         float forcexH = 0f;
         float forceyH = 0f;
         float absoluteAngle = findAbsoluteAngleOfPart(root,shoot);
-
+        float jA= ((RevoluteJoint)(character.joints.get(THIGH_RIGHT - 1))).getJointAngle() * RAD_TO_DEG;
+        System.out.println(jA + "jA");
         //TODO this doesn't pull the player up much, this just manuevers the arm into the correct position...
 
         if (absoluteAngle > -180 && absoluteAngle <= -90) {
@@ -468,7 +467,7 @@ public class Movement {
             forceyH = 1 + forcexH;
         } else { // (absoluteAngle > 90 && absoluteAngle < 180)
             forcexH = -(absoluteAngle - 90) / 90;
-            forceyH = - (1 - forcexH);
+            forceyH = - (1 + forcexH);
         }
         if (h>0){
             forcexH *= -1;
