@@ -56,6 +56,7 @@ public class Movement {
                 fs = Movement.getPhysicallyCorrectForceMultipliersLeftArm(v,h);
                 Movement.applyNewTestForces(fs,forceL,ARM_LEFT,v,h);
                 Movement.getMultipliersLeftForearm(v,h);
+                applyGeneralForceToPart(HAND_LEFT);
                 break;
 
             case HAND_RIGHT:
@@ -63,6 +64,8 @@ public class Movement {
                 fs = Movement.getPhysicallyCorrectForceMultipliersRightArm(v, h);
                 Movement.applyNewTestForces(fs, forceL, ARM_RIGHT, v, h);
                 Movement.getMultipliersRightForearm(v, h);
+                applyGeneralForceToPart(HAND_RIGHT);
+
                 break;
 
             case FOOT_LEFT:
@@ -85,6 +88,61 @@ public class Movement {
 
         }
         return fs;
+    }
+    private static boolean isGripping(int part) {
+        return ((ExtremityModel)(character.parts.get(part))).isGripped();
+    }
+    private static void applyGeneralForceToPart(int part) {
+        float aa;
+        Vector2 root;
+        Vector2 shoot;
+        if (isGripping(FOOT_LEFT) || isGripping(FOOT_RIGHT) || isGripping(HAND_LEFT) || isGripping(HAND_RIGHT)){
+            switch(part) {
+                case HAND_LEFT:
+                    root = character.joints.get(ARM_LEFT - 1).getAnchorA();
+                    shoot = character.joints.get(FOREARM_LEFT - 1).getAnchorA();
+                    aa = findAbsoluteAngleOfPart(root, shoot);
+                    useForce(ARM_LEFT, aa);
+                    break;
+                case HAND_RIGHT:
+                    root = character.joints.get(ARM_RIGHT - 1).getAnchorA();
+                    shoot = character.joints.get(FOREARM_RIGHT - 1).getAnchorA();
+                    aa = findAbsoluteAngleOfPart(root, shoot);
+                    useForce(ARM_RIGHT, aa);
+                    break;
+                case FOOT_LEFT:
+                    root = character.joints.get(THIGH_LEFT - 1).getAnchorA();
+                    shoot = character.joints.get(SHIN_LEFT - 1).getAnchorA();
+                    aa = findAbsoluteAngleOfPart(root, shoot);
+                    useForce(THIGH_LEFT, aa);
+                    break;
+                case FOOT_RIGHT:
+                    root = character.joints.get(THIGH_RIGHT - 1).getAnchorA();
+                    shoot = character.joints.get(SHIN_RIGHT - 1).getAnchorA();
+                    aa = findAbsoluteAngleOfPart(root, shoot);
+                    useForce(THIGH_RIGHT, aa);
+                    break;
+            }
+        }
+    }
+
+    private static void useForce(int part, float aa) {
+        float forcexV = 0f;
+        float forceyV = 0f;
+        if (aa > -180 && aa <= -90) {
+            forcexV = (aa + 90) / 90;
+            forceyV = -1 - forcexV;
+        } else if (aa > -90 && aa < 0) {
+            forcexV = -(aa + 90) / 90;
+            forceyV = 1 + forcexV;
+        } else if (aa >= 0 && aa <= 90) {
+            forcexV = aa / 90;
+            forceyV = 1 - forcexV;
+        } else { // (aa) > 90 && aa) < 180)
+            forcexV = (aa - 90) / 90;
+            forceyV = -1 + forcexV;
+        }
+//        character.parts.get(part).body.applyForceToCenter(forcexV*CONSTANT_X_FORCE,forceyV*CONSTANT_X_FORCE,true);
     }
 
     /**
