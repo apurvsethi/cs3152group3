@@ -91,23 +91,24 @@ public class PauseMode extends ModeController {
 	public void draw() {
 		canvas.clear();
 
+		float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
+
+//		canvas.begin();
+//		canvas.draw(background,Color.WHITE, canvas.getWidth() * 3 / 4, y,canvas.getWidth() / 4,canvas.getHeight());
+//		for (GameObject obj : gameObjects) obj.draw(canvas);
+//		canvas.end();
+//
+//		if (debug) {
+//			canvas.beginDebug();
+//			for(GameObject obj : gameObjects) obj.drawDebug(canvas);
+//			canvas.endDebug();
+//		}
+
 		canvas.begin();
-		canvas.draw(background,Color.WHITE, 0, 0,canvas.getWidth(),background.getRegionHeight());
-		for (GameObject obj : gameObjects) obj.draw(canvas);
+		canvas.draw(foreground, Color.WHITE, 0, y,canvas.getWidth(),canvas.getHeight());
 		canvas.end();
-
-		if (debug) {
-			canvas.beginDebug();
-			for(GameObject obj : gameObjects) obj.drawDebug(canvas);
-			canvas.endDebug();
-		}
-
 		canvas.begin();
-		canvas.draw(foreground, 0,0);
-		canvas.end();
-
-		canvas.begin();
-		int drawY = canvas.getHeight() / 2 + (MENU_ITEM_HEIGHT * menuOptions.length / 2);
+		float drawY = canvas.getHeight() / 2 + (MENU_ITEM_HEIGHT * menuOptions.length / 2) + y;
 		for (int i = 0; i < menuOptions.length; i++){
 			if (i == currSelection){
 				canvas.draw(menuOptions[i], Color.TEAL, menuOptions[i].getRegionWidth() / 2,

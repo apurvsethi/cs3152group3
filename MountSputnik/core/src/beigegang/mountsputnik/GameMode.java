@@ -2,6 +2,7 @@ package beigegang.mountsputnik;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -37,8 +38,10 @@ public class GameMode extends ModeController {
 	//We need to preload every single texture, regardless of which level we're currently using. Loading can't be
 	//dynamically
 	private static final String BACKGROUND_FILE = "assets/canyon/background.png";
-	//private static final String FOREGROUND_FILE = "preliminaryCharacterFilmStrip.png";
-	
+	private static final String TILE_FILE = "assets/canyon/Surface.png";
+	private static final String UI_FILE = "assets/HUD.png";
+	private static final String EDGE_FILE = "assets/canyon/SurfaceEdge.png";
+	private static final String GROUND_FILE = "assets/canyon/LevelStart.png";
 	private static final String HANDHOLD_TEXTURES[] = {"assets/canyon/handhold.png", "assets/canyon/handholdglow.png", "assets/canyon/handholdgrabbed.png"};
 	private static final String PART_TEXTURES[] = {"Ragdoll/Torso.png", "Ragdoll/Head.png", "Ragdoll/Hips.png",
 			"Ragdoll/ArmLeft.png", "Ragdoll/ArmRight.png", "Ragdoll/ForearmLeft.png", "Ragdoll/ForearmRight.png",
@@ -65,7 +68,10 @@ public class GameMode extends ModeController {
 	 * Texture asset for files used, parts, etc.
 	 */
 	private static TextureRegion background;
-	//private static TextureRegion;
+	private static TextureRegion tile;
+	private static TextureRegion UI;
+	private static TextureRegion edge;
+	private static TextureRegion ground;
 	private static TextureRegion[] partTextures = new TextureRegion[PART_TEXTURES.length];
 	private static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length]; 
 	
@@ -94,8 +100,15 @@ public class GameMode extends ModeController {
 		assetState = AssetState.LOADING;
 		manager.load(BACKGROUND_FILE, Texture.class);
 		assets.add(BACKGROUND_FILE);
-		//manager.load(FOREGROUND_FILE, Texture.class);
-		//assets.add(FOREGROUND_FILE);
+		manager.load(TILE_FILE, Texture.class);
+		assets.add(TILE_FILE);
+		manager.load(UI_FILE, Texture.class);
+		assets.add(UI_FILE);
+		manager.load(EDGE_FILE, Texture.class);
+		assets.add(EDGE_FILE);
+		manager.load(GROUND_FILE, Texture.class);
+		assets.add(GROUND_FILE);
+
 		for (String HANDHOLD_TEXTURE : HANDHOLD_TEXTURES) {
 			manager.load(HANDHOLD_TEXTURE, Texture.class);
 			assets.add(HANDHOLD_TEXTURE);
@@ -123,7 +136,10 @@ public class GameMode extends ModeController {
 		if (assetState != AssetState.LOADING) return;
 
 		background = createTexture(manager, BACKGROUND_FILE, false);
-		//foreground = createTexture(manager, FOREGROUND_FILE, false);
+		tile = createTexture(manager, TILE_FILE, false);
+		UI = createTexture(manager, UI_FILE, false);
+		edge = createTexture(manager, EDGE_FILE, false);
+		ground = createTexture(manager, GROUND_FILE, false);
 		
 		for (int i = 0; i < PART_TEXTURES.length; i++) {
 			partTextures[i] = createTexture(manager, PART_TEXTURES[i], false);
@@ -814,8 +830,22 @@ public class GameMode extends ModeController {
 	public void draw() {
 		canvas.clear();
 
+		float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
+		float tileY = y - (y % canvas.getHeight() / 4);
 		canvas.begin();
-		canvas.draw(background, Color.WHITE, 0, 0,canvas.getWidth(),background.getRegionHeight());
+		canvas.draw(background, Color.WHITE, canvas.getWidth() * 3 / 4, y,canvas.getWidth() / 4,canvas.getHeight());
+
+		for (int i = 0; i < 5; i++){
+			canvas.draw(tile,Color.WHITE, canvas.getWidth() / 4, tileY, canvas.getWidth() / 4, canvas.getWidth() / 4);
+			canvas.draw(tile,Color.WHITE, canvas.getWidth() / 2, tileY, canvas.getWidth() / 4, canvas.getWidth() / 4);
+			canvas.draw(edge, Color.WHITE, canvas.getWidth() * 3 / 4, tileY,canvas.getWidth() / 16,canvas.getHeight());
+			tileY += canvas.getWidth() / 4;
+		}
+
+
+		canvas.draw(ground, Color.WHITE, canvas.getWidth() / 4, 0,canvas.getWidth() / 2,canvas.getHeight() / 8);
+		canvas.draw(UI, Color.WHITE, 0, y,canvas.getWidth() / 4,background.getRegionHeight());
+
 		canvas.end();
 
 		canvas.begin();
