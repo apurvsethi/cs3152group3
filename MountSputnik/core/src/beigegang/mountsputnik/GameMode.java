@@ -2,7 +2,6 @@ package beigegang.mountsputnik;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -16,9 +15,10 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.utils.*;
+
+import java.util.Random;
 
 public class GameMode extends ModeController {
 
@@ -39,11 +39,12 @@ public class GameMode extends ModeController {
 	//We need to preload every single texture, regardless of which level we're currently using. Loading can't be
 	//dynamically
 	private static final String BACKGROUND_FILE = "assets/canyon/background.png";
-	private static final String TILE_FILE = "assets/canyon/Surface.png";
+	private static final String MIDGROUND_FILE = "assets/canyon/Midground.png";
+	private static final String TILE_FILE = "assets/canyon/SurfaceLight.png";
 	private static final String UI_FILE = "assets/HUD.png";
-	private static final String EDGE_FILE = "assets/canyon/SurfaceEdge.png";
+	private static final String EDGE_FILE = "assets/canyon/SurfaceEdgeLight.png";
 	private static final String GROUND_FILE = "assets/canyon/LevelStart.png";
-	private static final String HANDHOLD_TEXTURES[] = {"assets/canyon/handhold.png", "assets/canyon/handholdglow.png", "assets/canyon/handholdgrabbed.png"};
+	private static final String HANDHOLD_TEXTURES[] = {"assets/canyon/Handhold1.png", "assets/canyon/Handhold2.png"};
 	private static final String PART_TEXTURES[] = {"Ragdoll/Torso.png", "Ragdoll/Head.png", "Ragdoll/Hips.png",
 			"Ragdoll/ArmLeft.png", "Ragdoll/ArmRight.png", "Ragdoll/ForearmLeft.png", "Ragdoll/ForearmRight.png",
 			"Ragdoll/HandLeftUngripped.png", "Ragdoll/HandRightUngripped.png", "Ragdoll/ThighLeft.png",
@@ -69,12 +70,14 @@ public class GameMode extends ModeController {
 	 * Texture asset for files used, parts, etc.
 	 */
 	private static TextureRegion background;
+	private static TextureRegion midground;
 	private static TextureRegion tile;
 	private static TextureRegion UI;
 	private static TextureRegion edge;
 	private static TextureRegion ground;
 	private static TextureRegion[] partTextures = new TextureRegion[PART_TEXTURES.length];
-	private static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length]; 
+	private static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length];
+	private static TextureRegion[] handholdTextures = new TextureRegion[HANDHOLD_TEXTURES.length];
 	
 	/** The reader to process JSON files */
 	private JsonReader jsonReader;
@@ -101,6 +104,8 @@ public class GameMode extends ModeController {
 		assetState = AssetState.LOADING;
 		manager.load(BACKGROUND_FILE, Texture.class);
 		assets.add(BACKGROUND_FILE);
+		manager.load(MIDGROUND_FILE, Texture.class);
+		assets.add(MIDGROUND_FILE);
 		manager.load(TILE_FILE, Texture.class);
 		assets.add(TILE_FILE);
 		manager.load(UI_FILE, Texture.class);
@@ -137,6 +142,7 @@ public class GameMode extends ModeController {
 		if (assetState != AssetState.LOADING) return;
 
 		background = createTexture(manager, BACKGROUND_FILE, false);
+		midground = createTexture(manager, MIDGROUND_FILE, false);
 		tile = createTexture(manager, TILE_FILE, false);
 		UI = createTexture(manager, UI_FILE, false);
 		edge = createTexture(manager, EDGE_FILE, false);
@@ -149,6 +155,11 @@ public class GameMode extends ModeController {
 		for (int i = 0; i < TUTORIAL_TEXTURES.length; i++) {
 			tutorialTextures[i] = createTexture(manager, TUTORIAL_TEXTURES[i], false);
 		}
+
+		for (int i = 0; i < HANDHOLD_TEXTURES.length; i++) {
+			handholdTextures[i] = createTexture(manager, HANDHOLD_TEXTURES[i], false);
+		}
+
 		assetState = AssetState.COMPLETE;
 	}
 
@@ -323,12 +334,9 @@ public class GameMode extends ModeController {
 		JsonValue handholdDesc = levelPiece.get("handholds").child();
 		
 		//makeTestLevel(handholdDesc);
-		
+		Random rand = new Random();
 		while(handholdDesc != null){
-			handhold = new HandholdModel(
-					createTexture(assetManager, "assets/"+handholdDesc.getString("texture"), false).getTexture(), 
-					createTexture(assetManager, "assets/"+handholdDesc.getString("glowTexture"), false).getTexture(), 
-					createTexture(assetManager, "assets/"+handholdDesc.getString("gripTexture"), false).getTexture(),
+			handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
 					handholdDesc.getFloat("positionX"), handholdDesc.getFloat("positionY")+currentHeight,
 					new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
 			handhold.fixtureDef.filter.maskBits = 0;
@@ -362,8 +370,6 @@ public class GameMode extends ModeController {
 	private void makeTestLevel(JsonValue handholdDesc) {
 		handhold = new HandholdModel(
 				createTexture(assetManager,  "assets/"+handholdDesc.getString("texture"), false).getTexture(),
-				createTexture(assetManager,  "assets/"+handholdDesc.getString("glowTexture"), false).getTexture(),
-				createTexture(assetManager,  "assets/"+handholdDesc.getString("gripTexture"), false).getTexture(),
 				13, 10,
 				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
 		handhold.fixtureDef.filter.maskBits = 0;
@@ -376,8 +382,6 @@ public class GameMode extends ModeController {
 
 		handhold = new HandholdModel(
 				createTexture(assetManager,  "assets/"+handholdDesc.getString("texture"), false).getTexture(),
-				createTexture(assetManager,  "assets/"+handholdDesc.getString("glowTexture"), false).getTexture(),
-				createTexture(assetManager,  "assets/"+handholdDesc.getString("gripTexture"), false).getTexture(),
 				19, 10,
 				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
 		handhold.fixtureDef.filter.maskBits = 0;
@@ -391,8 +395,6 @@ public class GameMode extends ModeController {
 
 		handhold = new HandholdModel(
 				createTexture(assetManager,  "assets/"+handholdDesc.getString("texture"), false).getTexture(),
-				createTexture(assetManager,  "assets/"+handholdDesc.getString("glowTexture"), false).getTexture(),
-				createTexture(assetManager,  "assets/"+handholdDesc.getString("gripTexture"), false).getTexture(),
 				16, 5,
 				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
 		handhold.fixtureDef.filter.maskBits = 0;
@@ -406,8 +408,6 @@ public class GameMode extends ModeController {
 
 		handhold = new HandholdModel(
 				createTexture(assetManager,  "assets/"+handholdDesc.getString("texture"), false).getTexture(),
-				createTexture(assetManager,  "assets/"+handholdDesc.getString("glowTexture"), false).getTexture(),
-				createTexture(assetManager,  "assets/"+handholdDesc.getString("gripTexture"), false).getTexture(),
 				16, 7,
 				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
 		handhold.fixtureDef.filter.maskBits = 0;
@@ -421,8 +421,6 @@ public class GameMode extends ModeController {
 
 		handhold = new HandholdModel(
 				createTexture(assetManager,  "assets/"+handholdDesc.getString("texture"), false).getTexture(),
-				createTexture(assetManager, "assets/"+ handholdDesc.getString("glowTexture"), false).getTexture(),
-				createTexture(assetManager, "assets/"+ handholdDesc.getString("gripTexture"), false).getTexture(),
 				16, 10,
 				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
 		handhold.fixtureDef.filter.maskBits = 0;
@@ -845,9 +843,10 @@ public class GameMode extends ModeController {
 		canvas.clear();
 
 		float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
-		float tileY = y - (y % canvas.getHeight() / 4);
+		float tileY = y - (y % (canvas.getWidth() / 4));
 		canvas.begin();
 		canvas.draw(background, Color.WHITE, canvas.getWidth() * 3 / 4, y,canvas.getWidth() / 4,canvas.getHeight());
+		canvas.draw(midground, Color.WHITE, canvas.getWidth() * 3 / 4, y * MIDGROUND_SCROLL,canvas.getWidth() / 4,canvas.getHeight());
 
 		for (int i = 0; i < 5; i++){
 			canvas.draw(tile,Color.WHITE, canvas.getWidth() / 4, tileY, canvas.getWidth() / 4, canvas.getWidth() / 4);

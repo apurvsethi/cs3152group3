@@ -1,5 +1,6 @@
 package beigegang.mountsputnik;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -18,16 +19,10 @@ public class HandholdModel extends GameObject{
     protected boolean isCrumbling;
     /** array of all snap points for this handhold*/
     protected Array<Vector2> snapPoints;
-	/** says if this handhold should be drawn glowing */
-	private boolean glowing = false;
-	/** says if the handhold is being gripped */ 
-	private boolean isGripped = false;
-	/** The texture the handhold will have when glowing */ 
-	protected Texture glowTexture; 
+	/** says if the handhold is being gripped */
+	private boolean isGlowing = false;
 	/** The texture the handhold will have when not glowing */ 
-	protected Texture dullTexture; 
-	/** the texture the handhold will have when gripped */ 
-	protected Texture gripTexture;
+	protected Texture texture;
 
 	
 	@Override
@@ -105,18 +100,13 @@ public class HandholdModel extends GameObject{
 	
 	/**
 	 * Constructs HandholdModel
-	 *  
-	 * @param t Normal texture for handhold
-	 * @param glowTexture The glow texture for handhold
-	 * @param gripTexture The grip texture for handhold
+	 *  @param t Normal texture for handhold
 	 * @param x The x position of the model
 	 * @param y The y position of the model
-	 * @param drawSizeScale the scaling between object size and drawn size
-	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
 	 * @param dimensions the dimensions of the handhold in box2d coordinates
+	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
 	 */
-	public HandholdModel(Texture t, Texture glowTexture, Texture gripTexture,
-						 float x, float y,  Vector2 dimensions, Vector2 drawPositionScale){
+	public HandholdModel(Texture t, float x, float y, Vector2 dimensions, Vector2 drawPositionScale){
 		super(t, dimensions, drawPositionScale);
 		setX(x);
 		setY(y);
@@ -124,9 +114,7 @@ public class HandholdModel extends GameObject{
 		isCrumbling = false;
 		snapPoints = new Array<Vector2>();
 		snapPoints.add(getPosition());
-		this.glowTexture = glowTexture;
-		dullTexture = t; 
-		this.gripTexture = gripTexture;
+		texture = t;
 	}
 
 
@@ -149,23 +137,26 @@ public class HandholdModel extends GameObject{
 	}
 
 	public void unglow() {
-		if (!isGripped) {
-			glowing = false;
-			setTexture(dullTexture);
-		}
+		isGlowing = false;
 	}
 	public void glow() {
-		if (!isGripped) {
-			glowing = true;
-			setTexture(glowTexture);
+		isGlowing = true;
+	}
+
+	@Override
+	public void draw(GameCanvas canvas) {
+
+		//TODO: remove this if check once all level blocks only contain handholds within the playable area
+		if (getX() * drawPositionScale.x > canvas.getWidth() / 4 && getX() * drawPositionScale.x < canvas.getWidth() * 3 / 4) {
+			if (isGlowing) {
+				canvas.draw(animator, Color.YELLOW, origin.x, origin.y,
+						getX() * drawPositionScale.x, getY() * drawPositionScale.y,
+						getAngle(), drawSizeScale.x, drawSizeScale.y);
+			} else {
+				canvas.draw(animator, Color.WHITE, origin.x, origin.y,
+						getX() * drawPositionScale.x, getY() * drawPositionScale.y,
+						getAngle(), drawSizeScale.x, drawSizeScale.y);
+			}
 		}
-	}
-	public void ungrip(){
-		isGripped = false;
-		setTexture(dullTexture); 
-	}
-	public void grip(){
-		isGripped = true;
-		setTexture(gripTexture);
 	}
 }
