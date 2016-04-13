@@ -142,7 +142,7 @@ public class Movement {
             forcexV = (aa - 90) / 90;
             forceyV = -1 + forcexV;
         }
-//        character.parts.get(part).body.applyForceToCenter(forcexV*CONSTANT_X_FORCE,forceyV*CONSTANT_X_FORCE,true);
+        character.parts.get(part).body.applyForceToCenter(forcexV*CONSTANT_X_FORCE,forceyV*CONSTANT_X_FORCE,true);
     }
 
     /**
