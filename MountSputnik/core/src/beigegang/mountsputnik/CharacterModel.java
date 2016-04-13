@@ -344,15 +344,14 @@ public class CharacterModel {
 				break;
 			case 2:
 				gain = (float) (gainModifier*(1-Math.abs(b*Math.sin(angle/2)))/4);
-				loss = lossModifier*10+exertion;
+				loss = lossModifier+exertion*5;
 				break;
 			case 1:
-				loss = lossModifier*20+exertion;
+				loss = lossModifier*10+exertion*10;
 				break;
 			default:
 				break;
 		}
-		System.out.println("("+gain+","+loss+")");
 		float dEdt = (gain - loss)/60;
 		float newEnergy = getEnergy() < 0 ? 0 : getEnergy() > 100 ? 100 : getEnergy() + dEdt;
 		setEnergy(newEnergy);

@@ -254,7 +254,6 @@ public class GameMode extends ModeController {
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
-//			int blockNumber = 1;
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json"); 
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
 			
@@ -270,7 +269,6 @@ public class GameMode extends ModeController {
 			}
 		}
 		//Use this string to see which level blocks you are currently testing
-		//System.out.println(levelBlocks.toString()); 
 
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
 			//arms
