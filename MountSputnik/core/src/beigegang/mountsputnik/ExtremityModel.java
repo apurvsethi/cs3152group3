@@ -80,7 +80,10 @@ public class ExtremityModel extends PartModel{
 		gripped = true;
 		this.setTexture(grip);
 	}
-	
+
+	public boolean isGripped(){
+		return gripped;
+	}
 	/** Sets the value of isGripping to false*/
 	public void ungrip(){
 		gripped = false;

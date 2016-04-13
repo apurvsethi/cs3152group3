@@ -79,7 +79,6 @@ public class MenuMode extends ModeController {
 			currSelection = (currSelection + (input.getVerticalL() > 0.5 ? 1 : (input.getVerticalL() < -0.5 ? -1 : 0))+ menuOptions.length) % menuOptions.length;
 			changeCooldown = MENU_CHANGE_COOLDOWN;
 
-			System.out.println(currSelection);
 		}
 		if (input.didSelect()) listener.exitScreen(this, exitCodes[currSelection]);
 

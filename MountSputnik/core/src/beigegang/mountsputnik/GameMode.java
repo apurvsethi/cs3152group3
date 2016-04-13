@@ -16,6 +16,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.utils.*;
 
@@ -271,7 +272,7 @@ public class GameMode extends ModeController {
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json"); 
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
-
+			
 			addChunk(levelPiece, currentHeight, levelName);
 			currentHeight += levelPiece.getFloat("size");
 
@@ -283,7 +284,8 @@ public class GameMode extends ModeController {
 				currentHeight += levelPiece.getInt("size");
 			}
 		}
-
+		//Use this string to see which level blocks you are currently testing
+		//System.out.println(levelBlocks.toString());
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
 			//arms
 		objects.add(character.parts.get(ARM_LEFT));
@@ -490,6 +492,8 @@ public class GameMode extends ModeController {
 		
 		if(input.didSelect()) tutorialToggle = !tutorialToggle;
 
+		Movement.makeHookedJointsMovable(nextToPress);
+
 		if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
 		
 		Vector2 forceL = new Vector2(0, 0);
@@ -519,8 +523,8 @@ public class GameMode extends ModeController {
 //				if (((ExtremityModel) (character.parts.get(ext))).isGripping())
 //					forceR.add(calcForce(ext, CHEST,input.getHorizontalR(),input.getVerticalR()));
 //			}
-			forceR.x = CONSTANT_X_FORCE * 3;
-			forceR.y = CONSTANT_X_FORCE * 3;
+			forceR.x = CONSTANT_X_FORCE * 5;
+			forceR.y = CONSTANT_X_FORCE * 5;
 			applyTorsoForceIfApplicable(forceR);
 		}
 
@@ -538,11 +542,13 @@ public class GameMode extends ModeController {
 		timestep += 1;
 
 		canvas.setCameraPosition(canvas.getWidth() / 2,
-						character.parts.get(CHEST).getBody().getPosition().y*SCREEN_HEIGHT/DEFAULT_HEIGHT);
+						character.parts.get(CHEST).getBody().getPosition().y*scale.y);
 		if(canvas.getCamera().position.y < canvas.getHeight()/2){
 			canvas.setCameraPosition(canvas.getWidth()/2, canvas.getHeight()/2);
 		}
-		
+		if(canvas.getCamera().position.y + canvas.getHeight()/2 > background.getRegionHeight()){
+			canvas.setCameraPosition(canvas.getWidth()/2, background.getRegionHeight()-canvas.getHeight()/2); 
+		}
 		spawnObstacles();
 		for(GameObject g : objects){
 			if(g instanceof ObstacleModel && 
@@ -557,15 +563,15 @@ public class GameMode extends ModeController {
 				exertion+=Math.abs(forces[i]);
 			}
 		character.updateEnergy(oxygen, 1, exertion, true);
-//		if (character.getEnergy() <= 0){
-//			for(int e : EXTREMITIES){
-//				 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
-//				 ungrip(extremity);
-//				 extremity.ungrip();
-//				 extremity.body.setType(BodyDef.BodyType.DynamicBody);
-//				 extremity.setTexture(partTextures[e].getTexture());
-//			}
-//		}
+		if (character.getEnergy() <= 0){
+			for(int e : EXTREMITIES){
+				 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
+				 ungrip(extremity);
+				 extremity.ungrip();
+				 extremity.body.setType(BodyDef.BodyType.DynamicBody);
+				 extremity.setTexture(partTextures[e].getTexture());
+			}
+		}
 	}
 	
 	/** Grips a handhold by adding a revolute joint between the handhold and the extremity **/ 
@@ -576,8 +582,9 @@ public class GameMode extends ModeController {
 			jointD.collideConnected = false;
 			setJointMotor(jointD,0,10);
 			Joint j = world.createJoint(jointD);
-			e.setJoint(j); 
+			e.setJoint(j);
 		}
+		e.grip();
 	}
 	private void setJointMotor(RevoluteJointDef jd, float motorSpeed, float maxTorque) {
 		jd.enableMotor = true;
@@ -590,6 +597,7 @@ public class GameMode extends ModeController {
 			e.setJoint(null); 
 			
 		}
+		e.ungrip();
 	}
 	
 
@@ -776,12 +784,18 @@ public class GameMode extends ModeController {
 
 	private void applyTorsoForceIfApplicable(Vector2 force) {
 		if (TORSO_MODE){
-			InputController input = InputController.getInstance();
-			float h = input.getHorizontalR();
-			float v = input.getVerticalR();
-			applyIfUnderLimit(CHEST,new Vector2(force.x,force.y),h,v);
+			if (isGripping(FOOT_LEFT)|| isGripping(FOOT_RIGHT) || isGripping(HAND_LEFT) || isGripping(HAND_RIGHT)){
+				InputController input = InputController.getInstance();
+				float h = input.getHorizontalR();
+				float v = input.getVerticalR();
+				applyIfUnderLimit(CHEST,new Vector2(force.x,force.y),h,v);
+			}
 
 		}
+	}
+
+	private boolean isGripping(int part) {
+		return ((ExtremityModel)(character.parts.get(part))).isGripped();
 	}
 
 	private void applyIfUnderLimit(int part, Vector2 force, float h, float v) {

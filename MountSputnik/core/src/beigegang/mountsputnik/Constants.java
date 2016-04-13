@@ -122,12 +122,6 @@ public final class Constants {
 	public static final float MAX_ARM_DIST = ARM_X_CHEST_OFFSET + FOREARM_X_ARM_OFFSET + HAND_X_OFFSET;
 	public static final float MAX_LEG_DIST = THIGH_Y_HIP_OFFSET + SHIN_Y_THIGH_OFFSET + FOOT_Y_OFFSET ;
 
-	//TODO: Figure out what these should be
-	public static final float ENERGY_GAIN_MULTIPLIER = 1;
-	public static final float ENERGY_LOSS_MULTIPLIER = 1;
-	public static final float ENERGY_LOSS = .1f;
-	public static final float BASE_ENERGY_GAIN = 1f;
-
 	public static final float PART_MAX_X_VELOCITY = -DEFAULT_GRAVITY;
 	public static final float PART_MAX_Y_VELOCITY = -DEFAULT_GRAVITY;
 	/** if player can control torso */
@@ -142,7 +136,8 @@ public final class Constants {
 	public static float FOREARM_PULLING_UPPER_LIMIT = 90f;
 	//to make sure it could
 	public static float FOREARM_SWITCHING_EITHER_WAY = 0f;
-
+	public static float FOREARM_JOINT_SPEED = 3f;
+	public static float SHIN_JOINT_SPEED = 6f;
 
 
 }

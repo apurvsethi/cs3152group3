@@ -141,16 +141,6 @@ Builder.load_string('''
 
 ''')
 
-blockWidth = 32 
-handhold_width = 0.5
-scaling = 32
-
-handholds = []
-selected = -1
-canvas_left = Window.size[0]/4
-canvas_origin = 0
-
-
 class Handhold(): 
 
     #TODO: crumbling, moving, and slipping not yet implemented 
@@ -159,8 +149,25 @@ class Handhold():
         self.scale = scale
        
 
+blockWidth = 32 
+handhold_width = 1
+scaling = 32
+
+handholds = [
+    Handhold(12.53*scaling, 8.93*scaling, 1), 
+    Handhold(19*scaling, 9.18*scaling, 1), 
+    Handhold(14.28*scaling, 4.75*scaling, 1), 
+    Handhold(16.46*scaling, 4.5*scaling, 1)
+]
+selected = -1
+canvas_left = Window.size[0]/4
+canvas_origin = 0
+
+
+
+
 class LinePlayground(FloatLayout):
-    blockHeight = NumericProperty(32)
+    blockHeight = NumericProperty(22)
     handHoldScale = NumericProperty(1)
     directory = StringProperty("assets/canyon/")
     background = ListProperty((0.2, 0.2, 0.2))
@@ -175,8 +182,9 @@ class LinePlayground(FloatLayout):
         with self.canvas: 
             Color(0,0,0)
             Rectangle(pos=[canvas_left,0],size=Window.size)
-            Color(0.5,0.5,1)
-            Rectangle(pos=[canvas_left, canvas_origin],size=[blockWidth*scaling,self.blockHeight*scaling])
+            Color(1,1,1)
+            Rectangle(pos=[canvas_left, canvas_origin],size=[blockWidth*scaling,self.blockHeight*scaling], source=self.directory+'background.png')
+            Rectangle(pos=[canvas_left+blockWidth*scaling/2.5, 150], size=[blockWidth*scaling/5, blockWidth*scaling/5], source='assets/character.png')
         self.drawHandholds()
 
     def _capture_key(self,keyboard,keycode,text,modifiers): 
@@ -197,10 +205,10 @@ class LinePlayground(FloatLayout):
         with self.canvas: 
             Color(0,0,0)
             Rectangle(pos=[canvas_left, 0], size=[blockWidth*scaling, Window.size[1]])
-            Color(0.5,0.5,1,1)
-            Rectangle(pos=[canvas_left, canvas_origin],size=[blockWidth*scaling,self.blockHeight*scaling])
             Color(1,1,1,1)
-            Rectangle(pos=[canvas_left+blockWidth*scaling/2, 80], size=[blockWidth*scaling/20, blockWidth*scaling/12], source='assets/character.png')
+            Rectangle(pos=[canvas_left, canvas_origin],size=[blockWidth*scaling,self.blockHeight*scaling], source=self.directory+"background.png")
+            Color(1,1,1,1)
+            Rectangle(pos=[canvas_left+blockWidth*scaling/2.5, 150], size=[blockWidth*scaling/5, blockWidth*scaling/5], source='assets/character.png')
         self.removeBadHandholds()
         self.drawHandholds()
 
@@ -212,7 +220,7 @@ class LinePlayground(FloatLayout):
             if selected == -1:
                 touch_x = touch.x - canvas_left
                 touch_y = touch.y - canvas_origin
-                handholds.append(Handhold(touch_x-2*handhold_width*self.handHoldScale, touch_y-2*handhold_width*self.handHoldScale, self.handHoldScale))
+                handholds.append(Handhold(touch_x-0.5*handhold_width*self.handHoldScale*scaling, touch_y-0.5*handhold_width*self.handHoldScale*scaling, self.handHoldScale))
             else: 
                 self.updateSelected()
             self.resize()
@@ -256,7 +264,12 @@ class LinePlayground(FloatLayout):
     def clear(self):
         global handholds 
         global selected 
-        handholds = []
+        handholds = [
+            Handhold(12.53*scaling, 8.93*scaling, 1), 
+            Handhold(19*scaling, 9.18*scaling, 1), 
+            Handhold(14.28*scaling, 4.75*scaling, 1), 
+            Handhold(16.46*scaling, 4.5*scaling, 1)
+        ]
         selected = -1
         canvas_origin = 0
         self.resize()   
@@ -282,8 +295,8 @@ class LinePlayground(FloatLayout):
                 'texture': self.directory[7:] + 'handhold.png',
                 'glowTexture': self.directory[7:] + 'handholdglow.png',
                 'gripTexture': self.directory[7:] + 'handholdgrabbed.png', 
-                'width': handhold_width * hold.scale, 
-                'height': handhold_width * hold.scale, 
+                'width': handhold_width * hold.scale /3.0, 
+                'height': handhold_width * hold.scale /3.0, 
                 'positionX': (hold.pos[0])/scaling, 
                 'positionY': (hold.pos[1])/scaling, 
                 "friction": 1, 
@@ -291,9 +304,11 @@ class LinePlayground(FloatLayout):
                 "crumble": False
             }
 
-        new_file.write(str(level))
+        s = str(level).replace("'", '"'); 
+
+        new_file.write(s)
         new_file.close()
-        self.clear()
+        #self.clear()
 
     def changeDirectory(self, btn):
         self.directory = "assets/" + btn + "/"
