@@ -269,7 +269,7 @@ public class GameMode extends ModeController {
 			}
 		}
 		//Use this string to see which level blocks you are currently testing
-
+		//System.out.println(levelBlocks.toString());
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
 			//arms
 		objects.add(character.parts.get(ARM_LEFT));
@@ -478,8 +478,6 @@ public class GameMode extends ModeController {
 
 		Movement.makeHookedJointsMovable(nextToPress);
 
-		if(input.didSelect()) tutorialToggle = !tutorialToggle;
-
 		if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
 		
 		Vector2 forceL = new Vector2(0, 0);
@@ -528,11 +526,13 @@ public class GameMode extends ModeController {
 		timestep += 1;
 
 		canvas.setCameraPosition(canvas.getWidth() / 2,
-						character.parts.get(CHEST).getBody().getPosition().y*SCREEN_HEIGHT/DEFAULT_HEIGHT);
+						character.parts.get(CHEST).getBody().getPosition().y*scale.y);
 		if(canvas.getCamera().position.y < canvas.getHeight()/2){
 			canvas.setCameraPosition(canvas.getWidth()/2, canvas.getHeight()/2);
 		}
-		
+		if(canvas.getCamera().position.y + canvas.getHeight()/2 > background.getRegionHeight()){
+			canvas.setCameraPosition(canvas.getWidth()/2, background.getRegionHeight()-canvas.getHeight()/2); 
+		}
 		spawnObstacles();
 		for(GameObject g : objects){
 			if(g instanceof ObstacleModel && 
