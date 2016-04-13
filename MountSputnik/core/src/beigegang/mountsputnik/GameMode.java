@@ -857,7 +857,7 @@ public class GameMode extends ModeController {
 
 
 		canvas.draw(ground, Color.WHITE, canvas.getWidth() / 4, 0,canvas.getWidth() / 2,canvas.getHeight() / 8);
-		canvas.draw(UI, Color.WHITE, 0, y,canvas.getWidth() / 4,background.getRegionHeight());
+		canvas.draw(UI, Color.WHITE, 0, y,canvas.getWidth() / 4,canvas.getHeight());
 
 		canvas.end();
 

@@ -95,7 +95,7 @@ public class MenuMode extends ModeController {
 
 		canvas.begin();
 
-		float drawY = START_MENU_DRAW_LOCATION + y;
+		float drawY = START_MENU_DRAW_LOCATION * canvas.getHeight() + y;
 		for (int i = 0; i < menuOptions.length; i++){
 			if (i == currSelection){
 				canvas.draw(menuOptions[i], Color.TEAL, menuOptions[i].getRegionWidth() / 2,
