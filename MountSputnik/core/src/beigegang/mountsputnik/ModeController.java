@@ -341,10 +341,10 @@ public abstract class ModeController implements Screen {
 		}
 		
 		// Now it is time to maybe switch screens.
-		if (input.didMenu()) {
-			listener.exitScreen(this, EXIT_QUIT);
-			return false;
-		}
+//		if (input.didMenu()) {
+//			listener.exitScreen(this, EXIT_QUIT);
+//			return false;
+//		}
 		return true;
 	}
 	

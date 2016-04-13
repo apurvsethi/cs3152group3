@@ -254,9 +254,10 @@ public class GameMode extends ModeController {
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
+//			int blockNumber = 1;
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json"); 
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
-
+			
 			addChunk(levelPiece, currentHeight, levelName);
 			currentHeight += levelPiece.getFloat("size");
 
@@ -268,6 +269,8 @@ public class GameMode extends ModeController {
 				currentHeight += levelPiece.getInt("size");
 			}
 		}
+		//Use this string to see which level blocks you are currently testing
+		//System.out.println(levelBlocks.toString()); 
 
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
 			//arms
@@ -473,10 +476,14 @@ public class GameMode extends ModeController {
 		boolean c = input.didLeftArm() ? addToButtonsPressed((HAND_LEFT)) : checkIfJustReleased(HAND_LEFT);
 		boolean d = input.didRightArm() ? addToButtonsPressed((HAND_RIGHT)) : checkIfJustReleased(HAND_RIGHT);
 		
-		if(input.didSelect()) tutorialToggle = !tutorialToggle; 
+		if(input.didSelect()) tutorialToggle = !tutorialToggle;
 
 		Movement.makeHookedJointsMovable(nextToPress);
 
+		if(input.didSelect()) tutorialToggle = !tutorialToggle;
+
+		if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
+		
 		Vector2 forceL = new Vector2(0, 0);
 		Vector2 forceR = new Vector2(0, 0);
 		float[] forces = null;
@@ -504,8 +511,8 @@ public class GameMode extends ModeController {
 //				if (((ExtremityModel) (character.parts.get(ext))).isGripping())
 //					forceR.add(calcForce(ext, CHEST,input.getHorizontalR(),input.getVerticalR()));
 //			}
-			forceR.x = CONSTANT_X_FORCE * 3;
-			forceR.y = CONSTANT_X_FORCE * 3;
+			forceR.x = CONSTANT_X_FORCE * 5;
+			forceR.y = CONSTANT_X_FORCE * 5;
 			applyTorsoForceIfApplicable(forceR);
 		}
 
@@ -727,6 +734,12 @@ public class GameMode extends ModeController {
 		return (Math.sqrt(dist.x * dist.x + dist.y * dist.y) <= HANDHOLD_SNAP_RADIUS);
 	}
 
+
+	public PooledList<GameObject> getGameObjects(){
+		return objects;
+	}
+
+	public TextureRegion getGameBackground() { return background; }
 
 	/**
 	 * @param hookedPart - calculation of force for an extremity attached to a handhold

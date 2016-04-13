@@ -28,6 +28,10 @@ public class Movement {
         float forceyH = fs[3];
         v = Math.abs(v);
         h = Math.abs(h);
+
+        //System.out.println(v + " " + h);
+        //System.out.println(forcexV+ " " + forceyV + " " + forcexH + " " + forceyH);
+
         character.parts.get(part).body.applyForceToCenter(forcexV*x*v,forceyV*y*v,true);
         character.parts.get(part).body.applyForceToCenter(forcexH*x*h,forceyH*y*h,true);
     }
@@ -378,6 +382,7 @@ public class Movement {
         float forceyH = 0f;
         float absoluteAngle = findAbsoluteAngleOfPart(root,shoot);
         //VERTICAL DIRECTION
+        //System.out.println(absoluteAngle);
 
         //TODO this doesn't pull the player up at all, this just manuevers the arm into the correct position... is okay?
         if (absoluteAngle > -180 && absoluteAngle <= -90) {
@@ -433,6 +438,8 @@ public class Movement {
         float forcexH = 0f;
         float forceyH = 0f;
         float absoluteAngle = findAbsoluteAngleOfPart(root,shoot);
+        float jA= ((RevoluteJoint)(character.joints.get(THIGH_RIGHT - 1))).getJointAngle() * RAD_TO_DEG;
+        //System.out.println(jA + "jA");
 
         //TODO this doesn't pull the player up much, this just manuevers the arm into the correct position...
 
