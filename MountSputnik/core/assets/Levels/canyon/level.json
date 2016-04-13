@@ -1,8 +1,10 @@
 {
 	"difficulty": "easy",
+	"height": 50,
+	"uniqueBlocks": 9,
 	"height": 300,
 	"uniqueBlocks": 1,
-	"generalFillerSize": 0, 
+	"generalFillerSize": 0,
 	"fillerBlocks": 0,
     "oxygen": 1,
     "gravity": -9.8,

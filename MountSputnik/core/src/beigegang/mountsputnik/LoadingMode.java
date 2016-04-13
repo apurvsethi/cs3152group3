@@ -9,7 +9,7 @@ import static beigegang.mountsputnik.Constants.*;
 
 public class LoadingMode extends ModeController {
 	// Textures necessary to support the loading screen 
-	private static final String BACKGROUND_FILE = "loading.png";
+	private static final String BACKGROUND_FILE = "Menu/StartMenu/Background.png";
 	private static final String PROGRESS_FILE = "progressbar.png";
 	private static final String PLAY_BTN_FILE = "play.png";
 
@@ -111,9 +111,9 @@ public class LoadingMode extends ModeController {
 	public void update(float dt) {
 		InputController input = InputController.getInstance();
 		input.readInput(bounds, scale);
-		
-		if (playButton != null && input.didSelect()) {
-			listener.exitScreen(this, EXIT_GAME_NEW_LEVEL);
+
+		if (playButton != null) {
+			listener.exitScreen(this, EXIT_MENU);
 		}
 		
 		if (playButton == null) {
