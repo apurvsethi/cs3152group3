@@ -304,6 +304,14 @@ class LinePlayground(FloatLayout):
                 "crumble": False
             }
 
+            # Obstacles: 
+           #  "originX"
+           # "originY"
+           # "width"
+           # "height"
+           # "frequency"
+           # "texture"
+
         s = str(level).replace("'", '"'); 
 
         new_file.write(s)
