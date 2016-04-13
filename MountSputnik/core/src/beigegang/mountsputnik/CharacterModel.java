@@ -315,12 +315,7 @@ public class CharacterModel {
 	
 	/**
 	 * @author Daniel
-	 * dE/dt = A (1-B*sin(angle/2))(Base energy gain)(Environmental Gain Modifier) - 
-	 * - C (Exertion+1)(Environmental Loss Modifier)(3-feet)(3-hands) - D 
-	 * 
-	 * A, C and D are playtested constants
-	 * B allows for rotation to not effect energy gain
-	 * Base energy gain is a value in the character
+	 * Calculates new energy
 	 * 
 	 * @param gainModifier Environmental Gain Modifier
 	 * @param lossModifier Environmental Loss Modifier
@@ -335,15 +330,31 @@ public class CharacterModel {
 		feet += ((ExtremityModel)(parts.get(FOOT_RIGHT))).isGripping() ? 1 : 0;
 		int hands = ((ExtremityModel)(parts.get(HAND_LEFT))).isGripping()? 1 : 0;
 		hands += ((ExtremityModel)(parts.get(HAND_RIGHT))).isGripping()? 1 : 0;
+		int attached = feet+hands;
 		
-		
-		float gain = (float) (ENERGY_GAIN_MULTIPLIER * (1-b*Math.sin(angle/2.0)) * BASE_ENERGY_GAIN * gainModifier);
-		float loss = ENERGY_LOSS_MULTIPLIER * (exertion*123 + 1) * lossModifier * (3 - feet) * (3 - hands);
-		loss = feet == 0 && hands == 0 ? 0 : loss;
-		float dEdt = gain - loss - ENERGY_LOSS;
-		
-		float newEnergy = getEnergy() + dEdt;
-				//getEnergy() < 0 ? 0 : getEnergy() > 100 ? 100 : getEnergy() + dEdt;
+		float gain =0; float loss = 0;
+		switch(attached){
+			case 4: 
+				gain = (float) (gainModifier*(1-Math.abs(b*Math.sin(angle/2)))*10);
+				loss = lossModifier+exertion;
+				break;
+			case 3:
+				gain = (float) (gainModifier*(1-Math.abs(b*Math.sin(angle/2)))*2);
+				loss = lossModifier+exertion;
+				break;
+			case 2:
+				gain = (float) (gainModifier*(1-Math.abs(b*Math.sin(angle/2)))/4);
+				loss = lossModifier*10+exertion;
+				break;
+			case 1:
+				loss = lossModifier*20+exertion;
+				break;
+			default:
+				break;
+		}
+		System.out.println("("+gain+","+loss+")");
+		float dEdt = (gain - loss)/60;
+		float newEnergy = getEnergy() < 0 ? 0 : getEnergy() > 100 ? 100 : getEnergy() + dEdt;
 		setEnergy(newEnergy);
 	}
 }
