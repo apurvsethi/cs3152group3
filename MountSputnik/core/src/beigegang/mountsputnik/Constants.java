@@ -35,7 +35,7 @@ public final class Constants {
 
 	public static final int HANDHOLD_SNAP_RADIUS = 1;
 
-	public static final float START_MENU_DRAW_LOCATION = 0.5f;
+	public static final float START_MENU_DRAW_LOCATION = 0.25f;
 	public static final int MENU_ITEM_HEIGHT = 80;
 	public static final int MENU_CHANGE_COOLDOWN = 12;
 
@@ -83,6 +83,7 @@ public final class Constants {
 	public static final int NONE = -1;
 
 	public static final int[] EXTREMITIES = new int[]{FOOT_LEFT, FOOT_RIGHT, HAND_LEFT, HAND_RIGHT};
+	
 
 	public static final float DAMPENING_Y = .2f;
 	public static final float DAMPENING_X = .2f;
