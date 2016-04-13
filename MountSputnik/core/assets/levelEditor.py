@@ -183,7 +183,7 @@ class LinePlayground(FloatLayout):
             Color(0,0,0)
             Rectangle(pos=[canvas_left,0],size=Window.size)
             Color(1,1,1)
-            Rectangle(pos=[canvas_left, canvas_origin],size=[blockWidth*scaling,self.blockHeight*scaling], source=self.directory+'background.png')
+            Rectangle(pos=[canvas_left, canvas_origin],size=[blockWidth*scaling,self.blockHeight*scaling], source=self.directory+'SurfaceLight.png')
             Rectangle(pos=[canvas_left+blockWidth*scaling/2.5, 150], size=[blockWidth*scaling/5, blockWidth*scaling/5], source='assets/character.png')
         self.drawHandholds()
 
@@ -206,7 +206,7 @@ class LinePlayground(FloatLayout):
             Color(0,0,0)
             Rectangle(pos=[canvas_left, 0], size=[blockWidth*scaling, Window.size[1]])
             Color(1,1,1,1)
-            Rectangle(pos=[canvas_left, canvas_origin],size=[blockWidth*scaling,self.blockHeight*scaling], source=self.directory+"background.png")
+            Rectangle(pos=[canvas_left, canvas_origin],size=[blockWidth*scaling,self.blockHeight*scaling], source=self.directory+"SurfaceLight.png")
             Color(1,1,1,1)
             Rectangle(pos=[canvas_left+blockWidth*scaling/2.5, 150], size=[blockWidth*scaling/5, blockWidth*scaling/5], source='assets/character.png')
         self.removeBadHandholds()
@@ -245,7 +245,7 @@ class LinePlayground(FloatLayout):
             for i in range(len(handholds)): 
                 hold = handholds[i]
                 if self.withinCanvas(canvas_left + hold.pos[0]): 
-                    r = Rectangle(pos=[canvas_left + hold.pos[0],canvas_origin + hold.pos[1]],size=[scaling*handhold_width*hold.scale,scaling*handhold_width*hold.scale],source=self.directory + 'handhold.png')
+                    r = Rectangle(pos=[canvas_left + hold.pos[0],canvas_origin + hold.pos[1]],size=[scaling*handhold_width*hold.scale,scaling*handhold_width*hold.scale],source=self.directory + 'Handhold1.png')
                     if i == selected: 
                         r.source = self.directory + 'handholdgrabbed.png'
 
