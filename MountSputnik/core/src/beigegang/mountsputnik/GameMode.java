@@ -544,9 +544,9 @@ public class GameMode extends ModeController {
 		if(canvas.getCamera().position.y < canvas.getHeight()/2){
 			canvas.setCameraPosition(canvas.getWidth()/2, canvas.getHeight()/2);
 		}
-		if(canvas.getCamera().position.y + canvas.getHeight()/2 > background.getRegionHeight()){
-			canvas.setCameraPosition(canvas.getWidth()/2, background.getRegionHeight()-canvas.getHeight()/2); 
-		}
+//		if(canvas.getCamera().position.y + canvas.getHeight()/2 > background.getRegionHeight()){
+//			canvas.setCameraPosition(canvas.getWidth()/2, background.getRegionHeight()-canvas.getHeight()/2); 
+//		}
 		spawnObstacles();
 		for(GameObject g : objects){
 			if(g instanceof ObstacleModel && 
@@ -602,7 +602,7 @@ public class GameMode extends ModeController {
 
 	private void spawnObstacles(){
 		for(ObstacleZone oz : obstacles){
-			float viewHeight = (canvas.getCamera().position.x + canvas.height/2) * DEFAULT_HEIGHT/SCREEN_HEIGHT;
+			float viewHeight = (canvas.getCamera().position.x + canvas.height/2) * scale.y;
 			if(oz.canSpawnObstacle() && viewHeight < oz.getBounds().y && 
 					character.parts.get(CHEST).getBody().getPosition().y >= oz.getMinSpawnHeight()){
 				obstacle = new ObstacleModel(oz.getObstacleTexture(), 1f, scale); //TODO: determine obstacle drawSizeScale
