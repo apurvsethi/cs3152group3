@@ -335,7 +335,7 @@ public class CharacterModel {
 		float gain =0; float loss = 0;
 		switch(attached){
 			case 4: 
-				gain = (float) (gainModifier*(1-Math.abs(b*Math.sin(angle/2)))*10);
+				gain = (float) (gainModifier*(1-Math.abs(b*Math.sin(angle/2)))*10)+20;
 				loss = lossModifier+exertion;
 				break;
 			case 3:
