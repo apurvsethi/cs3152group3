@@ -295,8 +295,7 @@ public class GameMode extends ModeController {
 				currentHeight += levelPiece.getInt("size");
 			}
 		}
-		//Use this string to see which level blocks you are currently testing
-		//System.out.println(levelBlocks.toString());
+		
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
 			//arms
 		objects.add(character.parts.get(ARM_LEFT));
@@ -332,8 +331,9 @@ public class GameMode extends ModeController {
 		JsonAssetManager.getInstance().allocateDirectory();
 		
 		JsonValue handholdDesc = levelPiece.get("handholds").child();
-		
+
 		//makeTestLevel(handholdDesc);
+		
 		Random rand = new Random();
 		while(handholdDesc != null){
 			handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
@@ -342,20 +342,22 @@ public class GameMode extends ModeController {
 			handhold.fixtureDef.filter.maskBits = 0;
 			handhold.activatePhysics(world);
 			handhold.setBodyType(BodyDef.BodyType.StaticBody);
-			handhold.geometry.setUserData("handhold");
+			handhold.geometry.setUserData(handhold);
 			handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
 			handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
 			objects.add(handhold);
+			
+			try{handhold.setCrumble(handholdDesc.getFloat("crumble"));}
+			catch(Exception e){handhold.setCrumble(0);}
+			try{handhold.setSlip(handholdDesc.getFloat("slip"));}
+			catch(Exception e){handhold.setSlip(0);}
+			
 			handholdDesc = handholdDesc.next();
 		}
 
 		JsonValue obstacleDesc;
-		try{
-			obstacleDesc = levelPiece.get("obstacles").child();
-		}
-		catch(Exception e){
-			return;
-		}
+		try{obstacleDesc = levelPiece.get("obstacles").child();}
+		catch(Exception e){return;}
 		Rectangle bound;
 		while(obstacleDesc != null){
 			bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY")+currentHeight,
@@ -368,70 +370,11 @@ public class GameMode extends ModeController {
 	}
 	//TODO delete when there are actually levels!!!
 	private void makeTestLevel(JsonValue handholdDesc) {
-		handhold = new HandholdModel(
-				createTexture(assetManager,  "assets/"+handholdDesc.getString("texture"), false).getTexture(),
-				13, 10,
-				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
-		handhold.fixtureDef.filter.maskBits = 0;
-		handhold.activatePhysics(world);
-		handhold.setBodyType(BodyDef.BodyType.StaticBody);
-		handhold.geometry.setUserData("handhold");
-		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
-		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
-		objects.add(handhold);
-
-		handhold = new HandholdModel(
-				createTexture(assetManager,  "assets/"+handholdDesc.getString("texture"), false).getTexture(),
-				19, 10,
-				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
-		handhold.fixtureDef.filter.maskBits = 0;
-		handhold.activatePhysics(world);
-
-		handhold.setBodyType(BodyDef.BodyType.StaticBody);
-		handhold.geometry.setUserData("handhold");
-		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
-		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
-		objects.add(handhold);
-
-		handhold = new HandholdModel(
-				createTexture(assetManager,  "assets/"+handholdDesc.getString("texture"), false).getTexture(),
-				16, 5,
-				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
-		handhold.fixtureDef.filter.maskBits = 0;
-		handhold.activatePhysics(world);
-		handhold.setBodyType(BodyDef.BodyType.StaticBody);
-		handhold.geometry.setUserData("handhold");
-		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
-		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
-
-		objects.add(handhold);
-
-		handhold = new HandholdModel(
-				createTexture(assetManager,  "assets/"+handholdDesc.getString("texture"), false).getTexture(),
-				16, 7,
-				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
-		handhold.fixtureDef.filter.maskBits = 0;
-		handhold.activatePhysics(world);
-		handhold.setBodyType(BodyDef.BodyType.StaticBody);
-		handhold.geometry.setUserData("handhold");
-		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
-		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
-
-		objects.add(handhold);
-
-		handhold = new HandholdModel(
-				createTexture(assetManager,  "assets/"+handholdDesc.getString("texture"), false).getTexture(),
-				16, 10,
-				new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
-		handhold.fixtureDef.filter.maskBits = 0;
-		handhold.activatePhysics(world);
-		handhold.setBodyType(BodyDef.BodyType.StaticBody);
-		handhold.geometry.setUserData("handhold");
-		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
-		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
-
-		objects.add(handhold);
-
+		Random rand = new Random();
+		Rectangle bound = new Rectangle(10,20,10,3);
+		obstacleZone = new ObstacleZone(handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
+				10, .5f, bound);
+		obstacles.add(obstacleZone);
 	}
 
 	/**
@@ -550,7 +493,7 @@ public class GameMode extends ModeController {
 		spawnObstacles();
 		for(GameObject g : objects){
 			if(g instanceof ObstacleModel && 
-					g.getBody().getPosition().y  < character.parts.get(CHEST).getBody().getPosition().y){
+					g.getBody().getPosition().y  < (canvas.getCamera().position.y-canvas.getWidth())/scale.y){
 				objects.remove(g);
 			}
 		}
@@ -599,15 +542,24 @@ public class GameMode extends ModeController {
 	}
 	
 
-
+	/**
+	 * Spawns obstacles for active obstacle zones at a random point within the zone. For an obstacle zone to be active,
+	 * three conditions must hold true. 1) It must have been at least oz.getSpawnFrequency() frames since the last obstacle
+	 * spawn, 2) the top of the screen must be lower than the bottom of the obstacle zone, 3) The character must be in the
+	 * level chunk that contains that obstacle zone. 
+	 */
 	private void spawnObstacles(){
+		Random rand = new Random();
 		for(ObstacleZone oz : obstacles){
-			float viewHeight = (canvas.getCamera().position.x + canvas.height/2) * scale.y;
+			float viewHeight = (canvas.getCamera().position.y + canvas.getHeight()/2) / scale.y;
 			if(oz.canSpawnObstacle() && viewHeight < oz.getBounds().y && 
 					character.parts.get(CHEST).getBody().getPosition().y >= oz.getMinSpawnHeight()){
-				obstacle = new ObstacleModel(oz.getObstacleTexture(), 1f, scale); //TODO: determine obstacle drawSizeScale
+				obstacle = new ObstacleModel(oz.getObstacleTexture(), 1f, scale); 
+				obstacle.setX(oz.getBounds().x+rand.nextFloat()*oz.getBounds().width);
+				obstacle.setY(oz.getBounds().y+rand.nextFloat()*oz.getBounds().height);
 				obstacle.activatePhysics(world);
 				obstacle.setBodyType(BodyDef.BodyType.DynamicBody);
+				obstacle.geometry.setUserData(obstacle);
 				objects.add(obstacle);
 				oz.resetSpawnTimer();
 			}

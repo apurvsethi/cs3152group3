@@ -61,6 +61,7 @@ public class ObstacleZone {
 		spawnFrequency = freq;
 		this.bounds = bounds;
 		ticksSinceLastSpawn = 0;
+		obstacleTexture  = t;
 	}
 	
 	/**
@@ -76,6 +77,7 @@ public class ObstacleZone {
 		spawnFrequency = (int)(freq/WORLD_STEP);
 		this.bounds = bounds;
 		ticksSinceLastSpawn = 0;
+		obstacleTexture  = t;
 	}
 
 	/**
