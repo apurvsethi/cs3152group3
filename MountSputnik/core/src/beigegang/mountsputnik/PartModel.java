@@ -2,12 +2,19 @@ package beigegang.mountsputnik;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
+import static beigegang.mountsputnik.Constants.*;
 
 public class PartModel extends GameObject{
 
 	@Override
 	public ObjectType getType() {
 		return ObjectType.PART;
+	}
+	
+	private CharacterModel character;
+	
+	public CharacterModel getCharacter(){
+		return character;
 	}
 	
 	/** Contructs a PartModel
@@ -17,11 +24,13 @@ public class PartModel extends GameObject{
 	 * @param t	the texture of this part
 	 * @param drawSizeScale the scaling between object size and drawn size
 	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
+	 * @param character the character that this is a part of
 	 */
-	public PartModel(float x, float y, Texture t, float drawSizeScale, Vector2 drawPositionScale){
+	public PartModel(float x, float y, Texture t, float drawSizeScale, Vector2 drawPositionScale, CharacterModel character){
 		super(t, drawSizeScale, drawPositionScale);
 		setX(x);
 		setY(y);
+		this.character = character;
 	}
 
 	/**
@@ -37,7 +46,8 @@ public class PartModel extends GameObject{
 		// Create the fixture
 		fixtureDef.shape = shape;
 		fixtureDef.density = 0.5f;
-		fixtureDef.filter.maskBits = 2;
+		fixtureDef.filter.maskBits = OBSTACLE_BITS;
+		fixtureDef.filter.categoryBits = PART_BITS;
 		geometry = body.createFixture(fixtureDef);
 
 		markDirty(false);

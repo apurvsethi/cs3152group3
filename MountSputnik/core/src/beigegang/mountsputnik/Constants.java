@@ -143,5 +143,7 @@ public final class Constants {
 	public static float FOREARM_JOINT_SPEED = 3f;
 	public static float SHIN_JOINT_SPEED = 6f;
 
-
+	public static short PART_BITS = 8;
+	public static short OBSTACLE_BITS = 4;
+	public static short HANDHOLD_BITS = 0;
 }

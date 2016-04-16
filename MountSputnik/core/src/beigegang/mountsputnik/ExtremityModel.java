@@ -105,9 +105,11 @@ public class ExtremityModel extends PartModel{
 	 * @param gripTexture the gripped texture of this extremity
 	 * @param drawSizeScale the scaling between object size and drawn size
 	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
+	 * @param character the character this is a part of
 	 */
-	public ExtremityModel(float x, float y, Texture ungripTexture, Texture gripTexture, float drawSizeScale, Vector2 drawPositionScale){
-		super(x, y, ungripTexture, drawSizeScale, drawPositionScale);
+	public ExtremityModel(float x, float y, Texture ungripTexture, Texture gripTexture, float drawSizeScale, 
+			Vector2 drawPositionScale, CharacterModel character){
+		super(x, y, ungripTexture, drawSizeScale, drawPositionScale, character);
 		gripped = false;
 		notGrip = ungripTexture;
 		grip = gripTexture;

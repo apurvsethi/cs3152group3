@@ -19,16 +19,25 @@ public class ListenerClass implements ContactListener {
         GameObject objB = (GameObject) fixtureB.getUserData();
         
         if(objA instanceof ObstacleModel && objB instanceof PartModel){
-        	//TODO: DO SOMETHING
+        	CharacterModel c = ((PartModel) objB).getCharacter();
+        	c.setEnergy(c.getEnergy()-40);
         }
         else if(objB instanceof ObstacleModel && objA instanceof PartModel){
-        	//TODO: DO SOMETHING
+        	CharacterModel c = ((PartModel) objA).getCharacter();
+        	c.setEnergy(c.getEnergy()-40);
         }
     }
 
 	@Override
 	public void preSolve(Contact contact, Manifold oldManifold) {
-		
+		Fixture fixtureA = contact.getFixtureA();
+        Fixture fixtureB = contact.getFixtureB();
+        GameObject objA = (GameObject) fixtureA.getUserData();
+        GameObject objB = (GameObject) fixtureB.getUserData();
+        
+        if(objA instanceof HandholdModel && objB instanceof PartModel || 
+        		objB instanceof HandholdModel && objA instanceof PartModel)
+        	contact.setEnabled(false);
 	}
 
 	@Override

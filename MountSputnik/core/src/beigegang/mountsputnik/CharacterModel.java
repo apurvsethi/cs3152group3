@@ -135,7 +135,7 @@ public class CharacterModel {
 		else partCache.set(partX, partY);
 
 		PartModel partModel = new PartModel(partCache.x, partCache.y, texture.getTexture(),
-				CHARACTER_DRAW_SIZE_SCALE, drawPositionScale);
+				CHARACTER_DRAW_SIZE_SCALE, drawPositionScale, this);
 		partModel.setBodyType(BodyDef.BodyType.DynamicBody);
 		parts.add(partModel);
 		return partModel;
@@ -172,7 +172,7 @@ public class CharacterModel {
 
 		ExtremityModel extremityModel = new ExtremityModel(partCache.x, partCache.y,
 				texture.getTexture(), grippedTexture.getTexture(), CHARACTER_DRAW_SIZE_SCALE,
-				drawPositionScale);
+				drawPositionScale, this);
 		extremityModel.setBodyType(BodyDef.BodyType.DynamicBody);
 		parts.add(extremityModel);
 		return extremityModel;
