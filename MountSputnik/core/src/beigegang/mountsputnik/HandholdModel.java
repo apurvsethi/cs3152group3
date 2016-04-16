@@ -4,10 +4,13 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.utils.Array;
 
 public class HandholdModel extends GameObject{
 	
+	/** How fast the handhold moves (in m/s)*/
+	protected float velocity;
 	/** How crumbly handhold is
      * Range from 0.0 - 1.0*/
     protected float crumbleFactor;
@@ -55,6 +58,25 @@ public class HandholdModel extends GameObject{
 	 */
 	public void setSlip(float slip){
 		slipFactor = slip;
+	}
+	
+	/**
+	 * sets velocity and changes body type if necessary
+	 * @param v
+	 */
+	public void setVelocity(float v){
+		velocity = v;
+		if(v>0)
+			body.setType(BodyDef.BodyType.KinematicBody);
+		else
+			body.setType(BodyDef.BodyType.StaticBody);
+	}
+	
+	/**
+	 * @return velocity of handhold
+	 */
+	public float getVelocity(){
+		return velocity;
 	}
 	
 	/**
@@ -112,6 +134,7 @@ public class HandholdModel extends GameObject{
 		setY(y);
 
 		isCrumbling = false;
+		velocity = 0;
 		snapPoints = new Array<Vector2>();
 		snapPoints.add(getPosition());
 		texture = t;

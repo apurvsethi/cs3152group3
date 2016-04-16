@@ -5,7 +5,6 @@ import com.badlogic.gdx.math.Vector2;
 
 public class ObstacleModel extends GameObject{
 	
-	//TODO: implement once we have obstacles
 	public ObstacleModel(Texture obstacleTexture, float f, Vector2 scale) {
 		super(obstacleTexture, f, scale);
 	}
@@ -17,7 +16,12 @@ public class ObstacleModel extends GameObject{
 
 	@Override
 	protected void createFixtures() {
-
+		if (body == null) {
+			return;
+		}
+		fixtureDef.shape = shape;
+		geometry = body.createFixture(fixtureDef);
+		markDirty(false);
 	}
 
 	@Override

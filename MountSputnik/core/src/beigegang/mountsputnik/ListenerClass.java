@@ -15,17 +15,14 @@ public class ListenerClass implements ContactListener {
     public void beginContact(Contact contact) {
     	Fixture fixtureA = contact.getFixtureA();
         Fixture fixtureB = contact.getFixtureB();
-        String typeA = (String) fixtureA.getUserData();
-        String typeB = (String) fixtureB.getUserData();
+        GameObject objA = (GameObject) fixtureA.getUserData();
+        GameObject objB = (GameObject) fixtureB.getUserData();
         
-        if(typeA == null || typeB == null)
-        	return;
-        
-        if((typeA.equals("handhold")&&(typeB.contains("extremity")))){
-	    	stickies.add(new StickyInfo(fixtureB.getBody(), fixtureA.getBody(),typeB));
-	    }
-        else if((typeB.equals("handhold")&&(typeA.contains("extremity")))){
-        	stickies.add(new StickyInfo(fixtureA.getBody(), fixtureB.getBody(),typeA));
+        if(objA instanceof ObstacleModel && objB instanceof PartModel){
+        	//TODO: DO SOMETHING
+        }
+        else if(objB instanceof ObstacleModel && objA instanceof PartModel){
+        	//TODO: DO SOMETHING
         }
     }
 

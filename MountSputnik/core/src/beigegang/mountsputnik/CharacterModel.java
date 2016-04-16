@@ -54,6 +54,7 @@ public class CharacterModel {
 
 		for (PartModel part : parts) {
 			part.activatePhysics(world);
+			part.geometry.setUserData(part);
 		}
 
 		makeJoints(world, canvasSize);
