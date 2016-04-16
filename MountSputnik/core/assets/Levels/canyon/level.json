@@ -8,9 +8,9 @@
     "gravity": -9.8,
     "background": "canyon", 
 	"lava": {
-		"present": false,
-		"texture": null,
-		"speed":null
+		"present": true,
+		"texture": "testlavatexture.png",
+		"speed": .005
 	}
 }
 

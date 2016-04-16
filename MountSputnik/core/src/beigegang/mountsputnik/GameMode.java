@@ -39,6 +39,7 @@ public class GameMode extends ModeController {
 	//We need to preload every single texture, regardless of which level we're currently using. Loading can't be
 	//dynamically
 	private static final String BACKGROUND_FILE = "assets/canyon/background.png";
+	private static final String LAVA_FILE = "assets/testlavatexture.png"; //TODO: make this a better texture
 	private static final String MIDGROUND_FILE = "assets/canyon/Midground.png";
 	private static final String TILE_FILE = "assets/canyon/SurfaceLight.png";
 	private static final String UI_FILE = "assets/HUD.png";
@@ -75,6 +76,7 @@ public class GameMode extends ModeController {
 	private static TextureRegion UI;
 	private static TextureRegion edge;
 	private static TextureRegion ground;
+	private static TextureRegion lavaTexture;
 	private static TextureRegion[] partTextures = new TextureRegion[PART_TEXTURES.length];
 	private static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length];
 	private static TextureRegion[] handholdTextures = new TextureRegion[HANDHOLD_TEXTURES.length];
@@ -114,6 +116,8 @@ public class GameMode extends ModeController {
 		assets.add(EDGE_FILE);
 		manager.load(GROUND_FILE, Texture.class);
 		assets.add(GROUND_FILE);
+		manager.load(LAVA_FILE, Texture.class);
+		assets.add(LAVA_FILE);
 
 		for (String HANDHOLD_TEXTURE : HANDHOLD_TEXTURES) {
 			manager.load(HANDHOLD_TEXTURE, Texture.class);
@@ -147,6 +151,7 @@ public class GameMode extends ModeController {
 		UI = createTexture(manager, UI_FILE, false);
 		edge = createTexture(manager, EDGE_FILE, false);
 		ground = createTexture(manager, GROUND_FILE, false);
+		lavaTexture = createTexture(manager, LAVA_FILE, false);
 		
 		for (int i = 0; i < PART_TEXTURES.length; i++) {
 			partTextures[i] = createTexture(manager, PART_TEXTURES[i], false);
@@ -175,6 +180,7 @@ public class GameMode extends ModeController {
 	}
 	
 	private ObstacleZone obstacleZone;
+	private RisingObstacle risingObstacle = null;
 	private ObstacleModel obstacle;
 	private Array<ObstacleZone> obstacles = new Array<ObstacleZone>();
 	/**
@@ -223,6 +229,7 @@ public class GameMode extends ModeController {
 		for (GameObject obj : objects) {
 			obj.deactivatePhysics(world);
 		}
+		risingObstacle = null;
 		objects.clear();
 		obstacles.clear();
 		addQueue.clear();
@@ -296,6 +303,11 @@ public class GameMode extends ModeController {
 			}
 		}
 		
+		JsonValue lava = levelFormat.get("lava");
+		if(lava.getBoolean("present")){
+			risingObstacle = new RisingObstacle(lavaTexture, lava.getFloat("speed"));
+		}
+		
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
 			//arms
 		objects.add(character.parts.get(ARM_LEFT));
@@ -332,7 +344,7 @@ public class GameMode extends ModeController {
 		
 		JsonValue handholdDesc = levelPiece.get("handholds").child();
 
-		//makeTestLevel(handholdDesc);
+		//if(currentHeight == 0) makeTestLevel(handholdDesc);
 		
 		Random rand = new Random();
 		while(handholdDesc != null){
@@ -373,7 +385,7 @@ public class GameMode extends ModeController {
 		Random rand = new Random();
 		Rectangle bound = new Rectangle(10,20,10,3);
 		obstacleZone = new ObstacleZone(handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
-				10, .5f, bound);
+				10, 2f, bound);
 		obstacles.add(obstacleZone);
 	}
 
@@ -497,6 +509,7 @@ public class GameMode extends ModeController {
 				objects.remove(g);
 			}
 		}
+		
 		// TODO: Update energy quantity (fill in these values)
 		float exertion = 0;
 		if(forces!=null)
@@ -504,7 +517,19 @@ public class GameMode extends ModeController {
 				exertion+=Math.abs(forces[i]);
 			}
 		character.updateEnergy(oxygen, 1, exertion, true);
+
+		if(risingObstacle != null){
+			risingObstacle.setHeight(risingObstacle.getHeight()+risingObstacle.getSpeed());
+			for(PartModel p : character.parts){
+				if(risingObstacle.getHeight() >= p.getPosition().y){
+					character.setEnergy(0);
+					failed = true;
+				}
+			}
+		}
+		
 		if (character.getEnergy() <= 0){
+			failed = true;
 			for(int e : EXTREMITIES){
 				 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
 				 ungrip(extremity);
@@ -810,7 +835,7 @@ public class GameMode extends ModeController {
 
 		canvas.draw(ground, Color.WHITE, canvas.getWidth() / 4, 0,canvas.getWidth() / 2,canvas.getHeight() / 8);
 		canvas.draw(UI, Color.WHITE, 0, y,canvas.getWidth() / 4,canvas.getHeight());
-
+		
 		canvas.end();
 
 		canvas.begin();
@@ -821,8 +846,14 @@ public class GameMode extends ModeController {
 		canvas.begin();
 		canvas.drawText(((Integer)(Math.round(character.getEnergy()))).toString(), font, 0f,
 				canvas.getCamera().position.y+canvas.getHeight()/2-10f);
+		
+		if(risingObstacle!=null){
+			float lavaOrigin = risingObstacle.getHeight()*scale.y -
+					canvas.getHeight();
+			canvas.draw(risingObstacle.getTexture(), Color.WHITE, canvas.getWidth() / 4, lavaOrigin, canvas.getWidth() * 3/4, canvas.getHeight());
+		}
 		canvas.end();
-
+		
 		if (debug) {
 			canvas.beginDebug();
 			for(GameObject obj : objects) {
