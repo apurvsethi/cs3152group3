@@ -140,7 +140,7 @@ public final class Constants {
 	public static float FOREARM_PULLING_UPPER_LIMIT = 90f;
 	//to make sure it could
 	public static float FOREARM_SWITCHING_EITHER_WAY = 0f;
-	public static float FOREARM_JOINT_SPEED = 3f;
+	public static float FOREARM_JOINT_SPEED = 5f;
 	public static float SHIN_JOINT_SPEED = 6f;
 
 	public static short PART_BITS = 8;
