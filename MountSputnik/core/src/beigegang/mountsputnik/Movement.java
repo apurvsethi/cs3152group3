@@ -563,6 +563,6 @@ public class Movement {
         if (!nextToPress.contains(HAND_RIGHT, true)) {
             ((RevoluteJoint) character.joints.get(SHIN_RIGHT - 1)).setMaxMotorTorque(100);
         }
-        System.out.println(((RevoluteJoint) character.joints.get(ARM_LEFT - 1)).getJointSpeed());
+//        System.out.println(((RevoluteJoint) character.joints.get(ARM_LEFT - 1)).getJointSpeed());
     }
 }

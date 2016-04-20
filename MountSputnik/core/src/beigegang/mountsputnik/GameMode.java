@@ -393,32 +393,6 @@ public class GameMode extends ModeController {
 		obstacles.add(obstacleZone);
 	}
 
-	/**
-	 * if button was not pressed on the previous turn but is pressed now, add to nextToPress
-	 * note: cannot use set because order must be preserved for accurate/predictive control by player
-	 * @param part
-     * @return true if part was just pressed, false otherwise
-	 * @author Jacob
-     */
-	public boolean addToButtonsPressed(int part) {
-		boolean notRedundant = !nextToPress.contains(part, true);
-		if(notRedundant)
-			nextToPress.add(part);
-		return notRedundant;
-	}
-
-	/**
-	 * checks if that extremity was released on this timestep by player, if so adds to justReleased
- 	 * @param part
-	 * @return true if part was just released, false otherwise
-	 * @author Jacob
-     */
-    public boolean checkIfJustReleased(int part) {
-		boolean present = nextToPress.removeValue(part, true);
-		if (present)
-			justReleased.add(part);
-		return present;
-	}
 
 	/**
 	 * This method computes an order for the selected limbs based on previous timesteps and the first limb in nextToPress
@@ -439,26 +413,19 @@ public class GameMode extends ModeController {
 		inx = input.getHorizontalL();
 		iny = input.getVerticalL();
 
-		justReleased.clear();
 		upsideDown = character.parts.get(HEAD).getPosition().y - character.parts.get(CHEST).getPosition().y <= 0;
-		//will likely use these eventually but not right now. do not delete!
-		boolean a = input.didLeftLeg() ? addToButtonsPressed((FOOT_LEFT)) : checkIfJustReleased(FOOT_LEFT);
-		boolean b = input.didRightLeg() ? addToButtonsPressed((FOOT_RIGHT)) : checkIfJustReleased(FOOT_RIGHT);
-		boolean c = input.didLeftArm() ? addToButtonsPressed((HAND_LEFT)) : checkIfJustReleased(HAND_LEFT);
-		boolean d = input.didRightArm() ? addToButtonsPressed((HAND_RIGHT)) : checkIfJustReleased(HAND_RIGHT);
-//		if (! (a || c || b || d)) nextToPress.clear();
+
+		nextToPress = input.getButtonsPressed();
+		justReleased = input.getJustReleased();
 		if(input.didSelect()) tutorialToggle = !tutorialToggle;
 
 		Movement.makeHookedJointsMovable(nextToPress);
 
 		if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
-		
-		Vector2 forceL = new Vector2(0, 0);
-		Vector2 forceR = new Vector2(0, 0);
+
 		float[] forces = null;
 
 		Movement.resetLimbSpeedsTo0();
-//		if (timestep == 0) nextToPress.clear();
 		if (nextToPress.size > 0) {
 			for (int i : nextToPress) {
 				((ExtremityModel) (character.parts.get(i))).ungrip();
@@ -468,14 +435,8 @@ public class GameMode extends ModeController {
 			float h = input.getHorizontalL();
 			forces = Movement.findAndApplyForces(nextToPress.get(0),v,h);
 
-//			if (nextToPress.size > 1 && (TWO_LIMB_MODE)) {
-//				v = input.getVerticalR();
-//				h = input.getHorizontalR();
-//				forces = Movement.findAndApplyForces(nextToPress.get(1),v,h);
-//			}
 
 		}
-//		applyDampening();
 		if (TORSO_MODE){
 			applyTorsoForceIfApplicable(calcTorsoForce());
 		}

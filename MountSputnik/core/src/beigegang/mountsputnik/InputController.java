@@ -6,6 +6,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+
+import static beigegang.mountsputnik.Constants.*;
+import static beigegang.mountsputnik.Constants.HAND_RIGHT;
 
 public class InputController {	
 	/** Singleton instance for the controller */
@@ -58,7 +62,48 @@ public class InputController {
 
 	/** An X-Box controller (if it is connected) */
 	XBox360Controller xbox;
-	
+	/**
+	 * holds any extremities who's buttons were just released this timestep. cleared out every timestep
+	 */
+	private Array<Integer> justReleased = new Array<Integer>();
+	/**
+	 * holds any extremities who's buttons are pressed during this timestep. keeps order of pressing intact
+	 */
+	private Array<Integer> nextToPress = new Array<Integer>();
+
+	public Array<Integer> getJustReleased(){
+		return justReleased;
+	}
+	public Array<Integer> getButtonsPressed(){
+		return nextToPress;
+	}
+	/**
+	 * if button was not pressed on the previous turn but is pressed now, add to nextToPress
+	 * note: cannot use set because order must be preserved for accurate/predictive control by player
+	 * @param part
+	 * @return true if part was just pressed, false otherwise
+	 * @author Jacob
+	 */
+	public boolean addToButtonsPressed(int part) {
+		boolean notRedundant = !nextToPress.contains(part, true);
+		if(notRedundant)
+			nextToPress.add(part);
+		return notRedundant;
+	}
+
+	/**
+	 * checks if that extremity was released on this timestep by player, if so adds to justReleased
+	 * @param part
+	 * @return true if part was just released, false otherwise
+	 * @author Jacob
+	 */
+	public boolean checkIfJustReleased(int part) {
+		boolean present = nextToPress.removeValue(part, true);
+		if (present)
+			justReleased.add(part);
+		return present;
+	}
+
 	/**
 	 * Returns the amount of sideways movement from left stick.
 	 *
@@ -214,6 +259,8 @@ public class InputController {
 		debugPrevious = debugPressed;
 		selectPrevious = selectPressed;
 		backPrevious = backPressed;
+		justReleased.clear();
+
 		// Check to see if a GamePad is connected
 		if (xbox.isConnected()) {
 			readGamepad(bounds, scale);
@@ -242,8 +289,14 @@ public class InputController {
 		leftArmPressed = xbox.getLB();
 		rightArmPressed = xbox.getRB();
 		leftLegPressed = xbox.getLeftTrigger() > 0.5;
-		rightLegPressed = xbox.getRightTrigger() < -0.5;
-		
+		rightLegPressed = xbox.getRightTrigger() < -0.5 && xbox.getRightTrigger() != -1.0f;
+//		System.out.println(xbox.getRightTrigger());
+
+		boolean a = leftLegPressed ? addToButtonsPressed((FOOT_LEFT)) : checkIfJustReleased(FOOT_LEFT);
+		boolean b = rightLegPressed ? addToButtonsPressed((FOOT_RIGHT)) : checkIfJustReleased(FOOT_RIGHT);
+		boolean c = leftArmPressed ? addToButtonsPressed((HAND_LEFT)) : checkIfJustReleased(HAND_LEFT);
+		boolean d = rightArmPressed ? addToButtonsPressed((HAND_RIGHT)) : checkIfJustReleased(HAND_RIGHT);
+//
 		// Movement based on change
 		horizontalL = xbox.getLeftX();
 		verticalL = -xbox.getLeftY();
@@ -274,7 +327,12 @@ public class InputController {
 		rightArmPressed = (secondary && rightArmPressed) || (Gdx.input.isKeyPressed(Input.Keys.W));
 		leftLegPressed = (secondary && leftLegPressed) || (Gdx.input.isKeyPressed(Input.Keys.A));
 		rightLegPressed = (secondary && rightLegPressed) || (Gdx.input.isKeyPressed(Input.Keys.S));
-		
+
+		boolean a = leftLegPressed ? addToButtonsPressed((FOOT_LEFT)) : checkIfJustReleased(FOOT_LEFT);
+		boolean b = rightLegPressed ? addToButtonsPressed((FOOT_RIGHT)) : checkIfJustReleased(FOOT_RIGHT);
+		boolean c = leftArmPressed ? addToButtonsPressed((HAND_LEFT)) : checkIfJustReleased(HAND_LEFT);
+		boolean d = rightArmPressed ? addToButtonsPressed((HAND_RIGHT)) : checkIfJustReleased(HAND_RIGHT);
+
 		horizontalL = (secondary ? horizontalL : 0.0f);
 		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
 			horizontalL += 1.0f;
@@ -293,8 +351,6 @@ public class InputController {
 
 		horizontalR = (secondary? horizontalR :0);
 		verticalR = (secondary? verticalR :0);
-		//because not available with keypad.
-//		Constants.TORSO_MODE = false;
-//		Constants.TWO_LIMB_MODE = false;
+
 	}
 }
