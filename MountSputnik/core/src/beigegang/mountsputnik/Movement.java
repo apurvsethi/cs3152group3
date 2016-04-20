@@ -14,35 +14,28 @@ public class Movement {
 
     public static CharacterModel character;
 
-    public static float[] lastForces = new float[4];
-    public static float[] curForces = new float[4];
+//    public static float[] lastForces = new float[4];
+//    public static float[] curForces = new float[4];
     public static int lastLimb = 0;
     public static void setCharacter(CharacterModel c){
         character = c;
     }
-    public static int counter = 2;
-    private static void applyNewTestForces(float[] fs, Vector2 forceL,int part,float v, float h) {
-        float x = forceL.x;
-        float y = forceL.y;
-        float forcexV = fs[0];
-        float forceyV = fs[1];
-        float forcexH = fs[2];
-        float forceyH = fs[3];
-        v = Math.abs(v);
-        h = Math.abs(h);
-        //System.out.println(v + " " + h);
-        //System.out.println(forcexV+ " " + forceyV + " " + forcexH + " " + forceyH);
-//        counter --;
-//        if (counter == 0){
-////            System.out.println(forcexV*x*v + " " + forceyV*y*v + " " +  forcexH*x*h + " " + forceyH*y*h );
-////            counter = 2;
-//        }
+//    public static int counter = 2;
 
-        character.parts.get(part).body.applyForceToCenter(forcexV*x*v,forceyV*y*v,true);
-        character.parts.get(part).body.applyForceToCenter(forcexH*x*h,forceyH*y*h,true);
-        lastForces = curForces;
-        curForces = fs;
-    }
+
+//    private static void applyNewTestForces(float[] fs, Vector2 forceL,int part,float v, float h) {
+//        float x = forceL.x;
+//        float y = forceL.y;
+//        float forcexV = fs[0];
+//        float forceyV = fs[1];
+//        float forcexH = fs[2];
+//        float forceyH = fs[3];
+//        v = Math.abs(v);
+//        h = Math.abs(h);
+//
+//        character.parts.get(part).body.applyForceToCenter(forcexV*x*v,forceyV*y*v,true);
+//        character.parts.get(part).body.applyForceToCenter(forcexH*x*h,forceyH*y*h,true);
+//    }
 
     /**
      *
@@ -57,13 +50,15 @@ public class Movement {
         Vector2 forceL;
         float[] fs = null;
         RevoluteJoint armJoint;
+        resetLimbSpeedsTo0();
+
+
         switch(part){
             case HAND_LEFT:
                 forceL = new Vector2(CONSTANT_X_FORCE,CONSTANT_X_FORCE);
                  armJoint = ((RevoluteJoint) character.joints.get(ARM_LEFT-1));
                 armJoint.setMaxMotorTorque(100);
 //                //- is to waist. + to head.
-//                armJoint.setMotorSpeed(-10);
                 rotateLimbPiece(v,h,ARM_LEFT,FOREARM_LEFT);
 //                fs = Movement.getPhysicallyCorrectForceMultipliersLeftArm(v,h);
 //                Movement.applyNewTestForces(fs,forceL,ARM_LEFT,v,h);
@@ -124,6 +119,15 @@ public class Movement {
         lastLimb = part != 0 ? part : 0;
         return fs;
     }
+
+    public static void resetLimbSpeedsTo0() {
+        RevoluteJoint joint;
+        for (int limbPiece:NON_EXTREMITY_LIMBS){
+            joint = ((RevoluteJoint) character.joints.get(limbPiece-1));
+            joint.setMotorSpeed(0);
+        }
+    }
+
     private static void rotateLimbPiece(float v, float h, int upperJoint, int lowerJoint){
         Vector2 root = character.joints.get(upperJoint - 1).getAnchorA();
         Vector2 shoot = character.joints.get(lowerJoint - 1).getAnchorA();
@@ -274,7 +278,6 @@ public class Movement {
             forceyV = (90 - aa) / 90;
             forcexV = 1 + forceyV;
         }
-//        System.out.println(forcexV*CONSTANT_X_FORCE + " " + forceyV*CONSTANT_X_FORCE);
 
         character.parts.get(part).body.applyForceToCenter(forcexV*CONSTANT_X_FORCE,forceyV*CONSTANT_X_FORCE,true);
     }
@@ -313,14 +316,10 @@ public class Movement {
         Vector2 root = character.joints.get(ARM_LEFT - 1).getAnchorA();
         Vector2 shoot = character.joints.get(FOREARM_LEFT - 1).getAnchorA();
         float aa = findAbsoluteAngleOfPart(root,shoot);
-//        System.out.print(isForceDiagonal(v,h));
-//        System.out.print(lastLimb==HAND_LEFT);
-//        System.out.print(!forceOppositeAngle(v,h,aa));
-//        System.out.print(!forceDifferenceSignificant() + "\n");
+
 
         if (isForceDiagonal(v,h)){
             //do calculations for diagonal direction
-//            System.out.println("here");
             rotateLimbPiece(v,h,FOREARM_LEFT,HAND_LEFT);
 
             return null;
@@ -438,42 +437,26 @@ public class Movement {
         }
     }
 
-    private static boolean forceOppositeAngle(float v, float h,float aa) {
-        //arm up & right, dir not both up and right
-        if (aa>0 && aa<90 && (v<0 || h<0)){
-            return true;
-        }
-        //arm down & right, dir not both down and right
-        else if (aa>90 && aa<180 && (v>0 || h<0)){
-            return true;
-            //arm up & left, dir not both up and left
-        } else if (aa<0 && aa>-90 && (v<0 || h>0)){
-            return true;
-            //arm down & left, dir not both down and left
-        } else if (aa<-90 && aa>-180 && (v>0 || h>0)){
-            return true;
-        }
-        return false;
-    }
+//    private static boolean forceOppositeAngle(float v, float h,float aa) {
+//        //arm up & right, dir not both up and right
+//        if (aa>0 && aa<90 && (v<0 || h<0)){
+//            return true;
+//        }
+//        //arm down & right, dir not both down and right
+//        else if (aa>90 && aa<180 && (v>0 || h<0)){
+//            return true;
+//            //arm up & left, dir not both up and left
+//        } else if (aa<0 && aa>-90 && (v<0 || h>0)){
+//            return true;
+//            //arm down & left, dir not both down and left
+//        } else if (aa<-90 && aa>-180 && (v>0 || h>0)){
+//            return true;
+//        }
+//        return false;
+//    }
 
     private static boolean isForceDiagonal(float v, float h) {
        return  Math.abs(v)>.2 && Math.abs(h) > .2;
-    }
-
-
-    private static boolean forceDifferenceSignificant() {
-        String s = "";
-        for (int i = 0; i < 4; i ++){
-            s += Math.abs (lastForces[i] - curForces[i]) + " ";
-
-        }
-//        System.out.println(s);
-        for (int i = 0; i < 4; i ++){
-            if (Math.abs (lastForces[i] - curForces[i]) > .005){
-                return true;
-            }
-        }
-        return false;
     }
 
     private static float[] getMultipliersRightForearm(float v, float h) {
@@ -1115,6 +1098,7 @@ public class Movement {
         }if (!nextToPress.contains(HAND_RIGHT,true)){
             ((RevoluteJoint)character.joints.get(SHIN_RIGHT-1)).setMaxMotorTorque(100);
         }
+        System.out.println(((RevoluteJoint)character.joints.get(ARM_LEFT-1)).getJointSpeed());
     }
     //I need to use the modifiers from calcArmForce and calcLegForce multiplied by the max force multiplied by these constant things.
 

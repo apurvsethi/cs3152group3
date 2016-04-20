@@ -83,7 +83,8 @@ public final class Constants {
 	public static final int NONE = -1;
 
 	public static final int[] EXTREMITIES = new int[]{FOOT_LEFT, FOOT_RIGHT, HAND_LEFT, HAND_RIGHT};
-	
+	public static final int[] NON_EXTREMITY_LIMBS = new int[]{ARM_LEFT,ARM_RIGHT,FOREARM_LEFT,FOREARM_RIGHT,THIGH_LEFT,THIGH_RIGHT,SHIN_LEFT,SHIN_RIGHT};
+
 
 	public static final float DAMPENING_Y = .2f;
 	public static final float DAMPENING_X = .2f;
@@ -136,7 +137,7 @@ public final class Constants {
 
 	public static float FOREARM_PUSHING_LOWER_LIMIT = -90f;
 	public static float FOREARM_PUSHING_UPPER_LIMIT = .5f;
-	public static float FOREARM_PULLING_LOWER_LIMIT = -.5f;
+	public static float FOREARM_PULLING_LOWER_LIMIT = 2f;
 	public static float FOREARM_PULLING_UPPER_LIMIT = 90f;
 	//to make sure it could
 	public static float FOREARM_SWITCHING_EITHER_WAY = 0f;

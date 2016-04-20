@@ -456,6 +456,9 @@ public class GameMode extends ModeController {
 		Vector2 forceL = new Vector2(0, 0);
 		Vector2 forceR = new Vector2(0, 0);
 		float[] forces = null;
+
+		Movement.resetLimbSpeedsTo0();
+
 		if (nextToPress.size > 0) {
 			for (int i : nextToPress) {
 				((ExtremityModel) (character.parts.get(i))).ungrip();
@@ -465,14 +468,15 @@ public class GameMode extends ModeController {
 			float h = input.getHorizontalL();
 			forces = Movement.findAndApplyForces(nextToPress.get(0),v,h);
 
-			if (nextToPress.size > 1 && (TWO_LIMB_MODE)) {
-				v = input.getVerticalR();
-				h = input.getHorizontalR();
-				forces = Movement.findAndApplyForces(nextToPress.get(1),v,h);
-			}
+//			if (nextToPress.size > 1 && (TWO_LIMB_MODE)) {
+//				v = input.getVerticalR();
+//				h = input.getHorizontalR();
+//				forces = Movement.findAndApplyForces(nextToPress.get(1),v,h);
+//			}
 
 		}
 		//decently outdated code BUT still functional.
+//		applyDampening();
 		if (TORSO_MODE){
 			forceR.x = 0;
 			forceR.y = 0;
@@ -480,14 +484,18 @@ public class GameMode extends ModeController {
 //				if (((ExtremityModel) (character.parts.get(ext))).isGripping())
 //					forceR.add(calcForce(ext, CHEST,input.getHorizontalR(),input.getVerticalR()));
 //			}
-			forceR.x = CONSTANT_X_FORCE * 5;
-			forceR.y = CONSTANT_X_FORCE * 5;
+			forceR.x = CONSTANT_X_FORCE * 3f;
+			forceR.y = CONSTANT_X_FORCE * 3f;
+			int counter = 0;
+			counter = isGripping(HAND_LEFT)?counter+1:counter;
+			counter = isGripping(HAND_RIGHT)?counter+1:counter;
+			counter = isGripping(FOOT_LEFT)?counter+1:counter;
+			counter = isGripping(FOOT_RIGHT)?counter+1:counter;
+			forceR.scl(counter);
 			applyTorsoForceIfApplicable(forceR);
 		}
 
-		else {
-//			applyDampening();
-		}
+
 		for (PartModel p:character.parts){
 			Vector2 vect =  p.getLinearVelocity();
 			p.setLinearVelocity(boundVelocity(vect));
@@ -617,10 +625,11 @@ public class GameMode extends ModeController {
 	 * will apply dampening to any limb not currently controlled by the player & are unattached to a handhold
 	 * will help limbs not swing around wildly after player releases them.
 	 * @author Jacob
+	 *
  	 */
 	private void applyDampening() {
 		for (int ext : EXTREMITIES){
-			if (!((ExtremityModel)(character.parts.get(ext))).isGripping()){
+			if (!isGripping(ext)){
 				float thisDampX = DAMPENING_X;
 				float thisDampY = DAMPENING_Y;
 				Vector2 vel = character.parts.get(ext).getLinearVelocity();
