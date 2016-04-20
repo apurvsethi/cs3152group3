@@ -64,7 +64,7 @@ public class Movement {
                 armJoint.setMaxMotorTorque(100);
 //                //- is to waist. + to head.
 //                armJoint.setMotorSpeed(-10);
-                rotateLeftArm(v,h);
+                rotateLimbPiece(v,h,ARM_LEFT,FOREARM_LEFT);
 //                fs = Movement.getPhysicallyCorrectForceMultipliersLeftArm(v,h);
 //                Movement.applyNewTestForces(fs,forceL,ARM_LEFT,v,h);
                 Movement.getMultipliersLeftForearm(v,h);
@@ -77,7 +77,7 @@ public class Movement {
                 armJoint = ((RevoluteJoint) character.joints.get(ARM_RIGHT-1));
                 armJoint.setMaxMotorTorque(100);
                 //- is to head. + to waist.
-                rotateRightArm(v,h);
+                rotateLimbPiece(v,h,ARM_RIGHT,FOREARM_RIGHT);
 //                fs = Movement.getPhysicallyCorrectForceMultipliersRightArm(v, h);
 //                Movement.applyNewTestForces(fs, forceL, ARM_RIGHT, v, h);
                 Movement.getMultipliersRightForearm(v, h);
@@ -90,7 +90,7 @@ public class Movement {
                 armJoint.setMaxMotorTorque(100);
                 //+ is to waist. - to opposite of waist.
 //                armJoint.setMotorSpeed(-10);
-                rotateLeftLeg(v,h);
+                rotateLimbPiece(v,h,THIGH_LEFT,SHIN_LEFT);
 
 //                forceL = new Vector2(CONSTANT_X_FORCE,CONSTANT_X_FORCE);
 //                fs = Movement.getPhysicallyCorrectForceMultipliersLeftLeg(v,h);
@@ -105,7 +105,7 @@ public class Movement {
                 armJoint.setMaxMotorTorque(100);
                 //- is to waist. + to opposite of waist.
 //                armJoint.setMotorSpeed(-10);
-                rotateRightLeg(v,h);
+                rotateLimbPiece(v,h,THIGH_RIGHT,SHIN_RIGHT);
 
 //                forceL = new Vector2(CONSTANT_X_FORCE,CONSTANT_X_FORCE);
 //                fs = Movement.getPhysicallyCorrectForceMultipliersRightLeg(v,h);
@@ -124,9 +124,9 @@ public class Movement {
         lastLimb = part != 0 ? part : 0;
         return fs;
     }
-    private static void rotateLeftArm(float v, float h){
-        Vector2 root = character.joints.get(ARM_LEFT - 1).getAnchorA();
-        Vector2 shoot = character.joints.get(FOREARM_LEFT - 1).getAnchorA();
+    private static void rotateLimbPiece(float v, float h, int upperJoint, int lowerJoint){
+        Vector2 root = character.joints.get(upperJoint - 1).getAnchorA();
+        Vector2 shoot = character.joints.get(lowerJoint - 1).getAnchorA();
         float absoluteAngle = findAbsoluteAngleOfPart(root,shoot);
         boolean posJointSpeedV = false;
         boolean posJointSpeedH = false;
@@ -163,11 +163,11 @@ public class Movement {
         if (!isForceDiagonal(v,h)){
             if (Math.abs(v) > .2){
                 int a = posJointSpeedV ? 1:-1;
-                ((RevoluteJoint)character.joints.get(ARM_LEFT - 1)).setMotorSpeed(a*FOREARM_JOINT_SPEED);
+                ((RevoluteJoint)character.joints.get(upperJoint - 1)).setMotorSpeed(a*FOREARM_JOINT_SPEED);
             }
             if (Math.abs(h) > .2){
                 int a = posJointSpeedH ? 1:-1;
-                ((RevoluteJoint)character.joints.get(ARM_LEFT - 1)).setMotorSpeed(a*FOREARM_JOINT_SPEED);
+                ((RevoluteJoint)character.joints.get(upperJoint - 1)).setMotorSpeed(a*FOREARM_JOINT_SPEED);
             }
         }else{
             int aV = posJointSpeedV ? 1:-1;
@@ -178,29 +178,29 @@ public class Movement {
             if (v>0){
                 if (absoluteAngle < 0){
                     if (desiredAngle > absoluteAngle){
-                        setSpeedPart(ARM_LEFT,FOREARM_JOINT_SPEED,aV);
+                        setSpeedPart(upperJoint,FOREARM_JOINT_SPEED,aV);
                     }else{
-                        setSpeedPart(ARM_LEFT,FOREARM_JOINT_SPEED,aH);
+                        setSpeedPart(upperJoint,FOREARM_JOINT_SPEED,aH);
                     }
                 }else{
                     if (desiredAngle < absoluteAngle){
-                        setSpeedPart(ARM_LEFT,FOREARM_JOINT_SPEED,aV);
+                        setSpeedPart(upperJoint,FOREARM_JOINT_SPEED,aV);
                     }else{
-                        setSpeedPart(ARM_LEFT,FOREARM_JOINT_SPEED,aH);
+                        setSpeedPart(upperJoint,FOREARM_JOINT_SPEED,aH);
                     }
                 }
             }else{
                 if (absoluteAngle < 0){
                     if (desiredAngle > absoluteAngle){
-                        setSpeedPart(ARM_LEFT,FOREARM_JOINT_SPEED,aH);
+                        setSpeedPart(upperJoint,FOREARM_JOINT_SPEED,aH);
                     }else{
-                        setSpeedPart(ARM_LEFT,FOREARM_JOINT_SPEED,aV);
+                        setSpeedPart(upperJoint,FOREARM_JOINT_SPEED,aV);
                     }
                 }else{
                     if (desiredAngle < absoluteAngle){
-                        setSpeedPart(ARM_LEFT,FOREARM_JOINT_SPEED,aH);
+                        setSpeedPart(upperJoint,FOREARM_JOINT_SPEED,aH);
                     }else{
-                        setSpeedPart(ARM_LEFT,FOREARM_JOINT_SPEED,aV);
+                        setSpeedPart(upperJoint,FOREARM_JOINT_SPEED,aV);
                     }
                 }
             }
@@ -214,257 +214,6 @@ public class Movement {
     }
 
 
-    private static void rotateRightArm(float v, float h){
-        Vector2 root = character.joints.get(ARM_RIGHT - 1).getAnchorA();
-        Vector2 shoot = character.joints.get(FOREARM_RIGHT - 1).getAnchorA();
-        float absoluteAngle = findAbsoluteAngleOfPart(root,shoot);
-        boolean posJointSpeedV = false;
-        boolean posJointSpeedH = false;
-        //- is to waist. + to head.
-
-        if (absoluteAngle > -180 && absoluteAngle <= -90) {
-            posJointSpeedV = true;
-        } else if (absoluteAngle > -90 && absoluteAngle < 0) {
-            posJointSpeedV = true;
-        } else if (absoluteAngle >= 0 && absoluteAngle <= 90) {
-            posJointSpeedV = false;
-
-        } else { // (absoluteAngle > 90 && absoluteAngle < 180)
-            posJointSpeedV = false;
-        }
-        if (v<0){
-            posJointSpeedV = !posJointSpeedV;
-        }
-
-
-        if (absoluteAngle > -180 && absoluteAngle <= -90) {
-            posJointSpeedH = true;
-        } else if (absoluteAngle > -90 && absoluteAngle < 0) {
-            posJointSpeedH = false;
-        } else if (absoluteAngle >= 0 && absoluteAngle <= 90) {
-            posJointSpeedH = false;
-
-        } else { // (absoluteAngle > 90 && absoluteAngle < 180)
-            posJointSpeedH = true;
-        }
-        if (h>0){
-            posJointSpeedH = !posJointSpeedH;
-        }
-
-        if (!isForceDiagonal(v,h)){
-            if (Math.abs(v) > .2){
-                int a = posJointSpeedV ? 1:-1;
-                ((RevoluteJoint)character.joints.get(ARM_RIGHT - 1)).setMotorSpeed(a*FOREARM_JOINT_SPEED);
-            }
-            if (Math.abs(h) > .2){
-                int a = posJointSpeedH ? 1:-1;
-                ((RevoluteJoint)character.joints.get(ARM_RIGHT - 1)).setMotorSpeed(a*FOREARM_JOINT_SPEED);
-            }
-        }else{
-            int aV = posJointSpeedV ? 1:-1;
-            int aH = posJointSpeedH ? 1:-1;
-            //for left and up:
-            float desiredAngle = findAbsoluteAngleOfPart(new Vector2(0,0), new Vector2(h,v));
-            //works for v>0
-            if (v>0){
-                if (absoluteAngle < 0){
-                    if (desiredAngle > absoluteAngle){
-                        setSpeedPart(ARM_RIGHT,FOREARM_JOINT_SPEED,aV);
-                    }else{
-                        setSpeedPart(ARM_RIGHT,FOREARM_JOINT_SPEED,aH);
-                    }
-                }else{
-                    if (desiredAngle < absoluteAngle){
-                        setSpeedPart(ARM_RIGHT,FOREARM_JOINT_SPEED,aV);
-                    }else{
-                        setSpeedPart(ARM_RIGHT,FOREARM_JOINT_SPEED,aH);
-                    }
-                }
-            }else{ //v<0
-                if (absoluteAngle < 0){
-                    if (desiredAngle > absoluteAngle){
-                        setSpeedPart(ARM_RIGHT,FOREARM_JOINT_SPEED,aH);
-                    }else{
-                        setSpeedPart(ARM_RIGHT,FOREARM_JOINT_SPEED,aV);
-                    }
-                }else{
-                    if (desiredAngle < absoluteAngle){
-                        setSpeedPart(ARM_RIGHT,FOREARM_JOINT_SPEED,aH);
-                    }else{
-                        setSpeedPart(ARM_RIGHT,FOREARM_JOINT_SPEED,aV);
-                    }
-                }
-            }
-        }
-
-    }
-
-    private static void rotateLeftLeg(float v, float h){
-        Vector2 root = character.joints.get(THIGH_LEFT - 1).getAnchorA();
-        Vector2 shoot = character.joints.get(SHIN_LEFT - 1).getAnchorA();
-        float absoluteAngle = findAbsoluteAngleOfPart(root,shoot);
-        boolean posJointSpeedV = false;
-        boolean posJointSpeedH = false;
-        //- is to waist. + to head.
-
-        if (absoluteAngle > -180 && absoluteAngle <= -90) {
-            posJointSpeedV = true;
-        } else if (absoluteAngle > -90 && absoluteAngle < 0) {
-            posJointSpeedV = true;
-        } else if (absoluteAngle >= 0 && absoluteAngle <= 90) {
-            posJointSpeedV = false;
-
-        } else { // (absoluteAngle > 90 && absoluteAngle < 180)
-            posJointSpeedV = false;
-        }
-        if (v<0){
-            posJointSpeedV = !posJointSpeedV;
-        }
-
-
-        if (absoluteAngle > -180 && absoluteAngle <= -90) {
-            posJointSpeedH = true;
-        } else if (absoluteAngle > -90 && absoluteAngle < 0) {
-            posJointSpeedH = false;
-        } else if (absoluteAngle >= 0 && absoluteAngle <= 90) {
-            posJointSpeedH = false;
-
-        } else { // (absoluteAngle > 90 && absoluteAngle < 180)
-            posJointSpeedH = true;
-        }
-        if (h>0){
-            posJointSpeedH = !posJointSpeedH;
-        }
-        if (!isForceDiagonal(v,h)){
-            if (Math.abs(v) > .2){
-                int a = posJointSpeedV ? 1:-1;
-                ((RevoluteJoint)character.joints.get(THIGH_LEFT - 1)).setMotorSpeed(a*FOREARM_JOINT_SPEED);
-            }
-            if (Math.abs(h) > .2){
-                int a = posJointSpeedH ? 1:-1;
-                ((RevoluteJoint)character.joints.get(THIGH_LEFT - 1)).setMotorSpeed(a*FOREARM_JOINT_SPEED);
-            }
-        }else{
-            int aV = posJointSpeedV ? 1:-1;
-            int aH = posJointSpeedH ? 1:-1;
-            //for left and up:
-            float desiredAngle = findAbsoluteAngleOfPart(new Vector2(0,0), new Vector2(h,v));
-            //works for v>0
-            if (v>0){
-                if (absoluteAngle < 0){
-                    if (desiredAngle > absoluteAngle){
-                        setSpeedPart(THIGH_LEFT,FOREARM_JOINT_SPEED,aV);
-                    }else{
-                        setSpeedPart(THIGH_LEFT,FOREARM_JOINT_SPEED,aH);
-                    }
-                }else{
-                    if (desiredAngle < absoluteAngle){
-                        setSpeedPart(THIGH_LEFT,FOREARM_JOINT_SPEED,aV);
-                    }else{
-                        setSpeedPart(THIGH_LEFT,FOREARM_JOINT_SPEED,aH);
-                    }
-                }
-            }else{
-                if (absoluteAngle < 0){
-                    if (desiredAngle > absoluteAngle){
-                        setSpeedPart(THIGH_LEFT,FOREARM_JOINT_SPEED,aH);
-                    }else{
-                        setSpeedPart(THIGH_LEFT,FOREARM_JOINT_SPEED,aV);
-                    }
-                }else{
-                    if (desiredAngle < absoluteAngle){
-                        setSpeedPart(THIGH_LEFT,FOREARM_JOINT_SPEED,aH);
-                    }else{
-                        setSpeedPart(THIGH_LEFT,FOREARM_JOINT_SPEED,aV);
-                    }
-                }
-            }
-        }
-
-    }
-    private static void rotateRightLeg(float v, float h){
-        Vector2 root = character.joints.get(THIGH_RIGHT - 1).getAnchorA();
-        Vector2 shoot = character.joints.get(SHIN_RIGHT - 1).getAnchorA();
-        float absoluteAngle = findAbsoluteAngleOfPart(root,shoot);
-        boolean posJointSpeedV = false;
-        boolean posJointSpeedH = false;
-        //- is to waist. + to head.
-
-        if (absoluteAngle > -180 && absoluteAngle <= -90) {
-            posJointSpeedV = true;
-        } else if (absoluteAngle > -90 && absoluteAngle < 0) {
-            posJointSpeedV = true;
-        } else if (absoluteAngle >= 0 && absoluteAngle <= 90) {
-            posJointSpeedV = false;
-
-        } else { // (absoluteAngle > 90 && absoluteAngle < 180)
-            posJointSpeedV = false;
-        }
-        if (v<0){
-            posJointSpeedV = !posJointSpeedV;
-        }
-
-
-        if (absoluteAngle > -180 && absoluteAngle <= -90) {
-            posJointSpeedH = true;
-        } else if (absoluteAngle > -90 && absoluteAngle < 0) {
-            posJointSpeedH = false;
-        } else if (absoluteAngle >= 0 && absoluteAngle <= 90) {
-            posJointSpeedH = false;
-
-        } else { // (absoluteAngle > 90 && absoluteAngle < 180)
-            posJointSpeedH = true;
-        }
-        if (h>0){
-            posJointSpeedH = !posJointSpeedH;
-        }
-        if (!isForceDiagonal(v,h)){
-            if (Math.abs(v) > .2){
-                int a = posJointSpeedV ? 1:-1;
-                ((RevoluteJoint)character.joints.get(THIGH_RIGHT - 1)).setMotorSpeed(a*FOREARM_JOINT_SPEED);
-            }
-            if (Math.abs(h) > .2){
-                int a = posJointSpeedH ? 1:-1;
-                ((RevoluteJoint)character.joints.get(THIGH_RIGHT - 1)).setMotorSpeed(a*FOREARM_JOINT_SPEED);
-            }
-        }else{
-            int aV = posJointSpeedV ? 1:-1;
-            int aH = posJointSpeedH ? 1:-1;
-            //for left and up:
-            float desiredAngle = findAbsoluteAngleOfPart(new Vector2(0,0), new Vector2(h,v));
-            //works for v>0
-            if (v>0){
-                if (absoluteAngle < 0){
-                    if (desiredAngle > absoluteAngle){
-                        setSpeedPart(THIGH_RIGHT,FOREARM_JOINT_SPEED,aV);
-                    }else{
-                        setSpeedPart(THIGH_RIGHT,FOREARM_JOINT_SPEED,aH);
-                    }
-                }else{
-                    if (desiredAngle < absoluteAngle){
-                        setSpeedPart(THIGH_RIGHT,FOREARM_JOINT_SPEED,aV);
-                    }else{
-                        setSpeedPart(THIGH_RIGHT,FOREARM_JOINT_SPEED,aH);
-                    }
-                }
-            }else{
-                if (absoluteAngle < 0){
-                    if (desiredAngle > absoluteAngle){
-                        setSpeedPart(THIGH_RIGHT,FOREARM_JOINT_SPEED,aH);
-                    }else{
-                        setSpeedPart(THIGH_RIGHT,FOREARM_JOINT_SPEED,aV);
-                    }
-                }else{
-                    if (desiredAngle < absoluteAngle){
-                        setSpeedPart(THIGH_RIGHT,FOREARM_JOINT_SPEED,aH);
-                    }else{
-                        setSpeedPart(THIGH_RIGHT,FOREARM_JOINT_SPEED,aV);
-                    }
-                }
-            }
-        }
-
-    }
 
 
 
@@ -571,18 +320,9 @@ public class Movement {
 
         if (isForceDiagonal(v,h)){
             //do calculations for diagonal direction
+//            System.out.println("here");
+            rotateLimbPiece(v,h,FOREARM_LEFT,HAND_LEFT);
 
-            if (lastLimb == HAND_LEFT && !forceDifferenceSignificant() && !forceOppositeAngle(v,h,aa)){
-
-                Vector2 root2 = character.joints.get(FOREARM_LEFT - 1).getAnchorA();
-                Vector2 shoot2 = character.joints.get(HAND_LEFT - 1).getAnchorA();
-                float aa2 = findAbsoluteAngleOfPart(root2,shoot2);
-                System.out.println(aa2);
-                float dirAngle = findAbsoluteAngleOfPart(new Vector2(0,0), new Vector2(h,v));
-                System.out.println(dirAngle + " dir angle");
-                diagonalizeLimb(FOREARM_LEFT,dirAngle,aa2,forearmJoint);
-                return null;
-            }
             return null;
 
         }
@@ -743,6 +483,10 @@ public class Movement {
         Vector2 root = character.joints.get(ARM_RIGHT - 1).getAnchorA();
         Vector2 shoot = character.joints.get(FOREARM_RIGHT - 1).getAnchorA();
         float aa = findAbsoluteAngleOfPart(root,shoot);
+        if (isForceDiagonal(v,h)){
+            rotateLimbPiece(v,h,FOREARM_RIGHT,HAND_RIGHT);
+        }
+
         if (v>.2){//up
             if (aa>=0f){
                 if (aa > 45f){
@@ -1083,13 +827,14 @@ public class Movement {
 
         if (isForceDiagonal(v,h)){
             //do calculations for diagonal direction
-            if (lastLimb == FOOT_LEFT && !forceDifferenceSignificant() && !forceOppositeAngle(v,h,aa)){
-                Vector2 root2 = character.joints.get(SHIN_LEFT - 1).getAnchorA();
-                Vector2 shoot2 = character.joints.get(FOOT_LEFT - 1).getAnchorA();
-                float aa2 = findAbsoluteAngleOfPart(root2,shoot2);
-                diagonalizeLimb(SHIN_LEFT,aa,aa2,shinJoint);
-                return null;
-            }
+            rotateLimbPiece(v,h,SHIN_LEFT,FOOT_LEFT);
+//            if (lastLimb == FOOT_LEFT && !forceDifferenceSignificant() && !forceOppositeAngle(v,h,aa)){
+//                Vector2 root2 = character.joints.get(SHIN_LEFT - 1).getAnchorA();
+//                Vector2 shoot2 = character.joints.get(FOOT_LEFT - 1).getAnchorA();
+//                float aa2 = findAbsoluteAngleOfPart(root2,shoot2);
+//                diagonalizeLimb(SHIN_LEFT,aa,aa2,shinJoint);
+//                return null;
+
         }
         if (v>.2){//up
             if (aa>=0f){
@@ -1170,13 +915,15 @@ public class Movement {
         float aa = findAbsoluteAngleOfPart(root,shoot);
         if (isForceDiagonal(v,h)){
             //do calculations for diagonal direction
-            if (lastLimb == FOOT_RIGHT && !forceDifferenceSignificant() && !forceOppositeAngle(v,h,aa)){
-                Vector2 root2 = character.joints.get(SHIN_RIGHT - 1).getAnchorA();
-                Vector2 shoot2 = character.joints.get(FOOT_RIGHT - 1).getAnchorA();
-                float aa2 = findAbsoluteAngleOfPart(root2,shoot2);
-                diagonalizeLimb(SHIN_RIGHT,aa,aa2,shinJoint);
-                return null;
-            }
+            rotateLimbPiece(v,h,SHIN_RIGHT,FOOT_RIGHT);
+
+//            if (lastLimb == FOOT_RIGHT && !forceDifferenceSignificant() && !forceOppositeAngle(v,h,aa)){
+//                Vector2 root2 = character.joints.get(SHIN_RIGHT - 1).getAnchorA();
+//                Vector2 shoot2 = character.joints.get(FOOT_RIGHT - 1).getAnchorA();
+//                float aa2 = findAbsoluteAngleOfPart(root2,shoot2);
+//                diagonalizeLimb(SHIN_RIGHT,aa,aa2,shinJoint);
+//                return null;
+//            }
         }
         if (v>.2){//up
             if (aa>=0f){
