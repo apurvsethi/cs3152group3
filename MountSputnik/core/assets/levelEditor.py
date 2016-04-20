@@ -118,11 +118,11 @@ Builder.load_string('''
                     on_release: dropdown.select('Space')
                     on_release: root.changeDirectory("space")
                 Button:
-                    text: 'General'
+                    text: 'Tutorial'
                     size_hint_y: None
                     height: '48dp'
-                    on_release: dropdown.select('General')
-                    on_release: root.changeDirectory("general")        
+                    on_release: dropdown.select('Tutorial')
+                    on_release: root.changeDirectory("tutorial")        
 
         AnchorLayout: 
             size_hint: 1, None
@@ -191,10 +191,10 @@ class LinePlayground(FloatLayout):
         global canvas_origin
         if keycode[0] == 273: 
             if canvas_origin < 10: 
-                canvas_origin += 10
+                canvas_origin += 20
         if keycode[0] == 274: 
             if canvas_origin+self.blockHeight*scaling > Window.size[1]-10: 
-                canvas_origin -= 10
+                canvas_origin -= 20
         self.resize()   
 
     def _disable_keyboard(self):
