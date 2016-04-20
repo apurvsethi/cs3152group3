@@ -446,7 +446,7 @@ public class GameMode extends ModeController {
 		boolean b = input.didRightLeg() ? addToButtonsPressed((FOOT_RIGHT)) : checkIfJustReleased(FOOT_RIGHT);
 		boolean c = input.didLeftArm() ? addToButtonsPressed((HAND_LEFT)) : checkIfJustReleased(HAND_LEFT);
 		boolean d = input.didRightArm() ? addToButtonsPressed((HAND_RIGHT)) : checkIfJustReleased(HAND_RIGHT);
-		
+//		if (! (a || c || b || d)) nextToPress.clear();
 		if(input.didSelect()) tutorialToggle = !tutorialToggle;
 
 		Movement.makeHookedJointsMovable(nextToPress);
@@ -458,7 +458,7 @@ public class GameMode extends ModeController {
 		float[] forces = null;
 
 		Movement.resetLimbSpeedsTo0();
-
+//		if (timestep == 0) nextToPress.clear();
 		if (nextToPress.size > 0) {
 			for (int i : nextToPress) {
 				((ExtremityModel) (character.parts.get(i))).ungrip();
@@ -475,31 +475,13 @@ public class GameMode extends ModeController {
 //			}
 
 		}
-		//decently outdated code BUT still functional.
 //		applyDampening();
 		if (TORSO_MODE){
-			forceR.x = 0;
-			forceR.y = 0;
-//			for (int ext:EXTREMITIES){
-//				if (((ExtremityModel) (character.parts.get(ext))).isGripping())
-//					forceR.add(calcForce(ext, CHEST,input.getHorizontalR(),input.getVerticalR()));
-//			}
-			forceR.x = CONSTANT_X_FORCE * 3f;
-			forceR.y = CONSTANT_X_FORCE * 3f;
-			int counter = 0;
-			counter = isGripping(HAND_LEFT)?counter+1:counter;
-			counter = isGripping(HAND_RIGHT)?counter+1:counter;
-			counter = isGripping(FOOT_LEFT)?counter+1:counter;
-			counter = isGripping(FOOT_RIGHT)?counter+1:counter;
-			forceR.scl(counter);
-			applyTorsoForceIfApplicable(forceR);
+			applyTorsoForceIfApplicable(calcTorsoForce());
 		}
+		//bounding velocities
+		boundBodyVelocities();
 
-
-		for (PartModel p:character.parts){
-			Vector2 vect =  p.getLinearVelocity();
-			p.setLinearVelocity(boundVelocity(vect));
-		}
 		if (justReleased.size > 0 || timestep == 0) {
 			snapLimbsToHandholds(input);
 		}
@@ -551,7 +533,28 @@ public class GameMode extends ModeController {
 			}
 		}
 	}
-	
+
+	private void boundBodyVelocities() {
+		for (PartModel p:character.parts){
+			Vector2 vect =  p.getLinearVelocity();
+			p.setLinearVelocity(boundVelocity(vect));
+		}
+	}
+
+	private Vector2 calcTorsoForce() {
+		Vector2 forceR = new Vector2(0,0);
+		forceR.x = CONSTANT_X_FORCE * 2f;
+		forceR.y = CONSTANT_X_FORCE * 2f;
+		int counter = 0;
+		counter = isGripping(HAND_LEFT)?counter+1:counter;
+		counter = isGripping(HAND_RIGHT)?counter+1:counter;
+		counter = isGripping(FOOT_LEFT)?counter+1:counter;
+		counter = isGripping(FOOT_RIGHT)?counter+1:counter;
+		if (counter > 2) counter +=2;
+		forceR.scl(counter);
+		return forceR;
+	}
+
 	/** Grips a handhold by adding a revolute joint between the handhold and the extremity **/ 
 	public void grip(ExtremityModel e, HandholdModel h){
 		if (e.getJoint() == null){
@@ -743,32 +746,7 @@ public class GameMode extends ModeController {
 
 	public TextureRegion getGameBackground() { return background; }
 
-	/**
-	 * @param hookedPart - calculation of force for an extremity attached to a handhold
-	 * @param freePart - part that the force will be applied to
-	 * calculates X and Y force player can use to propel their selected limb.
-	 * should use the size of the handhold in the calculation although it does not.
-	 * @author Jacob
-	 */
-	private Vector2 calcForce(int hookedPart, int freePart,float xval,float yval) {
-		float forcex = 0f;
-		float forcey = 0f;
-		forcex = xval * CONSTANT_X_FORCE;
 
-		if (!upsideDown) {
-			Vector2 hp = character.parts.get(hookedPart).getPosition();
-//			Vector2 fp = character.parts.get(freePart).getPosition();
-			if (hookedPart == FOOT_LEFT || hookedPart == FOOT_RIGHT) {
-				forcey = Movement.calcLegForce(yval,hookedPart);
-			}
-			else {
-
-				forcey = Movement.calcArmForce(yval,hookedPart);
-			}
-		}
-		return new Vector2(forcex,forcey);
-
-	}
 
 	private void applyTorsoForceIfApplicable(Vector2 force) {
 		if (TORSO_MODE){
