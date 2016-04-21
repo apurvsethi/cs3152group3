@@ -240,12 +240,12 @@ public class CharacterModel {
 
 		makeJoint(SHIN_LEFT,  THIGH_LEFT, SHIN_X_THIGH_OFFSET, SHIN_Y_THIGH_OFFSET, 0, canvasSize);
 
-		setJointAngleLimits(-150, 0);
+		setJointAngleLimits(-150, -2);
 
 		setJointMotor(0, 30);
 		addJoint(world);
 		makeJoint(SHIN_RIGHT, THIGH_RIGHT, -SHIN_X_THIGH_OFFSET, SHIN_Y_THIGH_OFFSET, 0, canvasSize);
-		setJointAngleLimits(0, 150);
+		setJointAngleLimits(2, 150);
 		setJointMotor(0, 30);
 		addJoint(world);
 
@@ -321,7 +321,7 @@ public class CharacterModel {
 	 * @param gainModifier Environmental Gain Modifier
 	 * @param lossModifier Environmental Loss Modifier
 	 * @param rotationGain Whether or not rotation affects gain (would be false if in space or places with low gravity)
-	 * @param exterion Current force being exerted by character
+	 * @param exertion Current force being exerted by character
 	 */
 	public void updateEnergy(float gainModifier, float lossModifier, float exertion, boolean rotationGain){
 		int b = rotationGain ? 1 : 0;
@@ -356,5 +356,7 @@ public class CharacterModel {
 		float dEdt = (gain - loss)/60;
 		float newEnergy = getEnergy() < 0 ? 0 : getEnergy() > 100 ? 100 : getEnergy() + dEdt;
 		setEnergy(newEnergy);
+		//TODO delete this after done:
+		setEnergy(100);
 	}
 }

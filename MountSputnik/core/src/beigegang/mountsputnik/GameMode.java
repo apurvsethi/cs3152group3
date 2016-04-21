@@ -13,6 +13,7 @@ import beigegang.util.*;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
@@ -319,6 +320,9 @@ public class GameMode extends ModeController {
 		if(lava.getBoolean("present")){
 			risingObstacle = new RisingObstacle(lavaTexture, lava.getFloat("speed"));
 		}
+		//TODO delete this line as well:
+		risingObstacle = null;
+		//end this line
 		
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
 			//arms
@@ -355,8 +359,6 @@ public class GameMode extends ModeController {
 		JsonAssetManager.getInstance().allocateDirectory();
 		
 		JsonValue handholdDesc = levelPiece.get("handholds").child();
-
-		//if(currentHeight == 0) makeTestLevel(handholdDesc);
 		
 		Random rand = new Random();
 		while(handholdDesc != null){
@@ -365,10 +367,24 @@ public class GameMode extends ModeController {
 					new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
 			handhold.fixtureDef.filter.maskBits = 0;
 			handhold.activatePhysics(world);
-			handhold.setBodyType(BodyDef.BodyType.StaticBody);
 			handhold.geometry.setUserData(handhold);
 			handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
 			handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
+			try{
+				handhold.setBodyType(BodyDef.BodyType.KinematicBody);
+				JsonValue movement = handholdDesc.get("movement");
+				handhold.setStartPoint(movement.getFloat("startX"),movement.getFloat("startY"));
+				handhold.setEndPoint(movement.getFloat("endX"),movement.getFloat("endY"));
+				float speed = movement.getFloat("speed"), 
+					tx = handhold.getEndPoint().x - handhold.getStartPoint().x,
+					ty = handhold.getEndPoint().y - handhold.getStartPoint().y,
+					dist = (float) Math.sqrt(tx*tx+ty*ty);
+				handhold.setLinearVelocity(new Vector2((tx/dist)*speed, (ty/dist)*speed));
+				handhold.setPosition((handhold.getStartPoint().x+handhold.getEndPoint().x)/2,
+						(handhold.getStartPoint().y+handhold.getEndPoint().y)/2);
+			}
+			catch(Exception e){handhold.setBodyType(BodyDef.BodyType.StaticBody);}
+
 			objects.add(handhold);
 			
 			try{handhold.setCrumble(handholdDesc.getFloat("crumble"));}
@@ -380,52 +396,36 @@ public class GameMode extends ModeController {
 		}
 
 		JsonValue obstacleDesc;
-		try{obstacleDesc = levelPiece.get("obstacles").child();}
-		catch(Exception e){return;}
-		Rectangle bound;
-		while(obstacleDesc != null){
-			bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY")+currentHeight,
-					obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
-			//TODO: Set texture to something other than null once we have textures for obstacles
-			obstacleZone = new ObstacleZone(null, currentHeight, obstacleDesc.getInt("frequency"), bound);
-			obstacles.add(obstacleZone);
-			obstacleDesc = obstacleDesc.next();
+		try{
+			obstacleDesc = levelPiece.get("obstacles").child();
+			while(obstacleDesc != null){
+				Rectangle bound;
+				bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY")+currentHeight,
+						obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
+				//TODO: Set texture to something other than null once we have textures for obstacles
+				obstacleZone = new ObstacleZone(null, currentHeight, obstacleDesc.getInt("frequency"), bound);
+				obstacles.add(obstacleZone);
+				obstacleDesc = obstacleDesc.next();
+			}
 		}
-	}
-	//TODO delete when there are actually levels!!!
-	private void makeTestLevel(JsonValue handholdDesc) {
-		Random rand = new Random();
-		Rectangle bound = new Rectangle(10,20,10,3);
-		obstacleZone = new ObstacleZone(handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
-				10, 2f, bound);
-		obstacles.add(obstacleZone);
-	}
-
-	/**
-	 * if button was not pressed on the previous turn but is pressed now, add to nextToPress
-	 * note: cannot use set because order must be preserved for accurate/predictive control by player
-	 * @param part
-     * @return true if part was just pressed, false otherwise
-	 * @author Jacob
-     */
-	public boolean addToButtonsPressed(int part) {
-		boolean notRedundant = !nextToPress.contains(part, true);
-		if(notRedundant)
-			nextToPress.add(part);
-		return notRedundant;
-	}
-
-	/**
-	 * checks if that extremity was released on this timestep by player, if so adds to justReleased
- 	 * @param part
-	 * @return true if part was just released, false otherwise
-	 * @author Jacob
-     */
-    public boolean checkIfJustReleased(int part) {
-		boolean present = nextToPress.removeValue(part, true);
-		if (present)
-			justReleased.add(part);
-		return present;
+		catch(Exception e){}
+		
+		JsonValue staticDesc;
+		try{
+			staticDesc = levelPiece.get("static").child();
+			ObstacleModel obstacle;
+			while(staticDesc != null){
+				//TODO: Set texture to something other than null once we have textures for obstacles
+				obstacle = new ObstacleModel(null, staticDesc.getFloat("size"), scale);
+				obstacle.setX(staticDesc.getFloat("x"));
+				obstacle.setY(staticDesc.getFloat("y"));
+				obstacle.setBodyType(BodyType.StaticBody);
+				obstacle.activatePhysics(world);
+				objects.add(obstacle);
+				staticDesc = staticDesc.next();
+			}
+		}
+		catch(Exception e){}
 	}
 
 	/**
@@ -447,23 +447,17 @@ public class GameMode extends ModeController {
 		inx = input.getHorizontalL();
 		iny = input.getVerticalL();
 
-		justReleased.clear();
 		upsideDown = character.parts.get(HEAD).getPosition().y - character.parts.get(CHEST).getPosition().y <= 0;
-		//will likely use these eventually but not right now. do not delete!
-		boolean a = input.didLeftLeg() ? addToButtonsPressed((FOOT_LEFT)) : checkIfJustReleased(FOOT_LEFT);
-		boolean b = input.didRightLeg() ? addToButtonsPressed((FOOT_RIGHT)) : checkIfJustReleased(FOOT_RIGHT);
-		boolean c = input.didLeftArm() ? addToButtonsPressed((HAND_LEFT)) : checkIfJustReleased(HAND_LEFT);
-		boolean d = input.didRightArm() ? addToButtonsPressed((HAND_RIGHT)) : checkIfJustReleased(HAND_RIGHT);
-		
+
+		nextToPress = input.getButtonsPressed();
+		justReleased = input.getJustReleased();
 		if(input.didSelect()) tutorialToggle = !tutorialToggle;
 
 		Movement.makeHookedJointsMovable(nextToPress);
 
 		if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
-		
-		Vector2 forceL = new Vector2(0, 0);
-		Vector2 forceR = new Vector2(0, 0);
-		float[] forces = null;
+
+		Movement.resetLimbSpeedsTo0();
 		if (nextToPress.size > 0) {
 			for (int i : nextToPress) {
 				((ExtremityModel) (character.parts.get(i))).ungrip();
@@ -471,40 +465,21 @@ public class GameMode extends ModeController {
 			}
 			float v = input.getVerticalL();
 			float h = input.getHorizontalL();
-			forces = Movement.findAndApplyForces(nextToPress.get(0),v,h);
+			Movement.findAndApplyForces(nextToPress.get(0),v,h);
 
-			if (nextToPress.size > 1 && (TWO_LIMB_MODE)) {
-				v = input.getVerticalR();
-				h = input.getHorizontalR();
-				forces = Movement.findAndApplyForces(nextToPress.get(1),v,h);
-			}
 
 		}
-		//decently outdated code BUT still functional.
 		if (TORSO_MODE){
-			forceR.x = 0;
-			forceR.y = 0;
-//			for (int ext:EXTREMITIES){
-//				if (((ExtremityModel) (character.parts.get(ext))).isGripping())
-//					forceR.add(calcForce(ext, CHEST,input.getHorizontalR(),input.getVerticalR()));
-//			}
-			forceR.x = CONSTANT_X_FORCE * 5;
-			forceR.y = CONSTANT_X_FORCE * 5;
-			applyTorsoForceIfApplicable(forceR);
+			applyTorsoForceIfApplicable(calcTorsoForce());
 		}
+		//bounding velocities
+		boundBodyVelocities();
 
-		else {
-//			applyDampening();
-		}
-		for (PartModel p:character.parts){
-			Vector2 vect =  p.getLinearVelocity();
-			p.setLinearVelocity(boundVelocity(vect));
-		}
 		if (justReleased.size > 0 || timestep == 0) {
 			snapLimbsToHandholds(input);
 		}
+		
 		glowHandholds();
-		timestep += 1;
 
 		canvas.setCameraPosition(canvas.getWidth() / 2,
 						character.parts.get(CHEST).getBody().getPosition().y*scale.y);
@@ -515,20 +490,55 @@ public class GameMode extends ModeController {
 			canvas.setCameraPosition(canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y-canvas.getHeight()/2); 
 		}
 		
+		for(int e : EXTREMITIES){
+			 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
+			 if(extremity.isGripped()){
+				 extremity.updateGripTime();
+				 if(extremity.getJoint().getBodyB() == null){
+					 ungrip(extremity);
+				 }
+				 else{
+					 HandholdModel h = (HandholdModel) extremity.getJoint().getBodyB().getFixtureList().get(0).getUserData();
+					 if(extremity.getGripTime() > h.getSlip()*60 && h.getSlip() > 0){
+						 ungrip(extremity);
+					 }
+					 if(extremity.getGripTime() > h.getCrumble()*60 && h.getCrumble() > 0){
+						 //TODO add crumble animation
+						 ungripAllFrom(h);
+						 objects.remove(h);
+						 h.deactivatePhysics(world);
+					 }
+				 }
+				 
+				 if((e == HAND_LEFT || e == HAND_RIGHT) &&
+						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > ARM_UNGRIP_LENGTH)
+					 ungrip(extremity);
+				 else if((e == FOOT_LEFT || e == FOOT_RIGHT) &&
+						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > LEG_UNGRIP_LENGTH)
+					 ungrip(extremity);
+			 }
+			 
+		}
+		
 		spawnObstacles();
 		for(GameObject g : objects){
 			if(g instanceof ObstacleModel && 
-					g.getBody().getPosition().y  < (canvas.getCamera().position.y-canvas.getWidth())/scale.y){
+					g.getBody().getPosition().y  < (canvas.getCamera().position.y-canvas.getWidth())/scale.y &&
+					g.getBody().getType() != BodyDef.BodyType.StaticBody){
 				objects.remove(g);
+			}
+			if(g instanceof HandholdModel && ((HandholdModel) (g)).getStartPoint() != null){
+				HandholdModel h = (HandholdModel) g;
+				h.updateSnapPoints();
+				if(withinBounds(h.getBody().getPosition(),  h.getEndPoint()) || 
+				   withinBounds(h.getBody().getPosition(),  h.getStartPoint())){
+					h.getBody().setLinearVelocity(h.getBody().getLinearVelocity().x*-1, h.getBody().getLinearVelocity().y*-1);
+				}
 			}
 		}
 		
 		// TODO: Update energy quantity (fill in these values)
 		float exertion = 0;
-		if(forces!=null)
-			for(int i = 0; i < forces.length; i++){
-				exertion+=Math.abs(forces[i]);
-			}
 		character.updateEnergy(oxygen, 1, exertion, true);
 
 		if(risingObstacle != null){
@@ -554,10 +564,48 @@ public class GameMode extends ModeController {
 		
 		checkHasCompleted(); 
 		if(complete){
+			//TODO: properly change level
 			changeLevel("canyon"); 
 		}
+		timestep += 1;
 	}
 	
+	private void ungripAllFrom(HandholdModel h){
+		 for(int e : EXTREMITIES){
+			 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
+			 if(extremity.isGripped() && extremity.getJoint().getBodyB().getFixtureList().get(0).getUserData() == h){
+				 ungrip(extremity);
+			 }
+		 }
+	}
+	
+	private boolean withinBounds(Vector2 position, Vector2 target) {
+		float xError = Math.abs(position.x - target.x);
+		float yError = Math.abs(position.y - target.y);
+		return xError < .01f && yError < .01f;
+	}
+
+	private void boundBodyVelocities() {
+		for (PartModel p:character.parts){
+			Vector2 vect =  p.getLinearVelocity();
+			p.setLinearVelocity(boundVelocity(vect));
+		}
+	}
+
+	private Vector2 calcTorsoForce() {
+		Vector2 forceR = new Vector2(0,0);
+		forceR.x = CONSTANT_X_FORCE * 2f;
+		forceR.y = CONSTANT_X_FORCE * 2f;
+		int counter = 0;
+		counter = isGripping(HAND_LEFT)?counter+1:counter;
+		counter = isGripping(HAND_RIGHT)?counter+1:counter;
+		counter = isGripping(FOOT_LEFT)?counter+1:counter;
+		counter = isGripping(FOOT_RIGHT)?counter+1:counter;
+		if (counter > 2) counter +=2;
+		forceR.scl(counter);
+		return forceR;
+	}
+
 	/** Grips a handhold by adding a revolute joint between the handhold and the extremity **/ 
 	public void grip(ExtremityModel e, HandholdModel h){
 		if (e.getJoint() == null){
@@ -631,10 +679,11 @@ public class GameMode extends ModeController {
 	 * will apply dampening to any limb not currently controlled by the player & are unattached to a handhold
 	 * will help limbs not swing around wildly after player releases them.
 	 * @author Jacob
+	 *
  	 */
 	private void applyDampening() {
 		for (int ext : EXTREMITIES){
-			if (!((ExtremityModel)(character.parts.get(ext))).isGripping()){
+			if (!isGripping(ext)){
 				float thisDampX = DAMPENING_X;
 				float thisDampY = DAMPENING_Y;
 				Vector2 vel = character.parts.get(ext).getLinearVelocity();
@@ -737,7 +786,7 @@ public class GameMode extends ModeController {
 	*/
 
 	private boolean closeEnough(int limb, Vector2 snapPoint) {
-		Vector2 dist = character.parts.get(limb).getPosition().sub(snapPoint);
+		Vector2 dist = new Vector2 (character.parts.get(limb).getPosition().sub(snapPoint));
 		return (Math.sqrt(dist.x * dist.x + dist.y * dist.y) <= HANDHOLD_SNAP_RADIUS);
 	}
 
@@ -748,32 +797,7 @@ public class GameMode extends ModeController {
 
 	public TextureRegion getGameBackground() { return background; }
 
-	/**
-	 * @param hookedPart - calculation of force for an extremity attached to a handhold
-	 * @param freePart - part that the force will be applied to
-	 * calculates X and Y force player can use to propel their selected limb.
-	 * should use the size of the handhold in the calculation although it does not.
-	 * @author Jacob
-	 */
-	private Vector2 calcForce(int hookedPart, int freePart,float xval,float yval) {
-		float forcex = 0f;
-		float forcey = 0f;
-		forcex = xval * CONSTANT_X_FORCE;
 
-		if (!upsideDown) {
-			Vector2 hp = character.parts.get(hookedPart).getPosition();
-//			Vector2 fp = character.parts.get(freePart).getPosition();
-			if (hookedPart == FOOT_LEFT || hookedPart == FOOT_RIGHT) {
-				forcey = Movement.calcLegForce(yval,hookedPart);
-			}
-			else {
-
-				forcey = Movement.calcArmForce(yval,hookedPart);
-			}
-		}
-		return new Vector2(forcex,forcey);
-
-	}
 
 	private void applyTorsoForceIfApplicable(Vector2 force) {
 		if (TORSO_MODE){

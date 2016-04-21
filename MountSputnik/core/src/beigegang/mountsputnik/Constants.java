@@ -83,7 +83,8 @@ public final class Constants {
 	public static final int NONE = -1;
 
 	public static final int[] EXTREMITIES = new int[]{FOOT_LEFT, FOOT_RIGHT, HAND_LEFT, HAND_RIGHT};
-	
+	public static final int[] NON_EXTREMITY_LIMBS = new int[]{ARM_LEFT,ARM_RIGHT,FOREARM_LEFT,FOREARM_RIGHT,THIGH_LEFT,THIGH_RIGHT,SHIN_LEFT,SHIN_RIGHT};
+
 
 	public static final float DAMPENING_Y = .2f;
 	public static final float DAMPENING_X = .2f;
@@ -125,6 +126,9 @@ public final class Constants {
 
 	public static final float MAX_ARM_DIST = ARM_X_CHEST_OFFSET + FOREARM_X_ARM_OFFSET + HAND_X_OFFSET;
 	public static final float MAX_LEG_DIST = THIGH_Y_HIP_OFFSET + SHIN_Y_THIGH_OFFSET + FOOT_Y_OFFSET ;
+	
+	public static final float ARM_UNGRIP_LENGTH = 3.1f;
+	public static final float LEG_UNGRIP_LENGTH = 3.7f;
 
 	public static final float PART_MAX_X_VELOCITY = -DEFAULT_GRAVITY;
 	public static final float PART_MAX_Y_VELOCITY = -DEFAULT_GRAVITY;
@@ -136,11 +140,11 @@ public final class Constants {
 
 	public static float FOREARM_PUSHING_LOWER_LIMIT = -90f;
 	public static float FOREARM_PUSHING_UPPER_LIMIT = .5f;
-	public static float FOREARM_PULLING_LOWER_LIMIT = -.5f;
+	public static float FOREARM_PULLING_LOWER_LIMIT = 2f;
 	public static float FOREARM_PULLING_UPPER_LIMIT = 90f;
 	//to make sure it could
 	public static float FOREARM_SWITCHING_EITHER_WAY = 0f;
-	public static float FOREARM_JOINT_SPEED = 3f;
+	public static float FOREARM_JOINT_SPEED = 5f;
 	public static float SHIN_JOINT_SPEED = 6f;
 
 	public static short PART_BITS = 8;

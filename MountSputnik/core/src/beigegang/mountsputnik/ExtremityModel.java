@@ -25,6 +25,8 @@ public class ExtremityModel extends PartModel{
 	/** A revolute joint for when this extremity is gripping a hold **/ 
 	private Joint joint; 
 	
+	private int gripTime; 
+	
 	@Override
 	public ObjectType getType() {
 		return ObjectType.EXTREMITY;
@@ -78,6 +80,7 @@ public class ExtremityModel extends PartModel{
 	/** Sets the value of isGripping to true*/
 	public void grip(){
 		gripped = true;
+		gripTime = 0;
 		this.setTexture(grip);
 	}
 
@@ -87,7 +90,17 @@ public class ExtremityModel extends PartModel{
 	/** Sets the value of isGripping to false*/
 	public void ungrip(){
 		gripped = false;
+		gripTime = 0;
 		setTexture(notGrip); 
+	}
+	
+	public int getGripTime(){
+		return gripTime;
+	}
+	
+	public void updateGripTime(){
+		if(gripped)
+			gripTime++;
 	}
 	
 	public Joint getJoint(){
