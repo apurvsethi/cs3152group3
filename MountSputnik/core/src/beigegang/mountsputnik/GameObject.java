@@ -384,13 +384,7 @@ public abstract class GameObject {
 	 * @param texture the texture of this object
 	 */
 	public GameObject(Texture texture, float drawSizeScale, Vector2 drawPositionScale) {
-		setTexture(texture);
-		setDrawPositionScale(drawPositionScale);
-		setDrawSizeScale(drawSizeScale, drawSizeScale);
-
-		shape = new PolygonShape();
-		shape.setAsBox(texture.getWidth() * this.drawSizeScale.x / (2 * this.drawPositionScale.x),
-				texture.getHeight() * this.drawSizeScale.y / (2 * this.drawPositionScale.y));
+		this(texture, drawSizeScale, drawSizeScale, drawPositionScale);
 	}
 	
 	/**
@@ -399,9 +393,18 @@ public abstract class GameObject {
 	 * @param texture the texture of this object
 	 */
 	public GameObject(Texture texture, Vector2 dimensions, Vector2 drawPositionScale) {
+		this(texture, dimensions.x, dimensions.y, drawPositionScale);
+	}
+
+	/**
+	 * Constructs a game object
+	 *
+	 * @param texture the texture of this object
+	 */
+	public GameObject(Texture texture, float xDimension, float yDimension, Vector2 drawPositionScale) {
 		setTexture(texture);
 		setDrawPositionScale(drawPositionScale);
-		setDrawSizeScale(dimensions.x, dimensions.y);
+		setDrawSizeScale(xDimension, yDimension);
 
 		shape = new PolygonShape();
 		shape.setAsBox(texture.getWidth() * this.drawSizeScale.x / (2 * this.drawPositionScale.x),
@@ -476,13 +479,23 @@ public abstract class GameObject {
     
     /** Returns the height that this texture is drawn at*/
     public float getDrawHeight(){
-    	return animator.getTexture().getHeight()/ drawPositionScale.y;
+    	return animator.getTexture().getHeight() *drawSizeScale.y;
     }
     
     /** Returns the width that this texture is drawn at*/
     public float getDrawWidth(){
-    	return animator.getTexture().getWidth()/ drawPositionScale.x;
+    	return animator.getTexture().getWidth() * drawSizeScale.x;
     }
+
+	/** Returns the box2d height of this object */
+	public float getBoxHeight(){
+		return animator.getTexture().getHeight() * drawSizeScale.y / drawPositionScale.y;
+	}
+
+	/** Returns the box2d width of this object */
+	public float getBoxWidth(){
+		return animator.getTexture().getWidth() * drawSizeScale.x / drawPositionScale.x;
+	}
 	
 	/**
 	 * Updates the state of this object.
