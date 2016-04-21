@@ -22,6 +22,9 @@ import java.util.Random;
 
 public class GameMode extends ModeController {
 
+	/** A string representing the name of the current level */ 
+	private String levelName = "tutorial"; 
+	
 	/**
 	 * Track asset loading from all instances and subclasses
 	 */
@@ -38,13 +41,9 @@ public class GameMode extends ModeController {
 	 */
 	//We need to preload every single texture, regardless of which level we're currently using. Loading can't be
 	//dynamically
-	private static final String BACKGROUND_FILE = "assets/canyon/background.png";
+	private static final String LEVEL_NAMES[] = {"canyon", "tutorial"};//,"mountain","sky","space","tutorial"}; <-- Add the rest of these in as they are given assets
 	private static final String LAVA_FILE = "assets/testlavatexture.png"; //TODO: make this a better texture
-	private static final String MIDGROUND_FILE = "assets/canyon/Midground.png";
-	private static final String TILE_FILE = "assets/canyon/SurfaceLight.png";
 	private static final String UI_FILE = "assets/HUD.png";
-	private static final String EDGE_FILE = "assets/canyon/SurfaceEdgeLight.png";
-	private static final String GROUND_FILE = "assets/canyon/LevelStart.png";
 	private static final String HANDHOLD_TEXTURES[] = {"assets/canyon/Handhold1.png", "assets/canyon/Handhold2.png"};
 	private static final String PART_TEXTURES[] = {"Ragdoll/Torso.png", "Ragdoll/Head.png", "Ragdoll/Hips.png",
 			"Ragdoll/ArmLeft.png", "Ragdoll/ArmRight.png", "Ragdoll/ForearmLeft.png", "Ragdoll/ForearmRight.png",
@@ -99,23 +98,27 @@ public class GameMode extends ModeController {
 	 *
 	 * @param manager Reference to global asset manager.
 	 */
-	public void preLoadContent(AssetManager manager) {
+	public void preLoadContent(AssetManager manager) {	
 		assetManager = manager;
 		if (assetState != AssetState.EMPTY) return;
-
+		
 		assetState = AssetState.LOADING;
-		manager.load(BACKGROUND_FILE, Texture.class);
-		assets.add(BACKGROUND_FILE);
-		manager.load(MIDGROUND_FILE, Texture.class);
-		assets.add(MIDGROUND_FILE);
-		manager.load(TILE_FILE, Texture.class);
-		assets.add(TILE_FILE);
+		
+		for(String name : LEVEL_NAMES){
+			manager.load("assets/"+name+"/background.png", Texture.class);
+			assets.add("assets/"+name+"/background.png");
+			manager.load("assets/"+name+"/Midground.png", Texture.class);
+			assets.add("assets/"+name+"/Midground.png");
+			manager.load("assets/"+name+"/SurfaceLight.png", Texture.class);
+			assets.add("assets/"+name+"/SurfaceLight.png");
+			manager.load("assets/"+name+"/SurfaceEdgeLight.png", Texture.class);
+			assets.add("assets/"+name+"/SurfaceEdgeLight.png");
+			manager.load("assets/"+name+"/LevelStart.png", Texture.class);
+			assets.add("assets/"+name+"/LevelStart.png");
+		}
+	
 		manager.load(UI_FILE, Texture.class);
 		assets.add(UI_FILE);
-		manager.load(EDGE_FILE, Texture.class);
-		assets.add(EDGE_FILE);
-		manager.load(GROUND_FILE, Texture.class);
-		assets.add(GROUND_FILE);
 		manager.load(LAVA_FILE, Texture.class);
 		assets.add(LAVA_FILE);
 
@@ -143,14 +146,15 @@ public class GameMode extends ModeController {
 	 * @param manager Reference to global asset manager.
 	 */
 	public void loadContent(AssetManager manager) {
+	
 		if (assetState != AssetState.LOADING) return;
 
-		background = createTexture(manager, BACKGROUND_FILE, false);
-		midground = createTexture(manager, MIDGROUND_FILE, false);
-		tile = createTexture(manager, TILE_FILE, false);
+		background = createTexture(manager, "assets/"+levelName+"/background.png", false);
+		midground = createTexture(manager, "assets/"+levelName+"/Midground.png", false);
+		tile = createTexture(manager, "assets/"+levelName+"/SurfaceLight.png", false);
 		UI = createTexture(manager, UI_FILE, false);
-		edge = createTexture(manager, EDGE_FILE, false);
-		ground = createTexture(manager, GROUND_FILE, false);
+		edge = createTexture(manager, "assets/"+levelName+"/SurfaceEdgeLight.png", false);
+		ground = createTexture(manager, "assets/"+levelName+"/LevelStart.png", false);
 		lavaTexture = createTexture(manager, LAVA_FILE, false);
 		
 		for (int i = 0; i < PART_TEXTURES.length; i++) {
@@ -179,6 +183,16 @@ public class GameMode extends ModeController {
 		JsonAssetManager.clearInstance();
 	}
 	
+	public void changeLevel(String ln){
+		levelName = ln; 
+		//preloadContent()???
+		complete = false; 
+		failed = false; 
+		assetState = AssetState.LOADING; 
+		loadContent(assetManager); 
+		reset(); 
+	}
+	
 	private ObstacleZone obstacleZone;
 	private RisingObstacle risingObstacle = null;
 	private ObstacleModel obstacle;
@@ -186,11 +200,8 @@ public class GameMode extends ModeController {
 	/**
 	 * Whether we have completed this level
 	 */
-	private boolean complete;
-	/**
-	 * Whether we have failed at this level (and need a reset)
-	 */
-	private boolean failed;
+	private boolean complete = false; 
+	private boolean failed; 
 
 	/**
 	 * Character of game
@@ -222,6 +233,7 @@ public class GameMode extends ModeController {
 		//create debug font
 		font.setColor(Color.RED);
 		font.getData().setScale(5);
+		
 	}
 
 	@Override
@@ -236,7 +248,7 @@ public class GameMode extends ModeController {
 		world.dispose();
 		timestep = 0;
 		//TODO: make this based on current level, rather than hardcoded test
-		populateLevel("canyon");
+		populateLevel();
 	}
 
 	/**
@@ -267,7 +279,7 @@ public class GameMode extends ModeController {
 	 * 
 	 * @param levelName: the level to be generated
 	 */
-	public void populateLevel(String levelName) {
+	public void populateLevel() {
 		jsonReader = new JsonReader();
 		levelFormat = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/level.json"));
 		JsonAssetManager.getInstance().loadDirectory(levelFormat);
@@ -454,9 +466,10 @@ public class GameMode extends ModeController {
 		if(canvas.getCamera().position.y < canvas.getHeight()/2){
 			canvas.setCameraPosition(canvas.getWidth()/2, canvas.getHeight()/2);
 		}
-//		if(canvas.getCamera().position.y + canvas.getHeight()/2 > background.getRegionHeight()){
-//			canvas.setCameraPosition(canvas.getWidth()/2, background.getRegionHeight()-canvas.getHeight()/2); 
-//		}
+		if(canvas.getCamera().position.y + canvas.getHeight()/2 > levelFormat.getFloat("height")*scale.y){
+			canvas.setCameraPosition(canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y-canvas.getHeight()/2); 
+		}
+		
 		spawnObstacles();
 		for(GameObject g : objects){
 			if(g instanceof ObstacleModel && 
@@ -492,6 +505,11 @@ public class GameMode extends ModeController {
 				 extremity.body.setType(BodyDef.BodyType.DynamicBody);
 				 extremity.setTexture(partTextures[e].getTexture());
 			}
+		}
+		
+		checkHasCompleted(); 
+		if(complete){
+			changeLevel("canyon"); 
 		}
 	}
 
@@ -761,6 +779,13 @@ public class GameMode extends ModeController {
 			t = tutorialTextures[3]; 
 		canvas.draw(t, Color.WHITE, (pos.x*scale.x)+10, (pos.y*scale.y),40,40);
 	}
+	
+	private void checkHasCompleted(){
+		this.complete =  character.parts.get(HAND_RIGHT).getPosition().y >= levelFormat.getFloat("height")
+				||character.parts.get(HAND_LEFT).getPosition().y >= levelFormat.getFloat("height")
+				||character.parts.get(FOOT_RIGHT).getPosition().y >= levelFormat.getFloat("height")
+				||character.parts.get(FOOT_LEFT).getPosition().y >= levelFormat.getFloat("height");  
+	}
 
 
 	//	a Draw Note: If two parts are crossing each other, and one part is on a handhold, the other part
@@ -796,6 +821,9 @@ public class GameMode extends ModeController {
 		canvas.end();
 
 		canvas.begin();
+		if(complete){
+			canvas.drawText("YOU WIN", font, canvas.getWidth()/2, canvas.getCamera().position.y);
+		}
 		canvas.drawText(((Integer)(Math.round(character.getEnergy()))).toString(), font, 0f,
 				canvas.getCamera().position.y+canvas.getHeight()/2-10f);
 		
