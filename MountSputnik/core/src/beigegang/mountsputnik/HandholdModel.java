@@ -205,4 +205,9 @@ public class HandholdModel extends GameObject{
 	public float getSlip() {
 		return slipFactor;
 	}
+	
+	public void updateSnapPoints(){
+		snapPoints.removeIndex(0);
+		snapPoints.add(getPosition());
+	}
 }

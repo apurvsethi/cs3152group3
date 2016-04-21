@@ -126,6 +126,9 @@ public final class Constants {
 
 	public static final float MAX_ARM_DIST = ARM_X_CHEST_OFFSET + FOREARM_X_ARM_OFFSET + HAND_X_OFFSET;
 	public static final float MAX_LEG_DIST = THIGH_Y_HIP_OFFSET + SHIN_Y_THIGH_OFFSET + FOOT_Y_OFFSET ;
+	
+	public static final float ARM_UNGRIP_LENGTH = 3.1f;
+	public static final float LEG_UNGRIP_LENGTH = 3.7f;
 
 	public static final float PART_MAX_X_VELOCITY = -DEFAULT_GRAVITY;
 	public static final float PART_MAX_Y_VELOCITY = -DEFAULT_GRAVITY;

@@ -323,8 +323,7 @@ public class GameMode extends ModeController {
 		//TODO delete this line as well:
 		risingObstacle = null;
 		//end this line
-
-
+		
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
 			//arms
 		objects.add(character.parts.get(ARM_LEFT));
@@ -360,8 +359,6 @@ public class GameMode extends ModeController {
 		JsonAssetManager.getInstance().allocateDirectory();
 		
 		JsonValue handholdDesc = levelPiece.get("handholds").child();
-
-		//if(currentHeight == 0) makeTestLevel(handholdDesc);
 		
 		Random rand = new Random();
 		while(handholdDesc != null){
@@ -382,13 +379,12 @@ public class GameMode extends ModeController {
 					tx = handhold.getEndPoint().x - handhold.getStartPoint().x,
 					ty = handhold.getEndPoint().y - handhold.getStartPoint().y,
 					dist = (float) Math.sqrt(tx*tx+ty*ty);
-
-				Vector2 v = new Vector2((tx/dist)*speed, (ty/dist)*speed);
-				handhold.getBody().setLinearVelocity(v);
+				handhold.setLinearVelocity(new Vector2((tx/dist)*speed, (ty/dist)*speed));
+				handhold.setPosition((handhold.getStartPoint().x+handhold.getEndPoint().x)/2,
+						(handhold.getStartPoint().y+handhold.getEndPoint().y)/2);
 			}
 			catch(Exception e){handhold.setBodyType(BodyDef.BodyType.StaticBody);}
-			
-			
+
 			objects.add(handhold);
 			
 			try{handhold.setCrumble(handholdDesc.getFloat("crumble"));}
@@ -431,39 +427,6 @@ public class GameMode extends ModeController {
 		}
 		catch(Exception e){}
 	}
-	//TODO delete when there are actually levels!!!
-	private void makeTestLevel(JsonValue handholdDesc) {
-		Random rand = new Random();
-		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
-				13, 12,new Vector2(.5f,.5f), scale);
-		handhold.fixtureDef.filter.maskBits = 0;
-		handhold.activatePhysics(world);
-		handhold.geometry.setUserData(handhold);
-		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
-		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
-		handhold.setBodyType(BodyDef.BodyType.KinematicBody);
-		handhold.setStartPoint(10,12);
-		handhold.setEndPoint(17,2);
-		float speed = 2, 
-			tx = handhold.getEndPoint().x - handhold.getStartPoint().x,
-			ty = handhold.getEndPoint().y - handhold.getStartPoint().y,
-			dist = (float) Math.sqrt(tx*tx+ty*ty);
-		Vector2 v = new Vector2((tx/dist)*speed, (ty/dist)*speed);
-		handhold.getBody().setLinearVelocity(v);
-		objects.add(handhold);
-		
-		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
-				16, 6, new Vector2(.5f,.5f), scale);
-		handhold.fixtureDef.filter.maskBits = 0;
-		handhold.activatePhysics(world);
-		handhold.geometry.setUserData(handhold);
-		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
-		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
-		handhold.setBodyType(BodyDef.BodyType.StaticBody);
-		handhold.setCrumble(2);
-		objects.add(handhold);
-	}
-
 
 	/**
 	 * This method computes an order for the selected limbs based on previous timesteps and the first limb in nextToPress
@@ -515,8 +478,8 @@ public class GameMode extends ModeController {
 		if (justReleased.size > 0 || timestep == 0) {
 			snapLimbsToHandholds(input);
 		}
+		
 		glowHandholds();
-		timestep += 1;
 
 		canvas.setCameraPosition(canvas.getWidth() / 2,
 						character.parts.get(CHEST).getBody().getPosition().y*scale.y);
@@ -546,7 +509,15 @@ public class GameMode extends ModeController {
 						 h.deactivatePhysics(world);
 					 }
 				 }
+				 
+				 if((e == HAND_LEFT || e == HAND_RIGHT) &&
+						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > ARM_UNGRIP_LENGTH)
+					 ungrip(extremity);
+				 else if((e == FOOT_LEFT || e == FOOT_RIGHT) &&
+						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > LEG_UNGRIP_LENGTH)
+					 ungrip(extremity);
 			 }
+			 
 		}
 		
 		spawnObstacles();
@@ -556,11 +527,14 @@ public class GameMode extends ModeController {
 					g.getBody().getType() != BodyDef.BodyType.StaticBody){
 				objects.remove(g);
 			}
-			if(g instanceof HandholdModel && ((HandholdModel) (g)).getStartPoint() != null &&
-					(withinBounds(g.getBody().getPosition(),  ((HandholdModel) (g)).getEndPoint()) || 
-					 withinBounds(g.getBody().getPosition(),  ((HandholdModel) (g)).getStartPoint())))
-				g.getBody().setLinearVelocity(g.getBody().getLinearVelocity().x*-1, 
-						g.getBody().getLinearVelocity().y*-1);
+			if(g instanceof HandholdModel && ((HandholdModel) (g)).getStartPoint() != null){
+				HandholdModel h = (HandholdModel) g;
+				h.updateSnapPoints();
+				if(withinBounds(h.getBody().getPosition(),  h.getEndPoint()) || 
+				   withinBounds(h.getBody().getPosition(),  h.getStartPoint())){
+					h.getBody().setLinearVelocity(h.getBody().getLinearVelocity().x*-1, h.getBody().getLinearVelocity().y*-1);
+				}
+			}
 		}
 		
 		// TODO: Update energy quantity (fill in these values)
@@ -593,6 +567,7 @@ public class GameMode extends ModeController {
 			//TODO: properly change level
 			changeLevel("canyon"); 
 		}
+		timestep += 1;
 	}
 	
 	private void ungripAllFrom(HandholdModel h){
@@ -606,8 +581,8 @@ public class GameMode extends ModeController {
 	
 	private boolean withinBounds(Vector2 position, Vector2 target) {
 		float xError = Math.abs(position.x - target.x);
-		float yError = Math.abs(position.y - position.y);
-		return xError < .1f && yError < .1f;
+		float yError = Math.abs(position.y - target.y);
+		return xError < .01f && yError < .01f;
 	}
 
 	private void boundBodyVelocities() {
@@ -811,7 +786,7 @@ public class GameMode extends ModeController {
 	*/
 
 	private boolean closeEnough(int limb, Vector2 snapPoint) {
-		Vector2 dist = character.parts.get(limb).getPosition().sub(snapPoint);
+		Vector2 dist = new Vector2 (character.parts.get(limb).getPosition().sub(snapPoint));
 		return (Math.sqrt(dist.x * dist.x + dist.y * dist.y) <= HANDHOLD_SNAP_RADIUS);
 	}
 
