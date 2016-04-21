@@ -13,6 +13,7 @@ import beigegang.util.*;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
@@ -369,10 +370,25 @@ public class GameMode extends ModeController {
 					new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
 			handhold.fixtureDef.filter.maskBits = 0;
 			handhold.activatePhysics(world);
-			handhold.setBodyType(BodyDef.BodyType.StaticBody);
 			handhold.geometry.setUserData(handhold);
 			handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
 			handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
+			try{
+				handhold.setBodyType(BodyDef.BodyType.KinematicBody);
+				JsonValue movement = handholdDesc.get("movement");
+				handhold.setStartPoint(movement.getFloat("startX"),movement.getFloat("startY"));
+				handhold.setEndPoint(movement.getFloat("endX"),movement.getFloat("endY"));
+				float speed = movement.getFloat("speed"), 
+					tx = handhold.getEndPoint().x - handhold.getStartPoint().x,
+					ty = handhold.getEndPoint().y - handhold.getStartPoint().y,
+					dist = (float) Math.sqrt(tx*tx+ty*ty);
+
+				Vector2 v = new Vector2((tx/dist)*speed, (ty/dist)*speed);
+				handhold.getBody().setLinearVelocity(v);
+			}
+			catch(Exception e){handhold.setBodyType(BodyDef.BodyType.StaticBody);}
+			
+			
 			objects.add(handhold);
 			
 			try{handhold.setCrumble(handholdDesc.getFloat("crumble"));}
@@ -384,25 +400,68 @@ public class GameMode extends ModeController {
 		}
 
 		JsonValue obstacleDesc;
-		try{obstacleDesc = levelPiece.get("obstacles").child();}
-		catch(Exception e){return;}
-		Rectangle bound;
-		while(obstacleDesc != null){
-			bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY")+currentHeight,
-					obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
-			//TODO: Set texture to something other than null once we have textures for obstacles
-			obstacleZone = new ObstacleZone(null, currentHeight, obstacleDesc.getInt("frequency"), bound);
-			obstacles.add(obstacleZone);
-			obstacleDesc = obstacleDesc.next();
+		try{
+			obstacleDesc = levelPiece.get("obstacles").child();
+			while(obstacleDesc != null){
+				Rectangle bound;
+				bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY")+currentHeight,
+						obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
+				//TODO: Set texture to something other than null once we have textures for obstacles
+				obstacleZone = new ObstacleZone(null, currentHeight, obstacleDesc.getInt("frequency"), bound);
+				obstacles.add(obstacleZone);
+				obstacleDesc = obstacleDesc.next();
+			}
 		}
+		catch(Exception e){}
+		
+		JsonValue staticDesc;
+		try{
+			staticDesc = levelPiece.get("static").child();
+			ObstacleModel obstacle;
+			while(staticDesc != null){
+				//TODO: Set texture to something other than null once we have textures for obstacles
+				obstacle = new ObstacleModel(null, staticDesc.getFloat("size"), scale);
+				obstacle.setX(staticDesc.getFloat("x"));
+				obstacle.setY(staticDesc.getFloat("y"));
+				obstacle.setBodyType(BodyType.StaticBody);
+				obstacle.activatePhysics(world);
+				objects.add(obstacle);
+				staticDesc = staticDesc.next();
+			}
+		}
+		catch(Exception e){}
 	}
 	//TODO delete when there are actually levels!!!
 	private void makeTestLevel(JsonValue handholdDesc) {
 		Random rand = new Random();
-		Rectangle bound = new Rectangle(10,20,10,3);
-		obstacleZone = new ObstacleZone(handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
-				10, 2f, bound);
-		obstacles.add(obstacleZone);
+		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
+				13, 12,new Vector2(.5f,.5f), scale);
+		handhold.fixtureDef.filter.maskBits = 0;
+		handhold.activatePhysics(world);
+		handhold.geometry.setUserData(handhold);
+		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
+		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
+		handhold.setBodyType(BodyDef.BodyType.KinematicBody);
+		handhold.setStartPoint(10,12);
+		handhold.setEndPoint(17,2);
+		float speed = 2, 
+			tx = handhold.getEndPoint().x - handhold.getStartPoint().x,
+			ty = handhold.getEndPoint().y - handhold.getStartPoint().y,
+			dist = (float) Math.sqrt(tx*tx+ty*ty);
+		Vector2 v = new Vector2((tx/dist)*speed, (ty/dist)*speed);
+		handhold.getBody().setLinearVelocity(v);
+		objects.add(handhold);
+		
+		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
+				16, 6, new Vector2(.5f,.5f), scale);
+		handhold.fixtureDef.filter.maskBits = 0;
+		handhold.activatePhysics(world);
+		handhold.geometry.setUserData(handhold);
+		handhold.geometry.setRestitution(handholdDesc.getFloat("restitution"));
+		handhold.geometry.setFriction(handholdDesc.getFloat("friction"));
+		handhold.setBodyType(BodyDef.BodyType.StaticBody);
+		handhold.setCrumble(2);
+		objects.add(handhold);
 	}
 
 
@@ -434,8 +493,6 @@ public class GameMode extends ModeController {
 		Movement.makeHookedJointsMovable(nextToPress);
 
 		if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
-
-		float[] forces = null;
 
 		Movement.resetLimbSpeedsTo0();
 		if (nextToPress.size > 0) {
@@ -470,20 +527,44 @@ public class GameMode extends ModeController {
 			canvas.setCameraPosition(canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y-canvas.getHeight()/2); 
 		}
 		
+		for(int e : EXTREMITIES){
+			 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
+			 if(extremity.isGripped()){
+				 extremity.updateGripTime();
+				 if(extremity.getJoint().getBodyB() == null){
+					 ungrip(extremity);
+				 }
+				 else{
+					 HandholdModel h = (HandholdModel) extremity.getJoint().getBodyB().getFixtureList().get(0).getUserData();
+					 if(extremity.getGripTime() > h.getSlip()*60 && h.getSlip() > 0){
+						 ungrip(extremity);
+					 }
+					 if(extremity.getGripTime() > h.getCrumble()*60 && h.getCrumble() > 0){
+						 //TODO add crumble animation
+						 ungripAllFrom(h);
+						 objects.remove(h);
+						 h.deactivatePhysics(world);
+					 }
+				 }
+			 }
+		}
+		
 		spawnObstacles();
 		for(GameObject g : objects){
 			if(g instanceof ObstacleModel && 
-					g.getBody().getPosition().y  < (canvas.getCamera().position.y-canvas.getWidth())/scale.y){
+					g.getBody().getPosition().y  < (canvas.getCamera().position.y-canvas.getWidth())/scale.y &&
+					g.getBody().getType() != BodyDef.BodyType.StaticBody){
 				objects.remove(g);
 			}
+			if(g instanceof HandholdModel && ((HandholdModel) (g)).getStartPoint() != null &&
+					(withinBounds(g.getBody().getPosition(),  ((HandholdModel) (g)).getEndPoint()) || 
+					 withinBounds(g.getBody().getPosition(),  ((HandholdModel) (g)).getStartPoint())))
+				g.getBody().setLinearVelocity(g.getBody().getLinearVelocity().x*-1, 
+						g.getBody().getLinearVelocity().y*-1);
 		}
 		
 		// TODO: Update energy quantity (fill in these values)
 		float exertion = 0;
-		if(forces!=null)
-			for(int i = 0; i < forces.length; i++){
-				exertion+=Math.abs(forces[i]);
-			}
 		character.updateEnergy(oxygen, 1, exertion, true);
 
 		if(risingObstacle != null){
@@ -509,8 +590,24 @@ public class GameMode extends ModeController {
 		
 		checkHasCompleted(); 
 		if(complete){
+			//TODO: properly change level
 			changeLevel("canyon"); 
 		}
+	}
+	
+	private void ungripAllFrom(HandholdModel h){
+		 for(int e : EXTREMITIES){
+			 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
+			 if(extremity.isGripped() && extremity.getJoint().getBodyB().getFixtureList().get(0).getUserData() == h){
+				 ungrip(extremity);
+			 }
+		 }
+	}
+	
+	private boolean withinBounds(Vector2 position, Vector2 target) {
+		float xError = Math.abs(position.x - target.x);
+		float yError = Math.abs(position.y - position.y);
+		return xError < .1f && yError < .1f;
 	}
 
 	private void boundBodyVelocities() {
