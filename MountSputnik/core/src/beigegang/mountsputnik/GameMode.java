@@ -433,7 +433,7 @@ public class GameMode extends ModeController {
 			}
 			float v = input.getVerticalL();
 			float h = input.getHorizontalL();
-			forces = Movement.findAndApplyForces(nextToPress.get(0),v,h);
+			Movement.findAndApplyForces(nextToPress.get(0),v,h);
 
 
 		}

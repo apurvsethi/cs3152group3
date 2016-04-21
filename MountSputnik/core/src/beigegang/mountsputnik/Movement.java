@@ -13,7 +13,9 @@ import static beigegang.mountsputnik.Constants.*;
 public class Movement {
 
     public static CharacterModel character;
-
+    /**
+     * last limb controlled by player.
+     */
     public static int lastLimb = 0;
 
     public static void setCharacter(CharacterModel c) {
@@ -22,6 +24,7 @@ public class Movement {
 
 
     /**
+     *
      * @param part - ungripped part to apply the forces to
      * @param v    - vertical direction given by player (-1.0 -> 1.0 f) (ints if keyboard)
      * @param h    - horizontal direction given by player (-1.0 -> 1.0f) (ints if keyboard)
@@ -29,51 +32,46 @@ public class Movement {
      * @author Jacob
      */
 
-    public static float[] findAndApplyForces(int part, float v, float h) {
-        Vector2 forceL;
-        float[] fs = null;
-        RevoluteJoint armJoint;
+    public static void findAndApplyForces(int part, float v, float h) {
+        RevoluteJoint upperJoint;
         resetLimbSpeedsTo0();
-
 
         switch (part) {
             case HAND_LEFT:
-                forceL = new Vector2(CONSTANT_X_FORCE, CONSTANT_X_FORCE);
-                armJoint = ((RevoluteJoint) character.joints.get(ARM_LEFT - 1));
-                armJoint.setMaxMotorTorque(100);
+                upperJoint = ((RevoluteJoint) character.joints.get(ARM_LEFT - 1));
+                upperJoint.setMaxMotorTorque(100);
 //                //- is to waist. + to head.
                 rotateLimbPiece(v, h, ARM_LEFT, FOREARM_LEFT);
-                Movement.getMultipliersLeftForearm(v, h);
+                rotateLeftForearm(v, h);
 
                 break;
 
             case HAND_RIGHT:
-                forceL = new Vector2(CONSTANT_X_FORCE, CONSTANT_X_FORCE);
-                armJoint = ((RevoluteJoint) character.joints.get(ARM_RIGHT - 1));
-                armJoint.setMaxMotorTorque(100);
+                upperJoint = ((RevoluteJoint) character.joints.get(ARM_RIGHT - 1));
+                upperJoint.setMaxMotorTorque(100);
                 //- is to head. + to waist.
                 rotateLimbPiece(v, h, ARM_RIGHT, FOREARM_RIGHT);
-                Movement.getMultipliersRightForearm(v, h);
+                rotateRightForearm(v, h);
 
                 break;
 
             case FOOT_LEFT:
-                armJoint = ((RevoluteJoint) character.joints.get(THIGH_LEFT - 1));
-                armJoint.setMaxMotorTorque(100);
+                upperJoint = ((RevoluteJoint) character.joints.get(THIGH_LEFT - 1));
+                upperJoint.setMaxMotorTorque(100);
                 //+ is to waist. - to opposite of waist.
                 rotateLimbPiece(v, h, THIGH_LEFT, SHIN_LEFT);
 
-                Movement.getMultipliersLeftShin(v, h);
+                rotateLeftShin(v, h);
 
                 break;
 
             case FOOT_RIGHT:
-                armJoint = ((RevoluteJoint) character.joints.get(THIGH_RIGHT - 1));
-                armJoint.setMaxMotorTorque(100);
+                upperJoint = ((RevoluteJoint) character.joints.get(THIGH_RIGHT - 1));
+                upperJoint.setMaxMotorTorque(100);
                 //- is to waist. + to opposite of waist.
                 rotateLimbPiece(v, h, THIGH_RIGHT, SHIN_RIGHT);
 
-                Movement.getMultipliersRightShin(v, h);
+                rotateRightShin(v, h);
 
                 break;
 
@@ -84,9 +82,13 @@ public class Movement {
         }
 
         lastLimb = part != 0 ? part : 0;
-        return fs;
     }
 
+    /**
+     * Dampening method:
+     * basically freezes limbs once they aren't being controlled any longer.
+     * @author Jacob
+     */
     public static void resetLimbSpeedsTo0() {
         RevoluteJoint joint;
         for (int limbPiece : NON_EXTREMITY_LIMBS) {
@@ -95,6 +97,19 @@ public class Movement {
         }
     }
 
+
+    /**
+     * SUPER IMPORTANT METHOD
+     * controls all rotations of upper pieces of a limb (upper arm and upper leg) and
+     * the rotations of the forearms and shins upon diagonal movement of the joystick
+     * somehow it generalizes SUPER well to all limbs in all cases, which was unexpected.
+     *
+     * @param v - vertical input from joystick
+     * @param h - horizontal input from joystick
+     * @param upperJoint - where this limb connects to the torso
+     * @param lowerJoint - either a knee or elbow joint depending on the limb
+     * @author Jacob
+     */
     private static void rotateLimbPiece(float v, float h, int upperJoint, int lowerJoint) {
         Vector2 root = character.joints.get(upperJoint - 1).getAnchorA();
         Vector2 shoot = character.joints.get(lowerJoint - 1).getAnchorA();
@@ -216,7 +231,7 @@ public class Movement {
     }
 
 
-    private static float[] getMultipliersLeftForearm(float v, float h) {
+    private static float[] rotateLeftForearm(float v, float h) {
 
         RevoluteJoint forearmJoint = ((RevoluteJoint) character.joints.get(FOREARM_LEFT - 1));
         forearmJoint.setMaxMotorTorque(10);
@@ -307,7 +322,7 @@ public class Movement {
         return Math.abs(v) > .2 && Math.abs(h) > .2;
     }
 
-    private static float[] getMultipliersRightForearm(float v, float h) {
+    private static float[] rotateRightForearm(float v, float h) {
 
         RevoluteJoint forearmJoint = ((RevoluteJoint) character.joints.get(FOREARM_RIGHT - 1));
         forearmJoint.setMaxMotorTorque(10);
@@ -377,7 +392,7 @@ public class Movement {
     }
 
 
-    private static float[] getMultipliersLeftShin(float v, float h) {
+    private static float[] rotateLeftShin(float v, float h) {
 
         RevoluteJoint shinJoint = ((RevoluteJoint) character.joints.get(SHIN_LEFT - 1));
         shinJoint.setMaxMotorTorque(30);
@@ -461,7 +476,7 @@ public class Movement {
 
     }
 
-    private static float[] getMultipliersRightShin(float v, float h) {
+    private static float[] rotateRightShin(float v, float h) {
 
         RevoluteJoint shinJoint = ((RevoluteJoint) character.joints.get(SHIN_RIGHT - 1));
         shinJoint.setMaxMotorTorque(30);
@@ -549,7 +564,15 @@ public class Movement {
 
     }
 
-
+    //TODO this method could use some serious modifying. i dont think it makes sense lol. but since movement is fine rn
+    //will modify later
+    /**
+     * attempts to allow limbs that WERE hooked to handholds to rotate and bend more easily allowing for more
+     * natural movement
+     * @param nextToPress - all limbs not hooked to handholds that are currently selected.
+     *
+     * @author Jacob
+     */
     public static void makeHookedJointsMovable(Array<Integer> nextToPress) {
         if (!nextToPress.contains(FOOT_LEFT, true)) {
             ((RevoluteJoint) character.joints.get(FOREARM_LEFT - 1)).setMaxMotorTorque(100);
@@ -563,6 +586,5 @@ public class Movement {
         if (!nextToPress.contains(HAND_RIGHT, true)) {
             ((RevoluteJoint) character.joints.get(SHIN_RIGHT - 1)).setMaxMotorTorque(100);
         }
-//        System.out.println(((RevoluteJoint) character.joints.get(ARM_LEFT - 1)).getJointSpeed());
     }
 }
