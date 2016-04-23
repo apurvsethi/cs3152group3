@@ -884,7 +884,7 @@ public class GameMode extends ModeController {
 			c.set(0,0,0,Math.abs(energyLevel * 5)/100f);
 //			Texture t;
 //			Sprite s = new Sprite (blackoutTexture);
-			canvas.draw(blackoutTexture,Color.WHITE,canvas.getWidth()/4,0,canvas.getWidth()*2/4,canvas.getHeight());
+//			canvas.draw(blackoutTexture,Color.WHITE,canvas.getWidth()/4,0,canvas.getWidth()*2/4,canvas.getHeight());
 		}
 		canvas.end();
 
