@@ -24,6 +24,27 @@ public class Movement {
 
 
     /**
+     * Applies torso force directed by player if body is hooked to 1+ handholds
+     * @param force - strength of force to apply (not directed)
+     * @author Jacob
+     */
+    public static void applyTorsoForceIfApplicable(Vector2 force) {
+        if (TORSO_MODE){
+            if (isGripping(FOOT_LEFT)|| isGripping(FOOT_RIGHT) || isGripping(HAND_LEFT) || isGripping(HAND_RIGHT)){
+                InputController input = InputController.getInstance();
+                float h = input.getHorizontalR();
+                float v = input.getVerticalR();
+                applyIfUnderLimit(CHEST,new Vector2(force.x,force.y),h,v);
+            }
+
+        }
+    }
+    private static void applyIfUnderLimit(int part, Vector2 force, float h, float v) {
+        Vector2 vect = character.parts.get(part).body.getLinearVelocity();
+        character.parts.get(part).body.applyForceToCenter(force.x*h, 0, true);
+        character.parts.get(part).body.applyForceToCenter(0, force.y*v, true);
+    }
+    /**
      *
      * @param part - ungripped part to apply the forces to
      * @param v    - vertical direction given by player (-1.0 -> 1.0 f) (ints if keyboard)

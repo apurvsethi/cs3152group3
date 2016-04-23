@@ -357,6 +357,6 @@ public class CharacterModel {
 		float newEnergy = getEnergy() < 0 ? 0 : getEnergy() > 100 ? 100 : getEnergy() + dEdt;
 		setEnergy(newEnergy);
 		//TODO delete this after done:
-		setEnergy(100);
+//		setEnergy(100);
 	}
 }

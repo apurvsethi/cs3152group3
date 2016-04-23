@@ -14,17 +14,58 @@ import com.badlogic.gdx.math.Rectangle;
 public class ObstacleZone {
 	
 	private float minSpawnHeight;
+	private float maxSpawnHeight;
 	private int spawnFrequency;
 	private Rectangle bounds;
 	private Texture obstacleTexture;
-	
+	private Texture warningTexture;
+	private boolean triggered = false;
+	private boolean triggeredAlready = false;
 	private int ticksSinceLastSpawn;
-
+	private boolean releasedOnce = false;
+	//make sure an obstacle is released from this zone at least once!
+	public void releasedAnObstacle(){
+		releasedOnce = true;
+	}
+	public Texture getWarningTexture() {
+		return warningTexture;
+	}
+	//returns if this obstaclezone should be trying to release an obstacle
+	public boolean isTriggered(){
+		return triggered && triggeredAlready;
+	}
+	//sets triggeredAlready and triggered to v until v = true passed in, then it does that
+	//but once v = false passed in again (cpos >= chestHeight) it sets triggered to false.
+	//then, if the chest height dips below the zone again, it can't start to release obstacles again.
+	//however, every obstacleZone needs to release at least one obstacle :)
+	public void setTriggered(boolean v){
+		if ((triggeredAlready && triggered) || !releasedOnce) {
+			triggered = v;
+			if (v == true){
+				triggeredAlready = v;
+			}
+		}
+		else if (!triggeredAlready){
+			triggeredAlready = v;
+			triggered = v;
+		}
+	}
 	/**
 	 * @return the minSpawnHeight
 	 */
 	public float getMinSpawnHeight() {
 		return minSpawnHeight;
+	}
+
+	public float getMaxSpawnHeight() {
+		return minSpawnHeight + bounds.getHeight();
+	}
+	public float getMinX() {
+		return bounds.x;
+	}
+
+	public float getMaxX() {
+		return bounds.x + bounds.getWidth();
 	}
 
 	/**
@@ -56,12 +97,15 @@ public class ObstacleZone {
 	 * @param freq obstacle spawn frequency (in frames)
 	 * @param bounds the bounds of this zone
 	 */
-	public ObstacleZone(Texture t, float minHeight, int freq, Rectangle bounds){
+	public ObstacleZone(Texture t, Texture tr, float minHeight, int freq, Rectangle bounds){
 		minSpawnHeight = minHeight;
+		maxSpawnHeight = minSpawnHeight + SCREEN_HEIGHT;
 		spawnFrequency = freq;
 		this.bounds = bounds;
 		ticksSinceLastSpawn = 0;
 		obstacleTexture  = t;
+		warningTexture = tr;
+
 	}
 	
 	/**
@@ -72,12 +116,15 @@ public class ObstacleZone {
 	 * @param freq obstacle spawn frequency (in seconds)
 	 * @param bounds the bounds of this zone
 	 */
-	public ObstacleZone(Texture t, float minHeight, float freq, Rectangle bounds){
+	public ObstacleZone(Texture t, Texture tr, float minHeight, float freq, Rectangle bounds){
+
 		minSpawnHeight = minHeight;
 		spawnFrequency = (int)(freq/WORLD_STEP);
 		this.bounds = bounds;
 		ticksSinceLastSpawn = 0;
 		obstacleTexture  = t;
+		warningTexture = tr;
+
 	}
 
 	/**
