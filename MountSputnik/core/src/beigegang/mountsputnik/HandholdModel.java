@@ -27,6 +27,7 @@ public class HandholdModel extends GameObject{
 	/** The texture the handhold will have when not glowing */ 
 	protected Texture texture;
 
+	private Vector2 startPoint, endPoint;
 	
 	@Override
 	public ObjectType getType() {
@@ -181,5 +182,32 @@ public class HandholdModel extends GameObject{
 						getAngle(), drawSizeScale.x, drawSizeScale.y);
 			}
 		}
+	}
+
+	public void setStartPoint(float x, float y) {
+		startPoint = new Vector2(x, y);
+		
+	}
+
+	public void setEndPoint(float x, float y) {
+		endPoint = new Vector2(x, y);
+		
+	}
+
+	public Vector2 getEndPoint() {
+		return endPoint;
+	}
+	
+	public Vector2 getStartPoint() {
+		return startPoint;
+	}
+
+	public float getSlip() {
+		return slipFactor;
+	}
+	
+	public void updateSnapPoints(){
+		snapPoints.removeIndex(0);
+		snapPoints.add(getPosition());
 	}
 }

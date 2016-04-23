@@ -39,7 +39,7 @@ public class ObstacleZone {
 	//then, if the chest height dips below the zone again, it can't start to release obstacles again.
 	//however, every obstacleZone needs to release at least one obstacle :)
 	public void setTriggered(boolean v){
-		if ((triggeredAlready && triggered) || !releasedOnce) {
+		if ((triggeredAlready && triggered)) {
 			triggered = v;
 			if (v == true){
 				triggeredAlready = v;
