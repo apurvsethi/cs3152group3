@@ -70,11 +70,13 @@ public class GameMode extends ModeController {
 	};
 
 //	private static TextureRegion[] energyTextures;
-	private static final String ENERGY_TEXTURES[] = new String[10];
+private static final String ENERGY_TEXTURES[] = new String[10];
+	private static final String PROGRESS_TEXTURES[] = new String[6];
 
 //	private static final String ENERGY_TEXTURES2[] = new String[]
 //			{"Energy/e1.png","Energy/e2.png","Energy/e3.png","Energy/e4.png","Energy/e5.png","Energy/e6.png","Energy/e7.png","Energy/e8.png","Energy/e9.png","Energy/e10.png"};
 	private static TextureRegion[] energyTextures =  new TextureRegion[ENERGY_TEXTURES.length];
+	private static TextureRegion[] progressTextures =  new TextureRegion[PROGRESS_TEXTURES.length];
 	/**
 	 * font for displaying debug values to screen
 	 */
@@ -99,11 +101,13 @@ public class GameMode extends ModeController {
 	private static String BLACKOUT = "assets/blackout.png";
 	private static String FATIGUE_BAR = "Energy/Fatigue Gauge.png";
 	private static TextureRegion fatigueTexture;
-	private static String PROGRESS_BAR= "assets/Progress Bar.png";
-	private static TextureRegion progressTexture;
+	private static String PROGRESS_BACKGROUND= "assets/Progress Bar.png";
+	private static TextureRegion progressBackgroundTexture;
+	private static String PROGRESS_BAR= "Progress Chalk Bar.png";
+	private static TextureRegion progressBarTexture;
 	private Sprite blackoutSprite = new Sprite(new Texture(BLACKOUT));
 	private static SpriteBatch batch = new SpriteBatch();
-
+	private static int progressLevel = 0;
 	/** The reader to process JSON files */
 	private JsonReader jsonReader;
 	/** The JSON defining the level model */
@@ -150,6 +154,12 @@ public class GameMode extends ModeController {
 			assets.add(name);
 			ENERGY_TEXTURES[i-1] = name;
 		}
+		for (int i = 1; i<=PROGRESS_TEXTURES.length; i++){
+			String name = "Progress/p" + i + ".png";
+			manager.load(name, Texture.class);
+			assets.add(name);
+			PROGRESS_TEXTURES[i-1] = name;
+		}
 		manager.load(UI_FILE, Texture.class);
 		assets.add(UI_FILE);
 		manager.load(LOGO_FILE, Texture.class);
@@ -173,6 +183,8 @@ public class GameMode extends ModeController {
 		assets.add(BLACKOUT);
 		manager.load(FATIGUE_BAR,Texture.class);
 		assets.add(FATIGUE_BAR);
+		manager.load(PROGRESS_BACKGROUND,Texture.class);
+		assets.add(PROGRESS_BACKGROUND);
 		manager.load(PROGRESS_BAR,Texture.class);
 		assets.add(PROGRESS_BAR);
 	}
@@ -210,12 +222,17 @@ public class GameMode extends ModeController {
 		for (int i = 0; i < HANDHOLD_TEXTURES.length; i++) {
 			handholdTextures[i] = createTexture(manager, HANDHOLD_TEXTURES[i], false);
 		}
+
 		for (int i = 0; i < ENERGY_TEXTURES.length; i++) {
 			energyTextures[i] = createTexture(manager, ENERGY_TEXTURES[i], false);
 		}
+		for (int i = 0; i < PROGRESS_TEXTURES.length; i++) {
+			progressTextures[i] = createTexture(manager, PROGRESS_TEXTURES[i], false);
+		}
 		blackoutTexture = createTexture(manager,BLACKOUT,false);
 		fatigueTexture = createTexture(manager,FATIGUE_BAR,false);
-		progressTexture = createTexture(manager,PROGRESS_BAR,false);
+		progressBackgroundTexture = createTexture(manager,PROGRESS_BACKGROUND,false);
+		progressBarTexture = createTexture(manager,PROGRESS_BAR,false);
 		assetState = AssetState.COMPLETE;
 	}
 
@@ -251,7 +268,8 @@ public class GameMode extends ModeController {
 	 * Whether we have completed this level
 	 */
 	private boolean complete = false; 
-	private boolean failed; 
+	private boolean failed;
+	private float maxHandhold = 0f;
 
 	/**
 	 * Character of game
@@ -342,6 +360,7 @@ public class GameMode extends ModeController {
 		Vector2 gravity = new Vector2(0,levelFormat.getFloat("gravity"));
 		oxygen = levelFormat.getFloat("oxygen");
 		float remainingHeight = levelFormat.getFloat("height");
+		System.out.println(remainingHeight);
 		float currentHeight=0f;
 		int diffBlocks = levelFormat.getInt("uniqueBlocks");
 		int filler = levelFormat.getInt("generalFillerSize");
@@ -352,6 +371,7 @@ public class GameMode extends ModeController {
 		world.setContactListener(contactListener);
 
 		levelBlocks.clear();
+		int counter = 0;
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
@@ -360,7 +380,6 @@ public class GameMode extends ModeController {
 			
 			addChunk(levelPiece, currentHeight, levelName);
 			currentHeight += levelPiece.getFloat("size");
-
 			for(int i = 0; i < filler; i++){
 				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
 				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/general/block"+blockNumber+".json"));
@@ -420,6 +439,7 @@ public class GameMode extends ModeController {
 		//if(currentHeight == 0) makeTestLevel(handholdDesc);
 //		makeTestLevel();
 		Random rand = new Random();
+
 		while(handholdDesc != null){
 			handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
 					handholdDesc.getFloat("positionX"), handholdDesc.getFloat("positionY")+currentHeight,
@@ -443,9 +463,9 @@ public class GameMode extends ModeController {
 						(handhold.getStartPoint().y+handhold.getEndPoint().y)/2);
 			}
 			catch(Exception e){handhold.setBodyType(BodyDef.BodyType.StaticBody);}
-
 			objects.add(handhold);
-			
+			maxHandhold = Math.max(maxHandhold,handhold.getY());
+
 			try{handhold.setCrumble(handholdDesc.getFloat("crumble"));}
 			catch(Exception e){handhold.setCrumble(0);}
 			try{handhold.setSlip(handholdDesc.getFloat("slip"));}
@@ -977,14 +997,19 @@ public class GameMode extends ModeController {
 			canvas.draw(edge, Color.WHITE, canvas.getWidth() * 3 / 4, tileY, canvas.getWidth() / 16, canvas.getHeight());
 			tileY += canvas.getWidth() / 4;
 		}
-
-
+//		int a = v.y/maxHandhold;
+		if (timestep%60 == 0 && character.getEnergy() != 0)
+			progressLevel = Math.min(6,Math.max(0,Math.round(v.y/maxHandhold * 5 - .5f)));
 		canvas.draw(ground, Color.WHITE, canvas.getWidth() / 4, 0, canvas.getWidth() / 2, canvas.getHeight() / 8);
 		canvas.draw(UI, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 		canvas.draw(LOGO, Color.FIREBRICK, 0, canvas.getHeight() * 5.4f/6 + y, canvas.getWidth() / 4, canvas.getHeight() * .5f/6);
 		canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 		canvas.draw(fatigueTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-		canvas.draw(progressTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+		if (progressLevel > 0) {
+			canvas.draw(progressTextures[progressLevel-1], Color.BLUE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+		}
+		System.out.println(v.y + " " + maxHandhold);
+		canvas.draw(progressBackgroundTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 		canvas.end();
 
 		canvas.begin();
