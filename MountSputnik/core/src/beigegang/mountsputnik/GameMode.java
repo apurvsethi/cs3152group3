@@ -51,6 +51,7 @@ public class GameMode extends ModeController {
 	private static final String LEVEL_NAMES[] = {"canyon", "tutorial"};//,"mountain","sky","space","tutorial"}; <-- Add the rest of these in as they are given assets
 	private static final String LAVA_FILE = "assets/testlavatexture.png"; //TODO: make this a better texture
 	private static final String UI_FILE = "assets/HUD.png";
+	private static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
 	private static final String HANDHOLD_TEXTURES[] = {"assets/canyon/Handhold1.png", "assets/canyon/Handhold2.png"};
 	private static final String PART_TEXTURES[] = {"Ragdoll/Torso.png", "Ragdoll/Head.png", "Ragdoll/Hips.png",
 			"Ragdoll/ArmLeft.png", "Ragdoll/ArmRight.png", "Ragdoll/ForearmLeft.png", "Ragdoll/ForearmRight.png",
@@ -67,8 +68,13 @@ public class GameMode extends ModeController {
 			"Ragdoll/controls/360_LT_selected.png", 
 			"Ragdoll/controls/360_RT_selected.png"
 	};
-//	private static final String ENERGY_TEXTURES[] = {"assets/Energy/bar1.png","assets/Energy/bar2.png","assets/Energy/bar3.png","assets/Energy/bar4.png","assets/Energy/bar5.png","assets/Energy/bar6.png","assets/Energy/bar7.png","assets/Energy/bar8.png","assets/Energy/bar9.png","assets/Energy/bar10.png"};
-//	private static TextureRegion[] energyTextures =  new TextureRegion[ENERGY_TEXTURES.length];
+
+//	private static TextureRegion[] energyTextures;
+	private static final String ENERGY_TEXTURES[] = new String[10];
+
+//	private static final String ENERGY_TEXTURES2[] = new String[]
+//			{"Energy/e1.png","Energy/e2.png","Energy/e3.png","Energy/e4.png","Energy/e5.png","Energy/e6.png","Energy/e7.png","Energy/e8.png","Energy/e9.png","Energy/e10.png"};
+	private static TextureRegion[] energyTextures =  new TextureRegion[ENERGY_TEXTURES.length];
 	/**
 	 * font for displaying debug values to screen
 	 */
@@ -81,6 +87,7 @@ public class GameMode extends ModeController {
 	private static TextureRegion midground;
 	private static TextureRegion tile;
 	private static TextureRegion UI;
+	private static TextureRegion LOGO;
 	private static TextureRegion edge;
 	private static TextureRegion ground;
 	private static TextureRegion lavaTexture;
@@ -90,6 +97,10 @@ public class GameMode extends ModeController {
 	private static TextureRegion energyDisplay;
 	private static TextureRegion blackoutTexture;
 	private static String BLACKOUT = "assets/blackout.png";
+	private static String FATIGUE_BAR = "Energy/Fatigue Gauge.png";
+	private static TextureRegion fatigueTexture;
+	private static String PROGRESS_BAR= "assets/Progress Bar.png";
+	private static TextureRegion progressTexture;
 	private Sprite blackoutSprite = new Sprite(new Texture(BLACKOUT));
 	private static SpriteBatch batch = new SpriteBatch();
 
@@ -133,12 +144,16 @@ public class GameMode extends ModeController {
 			manager.load("assets/"+name+"/LevelStart.png", Texture.class);
 			assets.add("assets/"+name+"/LevelStart.png");
 		}
-//		for (String name: ENERGY_TEXTURES){
-//			manager.load(name, Texture.class);
-//			assets.add(name);
-//		}
+		for (int i = 1; i<=ENERGY_TEXTURES.length; i++){
+			String name = "Energy/e" + i + ".png";
+			manager.load(name, Texture.class);
+			assets.add(name);
+			ENERGY_TEXTURES[i-1] = name;
+		}
 		manager.load(UI_FILE, Texture.class);
 		assets.add(UI_FILE);
+		manager.load(LOGO_FILE, Texture.class);
+		assets.add(LOGO_FILE);
 		manager.load(LAVA_FILE, Texture.class);
 		assets.add(LAVA_FILE);
 
@@ -156,6 +171,10 @@ public class GameMode extends ModeController {
 		}
 		manager.load(BLACKOUT,Texture.class);
 		assets.add(BLACKOUT);
+		manager.load(FATIGUE_BAR,Texture.class);
+		assets.add(FATIGUE_BAR);
+		manager.load(PROGRESS_BAR,Texture.class);
+		assets.add(PROGRESS_BAR);
 	}
 
 	/**
@@ -175,6 +194,7 @@ public class GameMode extends ModeController {
 		midground = createTexture(manager, "assets/"+levelName+"/Midground.png", false);
 		tile = createTexture(manager, "assets/"+levelName+"/SurfaceLight.png", false);
 		UI = createTexture(manager, UI_FILE, false);
+		LOGO = createTexture(manager, LOGO_FILE, false);
 		edge = createTexture(manager, "assets/"+levelName+"/SurfaceEdgeLight.png", false);
 		ground = createTexture(manager, "assets/"+levelName+"/LevelStart.png", false);
 		lavaTexture = createTexture(manager, LAVA_FILE, false);
@@ -190,10 +210,12 @@ public class GameMode extends ModeController {
 		for (int i = 0; i < HANDHOLD_TEXTURES.length; i++) {
 			handholdTextures[i] = createTexture(manager, HANDHOLD_TEXTURES[i], false);
 		}
-//		for (int i = 0; i < ENERGY_TEXTURES.length; i++) {
-//			energyTextures[i] = createTexture(manager, ENERGY_TEXTURES[i], false);
-//		}
+		for (int i = 0; i < ENERGY_TEXTURES.length; i++) {
+			energyTextures[i] = createTexture(manager, ENERGY_TEXTURES[i], false);
+		}
 		blackoutTexture = createTexture(manager,BLACKOUT,false);
+		fatigueTexture = createTexture(manager,FATIGUE_BAR,false);
+		progressTexture = createTexture(manager,PROGRESS_BAR,false);
 		assetState = AssetState.COMPLETE;
 	}
 
@@ -221,8 +243,9 @@ public class GameMode extends ModeController {
 	private ObstacleZone obstacleZone;
 	private RisingObstacle risingObstacle = null;
 	private ObstacleModel obstacle;
-	private ObstacleWarning obstacleWarning;
+	/** all obstacle zones in level */
 	private Array<ObstacleZone> obstacles = new Array<ObstacleZone>();
+	/** Current obstacle warnings to display */
 	private Array<ObstacleZone> obstacleWarnings = new Array<ObstacleZone>();
 	/**
 	 * Whether we have completed this level
@@ -273,7 +296,6 @@ public class GameMode extends ModeController {
 		objects.clear();
 		obstacles.clear();
 		obstacleWarnings.clear();
-//		System.out.println(obstacles.size);
 		addQueue.clear();
 		world.dispose();
 		timestep = 0;
@@ -959,7 +981,10 @@ public class GameMode extends ModeController {
 
 		canvas.draw(ground, Color.WHITE, canvas.getWidth() / 4, 0, canvas.getWidth() / 2, canvas.getHeight() / 8);
 		canvas.draw(UI, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-//		canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, canvas.getWidth() / 8 + 50, y, canvas.getWidth() / 8 - 100, canvas.getHeight());
+		canvas.draw(LOGO, Color.FIREBRICK, 0, canvas.getHeight() * 5.4f/6 + y, canvas.getWidth() / 4, canvas.getHeight() * .5f/6);
+		canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+		canvas.draw(fatigueTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+		canvas.draw(progressTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 		canvas.end();
 
 		canvas.begin();
@@ -971,8 +996,8 @@ public class GameMode extends ModeController {
 		if (complete) {
 			canvas.drawText("YOU WIN", font, canvas.getWidth() / 2, canvas.getCamera().position.y);
 		}
-		canvas.drawText(((Integer) (Math.round(character.getEnergy()))).toString(), font, 0f,
-				canvas.getCamera().position.y + canvas.getHeight() / 2 - 10f);
+//		canvas.drawText(((Integer) (Math.round(character.getEnergy()))).toString(), font, 0f,
+//				canvas.getCamera().position.y + canvas.getHeight() / 2 - 10f);
 
 		if (risingObstacle != null) {
 			float lavaOrigin = risingObstacle.getHeight() * scale.y -
@@ -986,34 +1011,13 @@ public class GameMode extends ModeController {
 		}
 		canvas.end();
 		float f = character.getEnergy();
-
 		if ( f<= 40){
-//			Color c = Color.BLACK;
-//			c.set(0,0,0,Math.abs(energyLevel * 5)/100f);
-//			c.set(0,0,0,Math.abs(50)/100f);
 			blackoutSprite.setAlpha((Math.abs(f-100f)/100f - .5f)*1.5f);
 			batch.begin();
-////			batch.setBlendFunction(GameCanvas.BlendState.ALPHA_BLEND);
-//
-////			batch.draw(blackoutTexture,canvas.getWidth()/4,0,canvas.getWidth()*2/4,canvas.getHeight());
-//////			batch.draw(new Texture("assets/blackout.png"),new Vector2(canvas.getWidth()*2/4,canvas.getHeight()),c);
 			blackoutSprite.draw(batch);
-//
 			batch.end();
-//			Texture t;
-//			Sprite s = new Sprite (blackoutTexture);
-//			blackoutTexture.
-//			canvas.draw(blackoutTexture,Color.WHITE,canvas.getWidth()/4,0,canvas.getWidth()*2/4,canvas.getHeight());
 		}
 
-
-//		if (energyLevel >=-1){
-//			if (flashing){
-//				flashing = false;
-//			}else{
-//				flashing = true;
-//			}
-//		}
 		if (debug) {
 			canvas.beginDebug();
 			for(GameObject obj : objects) {
