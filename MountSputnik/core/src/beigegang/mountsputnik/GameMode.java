@@ -50,7 +50,7 @@ public class GameMode extends ModeController {
 	//dynamically
 	private static final String LEVEL_NAMES[] = {"canyon", "tutorial"};//,"mountain","sky","space","tutorial"}; <-- Add the rest of these in as they are given assets
 	private static final String LAVA_FILE = "assets/testlavatexture.png"; //TODO: make this a better texture
-	private static final String UI_FILE = "assets/HUD.png";
+	private static final String UI_FILE = "assets/HUD2.png";
 	private static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
 	private static final String HANDHOLD_TEXTURES[] = {"assets/canyon/Handhold1.png", "assets/canyon/Handhold2.png"};
 	private static final String PART_TEXTURES[] = {"Ragdoll/Torso.png", "Ragdoll/Head.png", "Ragdoll/Hips.png",
