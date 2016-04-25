@@ -25,11 +25,11 @@ public class Movement {
 
     /**
      * Applies torso force directed by player if body is hooked to 1+ handholds
-     * @param force - strength of force to apply (not directed)
      * @author Jacob
      */
-    public static void applyTorsoForceIfApplicable(Vector2 force) {
+    public static void applyTorsoForceIfApplicable() {
         if (TORSO_MODE){
+            Vector2 force = calcTorsoForce();
             if (isGripping(FOOT_LEFT)|| isGripping(FOOT_RIGHT) || isGripping(HAND_LEFT) || isGripping(HAND_RIGHT)){
                 InputController input = InputController.getInstance();
                 float h = input.getHorizontalR();
@@ -39,6 +39,21 @@ public class Movement {
 
         }
     }
+
+    private static Vector2 calcTorsoForce() {
+        Vector2 forceR = new Vector2(0,0);
+        forceR.x = CONSTANT_X_FORCE * 2f;
+        forceR.y = CONSTANT_X_FORCE * 2f;
+        int counter = 0;
+        counter = isGripping(HAND_LEFT)?counter+1:counter;
+        counter = isGripping(HAND_RIGHT)?counter+1:counter;
+        counter = isGripping(FOOT_LEFT)?counter+1:counter;
+        counter = isGripping(FOOT_RIGHT)?counter+1:counter;
+        if (counter > 2) counter +=2;
+        forceR.scl(counter);
+        return forceR;
+    }
+
     private static void applyIfUnderLimit(int part, Vector2 force, float h, float v) {
         Vector2 vect = character.parts.get(part).body.getLinearVelocity();
         character.parts.get(part).body.applyForceToCenter(force.x*h, 0, true);
@@ -352,6 +367,8 @@ public class Movement {
         float aa = findAbsoluteAngleOfPart(root, shoot);
         if (isForceDiagonal(v, h)) {
             rotateLimbPiece(v, h, FOREARM_RIGHT, HAND_RIGHT);
+            return null;
+
         }
 
         if (v > .2) {//up
@@ -507,6 +524,8 @@ public class Movement {
         if (isForceDiagonal(v, h)) {
             //do calculations for diagonal direction
             rotateLimbPiece(v, h, SHIN_RIGHT, FOOT_RIGHT);
+            return null;
+
 
         }
         if (v > .2) {//up

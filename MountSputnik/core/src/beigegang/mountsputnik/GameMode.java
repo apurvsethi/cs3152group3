@@ -329,7 +329,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	 * path within the assets folder: the general level description will be in "Levels/[levelName]/level.json" 
 	 * and the individual blocks will be in "Levels/[levelName]/block[x].json" where x is a whole number.
 	 * 
-	 * The general level description contains such things as the phsyics constants like gravity or oxygen
+	 * The general level description contains such things as the physics constants like gravity or oxygen
 	 * the desired height of the level, the total number of different blocks usable in generation, and 
 	 * descriptors of certain level-wide obstacles like rising lava, if they exist. 
 	 * 
@@ -360,7 +360,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		Vector2 gravity = new Vector2(0,levelFormat.getFloat("gravity"));
 		oxygen = levelFormat.getFloat("oxygen");
 		float remainingHeight = levelFormat.getFloat("height");
-		System.out.println(remainingHeight);
 		float currentHeight=0f;
 		int diffBlocks = levelFormat.getInt("uniqueBlocks");
 		int filler = levelFormat.getInt("generalFillerSize");
@@ -570,7 +569,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 		}
 		if (TORSO_MODE){
-			Movement.applyTorsoForceIfApplicable(calcTorsoForce());
+			Movement.applyTorsoForceIfApplicable();
 		}
 		//bounding velocities
 		boundBodyVelocities();
@@ -587,7 +586,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			canvas.setCameraPosition(canvas.getWidth()/2, canvas.getHeight()/2);
 		}
 		if(canvas.getCamera().position.y + canvas.getHeight()/2 > levelFormat.getFloat("height")*scale.y){
-			canvas.setCameraPosition(canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y-canvas.getHeight()/2); 
+			canvas.setCameraPosition(canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y-canvas.getHeight()/2);
 		}
 		
 //		for(int e : EXTREMITIES){
@@ -696,19 +695,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		}
 	}
 
-	private Vector2 calcTorsoForce() {
-		Vector2 forceR = new Vector2(0,0);
-		forceR.x = CONSTANT_X_FORCE * 2f;
-		forceR.y = CONSTANT_X_FORCE * 2f;
-		int counter = 0;
-		counter = isGripping(HAND_LEFT)?counter+1:counter;
-		counter = isGripping(HAND_RIGHT)?counter+1:counter;
-		counter = isGripping(FOOT_LEFT)?counter+1:counter;
-		counter = isGripping(FOOT_RIGHT)?counter+1:counter;
-		if (counter > 2) counter +=2;
-		forceR.scl(counter);
-		return forceR;
-	}
+
 
 	/** Grips a handhold by adding a revolute joint between the handhold and the extremity **/ 
 	public void grip(ExtremityModel e, HandholdModel h){
@@ -1008,7 +995,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		if (progressLevel > 0) {
 			canvas.draw(progressTextures[progressLevel-1], Color.BLUE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 		}
-		System.out.println(v.y + " " + maxHandhold);
 		canvas.draw(progressBackgroundTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 		canvas.end();
 
