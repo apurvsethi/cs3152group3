@@ -492,7 +492,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		Random rand = new Random();
 		Rectangle bound = new Rectangle(12,20,2,4);
 		obstacleZone = new ObstacleZone(handholdTextures[0].getTexture(),handholdTextures[0].getTexture(),
-				10, 2f, bound);
+				0, 2f, bound);
 
 		obstacles.add(obstacleZone);
 //		try{
@@ -739,7 +739,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 //					oz.isTriggered()){
 			//couldnt figure out why viewHeight<oz.getBounds().y was needed...
 
-			if(oz.canSpawnObstacle()){
+			if(oz.canSpawnObstacle()&& viewHeight < oz.getBounds().y){
 				obstacle = new ObstacleModel(oz.getObstacleTexture(), 1f, scale);
 				obstacle.setX(oz.getBounds().x+rand.nextFloat()*oz.getBounds().width);
 				obstacle.setY(oz.getBounds().y + rand.nextFloat()*oz.getBounds().height);
