@@ -4,6 +4,7 @@ import static beigegang.mountsputnik.Constants.*;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
  * A class to contain information about obstacle spawning zones
@@ -18,16 +19,23 @@ public class ObstacleZone {
 	private int spawnFrequency;
 	private Rectangle bounds;
 	private Texture obstacleTexture;
-	private Texture warningTexture;
+	private TextureRegion warningTexture;
 	private boolean triggered = false;
 	private boolean triggeredAlready = false;
-	private int ticksSinceLastSpawn;
+	public int ticksSinceLastSpawn;
 	private boolean releasedOnce = false;
+	private float obstX;
+	private float obstY;
+	public float getObstX(){ return obstX;}
+	public float getObstY(){ return obstY;}
+	public void setObstX(float x){ obstX = x;}
+	public void setObstY(float y){ obstY = y;}
+
 	//make sure an obstacle is released from this zone at least once!
 	public void releasedAnObstacle(){
 		releasedOnce = true;
 	}
-	public Texture getWarningTexture() {
+	public TextureRegion getWarningTexture() {
 		return warningTexture;
 	}
 	//returns if this obstaclezone should be trying to release an obstacle
@@ -97,7 +105,7 @@ public class ObstacleZone {
 	 * @param freq obstacle spawn frequency (in frames)
 	 * @param bounds the bounds of this zone
 	 */
-	public ObstacleZone(Texture t, Texture tr, float minHeight, int freq, Rectangle bounds){
+	public ObstacleZone(Texture t, TextureRegion tr, float minHeight, int freq, Rectangle bounds){
 		minSpawnHeight = minHeight;
 		maxSpawnHeight = minSpawnHeight + SCREEN_HEIGHT;
 		spawnFrequency = freq;
@@ -116,7 +124,7 @@ public class ObstacleZone {
 	 * @param freq obstacle spawn frequency (in seconds)
 	 * @param bounds the bounds of this zone
 	 */
-	public ObstacleZone(Texture t, Texture tr, float minHeight, float freq, Rectangle bounds){
+	public ObstacleZone(Texture t, TextureRegion tr, float minHeight, float freq, Rectangle bounds){
 
 		minSpawnHeight = minHeight;
 		spawnFrequency = (int)(freq/WORLD_STEP);
