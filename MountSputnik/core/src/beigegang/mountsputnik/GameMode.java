@@ -635,12 +635,12 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		Movement.applyTorsoForceIfApplicable();
 		//bounding velocities
 		boundBodyVelocities();
+		HandholdModel[] glowingHandholds = glowHandholds();
 
 		if (justReleased.size > 0 || timestep == 0) {
-			snapLimbsToHandholds(input);
+			snapLimbsToHandholds(input,glowingHandholds);
 		}
 		
-		glowHandholds();
 
 		canvas.setCameraPosition(canvas.getWidth() / 2,
 						character.parts.get(CHEST).getBody().getPosition().y*scale.y);
@@ -899,21 +899,39 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	 * //	 * implement a calculation which says that handhold distance <= MAX_ARM_DIST or MAX_LEG_DIST.
 	 * @author Jacob
 	 */
-	private void glowHandholds() {
-		for (GameObject obj : objects) {
-			if (obj.getType() == GameObject.ObjectType.HANDHOLD) {
-				HandholdModel h = (HandholdModel) obj;
-				h.unglow();
-				for (int e : EXTREMITIES) {
+	private HandholdModel[] glowHandholds() {
+		HandholdModel[] newGlowingHandholds = new HandholdModel[4];
+		for (int i = 0; i<EXTREMITIES.length; i++) {
+			HandholdModel closest = null;
+			double dist;
+			double closestdist = HANDHOLD_SNAP_RADIUS + 1;
+
+			for (GameObject obj : objects) {
+				if (obj.getType() == GameObject.ObjectType.HANDHOLD) {
+					HandholdModel h = (HandholdModel) obj;
+					if (i<1)
+						h.unglow();
+
 					for (Vector2 snapPoint : h.snapPoints) {
-						if (closeEnough(e, snapPoint)) {
-							h.glow();
-							break;
+						dist = distanceFrom(EXTREMITIES[i], snapPoint);
+						if (dist<=HANDHOLD_SNAP_RADIUS) {
+							closest = closestdist > dist ? h:closest;
+							closestdist = closestdist > dist ? dist:closestdist;
+
 						}
 					}
+
 				}
 			}
+
+			newGlowingHandholds[i] = closest;
+
 		}
+		for (HandholdModel g : newGlowingHandholds){
+			if (g != null) g.glow();
+		}
+		return newGlowingHandholds;
+
 	}
 
 	/**
@@ -923,15 +941,15 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 	 * @param input
      */
-	private void snapLimbsToHandholds(InputController input) {
+	private void snapLimbsToHandholds(InputController input, HandholdModel[] hs) {
 		for (int i : justReleased) {
-			snapIfPossible(i);
+			snapIfPossible(i, hs);
 		}
 		if (timestep == 0) {
-			snapIfPossible(FOOT_LEFT);
-			snapIfPossible(HAND_LEFT);
-			snapIfPossible(HAND_RIGHT);
-			snapIfPossible(FOOT_RIGHT);
+			snapIfPossible(FOOT_LEFT,hs);
+			snapIfPossible(HAND_LEFT,hs);
+			snapIfPossible(HAND_RIGHT,hs);
+			snapIfPossible(FOOT_RIGHT,hs);
 
 		}
 	}
@@ -941,20 +959,32 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	 * @param limb - limb to snap if possible
 	 * @author Jacob
 	 * */
-	private void snapIfPossible(int limb) {
-		for (GameObject obj : objects) {
-			if (obj.getType() == GameObject.ObjectType.HANDHOLD) {
-				HandholdModel h = (HandholdModel) obj;
-				for (Vector2 snapPoint : h.snapPoints) {
-					if (closeEnough(limb, snapPoint)) {
-						character.parts.get(limb).setPosition(snapPoint);
-						((ExtremityModel) character.parts.get(limb)).grip();
-						grip(((ExtremityModel) character.parts.get(limb)), h); 
-					}
+	private void snapIfPossible(int limb, HandholdModel[] hs) {
+//		for (GameObject obj : objects) {
+//			if (obj.getType() == GameObject.ObjectType.HANDHOLD) {
+//				HandholdModel h = (HandholdModel) obj;
+		HandholdModel closest = null;
+		double dist;
+		double closestdist = HANDHOLD_SNAP_RADIUS + 1;
+		Vector2 closestSnapPoint = new Vector2(0,0);
+		for (HandholdModel h: hs) {
+			if (h == null) continue;
+ 			for (Vector2 snapPoint : h.snapPoints) {
+				dist = distanceFrom(limb, snapPoint);
+				if (dist <= HANDHOLD_SNAP_RADIUS){
+					closest = closestdist > dist ? h:closest;
+					closestdist = closestdist > dist ? dist:closestdist;
+					closestSnapPoint = snapPoint;
 				}
-
 			}
 		}
+		if (closest !=null){
+			character.parts.get(limb).setPosition(closestSnapPoint);
+			((ExtremityModel) character.parts.get(limb)).grip();
+			grip(((ExtremityModel) character.parts.get(limb)), closest);
+		}
+//			}
+//		}
 	}
 
 	/**
@@ -972,7 +1002,10 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		Vector2 dist = new Vector2 (character.parts.get(limb).getPosition().sub(snapPoint));
 		return (Math.sqrt(dist.x * dist.x + dist.y * dist.y) <= HANDHOLD_SNAP_RADIUS);
 	}
-
+	private double distanceFrom(int limb, Vector2 snapPoint) {
+		Vector2 dist = new Vector2 (character.parts.get(limb).getPosition().sub(snapPoint));
+		return Math.sqrt(dist.x * dist.x + dist.y * dist.y);
+	}
 
 	public PooledList<GameObject> getGameObjects(){
 		return objects;
