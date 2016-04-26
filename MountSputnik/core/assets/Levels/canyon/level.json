@@ -1,10 +1,9 @@
 {    
-
 	"difficulty": "easy",
-	"height": 50,
+	"height": 150,
 	"uniqueBlocks": 9,
-	"generalFillerSize": 0,
-	"fillerBlocks": 0,
+	"generalFillerSize": 1,
+	"fillerBlocks": 2,
     "oxygen": 1,
     "gravity": -9.8,
     "background": "canyon", 
