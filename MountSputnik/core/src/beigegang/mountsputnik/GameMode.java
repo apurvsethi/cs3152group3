@@ -448,7 +448,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 		Movement.setCharacter(character);
 		
-		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
+		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),glowTexture.getTexture(), 
 				character.parts.get(HAND_LEFT).getPosition().x, character.parts.get(HAND_LEFT).getPosition().y,
 				new Vector2(.3f, .3f), scale);
 		handhold.fixtureDef.filter.maskBits = 0;
@@ -459,7 +459,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		handhold.setBodyType(BodyDef.BodyType.StaticBody);
 		objects.add(handhold);
 		
-		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
+		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),glowTexture.getTexture(), 
 				character.parts.get(HAND_RIGHT).getPosition().x, character.parts.get(HAND_RIGHT).getPosition().y,
 				new Vector2(.3f, .3f), scale);
 		handhold.fixtureDef.filter.maskBits = 0;
@@ -470,7 +470,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		handhold.setBodyType(BodyDef.BodyType.StaticBody);
 		objects.add(handhold);
 		
-		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
+		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),glowTexture.getTexture(), 
 				character.parts.get(FOOT_LEFT).getPosition().x, character.parts.get(FOOT_LEFT).getPosition().y,
 				new Vector2(.3f, .3f), scale);
 		handhold.fixtureDef.filter.maskBits = 0;
@@ -481,7 +481,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		handhold.setBodyType(BodyDef.BodyType.StaticBody);
 		objects.add(handhold);
 		
-		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
+		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(), glowTexture.getTexture(), 
 				character.parts.get(FOOT_RIGHT).getPosition().x, character.parts.get(FOOT_RIGHT).getPosition().y,
 				new Vector2(.3f, .3f), scale);
 		handhold.fixtureDef.filter.maskBits = 0;
