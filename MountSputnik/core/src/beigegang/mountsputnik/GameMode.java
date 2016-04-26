@@ -106,10 +106,13 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	private static TextureRegion warningTexture;
 	private static String PROGRESS_BACKGROUND= "assets/Progress Bar.png";
 	private static TextureRegion progressBackgroundTexture;
+	private static String LOW_ENERGY_HALO= "assets/redhalo.png";
+	private static TextureRegion lowEnergyHalo;
 	private static String PROGRESS_BAR= "Progress Chalk Bar.png";
 	private static TextureRegion progressBarTexture;
 	private Sprite blackoutSprite = new Sprite(new Texture(BLACKOUT));
 	private Sprite warningSprite = new Sprite(new Texture(WARNING_TEXTURE));
+	private Sprite lowEnergySprite = new Sprite(new Texture(LOW_ENERGY_HALO));
 	private static SpriteBatch batch = new SpriteBatch();
 	private static int progressLevel = 0;
 	/** The reader to process JSON files */
@@ -193,6 +196,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		assets.add(PROGRESS_BAR);
 		manager.load(WARNING_TEXTURE,Texture.class);
 		assets.add(WARNING_TEXTURE);
+		manager.load(LOW_ENERGY_HALO,Texture.class);
+		assets.add(LOW_ENERGY_HALO);
 	}
 
 	/**
@@ -239,6 +244,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		fatigueTexture = createTexture(manager,FATIGUE_BAR,false);
 		progressBackgroundTexture = createTexture(manager,PROGRESS_BACKGROUND,false);
 		progressBarTexture = createTexture(manager,PROGRESS_BAR,false);
+		lowEnergyHalo = createTexture(manager,LOW_ENERGY_HALO,false);
 		assetState = AssetState.COMPLETE;
 
 	}
@@ -327,6 +333,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		//TODO: make this based on current level, rather than hardcoded test
 		populateLevel();
 		blackoutSprite.setBounds(canvas.getWidth()/4,0,canvas.getWidth()*2/4,canvas.getHeight());
+		lowEnergySprite.setBounds(0, 0, canvas.getWidth() / 4, canvas.getHeight());
 
 	}
 
@@ -982,12 +989,48 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		canvas.draw(ground, Color.WHITE, canvas.getWidth() / 4, 0, canvas.getWidth() / 2, canvas.getHeight() / 8);
 		canvas.draw(UI, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 		canvas.draw(LOGO, Color.FIREBRICK, 0, canvas.getHeight() * 5.4f/6 + y, canvas.getWidth() / 4, canvas.getHeight() * .5f/6);
-		canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-		canvas.draw(fatigueTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 		if (progressLevel > 0) {
 			canvas.draw(progressTextures[progressLevel-1], Color.BLUE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 		}
 		canvas.draw(progressBackgroundTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+
+		float f = character.getEnergy();
+		canvas.end();
+		if ( f<= 40){
+			lowEnergySprite.setAlpha(.5f + Math.min((40-f)/f,.5f));
+			batch.begin();
+			lowEnergySprite.draw(batch);
+			batch.end();
+//			canvas.draw(lowEnergyHalo,Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+
+			flashing2 --;
+			canvas.begin();
+			if (flashing2<f/4){
+				canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.BLACK, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+
+				if (flashing2<=0)
+					flashing2 = Math.round(f/2);
+			}else {
+				canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+//
+//				blackoutSprite.setAlpha((Math.abs(f - 100f) / 100f - .5f) * 1.5f);
+//				batch.begin();
+//				blackoutSprite.draw(batch);
+//				batch.end();
+			}
+		}else{
+			canvas.begin();
+			canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+
+		}
+		canvas.draw(fatigueTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+
+
+
+
+
+
+
 		canvas.end();
 
 		canvas.begin();
@@ -1007,6 +1050,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 					canvas.getHeight();
 			canvas.draw(risingObstacle.getTexture(), Color.WHITE, canvas.getWidth() / 4, lavaOrigin, canvas.getWidth() * 3 / 4, canvas.getHeight());
 		}
+		canvas.end();
 		if (obstacles.size > 0) {
 			for (ObstacleZone oz : obstacleWarnings) {
 				warningSprite.setBounds(oz.getObstX() * scale.x -  1 * scale.x, canvas.getCamera().position.y + canvas.getHeight() / 2 - 100f, 2f * scale.x , 100f);
@@ -1016,20 +1060,9 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 				batch.end();
 			}
 		}
+		canvas.begin();
+
 		canvas.end();
-		float f = character.getEnergy();
-		if ( f<= 40){
-//			if (f<=10 && flashing2<f){
-//				flashing2 --;
-//				if (flashing2==0)
-//					flashing2 = Math.round(f)*2;
-//			}else {
-				blackoutSprite.setAlpha((Math.abs(f - 100f) / 100f - .5f) * 1.5f);
-				batch.begin();
-				blackoutSprite.draw(batch);
-				batch.end();
-//			}
-		}
 
 		if (debug) {
 			canvas.beginDebug();
