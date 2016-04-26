@@ -29,7 +29,7 @@ public class GameMode extends ModeController {
 	private boolean flashing = false;
 	private int flashing2 = 10;
 	/** A string representing the name of the current level */
-	private String levelName = "tutorial"; 
+	private String levelName = "canyon"; 
 	
 	/**
 	 * Track asset loading from all instances and subclasses
@@ -395,6 +395,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 				currentHeight += levelPiece.getInt("size");
 			}
 		}
+		System.out.println("level Blocks: " + levelBlocks.toString());
 		
 		JsonValue lava = levelFormat.get("lava");
 		if(lava.getBoolean("present")){
@@ -425,6 +426,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		objects.add(character.parts.get(HIPS));
 
 		Movement.setCharacter(character);
+
 	}
 	
 	/** 
@@ -454,8 +456,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			try{
 				handhold.setBodyType(BodyDef.BodyType.KinematicBody);
 				JsonValue movement = handholdDesc.get("movement");
-				handhold.setStartPoint(movement.getFloat("startX"),movement.getFloat("startY"));
-				handhold.setEndPoint(movement.getFloat("endX"),movement.getFloat("endY"));
+				handhold.setStartPoint(movement.getFloat("startX"),movement.getFloat("startY")+currentHeight);
+				handhold.setEndPoint(movement.getFloat("endX"),movement.getFloat("endY")+currentHeight);
 				float speed = movement.getFloat("speed"), 
 					tx = handhold.getEndPoint().x - handhold.getStartPoint().x,
 					ty = handhold.getEndPoint().y - handhold.getStartPoint().y,
@@ -477,28 +479,31 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 		JsonValue obstacleDesc;
 		try{
-			obstacleDesc = levelPiece.get("obstacles").child();
-			Rectangle bound;
-			while(obstacleDesc != null){
-				bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY")+currentHeight,
-						obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
-				//TODO: Set texture to something other than null once we have textures for obstacles
-				obstacleZone = new ObstacleZone(null, null, currentHeight, obstacleDesc.getInt("frequency"), bound);
-				obstacles.add(obstacleZone);
-				obstacleDesc = obstacleDesc.next();
-			}
+			obstacleDesc = levelPiece.get("obstacles").child();}
+		catch(Exception e){return;}
+		Rectangle bound;
+		while(obstacleDesc != null){
+			bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY")+currentHeight,
+					obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
+			//TODO: Set texture to something other than null once we have textures for obstacles
+			obstacleZone = new ObstacleZone(handholdTextures[0].getTexture(), null, currentHeight, obstacleDesc.getInt("frequency"), bound);
+			obstacles.add(obstacleZone);
+			obstacleDesc = obstacleDesc.next();
 		}
-		catch(Exception e){}
 		
+
+
 		JsonValue staticDesc;
 		try{
 			staticDesc = levelPiece.get("static").child();
 			ObstacleModel obstacle;
 			while(staticDesc != null){
 				//TODO: Set texture to something other than null once we have textures for obstacles
-				obstacle = new ObstacleModel(null, staticDesc.getFloat("size"), scale);
+
+				obstacle = new ObstacleModel(handholdTextures[0].getTexture(), staticDesc.getFloat("size"), scale);
 				obstacle.setX(staticDesc.getFloat("x"));
-				obstacle.setY(staticDesc.getFloat("y"));
+				obstacle.setY(staticDesc.getFloat("y")+currentHeight);
+
 				obstacle.setBodyType(BodyType.StaticBody);
 				obstacle.activatePhysics(world);
 				objects.add(obstacle);
@@ -514,6 +519,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		obstacleZone = new ObstacleZone(handholdTextures[0].getTexture(),warningTexture,
 				0, 2f, bound);
 	}
+
 
 	/**
 	 * This method computes an order for the selected limbs based on previous timesteps and the first limb in nextToPress
@@ -602,7 +608,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 //				 else if((e == FOOT_LEFT || e == FOOT_RIGHT) &&
 //						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > LEG_UNGRIP_LENGTH)
 //					 ungrip(extremity);
-			}
+			 }
 
 		}
 		
