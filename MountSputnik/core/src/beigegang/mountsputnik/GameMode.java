@@ -514,9 +514,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		Rectangle bound = new Rectangle(12,20,2,4);
 		obstacleZone = new ObstacleZone(handholdTextures[0].getTexture(),warningTexture,
 				0, 2f, bound);
-
-		obstacles.add(obstacleZone);
-
 	}
 
 	/**
