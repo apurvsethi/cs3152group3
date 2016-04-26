@@ -468,7 +468,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			}
 			catch(Exception e){handhold.setBodyType(BodyDef.BodyType.StaticBody);}
 			objects.add(handhold);
-//			maxHandhold = Math.max(maxHandhold,handhold.getY());
+			maxHandhold = Math.max(maxHandhold,handhold.getY());
 
 			try{handhold.setCrumble(handholdDesc.getFloat("crumble"));}
 			catch(Exception e){handhold.setCrumble(0);}
@@ -493,6 +493,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		}
 		
 
+
 		JsonValue staticDesc;
 		try{
 			staticDesc = levelPiece.get("static").child();
@@ -511,6 +512,13 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			}
 		}
 		catch(Exception e){}
+	}
+	//TODO delete when there are actually levels!!!
+	private void makeTestLevel2(float currentHeight) {
+		Random rand = new Random();
+		Rectangle bound = new Rectangle(12,20,2,4);
+		obstacleZone = new ObstacleZone(handholdTextures[0].getTexture(),warningTexture,
+				0, 2f, bound);
 	}
 
 
