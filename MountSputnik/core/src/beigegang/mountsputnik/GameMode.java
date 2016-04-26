@@ -478,27 +478,38 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 		JsonValue obstacleDesc;
 		try{
-			obstacleDesc = levelPiece.get("obstacles").child();}
-		catch(Exception e){return;}
-		Rectangle bound;
-//		while(obstacleDesc != null){
-//			bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY")+currentHeight,
-//					obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
-//			//TODO: Set texture to something other than null once we have textures for obstacles
-//			obstacleZone = new ObstacleZone(null, null, currentHeight, obstacleDesc.getInt("frequency"), bound);
-//			obstacles.add(obstacleZone);
-//			obstacleDesc = obstacleDesc.next();
-//		}
-	}
-	//TODO delete when there are actually levels!!!
-	private void makeTestLevel2(float currentHeight) {
-		Random rand = new Random();
-		Rectangle bound = new Rectangle(12,20,2,4);
-		obstacleZone = new ObstacleZone(handholdTextures[0].getTexture(),warningTexture,
-				0, 2f, bound);
 
-		obstacles.add(obstacleZone);
+		obstacleDesc = levelPiece.get("obstacles").child();
 
+			obstacleDesc = levelPiece.get("obstacles").child();
+			Rectangle bound;
+			while(obstacleDesc != null){
+				bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY")+currentHeight,
+						obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
+				//TODO: Set texture to something other than null once we have textures for obstacles
+				obstacleZone = new ObstacleZone(null, null, currentHeight, obstacleDesc.getInt("frequency"), bound);
+				obstacles.add(obstacleZone);
+				obstacleDesc = obstacleDesc.next();
+			}
+		}
+		catch(Exception e){}
+
+		JsonValue staticDesc;
+		try{
+			staticDesc = levelPiece.get("static").child();
+			ObstacleModel obstacle;
+			while(staticDesc != null){
+				//TODO: Set texture to something other than null once we have textures for obstacles
+				obstacle = new ObstacleModel(null, staticDesc.getFloat("size"), scale);
+				obstacle.setX(staticDesc.getFloat("x"));
+				obstacle.setY(staticDesc.getFloat("y"));
+				obstacle.setBodyType(BodyType.StaticBody);
+				obstacle.activatePhysics(world);
+				objects.add(obstacle);
+				staticDesc = staticDesc.next();
+			}
+		}
+		catch(Exception e){}
 	}
 
 	/**
