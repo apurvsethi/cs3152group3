@@ -21,6 +21,8 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.utils.*;
 
+import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.Random;
 
 public class GameMode extends ModeController {
@@ -48,11 +50,14 @@ public class GameMode extends ModeController {
 	 */
 	//We need to preload every single texture, regardless of which level we're currently using. Loading can't be
 	//dynamically
-	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "canyon", "canyon", "canyon", "canyon", "canyon"};//,"mountain","sky","space"}; <-- Add the rest of these in as they are given assets
+	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "canyon", "canyon", "canyon", "sky", "canyon"};//,"mountain","sky","space"}; <-- Add the rest of these in as they are given assets
 	private static final String LAVA_FILE = "assets/testlavatexture.png"; //TODO: make this a better texture
-	private static final String UI_FILE = "assets/HUD2.png";
+	private static final String UI_FILE = "assets/HUD4.png";
+	private static final String[] LEVEL_LABEL_FILES = {"assets/Tutorial.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Skycloud.png", "assets/Canyon.png"};
 	private static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
-	private static final String HANDHOLD_TEXTURES[] = {"assets/canyon/Handhold1.png", "assets/canyon/Handhold2.png"};
+	private static final String GLOW_FILE = "assets/glow.png"; 
+	private static final HashMap<String,Integer> NUM_HANDHOLDS = new HashMap<String,Integer>();  
+	//private static final String HANDHOLD_TEXTURES[] = {"assets/canyon/Handhold1.png", "assets/canyon/Handhold2.png"};
 	private static final String PART_TEXTURES[] = {"Ragdoll/Torso.png", "Ragdoll/Head.png", "Ragdoll/Hips.png",
 			"Ragdoll/ArmLeft.png", "Ragdoll/ArmRight.png", "Ragdoll/ForearmLeft.png", "Ragdoll/ForearmRight.png",
 			"Ragdoll/HandLeftUngripped.png", "Ragdoll/HandRightUngripped.png", "Ragdoll/ThighLeft.png",
@@ -91,13 +96,19 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	private static TextureRegion midground;
 	private static TextureRegion tile;
 	private static TextureRegion UI;
+	private static TextureRegion CANYON;
 	private static TextureRegion LOGO;
 	private static TextureRegion edge;
 	private static TextureRegion ground;
 	private static TextureRegion lavaTexture;
+	private static TextureRegion glowTexture; 
+	private static TextureRegion staticObstacle; 
+	private static TextureRegion fallingObstacle; 
 	private static TextureRegion[] partTextures = new TextureRegion[PART_TEXTURES.length];
 	private static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length];
-	private static TextureRegion[] handholdTextures = new TextureRegion[HANDHOLD_TEXTURES.length];
+	private static TextureRegion[] handholdTextures;
+	private static TextureRegion[] levelLabels = new TextureRegion[LEVEL_LABEL_FILES.length];
+
 	private static TextureRegion blackoutTexture;
 	private static String BLACKOUT = "assets/blackout.png";
 	private static String FATIGUE_BAR = "Energy/Fatigue Gauge.png";
@@ -106,10 +117,13 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	private static TextureRegion warningTexture;
 	private static String PROGRESS_BACKGROUND= "assets/Progress Bar.png";
 	private static TextureRegion progressBackgroundTexture;
+	private static String LOW_ENERGY_HALO= "assets/redhalo.png";
+	private static TextureRegion lowEnergyHalo;
 	private static String PROGRESS_BAR= "Progress Chalk Bar.png";
 	private static TextureRegion progressBarTexture;
 	private Sprite blackoutSprite = new Sprite(new Texture(BLACKOUT));
 	private Sprite warningSprite = new Sprite(new Texture(WARNING_TEXTURE));
+	private Sprite lowEnergySprite = new Sprite(new Texture(LOW_ENERGY_HALO));
 	private static SpriteBatch batch = new SpriteBatch();
 	private static int progressLevel = 0;
 	/** The reader to process JSON files */
@@ -145,12 +159,22 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			assets.add("assets/"+name+"/background.png");
 			manager.load("assets/"+name+"/Midground.png", Texture.class);
 			assets.add("assets/"+name+"/Midground.png");
-			manager.load("assets/"+name+"/SurfaceLight.png", Texture.class);
-			assets.add("assets/"+name+"/SurfaceLight.png");
-			manager.load("assets/"+name+"/SurfaceEdgeLight.png", Texture.class);
-			assets.add("assets/"+name+"/SurfaceEdgeLight.png");
+			manager.load("assets/"+name+"/Surface.png", Texture.class);
+			assets.add("assets/"+name+"/Surface.png");
+			manager.load("assets/"+name+"/SurfaceEdge.png", Texture.class);
+			assets.add("assets/"+name+"/SurfaceEdge.png");
 			manager.load("assets/"+name+"/LevelStart.png", Texture.class);
 			assets.add("assets/"+name+"/LevelStart.png");
+			manager.load("assets/"+name+"/StaticObstacle.png", Texture.class);
+			assets.add("assets/"+name+"/StaticObstacle.png");
+			manager.load("assets/"+name+"/FallingRock.png", Texture.class);
+			assets.add("assets/"+name+"/FallingRock.png");
+		
+
+		}
+		for (String name:LEVEL_LABEL_FILES){
+			manager.load(name,Texture.class);
+			assets.add(name);
 		}
 		for (int i = 1; i<=ENERGY_TEXTURES.length; i++){
 			String name = "Energy/e" + i + ".png";
@@ -166,14 +190,19 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		}
 		manager.load(UI_FILE, Texture.class);
 		assets.add(UI_FILE);
+
 		manager.load(LOGO_FILE, Texture.class);
 		assets.add(LOGO_FILE);
 		manager.load(LAVA_FILE, Texture.class);
 		assets.add(LAVA_FILE);
+		manager.load(GLOW_FILE, Texture.class);
+		assets.add(GLOW_FILE);
 
-		for (String HANDHOLD_TEXTURE : HANDHOLD_TEXTURES) {
-			manager.load(HANDHOLD_TEXTURE, Texture.class);
-			assets.add(HANDHOLD_TEXTURE);
+		for (Entry<String, Integer> entry : NUM_HANDHOLDS.entrySet()){
+			for(int i = 1; i <= entry.getValue(); i++){
+				manager.load("assets/"+entry.getKey()+"/Handhold"+i+".png",Texture.class);
+				assets.add("assets/"+entry.getKey()+"/Handhold"+i+".png");
+			}
 		}
 		for (String PART_TEXTURE : PART_TEXTURES) {
 			manager.load(PART_TEXTURE, Texture.class);
@@ -193,6 +222,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		assets.add(PROGRESS_BAR);
 		manager.load(WARNING_TEXTURE,Texture.class);
 		assets.add(WARNING_TEXTURE);
+		manager.load(LOW_ENERGY_HALO,Texture.class);
+		assets.add(LOW_ENERGY_HALO);
 	}
 
 	/**
@@ -210,13 +241,21 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 		background = createTexture(manager, "assets/"+levelName+"/background.png", false);
 		midground = createTexture(manager, "assets/"+levelName+"/Midground.png", false);
-		tile = createTexture(manager, "assets/"+levelName+"/SurfaceLight.png", false);
+		tile = createTexture(manager, "assets/"+levelName+"/Surface.png", false);
 		UI = createTexture(manager, UI_FILE, false);
 		LOGO = createTexture(manager, LOGO_FILE, false);
-		edge = createTexture(manager, "assets/"+levelName+"/SurfaceEdgeLight.png", false);
+		edge = createTexture(manager, "assets/"+levelName+"/SurfaceEdge.png", false);
 		ground = createTexture(manager, "assets/"+levelName+"/LevelStart.png", false);
 		lavaTexture = createTexture(manager, LAVA_FILE, false);
-		
+		glowTexture = createTexture(manager, GLOW_FILE, false); 
+		staticObstacle = createTexture(manager, "assets/"+levelName+"/StaticObstacle.png", false); 
+		fallingObstacle = createTexture(manager, "assets/"+levelName+"/FallingRock.png", false); 
+
+		for (int i = 0;  i < LEVEL_LABEL_FILES.length; i++){
+			levelLabels[i] = createTexture(manager, LEVEL_LABEL_FILES[i], false);
+
+		}
+
 		for (int i = 0; i < PART_TEXTURES.length; i++) {
 			partTextures[i] = createTexture(manager, PART_TEXTURES[i], false);
 		}
@@ -224,9 +263,10 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		for (int i = 0; i < TUTORIAL_TEXTURES.length; i++) {
 			tutorialTextures[i] = createTexture(manager, TUTORIAL_TEXTURES[i], false);
 		}
-
-		for (int i = 0; i < HANDHOLD_TEXTURES.length; i++) {
-			handholdTextures[i] = createTexture(manager, HANDHOLD_TEXTURES[i], false);
+		
+		handholdTextures = new TextureRegion[NUM_HANDHOLDS.get(levelName)];
+		for (int i = 1; i <= NUM_HANDHOLDS.get(levelName); i++) {
+			handholdTextures[i-1] = createTexture(manager, "assets/"+levelName+"/Handhold"+i+".png", false);
 		}
 
 		for (int i = 0; i < ENERGY_TEXTURES.length; i++) {
@@ -239,6 +279,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		fatigueTexture = createTexture(manager,FATIGUE_BAR,false);
 		progressBackgroundTexture = createTexture(manager,PROGRESS_BACKGROUND,false);
 		progressBarTexture = createTexture(manager,PROGRESS_BAR,false);
+		lowEnergyHalo = createTexture(manager,LOW_ENERGY_HALO,false);
 		assetState = AssetState.COMPLETE;
 
 	}
@@ -303,6 +344,9 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		font.setColor(Color.RED);
 		font.getData().setScale(5);
 
+		NUM_HANDHOLDS.put("canyon", 1); 
+		NUM_HANDHOLDS.put("tutorial",4); 
+		NUM_HANDHOLDS.put("sky", 1); 
 
 	}
 
@@ -313,7 +357,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		failed = false;
 		assetState = AssetState.LOADING;
 		loadContent(assetManager);
-
+		
 		for (GameObject obj : objects) {
 			obj.deactivatePhysics(world);
 		}
@@ -324,9 +368,9 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		addQueue.clear();
 		world.dispose();
 		timestep = 0;
-		//TODO: make this based on current level, rather than hardcoded test
 		populateLevel();
 		blackoutSprite.setBounds(canvas.getWidth()/4,0,canvas.getWidth()*2/4,canvas.getHeight());
+		lowEnergySprite.setBounds(0, 0, canvas.getWidth() / 4, canvas.getHeight());
 
 	}
 
@@ -378,10 +422,14 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 		levelBlocks.clear();
 		int counter = 0;
+		Array<Integer> used = new Array<Integer>();
 		maxHandhold = remainingHeight;
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
+			while(used.contains(blockNumber, true)&&!levelName.equals("tutorial"))
+				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
+			used.add(blockNumber);
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json"); 
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
 			
@@ -391,7 +439,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
 				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/general/block"+blockNumber+".json"));
 				levelBlocks.add("Levels/general/block"+blockNumber+".json"); 
-				addChunk(levelPiece, currentHeight, "general");
+				addChunk(levelPiece, currentHeight, levelName);
 				currentHeight += levelPiece.getInt("size");
 			}
 		}
@@ -401,9 +449,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		if(lava.getBoolean("present")){
 			risingObstacle = new RisingObstacle(lavaTexture, lava.getFloat("speed"));
 		}
-		//TODO delete this line as well:
-		risingObstacle = null;
-		//end this line
 		
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
 			//arms
@@ -426,6 +471,50 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		objects.add(character.parts.get(HIPS));
 
 		Movement.setCharacter(character);
+		
+		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),glowTexture.getTexture(), 
+				character.parts.get(HAND_LEFT).getPosition().x, character.parts.get(HAND_LEFT).getPosition().y,
+				new Vector2(.3f, .3f), scale);
+		handhold.fixtureDef.filter.maskBits = 0;
+		handhold.activatePhysics(world);
+		handhold.geometry.setUserData(handhold);
+		handhold.geometry.setRestitution(1);
+		handhold.geometry.setFriction(1);
+		handhold.setBodyType(BodyDef.BodyType.StaticBody);
+		objects.add(handhold);
+		
+		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),glowTexture.getTexture(), 
+				character.parts.get(HAND_RIGHT).getPosition().x, character.parts.get(HAND_RIGHT).getPosition().y,
+				new Vector2(.3f, .3f), scale);
+		handhold.fixtureDef.filter.maskBits = 0;
+		handhold.activatePhysics(world);
+		handhold.geometry.setUserData(handhold);
+		handhold.geometry.setRestitution(1);
+		handhold.geometry.setFriction(1);
+		handhold.setBodyType(BodyDef.BodyType.StaticBody);
+		objects.add(handhold);
+		
+		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),glowTexture.getTexture(), 
+				character.parts.get(FOOT_LEFT).getPosition().x, character.parts.get(FOOT_LEFT).getPosition().y,
+				new Vector2(.3f, .3f), scale);
+		handhold.fixtureDef.filter.maskBits = 0;
+		handhold.activatePhysics(world);
+		handhold.geometry.setUserData(handhold);
+		handhold.geometry.setRestitution(1);
+		handhold.geometry.setFriction(1);
+		handhold.setBodyType(BodyDef.BodyType.StaticBody);
+		objects.add(handhold);
+		
+		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(), glowTexture.getTexture(), 
+				character.parts.get(FOOT_RIGHT).getPosition().x, character.parts.get(FOOT_RIGHT).getPosition().y,
+				new Vector2(.3f, .3f), scale);
+		handhold.fixtureDef.filter.maskBits = 0;
+		handhold.activatePhysics(world);
+		handhold.geometry.setUserData(handhold);
+		handhold.geometry.setRestitution(1);
+		handhold.geometry.setFriction(1);
+		handhold.setBodyType(BodyDef.BodyType.StaticBody);
+		objects.add(handhold);
 
 	}
 	
@@ -434,18 +523,17 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	 * 
 	 * @param levelPiece: The block description
 	 * @param currentHeight: y offset from the bottom of the screen
+	 * @param levelName: the name of the level
 	 * @author Daniel
 	 */
 	private void addChunk(JsonValue levelPiece, float currentHeight, String levelName){
-		JsonAssetManager.getInstance().loadDirectory(levelPiece);
-		JsonAssetManager.getInstance().allocateDirectory();
 		
 		JsonValue handholdDesc = levelPiece.get("handholds").child();
 
 		Random rand = new Random();
 
 		while(handholdDesc != null){
-			handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
+			handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(), glowTexture.getTexture(), 
 					handholdDesc.getFloat("positionX"), handholdDesc.getFloat("positionY")+currentHeight,
 					new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
 			handhold.fixtureDef.filter.maskBits = 0;
@@ -486,7 +574,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY")+currentHeight,
 					obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
 			//TODO: Set texture to something other than null once we have textures for obstacles
-			obstacleZone = new ObstacleZone(handholdTextures[0].getTexture(), null, currentHeight, obstacleDesc.getInt("frequency"), bound);
+			obstacleZone = new ObstacleZone(fallingObstacle.getTexture(), null, currentHeight, obstacleDesc.getInt("frequency"), bound);
 			obstacles.add(obstacleZone);
 			obstacleDesc = obstacleDesc.next();
 		}
@@ -500,7 +588,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			while(staticDesc != null){
 				//TODO: Set texture to something other than null once we have textures for obstacles
 
-				obstacle = new ObstacleModel(handholdTextures[0].getTexture(), staticDesc.getFloat("size"), scale);
+				obstacle = new ObstacleModel(staticObstacle.getTexture(), staticDesc.getFloat("size"), scale);
 				obstacle.setX(staticDesc.getFloat("x"));
 				obstacle.setY(staticDesc.getFloat("y")+currentHeight);
 
@@ -511,13 +599,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			}
 		}
 		catch(Exception e){}
-	}
-	//TODO delete when there are actually levels!!!
-	private void makeTestLevel2(float currentHeight) {
-		Random rand = new Random();
-		Rectangle bound = new Rectangle(12,20,2,4);
-		obstacleZone = new ObstacleZone(handholdTextures[0].getTexture(),warningTexture,
-				0, 2f, bound);
 	}
 
 
@@ -566,12 +647,12 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		Movement.applyTorsoForceIfApplicable();
 		//bounding velocities
 		boundBodyVelocities();
+		HandholdModel[] glowingHandholds = glowHandholds();
 
 		if (justReleased.size > 0 || timestep == 0) {
-			snapLimbsToHandholds(input);
+			snapLimbsToHandholds(input,glowingHandholds);
 		}
 		
-		glowHandholds();
 
 		canvas.setCameraPosition(canvas.getWidth() / 2,
 						character.parts.get(CHEST).getBody().getPosition().y*scale.y);
@@ -830,21 +911,39 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	 * //	 * implement a calculation which says that handhold distance <= MAX_ARM_DIST or MAX_LEG_DIST.
 	 * @author Jacob
 	 */
-	private void glowHandholds() {
-		for (GameObject obj : objects) {
-			if (obj.getType() == GameObject.ObjectType.HANDHOLD) {
-				HandholdModel h = (HandholdModel) obj;
-				h.unglow();
-				for (int e : EXTREMITIES) {
+	private HandholdModel[] glowHandholds() {
+		HandholdModel[] newGlowingHandholds = new HandholdModel[4];
+		for (int i = 0; i<EXTREMITIES.length; i++) {
+			HandholdModel closest = null;
+			double dist;
+			double closestdist = HANDHOLD_SNAP_RADIUS + 1;
+
+			for (GameObject obj : objects) {
+				if (obj.getType() == GameObject.ObjectType.HANDHOLD) {
+					HandholdModel h = (HandholdModel) obj;
+					if (i<1)
+						h.unglow();
+
 					for (Vector2 snapPoint : h.snapPoints) {
-						if (closeEnough(e, snapPoint)) {
-							h.glow();
-							break;
+						dist = distanceFrom(EXTREMITIES[i], snapPoint);
+						if (dist<=HANDHOLD_SNAP_RADIUS) {
+							closest = closestdist > dist ? h:closest;
+							closestdist = closestdist > dist ? dist:closestdist;
+
 						}
 					}
+
 				}
 			}
+
+			newGlowingHandholds[i] = closest;
+
 		}
+		for (HandholdModel g : newGlowingHandholds){
+			if (g != null) g.glow();
+		}
+		return newGlowingHandholds;
+
 	}
 
 	/**
@@ -854,15 +953,15 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 	 * @param input
      */
-	private void snapLimbsToHandholds(InputController input) {
+	private void snapLimbsToHandholds(InputController input, HandholdModel[] hs) {
 		for (int i : justReleased) {
-			snapIfPossible(i);
+			snapIfPossible(i, hs);
 		}
 		if (timestep == 0) {
-			snapIfPossible(FOOT_LEFT);
-			snapIfPossible(HAND_LEFT);
-			snapIfPossible(HAND_RIGHT);
-			snapIfPossible(FOOT_RIGHT);
+			snapIfPossible(FOOT_LEFT,hs);
+			snapIfPossible(HAND_LEFT,hs);
+			snapIfPossible(HAND_RIGHT,hs);
+			snapIfPossible(FOOT_RIGHT,hs);
 
 		}
 	}
@@ -872,20 +971,32 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	 * @param limb - limb to snap if possible
 	 * @author Jacob
 	 * */
-	private void snapIfPossible(int limb) {
-		for (GameObject obj : objects) {
-			if (obj.getType() == GameObject.ObjectType.HANDHOLD) {
-				HandholdModel h = (HandholdModel) obj;
-				for (Vector2 snapPoint : h.snapPoints) {
-					if (closeEnough(limb, snapPoint)) {
-						character.parts.get(limb).setPosition(snapPoint);
-						((ExtremityModel) character.parts.get(limb)).grip();
-						grip(((ExtremityModel) character.parts.get(limb)), h); 
-					}
+	private void snapIfPossible(int limb, HandholdModel[] hs) {
+//		for (GameObject obj : objects) {
+//			if (obj.getType() == GameObject.ObjectType.HANDHOLD) {
+//				HandholdModel h = (HandholdModel) obj;
+		HandholdModel closest = null;
+		double dist;
+		double closestdist = HANDHOLD_SNAP_RADIUS + 1;
+		Vector2 closestSnapPoint = new Vector2(0,0);
+		for (HandholdModel h: hs) {
+			if (h == null) continue;
+ 			for (Vector2 snapPoint : h.snapPoints) {
+				dist = distanceFrom(limb, snapPoint);
+				if (dist <= HANDHOLD_SNAP_RADIUS){
+					closest = closestdist > dist ? h:closest;
+					closestdist = closestdist > dist ? dist:closestdist;
+					closestSnapPoint = snapPoint;
 				}
-
 			}
 		}
+		if (closest !=null){
+			character.parts.get(limb).setPosition(closestSnapPoint);
+			((ExtremityModel) character.parts.get(limb)).grip();
+			grip(((ExtremityModel) character.parts.get(limb)), closest);
+		}
+//			}
+//		}
 	}
 
 	/**
@@ -903,7 +1014,10 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		Vector2 dist = new Vector2 (character.parts.get(limb).getPosition().sub(snapPoint));
 		return (Math.sqrt(dist.x * dist.x + dist.y * dist.y) <= HANDHOLD_SNAP_RADIUS);
 	}
-
+	private double distanceFrom(int limb, Vector2 snapPoint) {
+		Vector2 dist = new Vector2 (character.parts.get(limb).getPosition().sub(snapPoint));
+		return Math.sqrt(dist.x * dist.x + dist.y * dist.y);
+	}
 
 	public PooledList<GameObject> getGameObjects(){
 		return objects;
@@ -981,13 +1095,50 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			progressLevel = Math.min(6,Math.max(0,Math.round(v.y/maxHandhold * 6 + .5f)));
 		canvas.draw(ground, Color.WHITE, canvas.getWidth() / 4, 0, canvas.getWidth() / 2, canvas.getHeight() / 8);
 		canvas.draw(UI, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-		canvas.draw(LOGO, Color.FIREBRICK, 0, canvas.getHeight() * 5.4f/6 + y, canvas.getWidth() / 4, canvas.getHeight() * .5f/6);
-		canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-		canvas.draw(fatigueTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+		canvas.draw(levelLabels[currLevel], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+//		canvas.draw(LOGO, Color.FIREBRICK, 0, canvas.getHeight() * 5.4f/6 + y, canvas.getWidth() / 4, canvas.getHeight() * .5f/6);
 		if (progressLevel > 0) {
-			canvas.draw(progressTextures[progressLevel-1], Color.BLUE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+			canvas.draw(progressTextures[progressLevel-1], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 		}
 		canvas.draw(progressBackgroundTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+
+		float f = character.getEnergy();
+		canvas.end();
+		if ( f<= 30){
+			lowEnergySprite.setAlpha(.5f + Math.min((30-f)/f,.5f));
+			batch.begin();
+			lowEnergySprite.draw(batch);
+			batch.end();
+//			canvas.draw(lowEnergyHalo,Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+
+			flashing2 --;
+			canvas.begin();
+			if (flashing2<f/4){
+				canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.BLACK, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+
+				if (flashing2<=0)
+					flashing2 = Math.round(f/2);
+			}else {
+				canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+//
+//				blackoutSprite.setAlpha((Math.abs(f - 100f) / 100f - .5f) * 1.5f);
+//				batch.begin();
+//				blackoutSprite.draw(batch);
+//				batch.end();
+			}
+		}else{
+			canvas.begin();
+			canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+
+		}
+		canvas.draw(fatigueTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+
+
+
+
+
+
+
 		canvas.end();
 
 		canvas.begin();
@@ -1007,6 +1158,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 					canvas.getHeight();
 			canvas.draw(risingObstacle.getTexture(), Color.WHITE, canvas.getWidth() / 4, lavaOrigin, canvas.getWidth() * 3 / 4, canvas.getHeight());
 		}
+		canvas.end();
 		if (obstacles.size > 0) {
 			for (ObstacleZone oz : obstacleWarnings) {
 				warningSprite.setBounds(oz.getObstX() * scale.x -  1 * scale.x, canvas.getCamera().position.y + canvas.getHeight() / 2 - 100f, 2f * scale.x , 100f);
@@ -1016,20 +1168,9 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 				batch.end();
 			}
 		}
+		canvas.begin();
+
 		canvas.end();
-		float f = character.getEnergy();
-		if ( f<= 40){
-//			if (f<=10 && flashing2<f){
-//				flashing2 --;
-//				if (flashing2==0)
-//					flashing2 = Math.round(f)*2;
-//			}else {
-				blackoutSprite.setAlpha((Math.abs(f - 100f) / 100f - .5f) * 1.5f);
-				batch.begin();
-				blackoutSprite.draw(batch);
-				batch.end();
-//			}
-		}
 
 		if (debug) {
 			canvas.beginDebug();

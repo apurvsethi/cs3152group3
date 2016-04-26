@@ -26,6 +26,7 @@ public class HandholdModel extends GameObject{
 	private boolean isGlowing = false;
 	/** The texture the handhold will have when not glowing */ 
 	protected Texture texture;
+	protected Texture glowTexture; 
 
 	private Vector2 startPoint, endPoint;
 	
@@ -129,11 +130,12 @@ public class HandholdModel extends GameObject{
 	 * @param dimensions the dimensions of the handhold in box2d coordinates
 	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
 	 */
-	public HandholdModel(Texture t, float x, float y, Vector2 dimensions, Vector2 drawPositionScale){
+	public HandholdModel(Texture t, Texture gt, float x, float y, Vector2 dimensions, Vector2 drawPositionScale){
 		super(t, dimensions, drawPositionScale);
 		setX(x);
 		setY(y);
 
+		glowTexture = gt; 
 		isCrumbling = false;
 		velocity = 0;
 		snapPoints = new Array<Vector2>();
@@ -172,15 +174,14 @@ public class HandholdModel extends GameObject{
 
 		//TODO: remove this if check once all level blocks only contain handholds within the playable area
 		if (getX() * drawPositionScale.x > canvas.getWidth() / 4 && getX() * drawPositionScale.x < canvas.getWidth() * 3 / 4) {
-			if (isGlowing) {
-				canvas.draw(animator, Color.YELLOW, origin.x, origin.y,
-						getX() * drawPositionScale.x, getY() * drawPositionScale.y,
+			if (isGlowing){
+				canvas.draw(glowTexture, Color.WHITE, origin.x, origin.y, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
 						getAngle(), drawSizeScale.x, drawSizeScale.y);
-			} else {
+			}
 				canvas.draw(animator, Color.WHITE, origin.x, origin.y,
 						getX() * drawPositionScale.x, getY() * drawPositionScale.y,
 						getAngle(), drawSizeScale.x, drawSizeScale.y);
-			}
+			
 		}
 	}
 
