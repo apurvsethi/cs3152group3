@@ -47,6 +47,11 @@ public class GameEngine extends Game implements ScreenListener {
 		controllers[LOADING_SCREEN].setCanvas(canvas);
 		controllers[LOADING_SCREEN].setScreenListener(this);
 		setScreen(controllers[LOADING_SCREEN]);
+		MenuMode m = (MenuMode) controllers[MENU_SCREEN]; 
+		m.unlockLevel(0); 
+		m.unlockLevel(1);
+		m.unlockLevel(2);
+		m.unlockLevel(5);
 	}
 	
 	@Override
