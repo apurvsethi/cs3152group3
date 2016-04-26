@@ -102,6 +102,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	private static TextureRegion ground;
 	private static TextureRegion lavaTexture;
 	private static TextureRegion glowTexture; 
+	private static TextureRegion staticObstacle; 
+	private static TextureRegion fallingObstacle; 
 	private static TextureRegion[] partTextures = new TextureRegion[PART_TEXTURES.length];
 	private static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length];
 	private static TextureRegion[] handholdTextures;
@@ -163,6 +165,11 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			assets.add("assets/"+name+"/SurfaceEdge.png");
 			manager.load("assets/"+name+"/LevelStart.png", Texture.class);
 			assets.add("assets/"+name+"/LevelStart.png");
+			manager.load("assets/"+name+"/StaticObstacle.png", Texture.class);
+			assets.add("assets/"+name+"/StaticObstacle.png");
+			manager.load("assets/"+name+"/FallingRock.png", Texture.class);
+			assets.add("assets/"+name+"/FallingRock.png");
+		
 
 		}
 		for (String name:LEVEL_LABEL_FILES){
@@ -240,7 +247,9 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		edge = createTexture(manager, "assets/"+levelName+"/SurfaceEdge.png", false);
 		ground = createTexture(manager, "assets/"+levelName+"/LevelStart.png", false);
 		lavaTexture = createTexture(manager, LAVA_FILE, false);
-		glowTexture = createTexture(manager, GLOW_FILE, false);
+		glowTexture = createTexture(manager, GLOW_FILE, false); 
+		staticObstacle = createTexture(manager, "assets/"+levelName+"/StaticObstacle.png", false); 
+		fallingObstacle = createTexture(manager, "assets/"+levelName+"/FallingRock.png", false); 
 
 		for (int i = 0;  i < LEVEL_LABEL_FILES.length; i++){
 			levelLabels[i] = createTexture(manager, LEVEL_LABEL_FILES[i], false);
@@ -348,7 +357,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		failed = false;
 		assetState = AssetState.LOADING;
 		loadContent(assetManager);
-
+		
 		for (GameObject obj : objects) {
 			obj.deactivatePhysics(world);
 		}
@@ -359,7 +368,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		addQueue.clear();
 		world.dispose();
 		timestep = 0;
-		//TODO: make this based on current level, rather than hardcoded test
 		populateLevel();
 		blackoutSprite.setBounds(canvas.getWidth()/4,0,canvas.getWidth()*2/4,canvas.getHeight());
 		lowEnergySprite.setBounds(0, 0, canvas.getWidth() / 4, canvas.getHeight());
@@ -566,7 +574,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY")+currentHeight,
 					obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
 			//TODO: Set texture to something other than null once we have textures for obstacles
-			obstacleZone = new ObstacleZone(handholdTextures[0].getTexture(), null, currentHeight, obstacleDesc.getInt("frequency"), bound);
+			obstacleZone = new ObstacleZone(fallingObstacle.getTexture(), null, currentHeight, obstacleDesc.getInt("frequency"), bound);
 			obstacles.add(obstacleZone);
 			obstacleDesc = obstacleDesc.next();
 		}
@@ -580,7 +588,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			while(staticDesc != null){
 				//TODO: Set texture to something other than null once we have textures for obstacles
 
-				obstacle = new ObstacleModel(handholdTextures[0].getTexture(), staticDesc.getFloat("size"), scale);
+				obstacle = new ObstacleModel(staticObstacle.getTexture(), staticDesc.getFloat("size"), scale);
 				obstacle.setX(staticDesc.getFloat("x"));
 				obstacle.setY(staticDesc.getFloat("y")+currentHeight);
 
@@ -591,13 +599,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			}
 		}
 		catch(Exception e){}
-	}
-	//TODO delete when there are actually levels!!!
-	private void makeTestLevel2(float currentHeight) {
-		Random rand = new Random();
-		Rectangle bound = new Rectangle(12,20,2,4);
-		obstacleZone = new ObstacleZone(handholdTextures[0].getTexture(),warningTexture,
-				0, 2f, bound);
 	}
 
 
