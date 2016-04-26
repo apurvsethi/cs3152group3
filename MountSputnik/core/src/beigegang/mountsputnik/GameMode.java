@@ -466,7 +466,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			}
 			catch(Exception e){handhold.setBodyType(BodyDef.BodyType.StaticBody);}
 			objects.add(handhold);
-//			maxHandhold = Math.max(maxHandhold,handhold.getY());
 
 			try{handhold.setCrumble(handholdDesc.getFloat("crumble"));}
 			catch(Exception e){handhold.setCrumble(0);}
