@@ -27,7 +27,7 @@ import java.util.Random;
 
 public class GameMode extends ModeController {
 
-
+	private int currLevel = LEVEL_TUTORIAL;
 	private boolean flashing = false;
 	private int flashing2 = 10;
 	/** A string representing the name of the current level */
@@ -50,7 +50,7 @@ public class GameMode extends ModeController {
 	 */
 	//We need to preload every single texture, regardless of which level we're currently using. Loading can't be
 	//dynamically
-	private static final String LEVEL_NAMES[] = {"canyon", "tutorial"};//,"mountain","sky","space","tutorial"}; <-- Add the rest of these in as they are given assets
+	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "canyon", "canyon", "canyon", "canyon", "canyon"};//,"mountain","sky","space"}; <-- Add the rest of these in as they are given assets
 	private static final String LAVA_FILE = "assets/testlavatexture.png"; //TODO: make this a better texture
 	private static final String UI_FILE = "assets/HUD2.png";
 	private static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
@@ -265,14 +265,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		JsonAssetManager.clearInstance();
 	}
 	
-	public void changeLevel(String ln){
-		levelName = ln; 
-		//preloadContent()???
-		complete = false; 
-		failed = false; 
-		assetState = AssetState.LOADING; 
-		loadContent(assetManager); 
-		reset(); 
+	public void changeLevel(int level){
+		listener.exitScreen(this, EXIT_GAME_NEXT_LEVEL);
 	}
 	
 	private ObstacleZone obstacleZone;
@@ -327,6 +321,12 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 	@Override
 	public void reset() {
+		levelName = LEVEL_NAMES[currLevel];
+		complete = false;
+		failed = false;
+		assetState = AssetState.LOADING;
+		loadContent(assetManager);
+
 		for (GameObject obj : objects) {
 			obj.deactivatePhysics(world);
 		}
@@ -481,7 +481,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			}
 			catch(Exception e){handhold.setBodyType(BodyDef.BodyType.StaticBody);}
 			objects.add(handhold);
-			maxHandhold = Math.max(maxHandhold,handhold.getY());
 
 			try{handhold.setCrumble(handholdDesc.getFloat("crumble"));}
 			catch(Exception e){handhold.setCrumble(0);}
@@ -671,7 +670,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		checkHasCompleted(); 
 		if(complete){
 			//TODO: properly change level
-			changeLevel("canyon"); 
+			changeLevel(currLevel);
 		}
 		timestep += 1;
 	}
@@ -1052,6 +1051,22 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			}
 			canvas.endDebug();
 		}
+	}
+
+	public void setLevel(int level){
+		if (level >= 0 && level < NUM_LEVELS){
+			currLevel = level;
+		}
+	}
+
+	public void nextLevel(){
+		if (currLevel != NUM_LEVELS - 1){
+			currLevel += 1;
+		}
+	}
+
+	public int getCurrLevel(){
+		return currLevel;
 	}
 
 	/**
