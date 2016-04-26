@@ -27,12 +27,12 @@ from glob import glob
 Builder.load_string('''
 <LinePlayground>:
     BoxLayout:
-        size_hint: 0.15, 1
+        size_hint: 1, 1
         orientation: 'horizontal' 
         
         GridLayout:
             cols: 1
-            size_hint: 1,1
+            size_hint: 0.03,1
             Label: 
                 size_hint_y: None
                 height: 30
@@ -45,37 +45,101 @@ Builder.load_string('''
                 on_value: root.resize()
                 min: 16.
                 max: 48.
-        
-            ToggleButton:
+            
+            Label: 
+                size_hint_y: None
+                height: 10
+                text: ('Crumble: ' + str(round(root.crumbling,2)))
+            Slider: 
                 size_hint_y: 0.1
-                group: 'crumble'
-                text: 'crumble'
-                on_press: root.crumble = self.text
-            ToggleButton:
-                size_hint_y: 0.1
-                group: 'move'
-                text: 'move'
-                on_press: root.move = self.text
-            ToggleButton:
-                size_hint_y: 0.1
-                group: 'slippery'
-                text: 'slippery'
-                on_press: root.slippery = self.text
+                orientation: 'horizontal'
+                value: root.crumbling
+                on_value: root.crumbling = args[1]
+                on_value: root.updateSelected()
+                min:0
+                max:10
 
             Label:
+                size_hint_y: None
+                height: 10
+                text: ('Slip: ' + str(round(root.slipping,2)))
+            Slider: 
                 size_hint_y: 0.1
-                text: 'Handhold scale'
+                orientation: 'horizontal'
+                value: root.slipping
+                on_value: root.slipping = args[1]
+                on_value: root.updateSelected()
+                min:0
+                max:10            
+
+            Label:
+                size_hint_y: None
+                height: 10
+                text: ('Move Speed: ' + str(round(root.movingSpeed,2)))
+            Slider:
+                size_hint_y: 0.1 
+                orientation: 'horizontal'
+                value: root.movingSpeed
+                on_value: root.movingSpeed = args[1]
+                on_value: root.updateSelected()
+                min:0
+                max:3            
+            
+            Label:
+                size_hint_y: 0.1
+                text: ('Scale: ' + str(round(root.currentScale,2)))
             Slider:
                 size_hint_y: 0.1
-                value: root.handHoldScale
-                on_value: root.handHoldScale = args[1]
+                value: root.currentScale
+                on_value: root.currentScale = args[1]
                 on_value: root.updateSelected()
                 min: 0.5
-                max: 2.
+                max: 5.
             Button:
                 size_hint_y: 0.1
                 text: 'Delete' 
                 on_release: root.deleteHold()
+
+            Button:
+                id: whatToPlaceButton
+                text: 'Handhold'
+                on_release: whatToPlace.open(self)
+                size_hint_y: None
+                height: '48dp'
+
+            DropDown: 
+                id: whatToPlace
+                on_parent: self.dismiss()
+                on_select: whatToPlaceButton.text = '{}'.format(args[1])
+
+                Button: 
+                    text: 'Handhold'
+                    size_hint_y: None
+                    height: '48dp'
+                    on_release: whatToPlace.select('Handhold')
+                    on_release: root.changePlacement('Handhold')
+
+                Button:
+                    text: 'Static Obstacle'
+                    size_hint_y: None
+                    height: '48dp'
+                    on_release: whatToPlace.select('Static Obstacle')
+                    on_release: root.changePlacement('StaticObstacle')
+
+                Button:
+                    text: 'Falling Obstacle'
+                    size_hint_y: None
+                    height: '48dp'
+                    on_release: whatToPlace.select('Falling Obstacle')
+                    on_release: root.changePlacement('FallingObstacle')
+
+                Button:
+                    text: 'Moving Obstacle'
+                    size_hint_y: None
+                    height: '48dp'
+                    on_release: whatToPlace.select('Moving Handhold')
+                    on_release: root.changePlacement('MovingHandhold')
+
 
             Button:
                 id: btn
@@ -122,45 +186,126 @@ Builder.load_string('''
                     size_hint_y: None
                     height: '48dp'
                     on_release: dropdown.select('Tutorial')
-                    on_release: root.changeDirectory("tutorial")        
+                    on_release: root.changeDirectory("tutorial")   
 
         AnchorLayout: 
-            size_hint: 1, None
-            width: 120
-            height: 40
+            size_hint: 0.15, 1 
+
+        AnchorLayout: 
+            size_hint: 0.02, 1
             anchor_x: 'right'
             GridLayout: 
-                cols: 2
+                cols: 1
+                size_hint: 1,1
+
+                Label: 
+                    size_hint_y: 0.1
+                    text: 'Falling Obstacles: '
+
+                Label:
+                    size_hint_y: 0.1
+                    height: 10
+                    text: ('Width: ' + str(round(root.horizontalRange,2)))
+                Slider:
+                    size_hint_y: 0.1 
+                    orientation: 'horizontal'
+                    value: root.horizontalRange
+                    on_value: root.horizontalRange = args[1]
+                    on_value: root.updateSelected()
+                    min:3
+                    max:32
+
+                Label:
+                    size_hint_y: 0.1
+                    height: 10
+                    text: ('Height: ' + str(round(root.verticalRange,2)))
+                Slider:
+                    size_hint_y: 0.1 
+                    orientation: 'horizontal'
+                    value: root.verticalRange
+                    on_value: root.verticalRange = args[1]
+                    on_value: root.updateSelected()
+                    min:2
+                    max:10 
+
+                Label:
+                    size_hint_y: 0.1
+                    height: 10
+                    text: ('Frequency: ' + str(round(root.frequency,2)))
+                Slider:
+                    size_hint_y: 0.1 
+                    orientation: 'horizontal'
+                    value: root.frequency
+                    on_value: root.frequency = args[1]
+                    on_value: root.updateSelected()
+                    min:1
+                    max:5
+
+                Label: 
+                    text: ''
+      
                 Button: 
+                    size_hint_y: 0.1
                     text: 'Submit'
                     on_release: root.createJSON()
                 Button: 
+                    size_hint_y: 0.1
                     text: 'Clear' 
                     on_release: root.clear()
 
 
+
 ''')
 
-class Handhold(): 
+class Handhold(object): 
 
     #TODO: crumbling, moving, and slipping not yet implemented 
+    def __init__(self,x,y,scale,c,s): 
+        self.pos = [x,y]
+        self.scale = scale
+        self.crumbling = c
+        self.slipping = s
+
+class MovingHandhold(Handhold): 
+
+    def __init__(self,x,y,scale,c,s,speed): 
+        super(MovingHandhold, self).__init__(x,y,scale,c,s)
+        self.speed = speed
+
+class FallingObstacle(object): 
+    def __init__(self,x,y,width,height,frequency): 
+        self.pos = [x,y]
+        self.width = width
+        self.height = height 
+        self.frequency = frequency
+        self.scale = fallingObstacleWidth
+
+class StaticObstacle(object): 
     def __init__(self,x,y,scale): 
         self.pos = [x,y]
         self.scale = scale
+
+
        
 
-blockWidth = 32 
+blockWidth = 16
 handhold_width = 1
+fallingObstacleWidth = 2
 scaling = 32
 
 handholds = [
-    Handhold(12.53*scaling, 8.93*scaling, 1), 
-    Handhold(19*scaling, 9.18*scaling, 1), 
-    Handhold(14.28*scaling, 4.75*scaling, 1), 
-    Handhold(16.46*scaling, 4.5*scaling, 1)
+    Handhold(6*scaling, 8.93*scaling, 1, 0, 0), 
+    Handhold(12.5*scaling, 9.18*scaling, 1, 0, 0), 
+    Handhold(7.78*scaling, 4.75*scaling, 1, 0, 0), 
+    Handhold(10*scaling, 4.5*scaling, 1, 0, 0)
 ]
+staticObstacles = []
+fallingObstacles = []
+movingHandholds = []
+
+
 selected = -1
-canvas_left = Window.size[0]/4
+canvas_left = Window.size[0]/2
 canvas_origin = 0
 
 
@@ -168,9 +313,17 @@ canvas_origin = 0
 
 class LinePlayground(FloatLayout):
     blockHeight = NumericProperty(22)
-    handHoldScale = NumericProperty(1)
+    currentScale = NumericProperty(1)
     directory = StringProperty("assets/canyon/")
     background = ListProperty((0.2, 0.2, 0.2))
+    whatToPlace = StringProperty("Handhold")
+    crumbling = NumericProperty(0)
+    slipping = NumericProperty(0)
+    movingSpeed = NumericProperty(0)
+
+    horizontalRange = NumericProperty(5)
+    verticalRange = NumericProperty(5)
+    frequency = NumericProperty(1)
     # scaleX = Window.size[0]-80/blockWidth
     # scaleY = Window.size[1]-60/blockHeight
     def __init__(self, **kwargs): 
@@ -181,11 +334,12 @@ class LinePlayground(FloatLayout):
         self._keyboard.bind(on_key_down=self._capture_key)
         with self.canvas: 
             Color(0,0,0)
-            Rectangle(pos=[canvas_left,0],size=Window.size)
+            Rectangle(pos=[canvas_left,0],size=[blockWidth*scaling, Window.size[1]])
             Color(1,1,1)
             Rectangle(pos=[canvas_left, canvas_origin],size=[blockWidth*scaling,self.blockHeight*scaling], source=self.directory+'SurfaceLight.png')
-            Rectangle(pos=[canvas_left+blockWidth*scaling/2.5, 150], size=[blockWidth*scaling/5, blockWidth*scaling/5], source='assets/character.png')
+            Rectangle(pos=[canvas_left+blockWidth*scaling/2.9, 150], size=[blockWidth*scaling/2.8, blockWidth*scaling/2.8], source='assets/character.png')
         self.drawHandholds()
+        self.drawObstacles()
 
     def _capture_key(self,keyboard,keycode,text,modifiers): 
         global canvas_origin
@@ -208,19 +362,28 @@ class LinePlayground(FloatLayout):
             Color(1,1,1,1)
             Rectangle(pos=[canvas_left, canvas_origin],size=[blockWidth*scaling,self.blockHeight*scaling], source=self.directory+"SurfaceLight.png")
             Color(1,1,1,1)
-            Rectangle(pos=[canvas_left+blockWidth*scaling/2.5, 150], size=[blockWidth*scaling/5, blockWidth*scaling/5], source='assets/character.png')
+            Rectangle(pos=[canvas_left+blockWidth*scaling/2.9, 150], size=[blockWidth*scaling/2.8, blockWidth*scaling/2.8], source='assets/character.png')
         self.removeBadHandholds()
         self.drawHandholds()
+        self.drawObstacles()
 
 
     def on_touch_down(self, touch):
         global selected
-        if self.withinCanvas(touch.x):
+        if self.withinCanvas(touch.x,0):
             self.doSelection(touch)
             if selected == -1:
                 touch_x = touch.x - canvas_left
                 touch_y = touch.y - canvas_origin
-                handholds.append(Handhold(touch_x-0.5*handhold_width*self.handHoldScale*scaling, touch_y-0.5*handhold_width*self.handHoldScale*scaling, self.handHoldScale))
+                if self.whatToPlace == "Handhold": 
+                    handholds.append(Handhold(touch_x-0.5*handhold_width*self.currentScale*scaling, touch_y-0.5*handhold_width*self.currentScale*scaling, self.currentScale, self.crumbling, self.slipping))
+                elif self.whatToPlace == "FallingObstacle":
+                    if self.withinCanvas(touch.x - (scaling*(self.horizontalRange/2)), (self.horizontalRange)*scaling): 
+                        fallingObstacles.append(FallingObstacle(touch_x-0.5*fallingObstacleWidth*scaling, touch_y-0.5*fallingObstacleWidth*scaling, self.horizontalRange, self.verticalRange, self.frequency))
+                elif self.whatToPlace == "StaticObstacle": 
+                    staticObstacles.append(StaticObstacle(touch_x-0.5*self.currentScale*scaling, touch_y-0.5*self.currentScale*scaling, self.currentScale))
+                elif self.whatToPlace == "MovingHandhold": 
+                    movingHandholds.append(MovingHandhold(touch_x-0.5*handhold_width*self.currentScale*scaling, touch_y-0.5*handhold_width*self.currentScale*scaling, self.currentScale, self.crumbling, self.slipping, self.movingSpeed))
             else: 
                 self.updateSelected()
             self.resize()
@@ -228,48 +391,115 @@ class LinePlayground(FloatLayout):
 
     def on_touch_move(self,touch): 
         global selected
-        if selected != -1 and self.withinCanvas(touch.x): 
+        if selected != -1 and self.withinCanvas(touch.x,0): 
             touch_x = touch.x - canvas_left
             touch_y = touch.y - canvas_origin
-            handholds[selected].pos = [touch_x, touch_y]
+            selected.pos = [touch_x, touch_y]
         self.resize()
 
     def updateSelected(self): 
         global selected 
         if selected != -1: 
-            handholds[selected].scale = self.handHoldScale 
+            selected.scale = self.currentScale 
+            if type(selected) is Handhold or type(selected) is MovingHandhold: 
+                selected.crumbling = self.crumbling
+                selected.slipping = self.slipping
+            if type(selected) is MovingHandhold: 
+                selected.speed = self.movingSpeed
+            if type(selected) is FallingObstacle: 
+                if self.withinCanvas(canvas_left + selected.pos[0] - (scaling*(self.horizontalRange/2)), (self.horizontalRange)*scaling): 
+                    selected.width = self.horizontalRange
+                selected.height = self.verticalRange
+                selected.frequency = self.frequency
         self.resize()
 
     def drawHandholds(self): 
         with self.canvas: 
             for i in range(len(handholds)): 
                 hold = handholds[i]
-                if self.withinCanvas(canvas_left + hold.pos[0]): 
+                if self.withinCanvas(canvas_left + hold.pos[0], hold.scale*scaling): 
+                    if hold == selected: 
+                        Color(1,0,0,1)
+                    else: 
+                        Color(1,1,1,1)
                     r = Rectangle(pos=[canvas_left + hold.pos[0],canvas_origin + hold.pos[1]],size=[scaling*handhold_width*hold.scale,scaling*handhold_width*hold.scale],source=self.directory + 'Handhold1.png')
-                    if i == selected: 
-                        r.source = self.directory + 'handholdgrabbed.png'
+            for i in range(len(movingHandholds)):
+                if i % 2 == 1:  
+                    hold = movingHandholds[i-1]
+                    endHold = movingHandholds[i]
+                    if self.withinCanvas(canvas_left + hold.pos[0], hold.scale*scaling): 
+                        r = Rectangle(pos=[canvas_left + hold.pos[0],canvas_origin + hold.pos[1]],size=[scaling*handhold_width*hold.scale,scaling*handhold_width*hold.scale],source=self.directory + 'Handhold1.png')
+                        q = Rectangle(pos=[canvas_left + endHold.pos[0],canvas_origin + endHold.pos[1]],size=[scaling*handhold_width*hold.scale,scaling*handhold_width*hold.scale],source=self.directory + 'movinghandholdend.png')
+                        if hold == selected or endHold == selected: 
+                            r.source = self.directory + 'handholdgrabbed.png'
+                            q.source = self.directory + 'movinghandholdendgrabbed.png'
+            if len(movingHandholds) % 2 == 1: 
+                hold = movingHandholds[-1]
+                r = Rectangle(pos=[canvas_left + hold.pos[0],canvas_origin + hold.pos[1]],size=[scaling*handhold_width*hold.scale,scaling*handhold_width*hold.scale],source=self.directory + 'Handhold1.png')
+                if hold == selected: 
+                    r.source = self.directory + 'handholdgrabbed.png'
+
+    def drawObstacles(self): 
+        with self.canvas: 
+            for i in range(len(staticObstacles)):
+                obstacle = staticObstacles[i]
+                if self.withinCanvas(canvas_left + obstacle.pos[0], obstacle.scale * scaling): 
+                    if obstacle == selected: 
+                        Color(1,0,0,1)
+                    else: 
+                        Color(1,1,1,1)
+                    Rectangle(pos=[canvas_left + obstacle.pos[0],canvas_origin + obstacle.pos[1]],size=[scaling*obstacle.scale,scaling*obstacle.scale],source=self.directory + 'FallingRock.png')
+            for i in range(len(fallingObstacles)): 
+                obstacle = fallingObstacles[i]
+                if obstacle == selected: 
+                    Color(1,0,0,0.5)
+                    Rectangle(pos=[canvas_left + obstacle.pos[0] - (scaling*(obstacle.width/2)),canvas_origin + obstacle.pos[1] - (scaling*(obstacle.height/2))],size=[obstacle.width*scaling, obstacle.height*scaling])
+                else: 
+                    Color(1,1,1,1)
+                Rectangle(pos=[canvas_left + obstacle.pos[0],canvas_origin + obstacle.pos[1]],size=[scaling*fallingObstacleWidth,scaling*fallingObstacleWidth],source=self.directory + 'FallingRock.png')
+            
+            
+
+                        
+
 
     def doSelection(self, touch): 
         global selected
-        for i in range(len(handholds)): 
-            hold = handholds[i]
-            if distance(canvas_left + hold.pos[0], canvas_origin + hold.pos[1],touch.x,touch.y) < hold.scale*handhold_width*scaling: 
-                selected = i
-                return 
+        for L in [handholds, staticObstacles, fallingObstacles, movingHandholds]: 
+            for i in range(len(L)): 
+                current = L[i]
+                if distance(canvas_left + current.pos[0], canvas_origin + current.pos[1],touch.x,touch.y) < current.scale*scaling: 
+                    selected = L[i]
+                    if L == handholds or L == movingHandholds: 
+                        self.currentScale = L[i].scale
+                        self.crumbling = L[i].crumbling
+                        self.slipping = L[i].slipping
+                    if L == movingHandholds: 
+                        self.movingSpeed = L[i].speed
+                    if L == staticObstacles: 
+                        self.currentScale = L[i].scale
+                    if L == fallingObstacles: 
+                        self.horizontalRange = L[i].width
+                        self.verticalRange = L[i].height
+                        self.frequency = L[i].frequency   
+                    return 
         selected = -1
 
-    def withinCanvas(self, x): 
-        return canvas_left < x < (canvas_left)+blockWidth*scaling  
+    def withinCanvas(self, x, w): 
+        return canvas_left < x and x+w < (canvas_left)+blockWidth*scaling  
 
     def clear(self):
         global handholds 
         global selected 
         handholds = [
-            Handhold(12.53*scaling, 8.93*scaling, 1), 
-            Handhold(19*scaling, 9.18*scaling, 1), 
-            Handhold(14.28*scaling, 4.75*scaling, 1), 
-            Handhold(16.46*scaling, 4.5*scaling, 1)
+            Handhold(12.53*scaling, 8.93*scaling, 1,0,0), 
+            Handhold(19*scaling, 9.18*scaling, 1,0,0), 
+            Handhold(14.28*scaling, 4.75*scaling, 1,0,0), 
+            Handhold(16.46*scaling, 4.5*scaling, 1,0,0)
         ]
+        movingHandholds = [] 
+        fallingObstacles = []
+        staticObstacles = []
         selected = -1
         canvas_origin = 0
         self.resize()   
@@ -287,30 +517,66 @@ class LinePlayground(FloatLayout):
         level = {'id': new_id, 
                  'difficulty': 'notRanked', 
                  'size': self.blockHeight, 
-                 'handholds': {} 
+                 'handholds': {}, 
+                 'static': {},
+                 'obstacles': {}
                  } 
         for i in range(len(handholds)): 
             hold = handholds[i]
             level['handholds']['hold'+str(i)] = {
-                'texture': self.directory[7:] + 'handhold.png',
-                'glowTexture': self.directory[7:] + 'handholdglow.png',
-                'gripTexture': self.directory[7:] + 'handholdgrabbed.png', 
+                # 'texture': self.directory[7:] + 'handhold.png',
+                # 'glowTexture': self.directory[7:] + 'handholdglow.png',
+                # 'gripTexture': self.directory[7:] + 'handholdgrabbed.png', 
                 'width': handhold_width * hold.scale /3.0, 
                 'height': handhold_width * hold.scale /3.0, 
-                'positionX': (hold.pos[0])/scaling, 
+                'positionX': 8.5 + (hold.pos[0])/scaling, 
                 'positionY': (hold.pos[1])/scaling, 
                 "friction": 1, 
                 "restitution": 1, 
-                "crumble": False
+                "crumble": hold.crumbling,
+                "slip": hold.slipping
+            }
+        for i in range(len(movingHandholds)): 
+            if i % 2 == 1: 
+                hold = movingHandholds[i-1] 
+                endHold = movingHandholds[i]
+                level['handholds']['hold'+str(i+len(handholds))] = {
+                    # 'texture': self.directory[7:] + 'handhold.png',
+                    # 'glowTexture': self.directory[7:] + 'handholdglow.png',
+                    # 'gripTexture': self.directory[7:] + 'handholdgrabbed.png', 
+                    'width': handhold_width * hold.scale /3.0, 
+                    'height': handhold_width * hold.scale /3.0, 
+                    'positionX': 8.5 + (hold.pos[0])/scaling, 
+                    'positionY': (hold.pos[1])/scaling, 
+                    "friction": 1, 
+                    "restitution": 1, 
+                    "crumble": hold.crumbling,
+                    "slip": hold.slipping,
+                    "movement": {
+                        'startX': 8.5 + (hold.pos[0])/scaling, 
+                        'startY': (hold.pos[1])/scaling, 
+                        'endX': 8.5 + (endHold.pos[0])/scaling, 
+                        'endY': (endHold.pos[1])/scaling, 
+                        'speed': hold.speed
+                    }
+                }
+        for i in range(len(staticObstacles)): 
+            obstacle = staticObstacles[i]
+            level['static']['obstacle'+str(i)] = {
+                'x': 8.5 + obstacle.pos[0]/scaling, 
+                'y': obstacle.pos[1]/scaling, 
+                'size': obstacle.scale/3.0    
             }
 
-            # Obstacles: 
-           #  "originX"
-           # "originY"
-           # "width"
-           # "height"
-           # "frequency"
-           # "texture"
+        for i in range(len(fallingObstacles)): 
+            obstacle = fallingObstacles[i]
+            level['obstacles']['obstacle'+str(i)] = {
+                'originX': 8.5 + obstacle.pos[0]/scaling, 
+                'originY': obstacle.pos[1]/scaling, 
+                'width': obstacle.width/3.0, 
+                'height': obstacle.height/3.0, 
+                'frequency': obstacle.frequency * 60
+            }
 
         s = str(level).replace("'", '"'); 
 
@@ -322,15 +588,32 @@ class LinePlayground(FloatLayout):
         self.directory = "assets/" + btn + "/"
         self.resize() 
 
+    def changePlacement(self, btn):
+        self.whatToPlace = btn
+        self.resize()
+
     def removeBadHandholds(self): 
-        for hold in handholds: 
-            if hold.pos[1] + canvas_origin > self.blockHeight*scaling: 
-                handholds.remove(hold)
+        for L in [handholds, movingHandholds, fallingObstacles, staticObstacles]: 
+            for hold in L: 
+              if hold.pos[1] + canvas_origin > self.blockHeight*scaling: 
+                L.remove(hold)
 
     def deleteHold(self): 
         global selected
-        if selected != -1: 
-            handholds.remove(handholds[selected])
+        if selected in handholds: 
+            handholds.remove(selected)
+        if selected in movingHandholds: 
+            i = movingHandholds.index(selected)
+            if i % 2 == 0 and len(movingHandholds)-1 != i: 
+                movingHandholds.remove(movingHandholds[i+1])
+            elif i % 2 == 1: 
+                movingHandholds.remove(movingHandholds[i-1])
+            movingHandholds.remove(selected)
+            
+        if selected in fallingObstacles: 
+            fallingObstacles.remove(selected)
+        if selected in staticObstacles: 
+            staticObstacles.remove(selected)
         selected = -1
         self.resize()
 

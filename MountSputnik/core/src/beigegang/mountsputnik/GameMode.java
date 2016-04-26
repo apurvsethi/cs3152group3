@@ -29,7 +29,7 @@ public class GameMode extends ModeController {
 	private boolean flashing = false;
 	private int flashing2 = 10;
 	/** A string representing the name of the current level */
-	private String levelName = "tutorial"; 
+	private String levelName = "canyon"; 
 	
 	/**
 	 * Track asset loading from all instances and subclasses
@@ -50,7 +50,7 @@ public class GameMode extends ModeController {
 	//dynamically
 	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "canyon", "canyon", "canyon", "canyon", "canyon"};//,"mountain","sky","space"}; <-- Add the rest of these in as they are given assets
 	private static final String LAVA_FILE = "assets/testlavatexture.png"; //TODO: make this a better texture
-	private static final String UI_FILE = "assets/HUD.png";
+	private static final String UI_FILE = "assets/HUD2.png";
 	private static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
 	private static final String HANDHOLD_TEXTURES[] = {"assets/canyon/Handhold1.png", "assets/canyon/Handhold2.png"};
 	private static final String PART_TEXTURES[] = {"Ragdoll/Torso.png", "Ragdoll/Head.png", "Ragdoll/Hips.png",
@@ -68,8 +68,10 @@ public class GameMode extends ModeController {
 			"Ragdoll/controls/360_LT_selected.png", 
 			"Ragdoll/controls/360_RT_selected.png"
 	};
+	private Random rand = new Random();
 
-//	private static TextureRegion[] energyTextures;
+
+	//	private static TextureRegion[] energyTextures;
 private static final String ENERGY_TEXTURES[] = new String[10];
 	private static final String PROGRESS_TEXTURES[] = new String[6];
 
@@ -96,16 +98,18 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	private static TextureRegion[] partTextures = new TextureRegion[PART_TEXTURES.length];
 	private static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length];
 	private static TextureRegion[] handholdTextures = new TextureRegion[HANDHOLD_TEXTURES.length];
-	private static TextureRegion energyDisplay;
 	private static TextureRegion blackoutTexture;
 	private static String BLACKOUT = "assets/blackout.png";
 	private static String FATIGUE_BAR = "Energy/Fatigue Gauge.png";
 	private static TextureRegion fatigueTexture;
+	private static String WARNING_TEXTURE = "assets/Falling Rock Warning.png";
+	private static TextureRegion warningTexture;
 	private static String PROGRESS_BACKGROUND= "assets/Progress Bar.png";
 	private static TextureRegion progressBackgroundTexture;
 	private static String PROGRESS_BAR= "Progress Chalk Bar.png";
 	private static TextureRegion progressBarTexture;
 	private Sprite blackoutSprite = new Sprite(new Texture(BLACKOUT));
+	private Sprite warningSprite = new Sprite(new Texture(WARNING_TEXTURE));
 	private static SpriteBatch batch = new SpriteBatch();
 	private static int progressLevel = 0;
 	/** The reader to process JSON files */
@@ -187,6 +191,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		assets.add(PROGRESS_BACKGROUND);
 		manager.load(PROGRESS_BAR,Texture.class);
 		assets.add(PROGRESS_BAR);
+		manager.load(WARNING_TEXTURE,Texture.class);
+		assets.add(WARNING_TEXTURE);
 	}
 
 	/**
@@ -234,6 +240,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		progressBackgroundTexture = createTexture(manager,PROGRESS_BACKGROUND,false);
 		progressBarTexture = createTexture(manager,PROGRESS_BAR,false);
 		assetState = AssetState.COMPLETE;
+
 	}
 
 	/** 
@@ -371,6 +378,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 		levelBlocks.clear();
 		int counter = 0;
+		maxHandhold = remainingHeight;
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
@@ -387,6 +395,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 				currentHeight += levelPiece.getInt("size");
 			}
 		}
+		System.out.println("level Blocks: " + levelBlocks.toString());
 		
 		JsonValue lava = levelFormat.get("lava");
 		if(lava.getBoolean("present")){
@@ -418,8 +427,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 		Movement.setCharacter(character);
 
-		makeTestLevel(currentHeight);
-
 	}
 	
 	/** 
@@ -435,8 +442,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		
 		JsonValue handholdDesc = levelPiece.get("handholds").child();
 
-		//if(currentHeight == 0) makeTestLevel(handholdDesc);
-//		makeTestLevel();
 		Random rand = new Random();
 
 		while(handholdDesc != null){
@@ -451,8 +456,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			try{
 				handhold.setBodyType(BodyDef.BodyType.KinematicBody);
 				JsonValue movement = handholdDesc.get("movement");
-				handhold.setStartPoint(movement.getFloat("startX"),movement.getFloat("startY"));
-				handhold.setEndPoint(movement.getFloat("endX"),movement.getFloat("endY"));
+				handhold.setStartPoint(movement.getFloat("startX"),movement.getFloat("startY")+currentHeight);
+				handhold.setEndPoint(movement.getFloat("endX"),movement.getFloat("endY")+currentHeight);
 				float speed = movement.getFloat("speed"), 
 					tx = handhold.getEndPoint().x - handhold.getStartPoint().x,
 					ty = handhold.getEndPoint().y - handhold.getStartPoint().y,
@@ -463,7 +468,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			}
 			catch(Exception e){handhold.setBodyType(BodyDef.BodyType.StaticBody);}
 			objects.add(handhold);
-			maxHandhold = Math.max(maxHandhold,handhold.getY());
 
 			try{handhold.setCrumble(handholdDesc.getFloat("crumble"));}
 			catch(Exception e){handhold.setCrumble(0);}
@@ -478,53 +482,44 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			obstacleDesc = levelPiece.get("obstacles").child();}
 		catch(Exception e){return;}
 		Rectangle bound;
-//		while(obstacleDesc != null){
-//			bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY")+currentHeight,
-//					obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
-//			//TODO: Set texture to something other than null once we have textures for obstacles
-//			obstacleZone = new ObstacleZone(null, null, currentHeight, obstacleDesc.getInt("frequency"), bound);
-//			obstacles.add(obstacleZone);
-//			obstacleDesc = obstacleDesc.next();
-//		}
+		while(obstacleDesc != null){
+			bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY")+currentHeight,
+					obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
+			//TODO: Set texture to something other than null once we have textures for obstacles
+			obstacleZone = new ObstacleZone(handholdTextures[0].getTexture(), null, currentHeight, obstacleDesc.getInt("frequency"), bound);
+			obstacles.add(obstacleZone);
+			obstacleDesc = obstacleDesc.next();
+		}
+		
+
+
+		JsonValue staticDesc;
+		try{
+			staticDesc = levelPiece.get("static").child();
+			ObstacleModel obstacle;
+			while(staticDesc != null){
+				//TODO: Set texture to something other than null once we have textures for obstacles
+
+				obstacle = new ObstacleModel(handholdTextures[0].getTexture(), staticDesc.getFloat("size"), scale);
+				obstacle.setX(staticDesc.getFloat("x"));
+				obstacle.setY(staticDesc.getFloat("y")+currentHeight);
+
+				obstacle.setBodyType(BodyType.StaticBody);
+				obstacle.activatePhysics(world);
+				objects.add(obstacle);
+				staticDesc = staticDesc.next();
+			}
+		}
+		catch(Exception e){}
 	}
 	//TODO delete when there are actually levels!!!
-	private void makeTestLevel(float currentHeight) {
+	private void makeTestLevel2(float currentHeight) {
 		Random rand = new Random();
 		Rectangle bound = new Rectangle(12,20,2,4);
-		obstacleZone = new ObstacleZone(handholdTextures[0].getTexture(),handholdTextures[0].getTexture(),
+		obstacleZone = new ObstacleZone(handholdTextures[0].getTexture(),warningTexture,
 				0, 2f, bound);
-
-		obstacles.add(obstacleZone);
-//		try{
-//			obstacleDesc = levelPiece.get("obstacles").child();
-//			while(obstacleDesc != null){
-//				bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY")+currentHeight,
-//						obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
-//				//TODO: Set texture to something other than null once we have textures for obstacles
-//				obstacleZone = new ObstacleZone(null, null, currentHeight, obstacleDesc.getInt("frequency"), bound);
-//				obstacles.add(obstacleZone);
-//				obstacleDesc = obstacleDesc.next();
-//			}
-//		}
-//		catch(Exception e){}
-//
-//		JsonValue staticDesc;
-//		try{
-//			staticDesc = levelPiece.get("static").child();
-//			ObstacleModel obstacle;
-//			while(staticDesc != null){
-//				//TODO: Set texture to something other than null once we have textures for obstacles
-//				obstacle = new ObstacleModel(null, staticDesc.getFloat("size"), scale);
-//				obstacle.setX(staticDesc.getFloat("x"));
-//				obstacle.setY(staticDesc.getFloat("y"));
-//				obstacle.setBodyType(BodyType.StaticBody);
-//				obstacle.activatePhysics(world);
-//				objects.add(obstacle);
-//				staticDesc = staticDesc.next();
-//			}
-//		}
-//		catch(Exception e){}
 	}
+
 
 	/**
 	 * This method computes an order for the selected limbs based on previous timesteps and the first limb in nextToPress
@@ -568,9 +563,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 
 		}
-		if (TORSO_MODE){
-			Movement.applyTorsoForceIfApplicable();
-		}
+		Movement.applyTorsoForceIfApplicable();
 		//bounding velocities
 		boundBodyVelocities();
 
@@ -589,35 +582,35 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			canvas.setCameraPosition(canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y-canvas.getHeight()/2);
 		}
 		
-//		for(int e : EXTREMITIES){
-//			 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
-//			 if(extremity.isGripped()){
-//				 extremity.updateGripTime();
-//				 if(extremity.getJoint().getBodyB() == null){
-//					 ungrip(extremity);
-//				 }
-//				 else{
-//					 HandholdModel h = (HandholdModel) extremity.getJoint().getBodyB().getFixtureList().get(0).getUserData();
-//					 if(extremity.getGripTime() > h.getSlip()*60 && h.getSlip() > 0){
-//						 ungrip(extremity);
-//					 }
-//					 if(extremity.getGripTime() > h.getCrumble()*60 && h.getCrumble() > 0){
-//						 //TODO add crumble animation
-//						 ungripAllFrom(h);
-//						 objects.remove(h);
-//						 h.deactivatePhysics(world);
-//					 }
-//				 }
-//
+		for(int e : EXTREMITIES){
+			 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
+			 if(extremity.isGripped()){
+				 extremity.updateGripTime();
+				 if(extremity.getJoint().getBodyB() == null){
+					 ungrip(extremity);
+				 }
+				 else{
+					 HandholdModel h = (HandholdModel) extremity.getJoint().getBodyB().getFixtureList().get(0).getUserData();
+					 if(extremity.getGripTime() > h.getSlip()*60 && h.getSlip() > 0){
+						 ungrip(extremity);
+					 }
+					 if(extremity.getGripTime() > h.getCrumble()*60 && h.getCrumble() > 0){
+						 //TODO add crumble animation
+						 ungripAllFrom(h);
+						 objects.remove(h);
+						 h.deactivatePhysics(world);
+					 }
+				 }
+
 //				 if((e == HAND_LEFT || e == HAND_RIGHT) &&
 //						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > ARM_UNGRIP_LENGTH)
 //					 ungrip(extremity);
 //				 else if((e == FOOT_LEFT || e == FOOT_RIGHT) &&
 //						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > LEG_UNGRIP_LENGTH)
 //					 ungrip(extremity);
-//			 }
-//
-//		}
+			 }
+
+		}
 		
 		spawnObstacles();
 		for(GameObject g : objects){
@@ -637,8 +630,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		}
 		
 		// TODO: Update energy quantity (fill in these values)
-		float exertion = 0;
-		character.updateEnergy(oxygen, 1, exertion, true);
+		Vector2 force = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
+		character.updateEnergy(oxygen, 1, force.len(), true);
 
 		if(risingObstacle != null){
 			risingObstacle.setHeight(risingObstacle.getHeight()+risingObstacle.getSpeed());
@@ -731,7 +724,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	 * level chunk that contains that obstacle zone. 
 	 */
 	private void spawnObstacles(){
-		Random rand = new Random();
 		float cpos = character.parts.get(CHEST).getBody().getPosition().y;
 		for(ObstacleZone oz : obstacles){
 			float viewHeight = (canvas.getCamera().position.y + canvas.getHeight()/2) / scale.y;
@@ -741,26 +733,25 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 			if(oz.canSpawnObstacle()&& viewHeight < oz.getBounds().y){
 				obstacle = new ObstacleModel(oz.getObstacleTexture(), 1f, scale);
-				obstacle.setX(oz.getBounds().x+rand.nextFloat()*oz.getBounds().width);
-				obstacle.setY(oz.getBounds().y + rand.nextFloat()*oz.getBounds().height);
+				obstacle.setX(oz.getObstX());
+				obstacle.setY(viewHeight + 1f);
 				obstacle.activatePhysics(world);
 				obstacle.setBodyType(BodyDef.BodyType.DynamicBody);
 				obstacle.geometry.setUserData(obstacle);
 				objects.add(obstacle);
 				oz.resetSpawnTimer();
-				destroyObstacleWarning(oz);
-				if (cpos<=oz.getMaxSpawnHeight())
-					makeObstacleWarning(oz);
 
 			}
 
 			else if (cpos >= oz.getMinSpawnHeight() || oz.isTriggered()){
 				oz.setTriggered(true);
 				oz.incrementSpawnTimer();
-				if ((oz.getMaxSpawnHeight() - cpos)*scale.y>0){
+				if ((oz.getMaxSpawnHeight() - cpos)*scale.y>0 && oz.ticksSinceLastSpawn > 15){
 					makeObstacleWarning(oz);
-				}else{
+				}else if (oz.ticksSinceLastSpawn == 5){
 					destroyObstacleWarning((oz));
+				}else if ((oz.getMaxSpawnHeight() - cpos)*scale.y<0){
+					destroyObstacleWarning(oz);
 				}
 			}
 
@@ -776,7 +767,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	private void makeObstacleWarning(ObstacleZone oz) {
 		if (obstacleWarnings.lastIndexOf(oz,false) == -1){
 			obstacleWarnings.add(oz);
-
+			oz.setObstX(oz.getBounds().x + rand.nextFloat()*oz.getBounds().width);
+			oz.setObstY(oz.getBounds().y + rand.nextFloat()*oz.getBounds().height);
 		}
 
 	}
@@ -984,9 +976,9 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			canvas.draw(edge, Color.WHITE, canvas.getWidth() * 3 / 4, tileY, canvas.getWidth() / 16, canvas.getHeight());
 			tileY += canvas.getWidth() / 4;
 		}
-//		int a = v.y/maxHandhold;
+		float a = v.y/maxHandhold;
 		if (timestep%60 == 0 && character.getEnergy() != 0)
-			progressLevel = Math.min(6,Math.max(0,Math.round(v.y/maxHandhold * 5 - .5f)));
+			progressLevel = Math.min(6,Math.max(0,Math.round(v.y/maxHandhold * 6 + .5f)));
 		canvas.draw(ground, Color.WHITE, canvas.getWidth() / 4, 0, canvas.getWidth() / 2, canvas.getHeight() / 8);
 		canvas.draw(UI, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 		canvas.draw(LOGO, Color.FIREBRICK, 0, canvas.getHeight() * 5.4f/6 + y, canvas.getWidth() / 4, canvas.getHeight() * .5f/6);
@@ -1017,16 +1009,26 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		}
 		if (obstacles.size > 0) {
 			for (ObstacleZone oz : obstacleWarnings) {
-				canvas.draw(oz.getWarningTexture(), Color.WHITE, oz.getMinX() * scale.x, canvas.getCamera().position.y + canvas.getHeight() / 2 - 100f, oz.getBounds().width * scale.x, 200f);
+				warningSprite.setBounds(oz.getObstX() * scale.x -  1 * scale.x, canvas.getCamera().position.y + canvas.getHeight() / 2 - 100f, 2f * scale.x , 100f);
+				warningSprite.setAlpha(.5f + oz.ticksSinceLastSpawn/2f/oz.getSpawnFrequency());
+				batch.begin();
+				warningSprite.draw(batch);
+				batch.end();
 			}
 		}
 		canvas.end();
 		float f = character.getEnergy();
 		if ( f<= 40){
-			blackoutSprite.setAlpha((Math.abs(f-100f)/100f - .5f)*1.5f);
-			batch.begin();
-			blackoutSprite.draw(batch);
-			batch.end();
+//			if (f<=10 && flashing2<f){
+//				flashing2 --;
+//				if (flashing2==0)
+//					flashing2 = Math.round(f)*2;
+//			}else {
+				blackoutSprite.setAlpha((Math.abs(f - 100f) / 100f - .5f) * 1.5f);
+				batch.begin();
+				blackoutSprite.draw(batch);
+				batch.end();
+//			}
 		}
 
 		if (debug) {
