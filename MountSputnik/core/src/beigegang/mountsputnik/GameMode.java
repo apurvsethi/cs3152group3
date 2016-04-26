@@ -21,6 +21,8 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.utils.*;
 
+import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.Random;
 
 public class GameMode extends ModeController {
@@ -52,7 +54,9 @@ public class GameMode extends ModeController {
 	private static final String LAVA_FILE = "assets/testlavatexture.png"; //TODO: make this a better texture
 	private static final String UI_FILE = "assets/HUD2.png";
 	private static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
-	private static final String HANDHOLD_TEXTURES[] = {"assets/canyon/Handhold1.png", "assets/canyon/Handhold2.png"};
+	private static final String GLOW_FILE = "assets/glow.png"; 
+	private static final HashMap<String,Integer> NUM_HANDHOLDS = new HashMap<String,Integer>();  
+	//private static final String HANDHOLD_TEXTURES[] = {"assets/canyon/Handhold1.png", "assets/canyon/Handhold2.png"};
 	private static final String PART_TEXTURES[] = {"Ragdoll/Torso.png", "Ragdoll/Head.png", "Ragdoll/Hips.png",
 			"Ragdoll/ArmLeft.png", "Ragdoll/ArmRight.png", "Ragdoll/ForearmLeft.png", "Ragdoll/ForearmRight.png",
 			"Ragdoll/HandLeftUngripped.png", "Ragdoll/HandRightUngripped.png", "Ragdoll/ThighLeft.png",
@@ -95,9 +99,10 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	private static TextureRegion edge;
 	private static TextureRegion ground;
 	private static TextureRegion lavaTexture;
+	private static TextureRegion glowTexture; 
 	private static TextureRegion[] partTextures = new TextureRegion[PART_TEXTURES.length];
 	private static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length];
-	private static TextureRegion[] handholdTextures = new TextureRegion[HANDHOLD_TEXTURES.length];
+	private static TextureRegion[] handholdTextures;
 	private static TextureRegion blackoutTexture;
 	private static String BLACKOUT = "assets/blackout.png";
 	private static String FATIGUE_BAR = "Energy/Fatigue Gauge.png";
@@ -145,10 +150,10 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			assets.add("assets/"+name+"/background.png");
 			manager.load("assets/"+name+"/Midground.png", Texture.class);
 			assets.add("assets/"+name+"/Midground.png");
-			manager.load("assets/"+name+"/SurfaceLight.png", Texture.class);
-			assets.add("assets/"+name+"/SurfaceLight.png");
-			manager.load("assets/"+name+"/SurfaceEdgeLight.png", Texture.class);
-			assets.add("assets/"+name+"/SurfaceEdgeLight.png");
+			manager.load("assets/"+name+"/Surface.png", Texture.class);
+			assets.add("assets/"+name+"/Surface.png");
+			manager.load("assets/"+name+"/SurfaceEdge.png", Texture.class);
+			assets.add("assets/"+name+"/SurfaceEdge.png");
 			manager.load("assets/"+name+"/LevelStart.png", Texture.class);
 			assets.add("assets/"+name+"/LevelStart.png");
 		}
@@ -170,10 +175,14 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		assets.add(LOGO_FILE);
 		manager.load(LAVA_FILE, Texture.class);
 		assets.add(LAVA_FILE);
+		manager.load(GLOW_FILE, Texture.class);
+		assets.add(GLOW_FILE);
 
-		for (String HANDHOLD_TEXTURE : HANDHOLD_TEXTURES) {
-			manager.load(HANDHOLD_TEXTURE, Texture.class);
-			assets.add(HANDHOLD_TEXTURE);
+		for (Entry<String, Integer> entry : NUM_HANDHOLDS.entrySet()){
+			for(int i = 1; i <= entry.getValue(); i++){
+				manager.load("assets/"+entry.getKey()+"/Handhold"+i+".png",Texture.class);
+				assets.add("assets/"+entry.getKey()+"/Handhold"+i+".png");
+			}
 		}
 		for (String PART_TEXTURE : PART_TEXTURES) {
 			manager.load(PART_TEXTURE, Texture.class);
@@ -210,12 +219,13 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 		background = createTexture(manager, "assets/"+levelName+"/background.png", false);
 		midground = createTexture(manager, "assets/"+levelName+"/Midground.png", false);
-		tile = createTexture(manager, "assets/"+levelName+"/SurfaceLight.png", false);
+		tile = createTexture(manager, "assets/"+levelName+"/Surface.png", false);
 		UI = createTexture(manager, UI_FILE, false);
 		LOGO = createTexture(manager, LOGO_FILE, false);
-		edge = createTexture(manager, "assets/"+levelName+"/SurfaceEdgeLight.png", false);
+		edge = createTexture(manager, "assets/"+levelName+"/SurfaceEdge.png", false);
 		ground = createTexture(manager, "assets/"+levelName+"/LevelStart.png", false);
 		lavaTexture = createTexture(manager, LAVA_FILE, false);
+		glowTexture = createTexture(manager, GLOW_FILE, false); 
 		
 		for (int i = 0; i < PART_TEXTURES.length; i++) {
 			partTextures[i] = createTexture(manager, PART_TEXTURES[i], false);
@@ -224,9 +234,10 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		for (int i = 0; i < TUTORIAL_TEXTURES.length; i++) {
 			tutorialTextures[i] = createTexture(manager, TUTORIAL_TEXTURES[i], false);
 		}
-
-		for (int i = 0; i < HANDHOLD_TEXTURES.length; i++) {
-			handholdTextures[i] = createTexture(manager, HANDHOLD_TEXTURES[i], false);
+		
+		handholdTextures = new TextureRegion[NUM_HANDHOLDS.get(levelName)];
+		for (int i = 1; i <= NUM_HANDHOLDS.get(levelName); i++) {
+			handholdTextures[i-1] = createTexture(manager, "assets/"+levelName+"/Handhold"+i+".png", false);
 		}
 
 		for (int i = 0; i < ENERGY_TEXTURES.length; i++) {
@@ -309,6 +320,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		font.setColor(Color.RED);
 		font.getData().setScale(5);
 
+		NUM_HANDHOLDS.put("canyon", 1); 
+		NUM_HANDHOLDS.put("tutorial",4); 
 
 	}
 
@@ -326,7 +339,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		timestep = 0;
 		//TODO: make this based on current level, rather than hardcoded test
 		populateLevel();
-		blackoutSprite.setBounds(canvas.getWidth()/4,0,canvas.getWidth()*2/4,canvas.getHeight());
+		blackoutSprite.setBounds(0,0,canvas.getWidth(),canvas.getHeight());
 
 	}
 
@@ -445,7 +458,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		Random rand = new Random();
 
 		while(handholdDesc != null){
-			handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
+			handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(), glowTexture.getTexture(), 
 					handholdDesc.getFloat("positionX"), handholdDesc.getFloat("positionY")+currentHeight,
 					new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
 			handhold.fixtureDef.filter.maskBits = 0;

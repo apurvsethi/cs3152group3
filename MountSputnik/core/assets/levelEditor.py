@@ -294,10 +294,10 @@ fallingObstacleWidth = 2
 scaling = 32
 
 handholds = [
-    Handhold(6*scaling, 8.93*scaling, 1, 0, 0), 
-    Handhold(12.5*scaling, 9.18*scaling, 1, 0, 0), 
-    Handhold(7.78*scaling, 4.75*scaling, 1, 0, 0), 
-    Handhold(10*scaling, 4.5*scaling, 1, 0, 0)
+    Handhold(5*scaling, 8.93*scaling, 1, 0, 0), 
+    Handhold(10.5*scaling, 9.18*scaling, 1, 0, 0), 
+    Handhold(6.78*scaling, 4.75*scaling, 1, 0, 0), 
+    Handhold(9*scaling, 4.5*scaling, 1, 0, 0)
 ]
 staticObstacles = []
 fallingObstacles = []
@@ -336,7 +336,7 @@ class LinePlayground(FloatLayout):
             Color(0,0,0)
             Rectangle(pos=[canvas_left,0],size=[blockWidth*scaling, Window.size[1]])
             Color(1,1,1)
-            Rectangle(pos=[canvas_left, canvas_origin],size=[blockWidth*scaling,self.blockHeight*scaling], source=self.directory+'SurfaceLight.png')
+            Rectangle(pos=[canvas_left, canvas_origin],size=[blockWidth*scaling,self.blockHeight*scaling], source=self.directory+'Surface.png')
             Rectangle(pos=[canvas_left+blockWidth*scaling/2.9, 150], size=[blockWidth*scaling/2.8, blockWidth*scaling/2.8], source='assets/character.png')
         self.drawHandholds()
         self.drawObstacles()
@@ -360,7 +360,7 @@ class LinePlayground(FloatLayout):
             Color(0,0,0)
             Rectangle(pos=[canvas_left, 0], size=[blockWidth*scaling, Window.size[1]])
             Color(1,1,1,1)
-            Rectangle(pos=[canvas_left, canvas_origin],size=[blockWidth*scaling,self.blockHeight*scaling], source=self.directory+"SurfaceLight.png")
+            Rectangle(pos=[canvas_left, canvas_origin],size=[blockWidth*scaling,self.blockHeight*scaling], source=self.directory+"Surface.png")
             Color(1,1,1,1)
             Rectangle(pos=[canvas_left+blockWidth*scaling/2.9, 150], size=[blockWidth*scaling/2.8, blockWidth*scaling/2.8], source='assets/character.png')
         self.removeBadHandholds()
@@ -489,14 +489,17 @@ class LinePlayground(FloatLayout):
         return canvas_left < x and x+w < (canvas_left)+blockWidth*scaling  
 
     def clear(self):
-        global handholds 
+        global handholds
+        global movingHandholds
+        global fallingObstacles
+        global staticObstacles 
         global selected 
         handholds = [
-            Handhold(12.53*scaling, 8.93*scaling, 1,0,0), 
-            Handhold(19*scaling, 9.18*scaling, 1,0,0), 
-            Handhold(14.28*scaling, 4.75*scaling, 1,0,0), 
-            Handhold(16.46*scaling, 4.5*scaling, 1,0,0)
-        ]
+            Handhold(5*scaling, 8.93*scaling, 1, 0, 0), 
+            Handhold(10.5*scaling, 9.18*scaling, 1, 0, 0), 
+            Handhold(6.78*scaling, 4.75*scaling, 1, 0, 0), 
+            Handhold(9*scaling, 4.5*scaling, 1, 0, 0)
+            ]
         movingHandholds = [] 
         fallingObstacles = []
         staticObstacles = []
