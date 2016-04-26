@@ -53,7 +53,7 @@ public class GameMode extends ModeController {
 	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "canyon", "canyon", "canyon", "sky", "canyon"};//,"mountain","sky","space"}; <-- Add the rest of these in as they are given assets
 	private static final String LAVA_FILE = "assets/testlavatexture.png"; //TODO: make this a better texture
 	private static final String UI_FILE = "assets/HUD4.png";
-	private static final String CANYON_FILE = "assets/Canyon.png";
+	private static final String[] LEVEL_LABEL_FILES = {"assets/Tutorial.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Skycloud.png", "assets/Canyon.png"};
 	private static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
 	private static final String GLOW_FILE = "assets/glow.png"; 
 	private static final HashMap<String,Integer> NUM_HANDHOLDS = new HashMap<String,Integer>();  
@@ -105,6 +105,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	private static TextureRegion[] partTextures = new TextureRegion[PART_TEXTURES.length];
 	private static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length];
 	private static TextureRegion[] handholdTextures;
+	private static TextureRegion[] levelLabels = new TextureRegion[LEVEL_LABEL_FILES.length];
+
 	private static TextureRegion blackoutTexture;
 	private static String BLACKOUT = "assets/blackout.png";
 	private static String FATIGUE_BAR = "Energy/Fatigue Gauge.png";
@@ -161,6 +163,11 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			assets.add("assets/"+name+"/SurfaceEdge.png");
 			manager.load("assets/"+name+"/LevelStart.png", Texture.class);
 			assets.add("assets/"+name+"/LevelStart.png");
+
+		}
+		for (String name:LEVEL_LABEL_FILES){
+			manager.load(name,Texture.class);
+			assets.add(name);
 		}
 		for (int i = 1; i<=ENERGY_TEXTURES.length; i++){
 			String name = "Energy/e" + i + ".png";
@@ -176,8 +183,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		}
 		manager.load(UI_FILE, Texture.class);
 		assets.add(UI_FILE);
-		manager.load(CANYON_FILE, Texture.class);
-		assets.add(CANYON_FILE);
+
 		manager.load(LOGO_FILE, Texture.class);
 		assets.add(LOGO_FILE);
 		manager.load(LAVA_FILE, Texture.class);
@@ -230,13 +236,17 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		midground = createTexture(manager, "assets/"+levelName+"/Midground.png", false);
 		tile = createTexture(manager, "assets/"+levelName+"/Surface.png", false);
 		UI = createTexture(manager, UI_FILE, false);
-		CANYON = createTexture(manager, CANYON_FILE, false);
 		LOGO = createTexture(manager, LOGO_FILE, false);
 		edge = createTexture(manager, "assets/"+levelName+"/SurfaceEdge.png", false);
 		ground = createTexture(manager, "assets/"+levelName+"/LevelStart.png", false);
 		lavaTexture = createTexture(manager, LAVA_FILE, false);
-		glowTexture = createTexture(manager, GLOW_FILE, false); 
-		
+		glowTexture = createTexture(manager, GLOW_FILE, false);
+
+		for (int i = 0;  i < LEVEL_LABEL_FILES.length; i++){
+			levelLabels[i] = createTexture(manager, LEVEL_LABEL_FILES[i], false);
+
+		}
+
 		for (int i = 0; i < PART_TEXTURES.length; i++) {
 			partTextures[i] = createTexture(manager, PART_TEXTURES[i], false);
 		}
@@ -1084,7 +1094,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			progressLevel = Math.min(6,Math.max(0,Math.round(v.y/maxHandhold * 6 + .5f)));
 		canvas.draw(ground, Color.WHITE, canvas.getWidth() / 4, 0, canvas.getWidth() / 2, canvas.getHeight() / 8);
 		canvas.draw(UI, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-		canvas.draw(CANYON, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+		canvas.draw(levelLabels[currLevel], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 //		canvas.draw(LOGO, Color.FIREBRICK, 0, canvas.getHeight() * 5.4f/6 + y, canvas.getWidth() / 4, canvas.getHeight() * .5f/6);
 		if (progressLevel > 0) {
 			canvas.draw(progressTextures[progressLevel-1], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
