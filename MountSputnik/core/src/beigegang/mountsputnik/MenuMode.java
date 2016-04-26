@@ -17,7 +17,7 @@ public class MenuMode extends ModeController {
 
 	private int currView = MAIN_MENU;
 	//TODO: read in from file so these don't reset each time
-	private boolean levelSelectAllowed [] = {true, false, false, false, false, false, false, true};
+	private boolean levelSelectAllowed [] = {true, true, false, false, false, false, false, true};
 
 	private static final String BACKGROUND_FILE = "Menu/StartMenu/Background.png";
 	private static final String MENU_OPTION_FILES[] = {"Menu/StartMenu/Start.png","Menu/StartMenu/Levels.png","Menu/StartMenu/Settings.png","Menu/StartMenu/Quit.png"};

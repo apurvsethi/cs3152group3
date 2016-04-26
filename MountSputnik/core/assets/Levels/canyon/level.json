@@ -1,16 +1,15 @@
 {    
-
 	"difficulty": "easy",
-	"height": 50,
+	"height": 150,
 	"uniqueBlocks": 9,
 	"generalFillerSize": 0,
-	"fillerBlocks": 0,
+	"fillerBlocks": 2,
     "oxygen": 1,
     "gravity": -9.8,
     "background": "canyon", 
     "handholdTextures" : 2, //The number of different handhold textures available
 	"lava": {
-		"present": true,
+		"present": false,
 		"texture": "testlavatexture.png",
 		"speed": .005
 	}
