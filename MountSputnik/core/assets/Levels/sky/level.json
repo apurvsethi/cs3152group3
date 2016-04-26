@@ -5,8 +5,8 @@
 	"uniqueBlocks": 4,
 	"generalFillerSize": 0,
 	"fillerBlocks": 0,
-    "oxygen": 1,
-    "gravity": -9.8,
+    "oxygen": .7,
+    "gravity": -4.9,
     "background": "sky", 
     "handholdTextures" : 1, //The number of different handhold textures available
 	"lava": {
