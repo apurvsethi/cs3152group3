@@ -24,7 +24,7 @@ public class PauseMode extends ModeController {
 	private static TextureRegion foreground;
 	private static TextureRegion[] menuOptions = new TextureRegion[MENU_OPTION_FILES.length];
 
-	private static int exitCodes[] ={EXIT_GAME_RESUME_LEVEL,EXIT_GAME_NEW_LEVEL,EXIT_MENU,EXIT_QUIT};
+	private static int exitCodes[] ={EXIT_GAME_RESUME_LEVEL,EXIT_GAME_RESTART_LEVEL,EXIT_MENU,EXIT_QUIT};
 
 	private AssetManager assetManager;
 
@@ -70,7 +70,7 @@ public class PauseMode extends ModeController {
 	@Override
 	public void reset() {
 		// TODO Auto-generated method stub
-
+		currSelection = 0;
 	}
 
 	@Override

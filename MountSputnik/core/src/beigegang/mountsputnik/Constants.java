@@ -12,11 +12,30 @@ public final class Constants {
 	public static final int PAUSE_SCREEN = 3;
 
 	/** Exit codes */
-	public static final int EXIT_GAME_NEW_LEVEL = 0;
-	public static final int EXIT_MENU = 1;
-	public static final int EXIT_GAME_RESUME_LEVEL = 2;
-	public static final int EXIT_PAUSE = 3;
-	public static final int EXIT_QUIT = 4;
+	public static final int EXIT_GAME_RESTART_LEVEL = 0;
+	public static final int EXIT_GAME_NEXT_LEVEL = 1;
+	public static final int EXIT_MENU = 2;
+	public static final int EXIT_GAME_RESUME_LEVEL = 3;
+	public static final int EXIT_PAUSE = 4;
+	public static final int EXIT_QUIT = 5;
+	public static final int EXIT_LEVEL_SELECT = 6;
+	public static final int EXIT_SETTINGS = 7;
+
+	/**Level codes*/
+	public static final int NUM_LEVELS = 7;
+	public static final int LEVEL_TUTORIAL = 0;
+	public static final int LEVEL_CANYON = 1;
+	public static final int LEVEL_SNOWY_MOUNTAIN = 2;
+	public static final int LEVEL_WATERFALL = 3;
+	public static final int LEVEL_VOLCANO = 4;
+	public static final int LEVEL_SKY = 5;
+	public static final int LEVEL_SPACE = 6;
+
+	/**Menu Codes*/
+	public static final int MAIN_MENU = 0;
+	public static final int LEVEL_SELECT = 1;
+	public static final int SETTINGS = 2;
+
 
 	/** The amount of time for a physics engine step. */
 	public static final float WORLD_STEP = 1 / 60.0f;
@@ -35,7 +54,11 @@ public final class Constants {
 
 	public static final int HANDHOLD_SNAP_RADIUS = 1;
 
-	public static final float START_MENU_DRAW_LOCATION = 0.25f;
+	public static final float START_MENU_DRAW_LOCATION = 0.35f;
+	public static final float LEVEL_SELECT_DRAW_LOCATION = 0.66f;
+	public static final int LEVEL_SELECT_ROWS = 2;
+	public static final int LEVEL_SELECT_SPACING = 40;
+	public static final float SETTINGS_DRAW_LOCATION = 0.25f;
 	public static final int MENU_ITEM_HEIGHT = 80;
 	public static final int MENU_CHANGE_COOLDOWN = 12;
 
