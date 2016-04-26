@@ -50,9 +50,10 @@ public class GameMode extends ModeController {
 	 */
 	//We need to preload every single texture, regardless of which level we're currently using. Loading can't be
 	//dynamically
-	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "canyon", "canyon", "canyon", "canyon", "canyon"};//,"mountain","sky","space"}; <-- Add the rest of these in as they are given assets
+	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "canyon", "canyon", "canyon", "sky", "canyon"};//,"mountain","sky","space"}; <-- Add the rest of these in as they are given assets
 	private static final String LAVA_FILE = "assets/testlavatexture.png"; //TODO: make this a better texture
-	private static final String UI_FILE = "assets/HUD2.png";
+	private static final String UI_FILE = "assets/HUD4.png";
+	private static final String CANYON_FILE = "assets/Canyon.png";
 	private static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
 	private static final String GLOW_FILE = "assets/glow.png"; 
 	private static final HashMap<String,Integer> NUM_HANDHOLDS = new HashMap<String,Integer>();  
@@ -95,6 +96,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	private static TextureRegion midground;
 	private static TextureRegion tile;
 	private static TextureRegion UI;
+	private static TextureRegion CANYON;
 	private static TextureRegion LOGO;
 	private static TextureRegion edge;
 	private static TextureRegion ground;
@@ -174,6 +176,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		}
 		manager.load(UI_FILE, Texture.class);
 		assets.add(UI_FILE);
+		manager.load(CANYON_FILE, Texture.class);
+		assets.add(CANYON_FILE);
 		manager.load(LOGO_FILE, Texture.class);
 		assets.add(LOGO_FILE);
 		manager.load(LAVA_FILE, Texture.class);
@@ -226,6 +230,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		midground = createTexture(manager, "assets/"+levelName+"/Midground.png", false);
 		tile = createTexture(manager, "assets/"+levelName+"/Surface.png", false);
 		UI = createTexture(manager, UI_FILE, false);
+		CANYON = createTexture(manager, CANYON_FILE, false);
 		LOGO = createTexture(manager, LOGO_FILE, false);
 		edge = createTexture(manager, "assets/"+levelName+"/SurfaceEdge.png", false);
 		ground = createTexture(manager, "assets/"+levelName+"/LevelStart.png", false);
@@ -322,6 +327,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 		NUM_HANDHOLDS.put("canyon", 1); 
 		NUM_HANDHOLDS.put("tutorial",4); 
+		NUM_HANDHOLDS.put("sky", 1); 
 
 	}
 
@@ -630,12 +636,12 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		Movement.applyTorsoForceIfApplicable();
 		//bounding velocities
 		boundBodyVelocities();
+		HandholdModel[] glowingHandholds = glowHandholds();
 
 		if (justReleased.size > 0 || timestep == 0) {
-			snapLimbsToHandholds(input);
+			snapLimbsToHandholds(input,glowingHandholds);
 		}
 		
-		glowHandholds();
 
 		canvas.setCameraPosition(canvas.getWidth() / 2,
 						character.parts.get(CHEST).getBody().getPosition().y*scale.y);
@@ -894,21 +900,39 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	 * //	 * implement a calculation which says that handhold distance <= MAX_ARM_DIST or MAX_LEG_DIST.
 	 * @author Jacob
 	 */
-	private void glowHandholds() {
-		for (GameObject obj : objects) {
-			if (obj.getType() == GameObject.ObjectType.HANDHOLD) {
-				HandholdModel h = (HandholdModel) obj;
-				h.unglow();
-				for (int e : EXTREMITIES) {
+	private HandholdModel[] glowHandholds() {
+		HandholdModel[] newGlowingHandholds = new HandholdModel[4];
+		for (int i = 0; i<EXTREMITIES.length; i++) {
+			HandholdModel closest = null;
+			double dist;
+			double closestdist = HANDHOLD_SNAP_RADIUS + 1;
+
+			for (GameObject obj : objects) {
+				if (obj.getType() == GameObject.ObjectType.HANDHOLD) {
+					HandholdModel h = (HandholdModel) obj;
+					if (i<1)
+						h.unglow();
+
 					for (Vector2 snapPoint : h.snapPoints) {
-						if (closeEnough(e, snapPoint)) {
-							h.glow();
-							break;
+						dist = distanceFrom(EXTREMITIES[i], snapPoint);
+						if (dist<=HANDHOLD_SNAP_RADIUS) {
+							closest = closestdist > dist ? h:closest;
+							closestdist = closestdist > dist ? dist:closestdist;
+
 						}
 					}
+
 				}
 			}
+
+			newGlowingHandholds[i] = closest;
+
 		}
+		for (HandholdModel g : newGlowingHandholds){
+			if (g != null) g.glow();
+		}
+		return newGlowingHandholds;
+
 	}
 
 	/**
@@ -918,15 +942,15 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 	 * @param input
      */
-	private void snapLimbsToHandholds(InputController input) {
+	private void snapLimbsToHandholds(InputController input, HandholdModel[] hs) {
 		for (int i : justReleased) {
-			snapIfPossible(i);
+			snapIfPossible(i, hs);
 		}
 		if (timestep == 0) {
-			snapIfPossible(FOOT_LEFT);
-			snapIfPossible(HAND_LEFT);
-			snapIfPossible(HAND_RIGHT);
-			snapIfPossible(FOOT_RIGHT);
+			snapIfPossible(FOOT_LEFT,hs);
+			snapIfPossible(HAND_LEFT,hs);
+			snapIfPossible(HAND_RIGHT,hs);
+			snapIfPossible(FOOT_RIGHT,hs);
 
 		}
 	}
@@ -936,20 +960,32 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	 * @param limb - limb to snap if possible
 	 * @author Jacob
 	 * */
-	private void snapIfPossible(int limb) {
-		for (GameObject obj : objects) {
-			if (obj.getType() == GameObject.ObjectType.HANDHOLD) {
-				HandholdModel h = (HandholdModel) obj;
-				for (Vector2 snapPoint : h.snapPoints) {
-					if (closeEnough(limb, snapPoint)) {
-						character.parts.get(limb).setPosition(snapPoint);
-						((ExtremityModel) character.parts.get(limb)).grip();
-						grip(((ExtremityModel) character.parts.get(limb)), h); 
-					}
+	private void snapIfPossible(int limb, HandholdModel[] hs) {
+//		for (GameObject obj : objects) {
+//			if (obj.getType() == GameObject.ObjectType.HANDHOLD) {
+//				HandholdModel h = (HandholdModel) obj;
+		HandholdModel closest = null;
+		double dist;
+		double closestdist = HANDHOLD_SNAP_RADIUS + 1;
+		Vector2 closestSnapPoint = new Vector2(0,0);
+		for (HandholdModel h: hs) {
+			if (h == null) continue;
+ 			for (Vector2 snapPoint : h.snapPoints) {
+				dist = distanceFrom(limb, snapPoint);
+				if (dist <= HANDHOLD_SNAP_RADIUS){
+					closest = closestdist > dist ? h:closest;
+					closestdist = closestdist > dist ? dist:closestdist;
+					closestSnapPoint = snapPoint;
 				}
-
 			}
 		}
+		if (closest !=null){
+			character.parts.get(limb).setPosition(closestSnapPoint);
+			((ExtremityModel) character.parts.get(limb)).grip();
+			grip(((ExtremityModel) character.parts.get(limb)), closest);
+		}
+//			}
+//		}
 	}
 
 	/**
@@ -967,7 +1003,10 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		Vector2 dist = new Vector2 (character.parts.get(limb).getPosition().sub(snapPoint));
 		return (Math.sqrt(dist.x * dist.x + dist.y * dist.y) <= HANDHOLD_SNAP_RADIUS);
 	}
-
+	private double distanceFrom(int limb, Vector2 snapPoint) {
+		Vector2 dist = new Vector2 (character.parts.get(limb).getPosition().sub(snapPoint));
+		return Math.sqrt(dist.x * dist.x + dist.y * dist.y);
+	}
 
 	public PooledList<GameObject> getGameObjects(){
 		return objects;
@@ -1045,16 +1084,17 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			progressLevel = Math.min(6,Math.max(0,Math.round(v.y/maxHandhold * 6 + .5f)));
 		canvas.draw(ground, Color.WHITE, canvas.getWidth() / 4, 0, canvas.getWidth() / 2, canvas.getHeight() / 8);
 		canvas.draw(UI, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-		canvas.draw(LOGO, Color.FIREBRICK, 0, canvas.getHeight() * 5.4f/6 + y, canvas.getWidth() / 4, canvas.getHeight() * .5f/6);
+		canvas.draw(CANYON, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+//		canvas.draw(LOGO, Color.FIREBRICK, 0, canvas.getHeight() * 5.4f/6 + y, canvas.getWidth() / 4, canvas.getHeight() * .5f/6);
 		if (progressLevel > 0) {
-			canvas.draw(progressTextures[progressLevel-1], Color.BLUE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+			canvas.draw(progressTextures[progressLevel-1], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 		}
 		canvas.draw(progressBackgroundTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 
 		float f = character.getEnergy();
 		canvas.end();
-		if ( f<= 40){
-			lowEnergySprite.setAlpha(.5f + Math.min((40-f)/f,.5f));
+		if ( f<= 30){
+			lowEnergySprite.setAlpha(.5f + Math.min((30-f)/f,.5f));
 			batch.begin();
 			lowEnergySprite.draw(batch);
 			batch.end();
