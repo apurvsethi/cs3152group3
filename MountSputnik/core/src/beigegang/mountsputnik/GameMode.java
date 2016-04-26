@@ -401,9 +401,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		if(lava.getBoolean("present")){
 			risingObstacle = new RisingObstacle(lavaTexture, lava.getFloat("speed"));
 		}
-		//TODO delete this line as well:
-		risingObstacle = null;
-		//end this line
 		
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
 			//arms
