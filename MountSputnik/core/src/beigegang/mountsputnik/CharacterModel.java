@@ -336,11 +336,11 @@ public class CharacterModel {
 		float gain =0; float loss = 0;
 		switch(attached){
 			case 4: 
-				gain = (float) (gainModifier*(1-Math.abs(b*Math.sin(angle/2)))*10)+20;
+				gain = (float) (gainModifier*(1-Math.abs(b*Math.sin(angle/2)))*40);
 				loss = lossModifier+exertion;
 				break;
 			case 3:
-				gain = (float) (gainModifier*(1-Math.abs(b*Math.sin(angle/2)))*2);
+				gain = (float) (gainModifier*(1-Math.abs(b*Math.sin(angle/2)))*5);
 				loss = lossModifier+exertion;
 				break;
 			case 2:
@@ -356,7 +356,5 @@ public class CharacterModel {
 		float dEdt = (gain - loss)/60;
 		float newEnergy = getEnergy() < 0 ? 0 : getEnergy() > 100 ? 100 : getEnergy() + dEdt;
 		setEnergy(newEnergy);
-		//TODO delete this after done:
-//		setEnergy(100);
 	}
 }

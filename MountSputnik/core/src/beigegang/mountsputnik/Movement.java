@@ -36,7 +36,6 @@ public class Movement {
                 float v = input.getVerticalR();
                 applyIfUnderLimit(CHEST,new Vector2(force.x,force.y),h,v);
             }
-
         }
     }
 
@@ -55,7 +54,6 @@ public class Movement {
     }
 
     private static void applyIfUnderLimit(int part, Vector2 force, float h, float v) {
-        Vector2 vect = character.parts.get(part).body.getLinearVelocity();
         character.parts.get(part).body.applyForceToCenter(force.x*h, 0, true);
         character.parts.get(part).body.applyForceToCenter(0, force.y*v, true);
     }
@@ -603,9 +601,6 @@ public class Movement {
         return null;
 
     }
-
-    //TODO this method could use some serious modifying. i dont think it makes sense lol. but since movement is fine rn
-    //will modify later
     /**
      * attempts to allow limbs that WERE hooked to handholds to rotate and bend more easily allowing for more
      * natural movement

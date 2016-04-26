@@ -425,9 +425,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		objects.add(character.parts.get(HIPS));
 
 		Movement.setCharacter(character);
-
-		makeTestLevel(currentHeight);
-
 	}
 	
 	/** 
@@ -443,8 +440,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		
 		JsonValue handholdDesc = levelPiece.get("handholds").child();
 
-		//if(currentHeight == 0) makeTestLevel(handholdDesc);
-//		makeTestLevel();
 		Random rand = new Random();
 
 		while(handholdDesc != null){
@@ -496,42 +491,14 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 //		}
 	}
 	//TODO delete when there are actually levels!!!
-	private void makeTestLevel(float currentHeight) {
+	private void makeTestLevel2(float currentHeight) {
 		Random rand = new Random();
 		Rectangle bound = new Rectangle(12,20,2,4);
 		obstacleZone = new ObstacleZone(handholdTextures[0].getTexture(),warningTexture,
 				0, 2f, bound);
 
 		obstacles.add(obstacleZone);
-//		try{
-//			obstacleDesc = levelPiece.get("obstacles").child();
-//			while(obstacleDesc != null){
-//				bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY")+currentHeight,
-//						obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
-//				//TODO: Set texture to something other than null once we have textures for obstacles
-//				obstacleZone = new ObstacleZone(null, null, currentHeight, obstacleDesc.getInt("frequency"), bound);
-//				obstacles.add(obstacleZone);
-//				obstacleDesc = obstacleDesc.next();
-//			}
-//		}
-//		catch(Exception e){}
-//
-//		JsonValue staticDesc;
-//		try{
-//			staticDesc = levelPiece.get("static").child();
-//			ObstacleModel obstacle;
-//			while(staticDesc != null){
-//				//TODO: Set texture to something other than null once we have textures for obstacles
-//				obstacle = new ObstacleModel(null, staticDesc.getFloat("size"), scale);
-//				obstacle.setX(staticDesc.getFloat("x"));
-//				obstacle.setY(staticDesc.getFloat("y"));
-//				obstacle.setBodyType(BodyType.StaticBody);
-//				obstacle.activatePhysics(world);
-//				objects.add(obstacle);
-//				staticDesc = staticDesc.next();
-//			}
-//		}
-//		catch(Exception e){}
+
 	}
 
 	/**
@@ -576,9 +543,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 
 		}
-		if (TORSO_MODE){
-			Movement.applyTorsoForceIfApplicable();
-		}
+		Movement.applyTorsoForceIfApplicable();
 		//bounding velocities
 		boundBodyVelocities();
 
@@ -597,35 +562,35 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			canvas.setCameraPosition(canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y-canvas.getHeight()/2);
 		}
 		
-//		for(int e : EXTREMITIES){
-//			 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
-//			 if(extremity.isGripped()){
-//				 extremity.updateGripTime();
-//				 if(extremity.getJoint().getBodyB() == null){
-//					 ungrip(extremity);
-//				 }
-//				 else{
-//					 HandholdModel h = (HandholdModel) extremity.getJoint().getBodyB().getFixtureList().get(0).getUserData();
-//					 if(extremity.getGripTime() > h.getSlip()*60 && h.getSlip() > 0){
-//						 ungrip(extremity);
-//					 }
-//					 if(extremity.getGripTime() > h.getCrumble()*60 && h.getCrumble() > 0){
-//						 //TODO add crumble animation
-//						 ungripAllFrom(h);
-//						 objects.remove(h);
-//						 h.deactivatePhysics(world);
-//					 }
-//				 }
-//
+		for(int e : EXTREMITIES){
+			 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
+			 if(extremity.isGripped()){
+				 extremity.updateGripTime();
+				 if(extremity.getJoint().getBodyB() == null){
+					 ungrip(extremity);
+				 }
+				 else{
+					 HandholdModel h = (HandholdModel) extremity.getJoint().getBodyB().getFixtureList().get(0).getUserData();
+					 if(extremity.getGripTime() > h.getSlip()*60 && h.getSlip() > 0){
+						 ungrip(extremity);
+					 }
+					 if(extremity.getGripTime() > h.getCrumble()*60 && h.getCrumble() > 0){
+						 //TODO add crumble animation
+						 ungripAllFrom(h);
+						 objects.remove(h);
+						 h.deactivatePhysics(world);
+					 }
+				 }
+
 //				 if((e == HAND_LEFT || e == HAND_RIGHT) &&
 //						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > ARM_UNGRIP_LENGTH)
 //					 ungrip(extremity);
 //				 else if((e == FOOT_LEFT || e == FOOT_RIGHT) &&
 //						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > LEG_UNGRIP_LENGTH)
 //					 ungrip(extremity);
-//			 }
-//
-//		}
+			}
+
+		}
 		
 		spawnObstacles();
 		for(GameObject g : objects){
@@ -645,8 +610,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		}
 		
 		// TODO: Update energy quantity (fill in these values)
-		float exertion = 0;
-		character.updateEnergy(oxygen, 1, exertion, true);
+		Vector2 force = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
+		character.updateEnergy(oxygen, 1, force.len(), true);
 
 		if(risingObstacle != null){
 			risingObstacle.setHeight(risingObstacle.getHeight()+risingObstacle.getSpeed());
