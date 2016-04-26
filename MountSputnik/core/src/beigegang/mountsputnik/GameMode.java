@@ -50,7 +50,7 @@ public class GameMode extends ModeController {
 	//dynamically
 	private static final String LEVEL_NAMES[] = {"canyon", "tutorial"};//,"mountain","sky","space","tutorial"}; <-- Add the rest of these in as they are given assets
 	private static final String LAVA_FILE = "assets/testlavatexture.png"; //TODO: make this a better texture
-	private static final String UI_FILE = "assets/HUD.png";
+	private static final String UI_FILE = "assets/HUD2.png";
 	private static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
 	private static final String HANDHOLD_TEXTURES[] = {"assets/canyon/Handhold1.png", "assets/canyon/Handhold2.png"};
 	private static final String PART_TEXTURES[] = {"Ragdoll/Torso.png", "Ragdoll/Head.png", "Ragdoll/Hips.png",
@@ -387,7 +387,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 				currentHeight += levelPiece.getInt("size");
 			}
 		}
-		//System.out.println("level Blocks: " + levelBlocks.toString());
+		System.out.println("level Blocks: " + levelBlocks.toString());
 		
 		JsonValue lava = levelFormat.get("lava");
 		if(lava.getBoolean("present")){
@@ -419,8 +419,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 		Movement.setCharacter(character);
 
-		//makeTestLevel(currentHeight);
-
 	}
 	
 	/** 
@@ -436,8 +434,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		
 		JsonValue handholdDesc = levelPiece.get("handholds").child();
 
-		//if(currentHeight == 0) makeTestLevel(handholdDesc);
-//		makeTestLevel();
 		Random rand = new Random();
 
 		while(handholdDesc != null){
@@ -487,15 +483,18 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			obstacles.add(obstacleZone);
 			obstacleDesc = obstacleDesc.next();
 		}
+		
 		JsonValue staticDesc;
 		try{
 			staticDesc = levelPiece.get("static").child();
 			ObstacleModel obstacle;
 			while(staticDesc != null){
 				//TODO: Set texture to something other than null once we have textures for obstacles
+
 				obstacle = new ObstacleModel(handholdTextures[0].getTexture(), staticDesc.getFloat("size"), scale);
 				obstacle.setX(staticDesc.getFloat("x"));
 				obstacle.setY(staticDesc.getFloat("y")+currentHeight);
+
 				obstacle.setBodyType(BodyType.StaticBody);
 				obstacle.activatePhysics(world);
 				objects.add(obstacle);
@@ -504,15 +503,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		}
 		catch(Exception e){}
 	}
-	//TODO delete when there are actually levels!!!
-	private void makeTestLevel(float currentHeight) {
-//		Random rand = new Random();
-//		Rectangle bound = new Rectangle(12,20,2,4);
-//		obstacleZone = new ObstacleZone(handholdTextures[0].getTexture(),handholdTextures[0].getTexture(),
-//				10, 2f, bound);
-//
-//		obstacles.add(obstacleZone);
-		}
+
 
 	/**
 	 * This method computes an order for the selected limbs based on previous timesteps and the first limb in nextToPress
@@ -556,9 +547,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 
 		}
-		if (TORSO_MODE){
-			Movement.applyTorsoForceIfApplicable();
-		}
+		Movement.applyTorsoForceIfApplicable();
 		//bounding velocities
 		boundBodyVelocities();
 
@@ -625,8 +614,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		}
 		
 		// TODO: Update energy quantity (fill in these values)
-		float exertion = 0;
-		character.updateEnergy(oxygen, 1, exertion, true);
+		Vector2 force = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
+		character.updateEnergy(oxygen, 1, force.len(), true);
 
 		if(risingObstacle != null){
 			risingObstacle.setHeight(risingObstacle.getHeight()+risingObstacle.getSpeed());
@@ -727,7 +716,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 //					oz.isTriggered()){
 			//couldnt figure out why viewHeight<oz.getBounds().y was needed...
 
-			if(oz.canSpawnObstacle()){
+			if(oz.canSpawnObstacle()&& viewHeight < oz.getBounds().y){
 				obstacle = new ObstacleModel(oz.getObstacleTexture(), 1f, scale);
 				obstacle.setX(oz.getBounds().x+rand.nextFloat()*oz.getBounds().width);
 				obstacle.setY(oz.getBounds().y + rand.nextFloat()*oz.getBounds().height);

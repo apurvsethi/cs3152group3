@@ -58,7 +58,7 @@ public class ObstacleZone {
 	}
 
 	public float getMaxSpawnHeight() {
-		return minSpawnHeight + bounds.getHeight();
+		return bounds.getY() + bounds.getHeight();
 	}
 	public float getMinX() {
 		return bounds.x;
