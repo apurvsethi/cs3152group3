@@ -1,8 +1,10 @@
 package beigegang.mountsputnik;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Joint;
+import static beigegang.mountsputnik.SoundController.*;
 
 public class ExtremityModel extends PartModel{
 
@@ -75,6 +77,7 @@ public class ExtremityModel extends PartModel{
 	
 	/** Sets the value of isGripping to true*/
 	public void grip(){
+		SoundController.get(SoundController.GRIP_SOUND).play();
 		gripped = true;
 		gripTime = 0;
 		this.setTexture(grip);
@@ -85,6 +88,7 @@ public class ExtremityModel extends PartModel{
 	}
 	/** Sets the value of isGripping to false*/
 	public void ungrip(){
+		if (gripped) SoundController.get(SoundController.UNGRIP_SOUND).play();
 		gripped = false;
 		gripTime = 0;
 		setTexture(notGrip); 

@@ -41,6 +41,7 @@ public class GameEngine extends Game implements ScreenListener {
 		controllers[MENU_SCREEN] = new MenuMode();
 		controllers[GAME_SCREEN] = new GameMode();
 		controllers[PAUSE_SCREEN] = new PauseMode();
+		SoundController.PreLoadContent(manager);
 		for(int ii = 1; ii < controllers.length; ii++) {
 			controllers[ii].preLoadContent(manager);
 		}
@@ -60,7 +61,7 @@ public class GameEngine extends Game implements ScreenListener {
 
 		canvas.dispose();
 		canvas = null;
-		
+		SoundController.UnloadContent(manager);
 		manager.clear();
 		manager.dispose();
 		super.dispose();
@@ -95,6 +96,7 @@ public class GameEngine extends Game implements ScreenListener {
 				controllers[controllerIndex].setScreenListener(this);
 				controllers[controllerIndex].setCanvas(canvas);
 			}
+			SoundController.LoadContent(manager);
 			controllers[MENU_SCREEN].reset();
 			setScreen(controllers[MENU_SCREEN]);
 		} else if (exitCode == EXIT_MENU) {

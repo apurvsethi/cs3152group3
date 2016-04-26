@@ -103,8 +103,8 @@ public class MenuMode extends ModeController {
 
 		InputController input = InputController.getInstance();
 
-		if (changeCooldown == 0) {
-			//play sound
+		if (changeCooldown == 0 && Math.abs(input.getVerticalL()) > 0.5) {
+			SoundController.get(SoundController.SCROLL_SOUND).play();
 			int selectionLength = currView == MAIN_MENU? menuOptions.length : (currView == LEVEL_SELECT ? levelSelectOptions.length + 1 : 1);
 			currSelection = (currSelection + (input.getVerticalL() > 0.5 ? -1 : (input.getVerticalL() < -0.5 ? 1 : 0))+ selectionLength) % selectionLength;
 			changeCooldown = MENU_CHANGE_COOLDOWN;
@@ -113,21 +113,22 @@ public class MenuMode extends ModeController {
 		if (input.didSelect() && currView == LEVEL_SELECT){
 			//play sound
 			if (currSelection >= levelSelectOptions.length){
-				//play back sound
+				SoundController.get(SoundController.DECLINE_SOUND).play();
 				listener.exitScreen(this, backCode);
 			}
 			else if (levelSelectAllowed[currSelection]) {
-				//play select sound
+				SoundController.get(SoundController.SELECT_SOUND).play();
 				((GameEngine) listener).exitLevelSelect(this, levelSelectCodes[currSelection]);
 			}
 			else {
-				//play back sound
+				SoundController.get(SoundController.DECLINE_SOUND).play();
 			}
 		}
 		else if (input.didSelect() && currView == SETTINGS){
-			//play sound
+			SoundController.get(SoundController.DECLINE_SOUND).play();
 			listener.exitScreen(this, EXIT_MENU);
 		} else if (input.didSelect()){
+			SoundController.get(SoundController.SELECT_SOUND).play();
 			listener.exitScreen(this, exitCodes[currSelection]);
 		}
 

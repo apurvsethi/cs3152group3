@@ -71,6 +71,7 @@ public class PauseMode extends ModeController {
 	public void reset() {
 		// TODO Auto-generated method stub
 		currSelection = 0;
+		SoundController.get(SoundController.DECLINE_SOUND).play();
 	}
 
 	@Override
@@ -80,11 +81,15 @@ public class PauseMode extends ModeController {
 
 		if (changeCooldown > 0) changeCooldown --;
 
-		if (changeCooldown == 0) {
+		if (changeCooldown == 0 && Math.abs(input.getVerticalL()) > 0.5) {
+			SoundController.get(SoundController.SCROLL_SOUND).play();
 			currSelection = (currSelection + (input.getVerticalL() > 0.5 ? -1 : (input.getVerticalL() < -0.5 ? 1 : 0))+ menuOptions.length) % menuOptions.length;
 			changeCooldown = MENU_CHANGE_COOLDOWN;
 		}
-		if (input.didSelect()) listener.exitScreen(this, exitCodes[currSelection]);
+		if (input.didSelect()){
+			SoundController.get(SoundController.SELECT_SOUND).play();
+			listener.exitScreen(this, exitCodes[currSelection]);
+		}
 
 	}
 
