@@ -13,7 +13,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  * @author Daniel
  */
 public class ObstacleZone {
-	
+	private ObstacleModel obstacle;
 	private float minSpawnHeight;
 	private float maxSpawnHeight;
 	private int spawnFrequency;
@@ -182,5 +182,12 @@ public class ObstacleZone {
 	 */
 	public void incrementSpawnTimer(){
 		ticksSinceLastSpawn++;
+	}
+
+	public void setObstacle(ObstacleModel obstacle) {
+		this.obstacle = obstacle;
+	}
+	public ObstacleModel getObstacle() {
+		return this.obstacle;
 	}
 }

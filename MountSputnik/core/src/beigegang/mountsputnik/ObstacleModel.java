@@ -6,9 +6,11 @@ import com.badlogic.gdx.math.Vector2;
 import static beigegang.mountsputnik.Constants.*;
 
 public class ObstacleModel extends GameObject{
-	
+	public float width;
 	public ObstacleModel(Texture obstacleTexture, float f, Vector2 scale) {
+
 		super(obstacleTexture, f, scale);
+		width = getX() * drawPositionScale.x;
 	}
 
 	@Override
