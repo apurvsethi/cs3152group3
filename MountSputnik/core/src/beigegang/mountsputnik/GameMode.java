@@ -50,7 +50,7 @@ public class GameMode extends ModeController {
 	 */
 	//We need to preload every single texture, regardless of which level we're currently using. Loading can't be
 	//dynamically
-	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "canyon", "canyon", "canyon", "canyon", "canyon"};//,"mountain","sky","space"}; <-- Add the rest of these in as they are given assets
+	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "canyon", "canyon", "canyon", "sky", "canyon"};//,"mountain","sky","space"}; <-- Add the rest of these in as they are given assets
 	private static final String LAVA_FILE = "assets/testlavatexture.png"; //TODO: make this a better texture
 	private static final String UI_FILE = "assets/HUD4.png";
 	private static final String CANYON_FILE = "assets/Canyon.png";
@@ -327,6 +327,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 		NUM_HANDHOLDS.put("canyon", 1); 
 		NUM_HANDHOLDS.put("tutorial",4); 
+		NUM_HANDHOLDS.put("sky", 1); 
 
 	}
 
