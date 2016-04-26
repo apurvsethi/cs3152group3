@@ -403,10 +403,14 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 		levelBlocks.clear();
 		int counter = 0;
+		Array<Integer> used = new Array<Integer>();
 		maxHandhold = remainingHeight;
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
+			while(used.contains(blockNumber, true)&&!levelName.equals("tutorial"))
+				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
+			used.add(blockNumber);
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json"); 
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
 			
@@ -416,7 +420,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
 				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/general/block"+blockNumber+".json"));
 				levelBlocks.add("Levels/general/block"+blockNumber+".json"); 
-				addChunk(levelPiece, currentHeight, "general");
+				addChunk(levelPiece, currentHeight, levelName);
 				currentHeight += levelPiece.getInt("size");
 			}
 		}
@@ -426,9 +430,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		if(lava.getBoolean("present")){
 			risingObstacle = new RisingObstacle(lavaTexture, lava.getFloat("speed"));
 		}
-		//TODO delete this line as well:
-		risingObstacle = null;
-		//end this line
 		
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
 			//arms
@@ -451,6 +452,50 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		objects.add(character.parts.get(HIPS));
 
 		Movement.setCharacter(character);
+		
+		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),glowTexture.getTexture(), 
+				character.parts.get(HAND_LEFT).getPosition().x, character.parts.get(HAND_LEFT).getPosition().y,
+				new Vector2(.3f, .3f), scale);
+		handhold.fixtureDef.filter.maskBits = 0;
+		handhold.activatePhysics(world);
+		handhold.geometry.setUserData(handhold);
+		handhold.geometry.setRestitution(1);
+		handhold.geometry.setFriction(1);
+		handhold.setBodyType(BodyDef.BodyType.StaticBody);
+		objects.add(handhold);
+		
+		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),glowTexture.getTexture(), 
+				character.parts.get(HAND_RIGHT).getPosition().x, character.parts.get(HAND_RIGHT).getPosition().y,
+				new Vector2(.3f, .3f), scale);
+		handhold.fixtureDef.filter.maskBits = 0;
+		handhold.activatePhysics(world);
+		handhold.geometry.setUserData(handhold);
+		handhold.geometry.setRestitution(1);
+		handhold.geometry.setFriction(1);
+		handhold.setBodyType(BodyDef.BodyType.StaticBody);
+		objects.add(handhold);
+		
+		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),glowTexture.getTexture(), 
+				character.parts.get(FOOT_LEFT).getPosition().x, character.parts.get(FOOT_LEFT).getPosition().y,
+				new Vector2(.3f, .3f), scale);
+		handhold.fixtureDef.filter.maskBits = 0;
+		handhold.activatePhysics(world);
+		handhold.geometry.setUserData(handhold);
+		handhold.geometry.setRestitution(1);
+		handhold.geometry.setFriction(1);
+		handhold.setBodyType(BodyDef.BodyType.StaticBody);
+		objects.add(handhold);
+		
+		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(), glowTexture.getTexture(), 
+				character.parts.get(FOOT_RIGHT).getPosition().x, character.parts.get(FOOT_RIGHT).getPosition().y,
+				new Vector2(.3f, .3f), scale);
+		handhold.fixtureDef.filter.maskBits = 0;
+		handhold.activatePhysics(world);
+		handhold.geometry.setUserData(handhold);
+		handhold.geometry.setRestitution(1);
+		handhold.geometry.setFriction(1);
+		handhold.setBodyType(BodyDef.BodyType.StaticBody);
+		objects.add(handhold);
 
 	}
 	
@@ -459,11 +504,10 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	 * 
 	 * @param levelPiece: The block description
 	 * @param currentHeight: y offset from the bottom of the screen
+	 * @param levelName: the name of the level
 	 * @author Daniel
 	 */
 	private void addChunk(JsonValue levelPiece, float currentHeight, String levelName){
-		JsonAssetManager.getInstance().loadDirectory(levelPiece);
-		JsonAssetManager.getInstance().allocateDirectory();
 		
 		JsonValue handholdDesc = levelPiece.get("handholds").child();
 
