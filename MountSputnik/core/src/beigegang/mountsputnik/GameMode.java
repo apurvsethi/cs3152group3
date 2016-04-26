@@ -52,7 +52,8 @@ public class GameMode extends ModeController {
 	//dynamically
 	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "canyon", "canyon", "canyon", "canyon", "canyon"};//,"mountain","sky","space"}; <-- Add the rest of these in as they are given assets
 	private static final String LAVA_FILE = "assets/testlavatexture.png"; //TODO: make this a better texture
-	private static final String UI_FILE = "assets/HUD2.png";
+	private static final String UI_FILE = "assets/HUD4.png";
+	private static final String CANYON_FILE = "assets/Canyon.png";
 	private static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
 	private static final String GLOW_FILE = "assets/glow.png"; 
 	private static final HashMap<String,Integer> NUM_HANDHOLDS = new HashMap<String,Integer>();  
@@ -95,6 +96,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	private static TextureRegion midground;
 	private static TextureRegion tile;
 	private static TextureRegion UI;
+	private static TextureRegion CANYON;
 	private static TextureRegion LOGO;
 	private static TextureRegion edge;
 	private static TextureRegion ground;
@@ -174,6 +176,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		}
 		manager.load(UI_FILE, Texture.class);
 		assets.add(UI_FILE);
+		manager.load(CANYON_FILE, Texture.class);
+		assets.add(CANYON_FILE);
 		manager.load(LOGO_FILE, Texture.class);
 		assets.add(LOGO_FILE);
 		manager.load(LAVA_FILE, Texture.class);
@@ -226,6 +230,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		midground = createTexture(manager, "assets/"+levelName+"/Midground.png", false);
 		tile = createTexture(manager, "assets/"+levelName+"/Surface.png", false);
 		UI = createTexture(manager, UI_FILE, false);
+		CANYON = createTexture(manager, CANYON_FILE, false);
 		LOGO = createTexture(manager, LOGO_FILE, false);
 		edge = createTexture(manager, "assets/"+levelName+"/SurfaceEdge.png", false);
 		ground = createTexture(manager, "assets/"+levelName+"/LevelStart.png", false);
@@ -1001,16 +1006,17 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			progressLevel = Math.min(6,Math.max(0,Math.round(v.y/maxHandhold * 6 + .5f)));
 		canvas.draw(ground, Color.WHITE, canvas.getWidth() / 4, 0, canvas.getWidth() / 2, canvas.getHeight() / 8);
 		canvas.draw(UI, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-		canvas.draw(LOGO, Color.FIREBRICK, 0, canvas.getHeight() * 5.4f/6 + y, canvas.getWidth() / 4, canvas.getHeight() * .5f/6);
+		canvas.draw(CANYON, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+//		canvas.draw(LOGO, Color.FIREBRICK, 0, canvas.getHeight() * 5.4f/6 + y, canvas.getWidth() / 4, canvas.getHeight() * .5f/6);
 		if (progressLevel > 0) {
-			canvas.draw(progressTextures[progressLevel-1], Color.BLUE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+			canvas.draw(progressTextures[progressLevel-1], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 		}
 		canvas.draw(progressBackgroundTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 
 		float f = character.getEnergy();
 		canvas.end();
-		if ( f<= 40){
-			lowEnergySprite.setAlpha(.5f + Math.min((40-f)/f,.5f));
+		if ( f<= 30){
+			lowEnergySprite.setAlpha(.5f + Math.min((30-f)/f,.5f));
 			batch.begin();
 			lowEnergySprite.draw(batch);
 			batch.end();
