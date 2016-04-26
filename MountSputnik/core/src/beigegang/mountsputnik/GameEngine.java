@@ -100,8 +100,15 @@ public class GameEngine extends Game implements ScreenListener {
 		} else if (exitCode == EXIT_MENU) {
 			controllers[MENU_SCREEN].reset();
 			setScreen(controllers[MENU_SCREEN]);
-		} else if (exitCode == EXIT_GAME_NEW_LEVEL) {
+		} else if (exitCode == EXIT_GAME_RESTART_LEVEL) {
 			controllers[GAME_SCREEN].reset();
+			setScreen(controllers[GAME_SCREEN]);
+		} else if (exitCode == EXIT_GAME_NEXT_LEVEL) {
+			GameMode gameMode = (GameMode) controllers[GAME_SCREEN];
+			MenuMode menuMode = (MenuMode) controllers[MENU_SCREEN];
+			gameMode.nextLevel();
+			gameMode.reset();
+			menuMode.unlockLevel(gameMode.getCurrLevel());
 			setScreen(controllers[GAME_SCREEN]);
 		} else if (exitCode == EXIT_PAUSE) {
 			PauseMode pause = (PauseMode) controllers[PAUSE_SCREEN];
@@ -112,10 +119,24 @@ public class GameEngine extends Game implements ScreenListener {
 			setScreen(controllers[PAUSE_SCREEN]);
 		} else if (exitCode == EXIT_GAME_RESUME_LEVEL) {
 			setScreen(controllers[GAME_SCREEN]);
+		} else if (exitCode == EXIT_LEVEL_SELECT){
+			MenuMode menu = (MenuMode) controllers[MENU_SCREEN];
+			menu.changeView(LEVEL_SELECT);
+			setScreen(controllers[MENU_SCREEN]);
+		} else if (exitCode == EXIT_SETTINGS){
+			MenuMode menu = (MenuMode) controllers[MENU_SCREEN];
+			menu.changeView(SETTINGS);
+			setScreen(controllers[MENU_SCREEN]);
 		}
 		else if (exitCode == EXIT_QUIT) {
 			// We quit the main application
 			Gdx.app.exit();
 		}
+	}
+
+	public void exitLevelSelect(Screen screen, int level){
+		GameMode gameMode = (GameMode) controllers[GAME_SCREEN];
+		gameMode.setLevel(level);
+		exitScreen(screen, EXIT_GAME_RESTART_LEVEL);
 	}
 }
