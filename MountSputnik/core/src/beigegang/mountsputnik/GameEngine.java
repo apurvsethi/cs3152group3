@@ -50,7 +50,6 @@ public class GameEngine extends Game implements ScreenListener {
 		MenuMode m = (MenuMode) controllers[MENU_SCREEN]; 
 		m.unlockLevel(0); 
 		m.unlockLevel(1);
-		m.unlockLevel(2);
 		m.unlockLevel(5);
 	}
 	
