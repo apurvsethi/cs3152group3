@@ -1210,7 +1210,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		canvas.draw(fatigueTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 
 		if (currLevel == LEVEL_TUTORIAL)
-		canvas.draw(tutorialOverlay, Color.WHITE, canvas.getWidth()/4, canvas.getHeight()/8, canvas.getWidth()/2, tutorialOverlay.getTexture().getHeight());
+		canvas.draw(tutorialOverlay, Color.WHITE, canvas.getWidth()/4, canvas.getHeight()/8, canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
 
 
 
