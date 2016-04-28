@@ -326,6 +326,7 @@ public class CharacterModel {
 	public void updateEnergy(float gainModifier, float lossModifier, float exertion, boolean rotationGain){
 		int b = rotationGain ? 1 : 0;
 		float angle = parts.get(CHEST).getAngle();
+		float chesty = parts.get(CHEST).getPosition().y;
 		
 		int feet = ((ExtremityModel)(parts.get(FOOT_LEFT))).isGripping() ? 1 : 0;
 		feet += ((ExtremityModel)(parts.get(FOOT_RIGHT))).isGripping() ? 1 : 0;
@@ -340,15 +341,39 @@ public class CharacterModel {
 				loss = lossModifier+exertion;
 				break;
 			case 3:
-				gain = (float) (gainModifier*(1-Math.abs(b*Math.sin(angle/2)))*5);
+				if(((ExtremityModel)(parts.get(HAND_LEFT))).isGripping()
+						&&((ExtremityModel)(parts.get(HAND_RIGHT))).isGripping()
+						&& chesty < parts.get(HAND_LEFT).getPosition().y
+						&& chesty < parts.get(HAND_RIGHT).getPosition().y){
+					gain = (float) (gainModifier*(1-Math.abs(b*Math.sin(angle/2)))*40);
+				}
+				else{
+					gain = (float) (gainModifier*(1-Math.abs(b*Math.sin(angle/2)))*5);
+				}
 				loss = lossModifier+exertion;
 				break;
 			case 2:
-				gain = (float) (gainModifier*(1-Math.abs(b*Math.sin(angle/2)))/4);
-				loss = lossModifier+exertion*5;
+				if(((ExtremityModel)(parts.get(HAND_LEFT))).isGripping()
+						&&((ExtremityModel)(parts.get(HAND_RIGHT))).isGripping()
+						&& chesty < parts.get(HAND_LEFT).getPosition().y
+						&& chesty < parts.get(HAND_RIGHT).getPosition().y){
+					gain = (float) (gainModifier*(1-Math.abs(b*Math.sin(angle/2)))*5);
+					loss = lossModifier+exertion;
+				}
+				else{
+					gain = (float) (gainModifier*(1-Math.abs(b*Math.sin(angle/2)))/4);
+					loss = lossModifier+exertion*5;
+				}
 				break;
 			case 1:
-				loss = lossModifier*10+exertion*10;
+				if((((ExtremityModel)(parts.get(HAND_LEFT))).isGripping()  && chesty < parts.get(HAND_LEFT).getPosition().y ) ||
+			       (((ExtremityModel)(parts.get(HAND_RIGHT))).isGripping() && chesty < parts.get(HAND_RIGHT).getPosition().y)){
+					gain = (float) (gainModifier*(1-Math.abs(b*Math.sin(angle/2)))/4);
+					loss = lossModifier+exertion*5;
+				}
+				else{
+					loss = lossModifier*10+exertion*10;
+				}
 				break;
 			default:
 				break;

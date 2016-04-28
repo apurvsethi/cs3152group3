@@ -456,8 +456,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		checkpoints.add(0f);
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
-			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
-//			blockNumber = 13;
+			int blockNumber = 11;//((int) (Math.random() * diffBlocks)) + 1;
 			while(used.contains(blockNumber, true)&&!levelName.equals("tutorial"))
 				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			used.add(blockNumber);
@@ -474,12 +473,12 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 				currentHeight += levelPiece.getInt("size");
 			}
 		}
+		System.out.println(levelBlocks);
 
 		JsonValue lava = levelFormat.get("lava");
 		if(lava.getBoolean("present")){
 			risingObstacle = new RisingObstacle(lavaTexture, lava.getFloat("speed"));
 		}
-//		makeTestLevel();
 
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
 			//arms
