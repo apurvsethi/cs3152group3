@@ -75,7 +75,7 @@ public class GameMode extends ModeController {
 	};
 	private static final String TUTORIAL_OVERLAY_TEXTURE = "assets/tutorial/TutorialOverlay.png";
 	private Random rand = new Random();
-
+	private float cposYAtTime0 = 0;
 
 	//	private static TextureRegion[] energyTextures;
 private static final String ENERGY_TEXTURES[] = new String[10];
@@ -83,7 +83,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 //	private static final String ENERGY_TEXTURES2[] = new String[]
 //			{"Energy/e1.png","Energy/e2.png","Energy/e3.png","Energy/e4.png","Energy/e5.png","Energy/e6.png","Energy/e7.png","Energy/e8.png","Energy/e9.png","Energy/e10.png"};
-	private static TextureRegion[] energyTextures =  new TextureRegion[ENERGY_TEXTURES.length];
+	private static TextureRegion[] energyTextures =  new TextureRegion[ENERGY_TEXTURES.length + 1];
 	private static TextureRegion[] progressTextures =  new TextureRegion[PROGRESS_TEXTURES.length];
 	/**
 	 * font for displaying debug values to screen
@@ -275,8 +275,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			handholdTextures[i-1] = createTexture(manager, "assets/"+levelName+"/Handhold"+i+".png", false);
 		}
 
-		for (int i = 0; i < ENERGY_TEXTURES.length; i++) {
-			energyTextures[i] = createTexture(manager, ENERGY_TEXTURES[i], false);
+		for (int i = 1; i < ENERGY_TEXTURES.length + 1; i++) {
+			energyTextures[i] = createTexture(manager, ENERGY_TEXTURES[i-1], false);
 		}
 		for (int i = 0; i < PROGRESS_TEXTURES.length; i++) {
 			progressTextures[i] = createTexture(manager, PROGRESS_TEXTURES[i], false);
@@ -743,6 +743,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			//TODO: properly change level
 			changeLevel(currLevel);
 		}
+		if (timestep == 0) cposYAtTime0 = character.parts.get(HEAD).getY();
+
 		timestep += 1;
 	}
 
@@ -1167,9 +1169,9 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			canvas.draw(edge, Color.WHITE, canvas.getWidth() * 3 / 4, tileY, canvas.getWidth() / 16, canvas.getHeight());
 			tileY += canvas.getWidth() / 4;
 		}
-		float a = v2.y/maxHandhold;
+		float a = (v2.y - cposYAtTime0)/(maxHandhold - cposYAtTime0);
 		if (timestep%60 == 0 && character.getEnergy() != 0)
-			progressLevel = Math.min(6,Math.max(0,Math.round(v.y/maxHandhold * 6 - .1f)));
+			progressLevel = Math.min(6,Math.max(0,Math.round(a * 6 - .1f)));
 		canvas.draw(ground, Color.WHITE, canvas.getWidth() / 4, 0, canvas.getWidth() / 2, canvas.getHeight() / 8);
 		canvas.draw(UI, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 		canvas.draw(levelLabels[currLevel], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
@@ -1204,7 +1206,10 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			}
 		}else{
 			canvas.begin();
-			canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+			if (energyLevel > 0)
+				canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+
+//			canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 
 		}
 		canvas.draw(fatigueTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
