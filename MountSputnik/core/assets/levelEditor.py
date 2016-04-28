@@ -239,7 +239,7 @@ Builder.load_string('''
                     on_value: root.frequency = args[1]
                     on_value: root.updateSelected()
                     min:1
-                    max:5
+                    max:20
 
                 Label: 
                     text: ''
@@ -293,12 +293,7 @@ handhold_width = 1
 fallingObstacleWidth = 2
 scaling = 32
 
-handholds = [
-    Handhold(5*scaling, 8.93*scaling, 1, 0, 0), 
-    Handhold(10.5*scaling, 9.18*scaling, 1, 0, 0), 
-    Handhold(6.78*scaling, 4.75*scaling, 1, 0, 0), 
-    Handhold(9*scaling, 4.5*scaling, 1, 0, 0)
-]
+handholds = []
 staticObstacles = []
 fallingObstacles = []
 movingHandholds = []
@@ -323,7 +318,7 @@ class LinePlayground(FloatLayout):
 
     horizontalRange = NumericProperty(5)
     verticalRange = NumericProperty(5)
-    frequency = NumericProperty(1)
+    frequency = NumericProperty(5)
     # scaleX = Window.size[0]-80/blockWidth
     # scaleY = Window.size[1]-60/blockHeight
     def __init__(self, **kwargs): 
@@ -453,11 +448,11 @@ class LinePlayground(FloatLayout):
                 obstacle = fallingObstacles[i]
                 if obstacle == selected: 
                     Color(1,0,0,0.5)
-                    Rectangle(pos=[canvas_left + obstacle.pos[0] - (scaling*(obstacle.width/2)),canvas_origin + obstacle.pos[1] - (scaling*(obstacle.height/2))],size=[obstacle.width*scaling, obstacle.height*scaling])
                 else: 
-                    Color(1,1,1,1)
-                Rectangle(pos=[canvas_left + obstacle.pos[0],canvas_origin + obstacle.pos[1]],size=[scaling*fallingObstacleWidth,scaling*fallingObstacleWidth],source=self.directory + 'FallingRock.png')
-            
+                    Color(1,0,0,0.3)
+                Rectangle(pos=[canvas_left + obstacle.pos[0] - (scaling*(obstacle.width/2)),canvas_origin + obstacle.pos[1] - (scaling*(obstacle.height/2))],size=[obstacle.width*scaling, obstacle.height*scaling])
+                
+                
             
 
                         
@@ -494,12 +489,7 @@ class LinePlayground(FloatLayout):
         global fallingObstacles
         global staticObstacles 
         global selected 
-        handholds = [
-            Handhold(5*scaling, 8.93*scaling, 1, 0, 0), 
-            Handhold(10.5*scaling, 9.18*scaling, 1, 0, 0), 
-            Handhold(6.78*scaling, 4.75*scaling, 1, 0, 0), 
-            Handhold(9*scaling, 4.5*scaling, 1, 0, 0)
-            ]
+        handholds = []
         movingHandholds = [] 
         fallingObstacles = []
         staticObstacles = []
@@ -510,8 +500,9 @@ class LinePlayground(FloatLayout):
     def createJSON(self): 
         new_id = 0
         for link in glob('levels/' + self.directory[7:] + 'block*'): 
-            if int(link[-6]) > new_id: 
-                new_id = int(link[-6])
+            link_num = link[link.find("block")+5:-5]
+            if int(link_num) > new_id: 
+                new_id = int(link_num)
             pass
         new_id += 1
         print "Creating " + 'levels/' + self.directory[7:] + 'block'+str(new_id)+'.json'
