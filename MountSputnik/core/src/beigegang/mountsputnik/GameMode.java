@@ -424,7 +424,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		JsonAssetManager.getInstance().allocateDirectory();
 		Vector2 gravity = new Vector2(0,levelFormat.getFloat("gravity"));
 		oxygen = levelFormat.getFloat("oxygen");
-		float remainingHeight = levelFormat.getFloat("height") * 2;
+		float remainingHeight = levelFormat.getFloat("height");
 		float currentHeight=0f;
 		int diffBlocks = levelFormat.getInt("uniqueBlocks");
 		int filler = levelFormat.getInt("generalFillerSize");
@@ -443,10 +443,10 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
-			blockNumber = 10;
+//			blockNumber = 10;
 			while(used.contains(blockNumber, true)&&!levelName.equals("tutorial"))
 				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
-			blockNumber = 10;
+//			blockNumber = 10;
 			used.add(blockNumber);
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json"); 
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
