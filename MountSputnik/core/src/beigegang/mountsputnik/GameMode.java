@@ -73,6 +73,7 @@ public class GameMode extends ModeController {
 			"Ragdoll/controls/360_LT_selected.png", 
 			"Ragdoll/controls/360_RT_selected.png"
 	};
+	private static final String TUTORIAL_OVERLAY_TEXTURE = "assets/tutorial/TutorialOverlay.png";
 	private Random rand = new Random();
 
 
@@ -108,7 +109,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	private static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length];
 	private static TextureRegion[] handholdTextures;
 	private static TextureRegion[] levelLabels = new TextureRegion[LEVEL_LABEL_FILES.length];
-
+	private static TextureRegion tutorialOverlay;
+	
 	private static TextureRegion blackoutTexture;
 	private static String BLACKOUT = "assets/blackout.png";
 	private static String FATIGUE_BAR = "Energy/Fatigue Gauge.png";
@@ -226,6 +228,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		assets.add(WARNING_TEXTURE);
 		manager.load(LOW_ENERGY_HALO,Texture.class);
 		assets.add(LOW_ENERGY_HALO);
+		manager.load(TUTORIAL_OVERLAY_TEXTURE, Texture.class); 
+		assets.add(TUTORIAL_OVERLAY_TEXTURE);
 	}
 
 	/**
@@ -283,6 +287,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		progressBarTexture = createTexture(manager,PROGRESS_BAR,false);
 		lowEnergyHalo = createTexture(manager,LOW_ENERGY_HALO,false);
 		assetState = AssetState.COMPLETE;
+		tutorialOverlay = createTexture(manager, TUTORIAL_OVERLAY_TEXTURE, false); 
 
 	}
 
@@ -1204,8 +1209,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		}
 		canvas.draw(fatigueTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 
-
-
+		if (currLevel == LEVEL_TUTORIAL)
+		canvas.draw(tutorialOverlay, Color.WHITE, canvas.getWidth()/4, canvas.getHeight()/8, canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
 
 
 
