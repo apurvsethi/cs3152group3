@@ -121,7 +121,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 	private static TextureRegion lowEnergyHalo;
 	private static String PROGRESS_BAR= "Progress Chalk Bar.png";
 	private static TextureRegion progressBarTexture;
-	private Sprite blackoutSprite = new Sprite(new Texture(BLACKOUT));
+	private Sprite progressSprite = new Sprite(new Texture(PROGRESS_BAR));
 	private Sprite warningSprite = new Sprite(new Texture(WARNING_TEXTURE));
 	private Sprite lowEnergySprite = new Sprite(new Texture(LOW_ENERGY_HALO));
 	private static SpriteBatch batch = new SpriteBatch();
@@ -382,7 +382,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		world.dispose();
 		timestep = 0;
 		populateLevel();
-		blackoutSprite.setBounds(canvas.getWidth()/4,0,canvas.getWidth()*2/4,canvas.getHeight());
+		progressSprite.setBounds(0,0,canvas.getWidth()/4,canvas.getHeight());
 		lowEnergySprite.setBounds(0, 0, canvas.getWidth() / 4, canvas.getHeight());
 		queuedObstacles.clear();
 
@@ -439,14 +439,11 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		Array<Integer> used = new Array<Integer>();
 		maxHandhold = remainingHeight;
 		maxLevelHeight = remainingHeight;
-		System.out.println(remainingHeight);
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
-//			blockNumber = 10;
 			while(used.contains(blockNumber, true)&&!levelName.equals("tutorial"))
 				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
-//			blockNumber = 10;
 			used.add(blockNumber);
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json"); 
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
@@ -1135,22 +1132,33 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			canvas.draw(edge, Color.WHITE, canvas.getWidth() * 3 / 4, tileY, canvas.getWidth() / 16, canvas.getHeight());
 			tileY += canvas.getWidth() / 4;
 		}
-		float a = v.y/maxHandhold;
+		float a = v2.y/maxHandhold;
 		if (timestep%60 == 0 && character.getEnergy() != 0)
-			progressLevel = Math.min(6,Math.max(0,Math.round(v.y/maxHandhold * 6 + .5f)));
+			progressLevel = Math.min(6,Math.max(0,Math.round(v.y/maxHandhold * 6 - .1f)));
+//			progressLevel = v.y/maxHandhold;
 		canvas.draw(ground, Color.WHITE, canvas.getWidth() / 4, 0, canvas.getWidth() / 2, canvas.getHeight() / 8);
 		canvas.draw(UI, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 		canvas.draw(levelLabels[currLevel], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-//		canvas.draw(LOGO, Color.FIREBRICK, 0, , canvas.getWidth() / 4, canvas.getHeight() * .5f/6);
+		canvas.end();
+//
+//		progressSprite.setBounds(0,0,canvas.getWidth()/4,canvas.getHeight() * a);
+//		batch.begin();
+//		progressSprite.draw(batch);
+//		batch.end();
+
+		canvas.begin();
 		if (progressLevel > 0) {
 			canvas.draw(progressTextures[progressLevel-1], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 		}
+
 		canvas.draw(progressBackgroundTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 
 		float f = character.getEnergy();
 		canvas.end();
 		if ( f<= 30){
-			lowEnergySprite.setAlpha(.5f + Math.min((30-f)/f,.5f));
+			lowEnergySprite.setAlpha(.5f + Math.min((30-f)/f,.5f));//
+//			lowEnergySprite.setRegion(0,0,canvas.getWidth()/4,canvas.getHeight()/4);
+//			lowEnergySprite.setSize(canvas.getWidth()/4,800);
 			batch.begin();
 			lowEnergySprite.draw(batch);
 			batch.end();
