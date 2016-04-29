@@ -545,10 +545,6 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		handhold.geometry.setFriction(1);
 		handhold.setBodyType(BodyDef.BodyType.StaticBody);
 		objects.add(handhold);
-
-		for (GameObject object : objects) {
-			System.out.println(object.getPosition());
-		}
 	}
 	
 	/** 
