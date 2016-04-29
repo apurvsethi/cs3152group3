@@ -46,66 +46,64 @@ public class CharacterModel {
 	 * @param initialPositionX where character's chest should be to start (x value)
 	 * @param initialPositionY where character's chest should be to start (y value)
 	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
-	 * @param canvasSize width and height of screen in pixels
 	 */
 	private void init(World world, float initialPositionX, float initialPositionY,
-					  Vector2 drawPositionScale, Vector2 canvasSize) {
-		makeParts(initialPositionX, initialPositionY, drawPositionScale, canvasSize);
+					  Vector2 drawPositionScale) {
+		makeParts(initialPositionX, initialPositionY, drawPositionScale);
 
 		for (PartModel part : parts) {
 			part.activatePhysics(world);
 			part.geometry.setUserData(part);
 		}
 
-		makeJoints(world, canvasSize);
+		makeJoints(world);
 	}
 
-	private void makeParts(float initialPositionX, float initialPositionY, Vector2 drawPositionScale,
-						   Vector2 canvasSize) {
+	private void makeParts(float initialPositionX, float initialPositionY, Vector2 drawPositionScale) {
 		// CHEST
-		makePart(CHEST, NONE, initialPositionX, 0, initialPositionY, 0, drawPositionScale, canvasSize);
+		makePart(CHEST, NONE, initialPositionX, 0, initialPositionY, 0, drawPositionScale);
 
 		// HEAD
-		makePart(HEAD, CHEST, 0, 0, HEAD_OFFSET, CHEST_HEAD_OFFSET, drawPositionScale, canvasSize);
+		makePart(HEAD, CHEST, 0, 0, HEAD_OFFSET, CHEST_HEAD_OFFSET, drawPositionScale);
 
 		//HIPS
-		makePart(HIPS, CHEST, 0, 0, HIP_CHEST_OFFSET, CHEST_HIP_OFFSET, drawPositionScale, canvasSize);
+		makePart(HIPS, CHEST, 0, 0, HIP_CHEST_OFFSET, CHEST_HIP_OFFSET, drawPositionScale);
 
 		// ARMS
 		makePart(ARM_LEFT, CHEST, ARM_X_CHEST_OFFSET, CHEST_X_ARM_OFFSET,
-				ARM_Y_CHEST_OFFSET, CHEST_Y_ARM_OFFSET, drawPositionScale, canvasSize);
+				ARM_Y_CHEST_OFFSET, CHEST_Y_ARM_OFFSET, drawPositionScale);
 		makePart(ARM_RIGHT, CHEST, -ARM_X_CHEST_OFFSET, -CHEST_X_ARM_OFFSET,
-				ARM_Y_CHEST_OFFSET, CHEST_Y_ARM_OFFSET, drawPositionScale, canvasSize).setAngle(180 * DEG_TO_RAD);
+				ARM_Y_CHEST_OFFSET, CHEST_Y_ARM_OFFSET, drawPositionScale).setAngle(180 * DEG_TO_RAD);
 
 		// FOREARMS
 		makePart(FOREARM_LEFT, ARM_LEFT, FOREARM_X_ARM_OFFSET, ARM_X_FOREARM_OFFSET,
-				FOREARM_Y_ARM_OFFSET, ARM_Y_FOREARM_OFFSET, drawPositionScale, canvasSize);
+				FOREARM_Y_ARM_OFFSET, ARM_Y_FOREARM_OFFSET, drawPositionScale);
 		makePart(FOREARM_RIGHT, ARM_RIGHT, -FOREARM_X_ARM_OFFSET, -ARM_X_FOREARM_OFFSET,
-				FOREARM_Y_ARM_OFFSET, ARM_Y_FOREARM_OFFSET, drawPositionScale, canvasSize).setAngle(180 * DEG_TO_RAD);
+				FOREARM_Y_ARM_OFFSET, ARM_Y_FOREARM_OFFSET, drawPositionScale).setAngle(180 * DEG_TO_RAD);
 
 		//HANDS
 		makeExtremity(HAND_LEFT, FOREARM_LEFT, HAND_X_OFFSET, FOREARM_X_HAND_OFFSET,
-				HAND_Y_OFFSET, FOREARM_Y_HAND_OFFSET, drawPositionScale, canvasSize);
+				HAND_Y_OFFSET, FOREARM_Y_HAND_OFFSET, drawPositionScale);
 		makeExtremity(HAND_RIGHT, FOREARM_RIGHT, -HAND_X_OFFSET, -FOREARM_X_HAND_OFFSET,
-				HAND_Y_OFFSET, FOREARM_Y_HAND_OFFSET, drawPositionScale, canvasSize).setAngle(180 * DEG_TO_RAD);
+				HAND_Y_OFFSET, FOREARM_Y_HAND_OFFSET, drawPositionScale).setAngle(180 * DEG_TO_RAD);
 
 		// THIGHS
 		makePart(THIGH_LEFT, HIPS, THIGH_X_HIP_OFFSET, HIP_X_THIGH_OFFSET,
-				THIGH_Y_HIP_OFFSET, HIP_Y_THIGH_OFFSET, drawPositionScale, canvasSize);
+				THIGH_Y_HIP_OFFSET, HIP_Y_THIGH_OFFSET, drawPositionScale);
 		makePart(THIGH_RIGHT, HIPS, -THIGH_X_HIP_OFFSET, -HIP_X_THIGH_OFFSET,
-				THIGH_Y_HIP_OFFSET, HIP_Y_THIGH_OFFSET, drawPositionScale, canvasSize);
+				THIGH_Y_HIP_OFFSET, HIP_Y_THIGH_OFFSET, drawPositionScale);
 
 		// SHINS
 		makePart(SHIN_LEFT,  THIGH_LEFT, SHIN_X_THIGH_OFFSET, THIGH_X_SHIN_OFFSET,
-				SHIN_Y_THIGH_OFFSET, THIGH_Y_SHIN_OFFSET, drawPositionScale, canvasSize);
+				SHIN_Y_THIGH_OFFSET, THIGH_Y_SHIN_OFFSET, drawPositionScale);
 		makePart(SHIN_RIGHT, THIGH_RIGHT, -SHIN_X_THIGH_OFFSET, -THIGH_X_SHIN_OFFSET,
-				SHIN_Y_THIGH_OFFSET, THIGH_Y_SHIN_OFFSET, drawPositionScale, canvasSize);
+				SHIN_Y_THIGH_OFFSET, THIGH_Y_SHIN_OFFSET, drawPositionScale);
 
 		//FEET
 		makeExtremity(FOOT_LEFT, SHIN_LEFT, FOOT_X_OFFSET, SHIN_X_FOOT_OFFSET, FOOT_Y_OFFSET,
-				SHIN_Y_FOOT_OFFSET, drawPositionScale, canvasSize);
+				SHIN_Y_FOOT_OFFSET, drawPositionScale);
 		makeExtremity(FOOT_RIGHT, SHIN_RIGHT, -FOOT_X_OFFSET, -SHIN_X_FOOT_OFFSET, FOOT_Y_OFFSET,
-				SHIN_Y_FOOT_OFFSET, drawPositionScale, canvasSize);
+				SHIN_Y_FOOT_OFFSET, drawPositionScale);
 	}
 
 	/**
@@ -118,19 +116,17 @@ public class CharacterModel {
 	 * @param partY    The y-offset of the part RELATIVE to the connecting part's offset
 	 * @param connectY The y-offset of the connecting part RELATIVE to the part's offset
 	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
-	 * @param canvasSize the size of the canvas, used to scale offsets
 	 *
 	 * @return the part that was made
 	 */
 	private PartModel makePart(int part, int connect, float partX, float connectX,
-							   float partY, float connectY, Vector2 drawPositionScale,
-							   Vector2 canvasSize) {
+							   float partY, float connectY, Vector2 drawPositionScale) {
 		TextureRegion texture = partTextures[part];
 
 		if (connect != NONE) {
-			partCache.set(-partX * SCREEN_WIDTH / canvasSize.x, -partY * SCREEN_HEIGHT / canvasSize.y);
+			partCache.set(-partX, -partY);
 			partCache.add(parts.get(connect).getPosition());
-			partCache.add(connectX * SCREEN_WIDTH / canvasSize.x, connectY * SCREEN_HEIGHT / canvasSize.y);
+			partCache.add(connectX, connectY);
 		}
 		else partCache.set(partX, partY);
 
@@ -151,19 +147,17 @@ public class CharacterModel {
 	 * @param partY    The y-offset of the part RELATIVE to the connecting part's offset
 	 * @param connectY The y-offset of the connecting part RELATIVE to the part's offset
 	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
-	 * @param canvasSize the size of the canvas, used to scale offsets
 	 *
 	 * @return the part that was made
 	 */
 	private PartModel makeExtremity(int part, int connect, float partX, float connectX,
-							   float partY, float connectY, Vector2 drawPositionScale,
-									Vector2 canvasSize) {
+							   float partY, float connectY, Vector2 drawPositionScale) {
 		TextureRegion texture = partTextures[part];
 
 		if (connect != NONE) {
-			partCache.set(-partX * SCREEN_WIDTH / canvasSize.x, -partY * SCREEN_HEIGHT / canvasSize.y);
+			partCache.set(-partX, -partY);
 			partCache.add(parts.get(connect).getPosition());
-			partCache.add(connectX * SCREEN_WIDTH / canvasSize.x, connectY * SCREEN_HEIGHT / canvasSize.y);
+			partCache.add(connectX, connectY);
 		}
 		else partCache.set(partX, partY);
 
@@ -178,84 +172,64 @@ public class CharacterModel {
 		return extremityModel;
 	}
 
-	private void makeJoints(World world, Vector2 canvasSize) {
-		makeJoint(CHEST, HEAD, 0, CHEST_HEAD_OFFSET, 0, canvasSize);
+	private void makeJoints(World world) {
+		makeJoint(CHEST, HEAD, 0, CHEST_HEAD_OFFSET, 0);
 		setJointAngleLimits(-10, 10);
-//		setJointMotor(0, 0);
-
 		addJoint(world);
 
-		makeJoint(HIPS, CHEST, 0, HIP_CHEST_OFFSET, 0, canvasSize);
+		makeJoint(HIPS, CHEST, 0, HIP_CHEST_OFFSET, 0);
 		setJointAngleLimits(-45, 45);
 		setJointMotor(0, 5);
-
 		addJoint(world);
 
-		makeJoint(ARM_LEFT, CHEST, ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0, canvasSize);
+		makeJoint(ARM_LEFT, CHEST, ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0);
 		setJointAngleLimits(-90, 90);
-//		setJointMotor(0, 100);
-
 		addJoint(world);
-		makeJoint(ARM_RIGHT, CHEST, -ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, -180, canvasSize);
+		makeJoint(ARM_RIGHT, CHEST, -ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, -180);
 		setJointAngleLimits(-90, 90);
-//		setJointMotor(0, 100);
-
 		addJoint(world);
 
-		makeJoint(FOREARM_LEFT, ARM_LEFT, FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, 0, canvasSize);
+		makeJoint(FOREARM_LEFT, ARM_LEFT, FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, 0);
+		setJointAngleLimits(FOREARM_PULLING_LOWER_LIMIT, FOREARM_PULLING_UPPER_LIMIT);
+		setJointMotor(0, 0);
+		addJoint(world);
+		makeJoint(FOREARM_RIGHT, ARM_RIGHT, -FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, -90);
 		setJointAngleLimits(FOREARM_PULLING_LOWER_LIMIT, FOREARM_PULLING_UPPER_LIMIT);
 		setJointMotor(0, 0);
 		addJoint(world);
 
-		makeJoint(FOREARM_RIGHT, ARM_RIGHT, -FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, -90, canvasSize);
-		setJointAngleLimits(FOREARM_PULLING_LOWER_LIMIT, FOREARM_PULLING_UPPER_LIMIT);
-//		setJointMotor(0, 100);
-		addJoint(world);
-
-		makeJoint(HAND_LEFT, FOREARM_LEFT, HAND_X_OFFSET, HAND_Y_OFFSET, 0, canvasSize);
+		makeJoint(HAND_LEFT, FOREARM_LEFT, HAND_X_OFFSET, HAND_Y_OFFSET, 0);
 		setJointAngleLimits(-20, 60);
 		setJointMotor(0, 5);
-
-//		setJointMotor(0, 100);
 		addJoint(world);
-
-		makeJoint(HAND_RIGHT, FOREARM_RIGHT, -HAND_X_OFFSET, HAND_Y_OFFSET, 0, canvasSize);
+		makeJoint(HAND_RIGHT, FOREARM_RIGHT, -HAND_X_OFFSET, HAND_Y_OFFSET, 0);
 		setJointAngleLimits(-20, 60);
 		setJointMotor(0, 5);
-
-//		setJointMotor(0, 100);
 		addJoint(world);
 
-		makeJoint(THIGH_LEFT, HIPS, THIGH_X_HIP_OFFSET, THIGH_Y_HIP_OFFSET, 0, canvasSize);
+		makeJoint(THIGH_LEFT, HIPS, THIGH_X_HIP_OFFSET, THIGH_Y_HIP_OFFSET, 0);
 		setJointMotor(0, 30);
 		setJointAngleLimits(-45, 90);
-
 		addJoint(world);
-
-		makeJoint(THIGH_RIGHT, HIPS, THIGH_X_HIP_OFFSET, THIGH_Y_HIP_OFFSET, 0, canvasSize);
+		makeJoint(THIGH_RIGHT, HIPS, THIGH_X_HIP_OFFSET, THIGH_Y_HIP_OFFSET, 0);
 		setJointMotor(0, 30);
-
 		setJointAngleLimits(-90, 45);
 		addJoint(world);
 
-		makeJoint(SHIN_LEFT,  THIGH_LEFT, SHIN_X_THIGH_OFFSET, SHIN_Y_THIGH_OFFSET, 0, canvasSize);
-
+		makeJoint(SHIN_LEFT,  THIGH_LEFT, SHIN_X_THIGH_OFFSET, SHIN_Y_THIGH_OFFSET, 0);
 		setJointAngleLimits(-150, -2);
-
 		setJointMotor(0, 30);
 		addJoint(world);
-		makeJoint(SHIN_RIGHT, THIGH_RIGHT, -SHIN_X_THIGH_OFFSET, SHIN_Y_THIGH_OFFSET, 0, canvasSize);
+		makeJoint(SHIN_RIGHT, THIGH_RIGHT, -SHIN_X_THIGH_OFFSET, SHIN_Y_THIGH_OFFSET, 0);
 		setJointAngleLimits(2, 150);
 		setJointMotor(0, 30);
 		addJoint(world);
 
-		makeJoint(FOOT_LEFT, SHIN_LEFT, FOOT_X_OFFSET, FOOT_Y_OFFSET, 0, canvasSize);
+		makeJoint(FOOT_LEFT, SHIN_LEFT, FOOT_X_OFFSET, FOOT_Y_OFFSET, 0);
 		setJointAngleLimits(-90, 90);
-//		setJointMotor(10, 30);
 		addJoint(world);
-		makeJoint(FOOT_RIGHT, SHIN_RIGHT, -FOOT_X_OFFSET, FOOT_Y_OFFSET, 0, canvasSize);
+		makeJoint(FOOT_RIGHT, SHIN_RIGHT, -FOOT_X_OFFSET, FOOT_Y_OFFSET, 0);
 		setJointAngleLimits(-90, 90);
-//		setJointMotor(10, 30);
 		addJoint(world);
 	}
 
@@ -266,19 +240,18 @@ public class CharacterModel {
 	 * @param partX The x-offset of the part RELATIVE to the connecting part's offset
 	 * @param partY    The y-offset of the part RELATIVE to the connecting part's offset
 	 * @param referenceAngle The reference angle for the joint to use
-	 * @param canvasSize the size of the canvas, used to scale offsets
 	 */
 	private void makeJoint(int part, int connect, float partX, float partY,
-						   float referenceAngle, Vector2 canvasSize) {
+						   float referenceAngle) {
 		partCache.set(parts.get(part).getX(), parts.get(part).getY());
-		partCache.add(partX * SCREEN_WIDTH / canvasSize.x, partY * SCREEN_HEIGHT / canvasSize.y);
+		partCache.add(partX, partY);
 		jointDef.initialize(parts.get(part).getBody(), parts.get(connect).getBody(),
 				partCache);
 		jointDef.collideConnected = false;
 		jointDef.referenceAngle = referenceAngle * DEG_TO_RAD;
 	}
 
-	public void setJointMotor(float motorSpeed, float maxTorque) {
+	private void setJointMotor(float motorSpeed, float maxTorque) {
 		jointDef.enableMotor = true;
 		jointDef.motorSpeed = motorSpeed * DEG_TO_RAD;
 		jointDef.maxMotorTorque = maxTorque;
@@ -302,15 +275,13 @@ public class CharacterModel {
 	 * @param initialPositionX where character's chest should be to start (x value)
 	 * @param initialPositionY where character's chest should be to start (y value)
 	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
-	 * @param canvasSize width and height of screen in pixels
 	 */
 	public CharacterModel(TextureRegion[] textures, World w, float initialPositionX,
-						  float initialPositionY, Vector2 drawPositionScale,
-						  Vector2 canvasSize){
+						  float initialPositionY, Vector2 drawPositionScale){
 		parts = new Array<PartModel>();
 		joints = new Array<Joint>();
 		partTextures = textures;
-		init(w, initialPositionX, initialPositionY, drawPositionScale, canvasSize);
+		init(w, initialPositionX, initialPositionY, drawPositionScale);
 		energy = 100f;
 	}
 	

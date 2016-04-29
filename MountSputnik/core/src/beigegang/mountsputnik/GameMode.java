@@ -456,7 +456,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		checkpoints.add(0f);
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
-			int blockNumber = 11;//((int) (Math.random() * diffBlocks)) + 1;
+			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			while(used.contains(blockNumber, true)&&!levelName.equals("tutorial"))
 				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			used.add(blockNumber);
@@ -546,6 +546,9 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		handhold.setBodyType(BodyDef.BodyType.StaticBody);
 		objects.add(handhold);
 
+		for (GameObject object : objects) {
+			System.out.println(object.getPosition());
+		}
 	}
 	
 	/** 
@@ -771,12 +774,12 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 					}
 				}
 
-//				 if((e == HAND_LEFT || e == HAND_RIGHT) &&
-//						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > ARM_UNGRIP_LENGTH)
-//					 ungrip(extremity);
-//				 else if((e == FOOT_LEFT || e == FOOT_RIGHT) &&
-//						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > LEG_UNGRIP_LENGTH)
-//					 ungrip(extremity);
+				 if((e == HAND_LEFT || e == HAND_RIGHT) &&
+						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > ARM_UNGRIP_LENGTH)
+					 ungrip(extremity);
+				 else if((e == FOOT_LEFT || e == FOOT_RIGHT) &&
+						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > LEG_UNGRIP_LENGTH)
+					 ungrip(extremity);
 			}
 
 		}
