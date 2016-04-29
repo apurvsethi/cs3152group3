@@ -137,8 +137,9 @@ public class XBox360Controller implements ControllerListener {
 	 * @param controller The base controller to wrap
 	 */
 	protected void initialize(Controller controller) {
-		if (!controller.getName().toLowerCase().contains("xbox") ||
-			!controller.getName().contains("360")) {
+		boolean isXBox360 = false;
+		if (!controller.getName().toLowerCase().contains("xbox")) {
+			isXBox360 = controller.getName().contains("360");
 			this.controller = null;
 			return;
 		}
@@ -180,7 +181,7 @@ public class XBox360Controller implements ControllerListener {
 			
 			axis_right_x = 3;
 			axis_right_y = 2;
-			axis_right_trigger = 4;
+			axis_right_trigger = 5;
 		} else {
 		
 			// Mac Driver settings
