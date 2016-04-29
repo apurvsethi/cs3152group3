@@ -112,7 +112,7 @@ public final class Constants {
 	public static final float DAMPENING_Y = .2f;
 	public static final float DAMPENING_X = .2f;
 
-	public static final float CHARACTER_DRAW_SIZE_SCALE = 0.2f;
+	public static final float CHARACTER_DRAW_SIZE_SCALE = 0.3f;
 	public static final float CHARACTER_DRAW_SIZE_SCALE_TWO = 0.3f;
 	/** Hard coded offsets.
 	 *  Style: part_x/y_connect, meaning part x/y offset from connecting

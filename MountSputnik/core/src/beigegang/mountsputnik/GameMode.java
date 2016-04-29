@@ -496,9 +496,9 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 		objects.add(character.parts.get(FOOT_LEFT));
 		objects.add(character.parts.get(FOOT_RIGHT));
 		//rest
-		objects.add(character.parts.get(CHEST));
 		objects.add(character.parts.get(HEAD));
 		objects.add(character.parts.get(HIPS));
+		objects.add(character.parts.get(CHEST));
 
 		Movement.setCharacter(character);
 		
