@@ -181,7 +181,7 @@ public class XBox360Controller implements ControllerListener {
 			
 			axis_right_x = 3;
 			axis_right_y = 2;
-			axis_right_trigger = 5;
+			axis_right_trigger = 4;
 		} else {
 		
 			// Mac Driver settings
