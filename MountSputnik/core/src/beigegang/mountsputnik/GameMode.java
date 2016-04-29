@@ -457,7 +457,7 @@ public class GameMode extends ModeController {
 		checkpoints.add(0f);
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
-			int blockNumber = 11;//((int) (Math.random() * diffBlocks)) + 1;
+			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			while(used.contains(blockNumber, true)&&!levelName.equals("tutorial"))
 				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			used.add(blockNumber);
@@ -481,7 +481,7 @@ public class GameMode extends ModeController {
 			risingObstacle = new RisingObstacle(lavaTexture, lava.getFloat("speed"));
 		}
 
-		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
+		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale);
 			//arms
 		objects.add(character.parts.get(ARM_LEFT));
 		objects.add(character.parts.get(ARM_RIGHT));
@@ -497,9 +497,9 @@ public class GameMode extends ModeController {
 		objects.add(character.parts.get(FOOT_LEFT));
 		objects.add(character.parts.get(FOOT_RIGHT));
 		//rest
-		objects.add(character.parts.get(CHEST));
 		objects.add(character.parts.get(HEAD));
 		objects.add(character.parts.get(HIPS));
+		objects.add(character.parts.get(CHEST));
 
 		Movement.setCharacter(character);
 		
@@ -546,7 +546,6 @@ public class GameMode extends ModeController {
 		handhold.geometry.setFriction(1);
 		handhold.setBodyType(BodyDef.BodyType.StaticBody);
 		objects.add(handhold);
-
 	}
 	
 	/** 
