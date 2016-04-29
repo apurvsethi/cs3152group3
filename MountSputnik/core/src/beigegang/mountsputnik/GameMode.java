@@ -480,7 +480,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			risingObstacle = new RisingObstacle(lavaTexture, lava.getFloat("speed"));
 		}
 
-		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale, canvas.getSize());
+		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale);
 			//arms
 		objects.add(character.parts.get(ARM_LEFT));
 		objects.add(character.parts.get(ARM_RIGHT));
