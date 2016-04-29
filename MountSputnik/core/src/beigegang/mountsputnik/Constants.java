@@ -113,43 +113,44 @@ public final class Constants {
 	public static final float DAMPENING_X = .2f;
 
 	public static final float CHARACTER_DRAW_SIZE_SCALE = 0.2f;
+	public static final float CHARACTER_DRAW_SIZE_SCALE_TWO = 0.3f;
 	/** Hard coded offsets.
 	 *  Style: part_x/y_connect, meaning part x/y offset from connecting
 	 *  If connect does not exist, then part only connects to 1 piece
 	 */
 	//TODO: once character assets complete, determine actual offsets
-	public static final float HEAD_OFFSET = -2.2f;
-	public static final float CHEST_HEAD_OFFSET = 2.2f;
-	public static final float CHEST_HIP_OFFSET = -1.8f;
-	public static final float CHEST_X_ARM_OFFSET = -2.2f;
-	public static final float CHEST_Y_ARM_OFFSET = 0.75f;
-	public static final float ARM_X_CHEST_OFFSET = 2.2f;
-	public static final float ARM_Y_CHEST_OFFSET = 0;
-	public static final float ARM_X_FOREARM_OFFSET = -1.7f;
-	public static final float ARM_Y_FOREARM_OFFSET = 0;
-	public static final float FOREARM_X_ARM_OFFSET = 2.1f;
-	public static final float FOREARM_Y_ARM_OFFSET = 0;
-	public static final float FOREARM_X_HAND_OFFSET = -2.4f;
-	public static final float FOREARM_Y_HAND_OFFSET = 0;
-	public static final float HAND_X_OFFSET = 0.6f;
-	public static final float HAND_Y_OFFSET = 0;
-	public static final float HIP_CHEST_OFFSET = 1.8f;
-	public static final float HIP_X_THIGH_OFFSET = -1.1f;
-	public static final float HIP_Y_THIGH_OFFSET = -2.1f;
-	public static final float THIGH_X_HIP_OFFSET = 0;
-	public static final float THIGH_Y_HIP_OFFSET = 2.1f;
-	public static final float THIGH_X_SHIN_OFFSET = 0;
-	public static final float THIGH_Y_SHIN_OFFSET = -2.3f;
-	public static final float SHIN_X_THIGH_OFFSET = 0;
-	public static final float SHIN_Y_THIGH_OFFSET = 2.4f;
-	public static final float SHIN_X_FOOT_OFFSET = -0.2f;
-	public static final float SHIN_Y_FOOT_OFFSET = -2.0f;
-	public static final float FOOT_X_OFFSET = 0.7f;
-	public static final float FOOT_Y_OFFSET = 0.7f;
+	public static final float HEAD_OFFSET = -2.2f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float CHEST_HEAD_OFFSET = 2.2f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float CHEST_HIP_OFFSET = -1.8f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float CHEST_X_ARM_OFFSET = -2.2f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float CHEST_Y_ARM_OFFSET = 0.75f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float ARM_X_CHEST_OFFSET = 2.2f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float ARM_Y_CHEST_OFFSET = 0 * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float ARM_X_FOREARM_OFFSET = -1.7f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float ARM_Y_FOREARM_OFFSET = 0 * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float FOREARM_X_ARM_OFFSET = 2.1f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float FOREARM_Y_ARM_OFFSET = 0 * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float FOREARM_X_HAND_OFFSET = -2.4f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float FOREARM_Y_HAND_OFFSET = 0 * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float HAND_X_OFFSET = 0.6f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float HAND_Y_OFFSET = 0 * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float HIP_CHEST_OFFSET = 1.8f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float HIP_X_THIGH_OFFSET = -1.1f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float HIP_Y_THIGH_OFFSET = -2.1f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float THIGH_X_HIP_OFFSET = 0 * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float THIGH_Y_HIP_OFFSET = 2.1f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float THIGH_X_SHIN_OFFSET = 0 * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float THIGH_Y_SHIN_OFFSET = -2.3f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float SHIN_X_THIGH_OFFSET = 0 * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float SHIN_Y_THIGH_OFFSET = 2.4f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float SHIN_X_FOOT_OFFSET = -0.2f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float SHIN_Y_FOOT_OFFSET = -2.0f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float FOOT_X_OFFSET = 0.7f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float FOOT_Y_OFFSET = 0.7f * CHARACTER_DRAW_SIZE_SCALE_TWO;
 
 	public static final float MAX_ARM_DIST = ARM_X_CHEST_OFFSET + FOREARM_X_ARM_OFFSET + HAND_X_OFFSET;
 	public static final float MAX_LEG_DIST = THIGH_Y_HIP_OFFSET + SHIN_Y_THIGH_OFFSET + FOOT_Y_OFFSET ;
-	
+
 	public static final float ARM_UNGRIP_LENGTH = 3.1f;
 	public static final float LEG_UNGRIP_LENGTH = 3.7f;
 

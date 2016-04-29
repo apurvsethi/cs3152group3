@@ -774,12 +774,12 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 					}
 				}
 
-				 if((e == HAND_LEFT || e == HAND_RIGHT) &&
-						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > ARM_UNGRIP_LENGTH)
-					 ungrip(extremity);
-				 else if((e == FOOT_LEFT || e == FOOT_RIGHT) &&
-						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > LEG_UNGRIP_LENGTH)
-					 ungrip(extremity);
+//				 if((e == HAND_LEFT || e == HAND_RIGHT) &&
+//						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > ARM_UNGRIP_LENGTH)
+//					 ungrip(extremity);
+//				 else if((e == FOOT_LEFT || e == FOOT_RIGHT) &&
+//						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > LEG_UNGRIP_LENGTH)
+//					 ungrip(extremity);
 			}
 
 		}
