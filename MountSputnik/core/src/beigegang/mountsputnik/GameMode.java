@@ -78,12 +78,13 @@ public class GameMode extends ModeController {
 	private float cposYAtTime0 = 0;
 
 	//	private static TextureRegion[] energyTextures;
-private static final String ENERGY_TEXTURES[] = new String[10];
+	//first element is an empty drawing
+	private static final String ENERGY_TEXTURES[] = new String[11];
 	private static final String PROGRESS_TEXTURES[] = new String[6];
 
 //	private static final String ENERGY_TEXTURES2[] = new String[]
 //			{"Energy/e1.png","Energy/e2.png","Energy/e3.png","Energy/e4.png","Energy/e5.png","Energy/e6.png","Energy/e7.png","Energy/e8.png","Energy/e9.png","Energy/e10.png"};
-	private static TextureRegion[] energyTextures =  new TextureRegion[ENERGY_TEXTURES.length + 1];
+	private static TextureRegion[] energyTextures =  new TextureRegion[ENERGY_TEXTURES.length];
 	private static TextureRegion[] progressTextures =  new TextureRegion[PROGRESS_TEXTURES.length];
 	/**
 	 * font for displaying debug values to screen
@@ -180,11 +181,11 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			manager.load(name,Texture.class);
 			assets.add(name);
 		}
-		for (int i = 1; i<=ENERGY_TEXTURES.length; i++){
+		for (int i = 0; i<ENERGY_TEXTURES.length; i++){
 			String name = "Energy/e" + i + ".png";
 			manager.load(name, Texture.class);
 			assets.add(name);
-			ENERGY_TEXTURES[i-1] = name;
+			ENERGY_TEXTURES[i] = name;
 		}
 		for (int i = 1; i<=PROGRESS_TEXTURES.length; i++){
 			String name = "Progress/p" + i + ".png";
@@ -275,8 +276,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			handholdTextures[i-1] = createTexture(manager, "assets/"+levelName+"/Handhold"+i+".png", false);
 		}
 
-		for (int i = 1; i < ENERGY_TEXTURES.length + 1; i++) {
-			energyTextures[i] = createTexture(manager, ENERGY_TEXTURES[i-1], false);
+		for (int i = 0; i < ENERGY_TEXTURES.length; i++) {
+			energyTextures[i] = createTexture(manager, ENERGY_TEXTURES[i], false);
 		}
 		for (int i = 0; i < PROGRESS_TEXTURES.length; i++) {
 			progressTextures[i] = createTexture(manager, PROGRESS_TEXTURES[i], false);
@@ -866,6 +867,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 //			if(oz.canSpawnObstacle() && viewHeight < oz.getBounds().y &&
 //					oz.isTriggered()){
 			//couldnt figure out why viewHeight<oz.getBounds().y was needed...
+
 			if(oz.ticksSinceLastSpawn == 0 && viewHeight < oz.getBounds().y && cpos > oz.getMinSpawnHeight()){
 				obstacle = new ObstacleModel(oz.getObstacleTexture(), 1f, scale);
 				oz.setObstX(oz.getBounds().x + rand.nextFloat()*oz.getBounds().width);
@@ -1186,6 +1188,7 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 
 		float f = character.getEnergy();
 		canvas.end();
+
 		if ( f<= 30){
 			lowEnergySprite.setAlpha(.5f + Math.min((30-f)/f,.5f));
 			batch.begin();
@@ -1205,8 +1208,8 @@ private static final String ENERGY_TEXTURES[] = new String[10];
 			}
 		}else{
 			canvas.begin();
-			if (energyLevel > 0)
-				canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+
+			canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 
 //			canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 
