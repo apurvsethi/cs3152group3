@@ -52,7 +52,7 @@ public class GameMode extends ModeController {
 	//dynamically
 	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "canyon", "canyon", "canyon", "sky", "canyon"};//,"mountain","sky","space"}; <-- Add the rest of these in as they are given assets
 	private static final String LAVA_FILE = "assets/testlavatexture.png"; //TODO: make this a better texture
-	private static final String UI_FILE = "assets/HUD4.png";
+	private static final String UI_FILE = "assets/HUD4timeless.png"; //TODO: change back to regular after video
 	private static final String[] LEVEL_LABEL_FILES = {"assets/Tutorial.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Skycloud.png", "assets/Canyon.png"};
 	private static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
 	private static final String GLOW_FILE = "assets/glow.png"; 
