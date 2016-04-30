@@ -6,6 +6,7 @@ import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.graphics.*;
 
 import beigegang.util.*;
+import static beigegang.mountsputnik.Constants.*;
 
 
 /** Base model class that is the parent class to all other models
@@ -604,7 +605,8 @@ public abstract class GameObject {
 	public void draw(GameCanvas canvas) {
 		canvas.draw(animator, Color.WHITE, origin.x, origin.y,
 				getX() * drawPositionScale.x, getY() * drawPositionScale.y,
-				getAngle(), drawSizeScale.x, drawSizeScale.y);
+				getAngle(), drawSizeScale.x / SCREEN_WIDTH * canvas.getWidth(),
+				drawSizeScale.y / SCREEN_HEIGHT * canvas.getHeight());
 	}
 
 	/**
