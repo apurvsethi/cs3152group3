@@ -289,7 +289,7 @@ public class InputController {
 		leftArmPressed = xbox.getLB();
 		rightArmPressed = xbox.getRB();
 		leftLegPressed = xbox.getLeftTrigger() > 0.5;
-		rightLegPressed = xbox.getRightTrigger() < 0.5 && xbox.getRightTrigger() != -1.0f;
+		rightLegPressed = xbox.getRightTrigger() < -0.5 && xbox.getRightTrigger() != -1.0f;
 //		System.out.println(xbox.getRightTrigger());
 
 		boolean a = leftLegPressed ? addToButtonsPressed((FOOT_LEFT)) : checkIfJustReleased(FOOT_LEFT);
