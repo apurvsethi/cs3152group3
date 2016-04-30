@@ -221,6 +221,7 @@ public abstract class ModeController implements Screen {
 		this.canvas = canvas;
 		this.scale.x = canvas.getWidth()/bounds.getWidth();
 		this.scale.y = canvas.getHeight()/bounds.getHeight();
+
 	}
 
 	/**

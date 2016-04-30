@@ -457,7 +457,8 @@ public class GameMode extends ModeController {
 		checkpoints.add(0f);
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
-			int blockNumber = 11;//((int) (Math.random() * diffBlocks)) + 1;
+			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
+			blockNumber = 16;
 			while(used.contains(blockNumber, true)&&!levelName.equals("tutorial"))
 				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			used.add(blockNumber);

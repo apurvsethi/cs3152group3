@@ -137,9 +137,11 @@ public class XBox360Controller implements ControllerListener {
 	 * @param controller The base controller to wrap
 	 */
 	protected void initialize(Controller controller) {
-		boolean isXBox360 = false;
-		if (!controller.getName().toLowerCase().contains("xbox")) {
-			isXBox360 = controller.getName().contains("360");
+		if (!controller.getName().toLowerCase().contains("xbox") ||
+				!controller.getName().contains("360")) {
+//		boolean isXBox360 = false;
+//		if (!controller.getName().toLowerCase().contains("xbox")) {
+//			isXBox360 = controller.getName().contains("360");
 			this.controller = null;
 			return;
 		}
