@@ -45,7 +45,7 @@ public class PartModel extends GameObject{
 
 		// Create the fixture
 		fixtureDef.shape = shape;
-		fixtureDef.density = 0.5f;
+		fixtureDef.density = 0.22f;
 		fixtureDef.filter.maskBits = OBSTACLE_BITS;
 		fixtureDef.filter.categoryBits = PART_BITS;
 		geometry = body.createFixture(fixtureDef);

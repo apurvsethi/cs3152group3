@@ -133,6 +133,7 @@ public class CharacterModel {
 		PartModel partModel = new PartModel(partCache.x, partCache.y, texture.getTexture(),
 				CHARACTER_DRAW_SIZE_SCALE, drawPositionScale, this);
 		partModel.setBodyType(BodyDef.BodyType.DynamicBody);
+
 		parts.add(partModel);
 		return partModel;
 	}
