@@ -51,7 +51,7 @@ public class XBox360Controller implements ControllerListener {
 	/** Whether this controller is currently running with the Mac OS X driver */
 	private boolean macosx;
 	/** Whether this is the special XBox 360 controller (right trigger issue) */
-	private boolean xbox360;
+	private boolean xboxOne;
 	
 	/** Button identifier for the X-Button */
 	private int button_x;
@@ -139,17 +139,13 @@ public class XBox360Controller implements ControllerListener {
 	 * @param controller The base controller to wrap
 	 */
 	protected void initialize(Controller controller) {
-//<<<<<<< HEAD
-		if (!controller.getName().toLowerCase().contains("xbox") ||
+		xboxOne = false;
+		if (controller.getName().toLowerCase().contains("xbox") &&
 				!controller.getName().contains("360")) {
-//		boolean isXBox360 = false;
-//		if (!controller.getName().toLowerCase().contains("xbox")) {
-//			isXBox360 = controller.getName().contains("360");
-//=======
-//		xbox360 = false;
-//		if (!controller.getName().toLowerCase().contains("xbox")) {
-//			xbox360 = controller.getName().contains("360");
-//>>>>>>> 8a4490088e81a8a542aa929318385932d785380d
+			xboxOne = true;
+		}
+		else if (!controller.getName().toLowerCase().contains("xbox") ||
+				!controller.getName().contains("360")) {
 			this.controller = null;
 			return;
 		}
@@ -191,7 +187,7 @@ public class XBox360Controller implements ControllerListener {
 			
 			axis_right_x = 3;
 			axis_right_y = 2;
-			axis_right_trigger = xbox360 ? 4 : 5;
+			axis_right_trigger = xboxOne ? 5 : 4;
 		} else {
 		
 			// Mac Driver settings
@@ -597,7 +593,7 @@ public class XBox360Controller implements ControllerListener {
 	public float getRightTrigger() {
 		float value = controller.getAxis(axis_right_trigger);
 		// Workaround for bug in Mac driver
-		if (this.macosx || this.xbox360) value = -value;
+		if (this.macosx || this.xboxOne) value = -value;
 		if (right_trigger_begin) {
 			if (value != 0) {
 				right_trigger_begin = false;
