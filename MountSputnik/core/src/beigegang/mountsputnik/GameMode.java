@@ -116,7 +116,7 @@ public class GameMode extends ModeController {
 	private static String BLACKOUT = "assets/blackout.png";
 	private static String FATIGUE_BAR = "Energy/Fatigue Gauge.png";
 	private static TextureRegion fatigueTexture;
-	private static String WARNING_TEXTURE = "assets/Falling Rock Warning.png";
+	private static String WARNING_TEXTURE = "assets/Obstacle Warning.png";
 	private static TextureRegion warningTexture;
 	private static String PROGRESS_BACKGROUND= "assets/Progress Bar.png";
 	private static TextureRegion progressBackgroundTexture;
@@ -458,7 +458,7 @@ public class GameMode extends ModeController {
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
-			blockNumber = 13;
+			blockNumber = 14;
 			while(used.contains(blockNumber, true)&&!levelName.equals("tutorial"))
 				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			used.add(blockNumber);
@@ -1243,7 +1243,7 @@ public class GameMode extends ModeController {
 		//draw the obstacle warnings.
 		if (queuedObstacles.size > 0) {
 			for (warningsClass oz : obstacleWarnings) {
-				warningSprite.setBounds(oz.center * scale.x -  1 * scale.x, y/scale.y + canvas.getHeight()*9f/10f, 2f * scale.x , canvas.getHeight()/10f);
+				warningSprite.setBounds(oz.center * scale.x -  1.5f * scale.x, y/scale.y + canvas.getHeight()*9f/10f, 3f * scale.x , canvas.getHeight()/10f);
 				warningSprite.setAlpha(1f);
 				batch.begin();
 				warningSprite.draw(batch);
