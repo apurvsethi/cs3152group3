@@ -110,7 +110,7 @@ public class LoadingMode extends ModeController {
 	@Override
 	public void update(float dt) {
 		InputController input = InputController.getInstance();
-		input.readInput(bounds, scale);
+		input.readInput();
 
 		if (playButton != null) {
 			listener.exitScreen(this, EXIT_MENU);

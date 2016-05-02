@@ -4,26 +4,21 @@ import beigegang.util.XBox360Controller;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import static beigegang.mountsputnik.Constants.*;
-import static beigegang.mountsputnik.Constants.HAND_RIGHT;
 
-public class InputController {	
+public class InputController {
 	/** Singleton instance for the controller */
 	private static InputController theController = null;
-	
-	/** 
+
+	/**
 	 * Return the singleton instance of the input controller
 	 *
 	 * @return the singleton instance of the input controller
 	 */
 	public static InputController getInstance() {
-		if (theController == null) {
-			theController = new InputController();
-		}
+		if (theController == null) theController = new InputController();
 		return theController;
 	}
 
@@ -43,13 +38,17 @@ public class InputController {
 	
 	/** Whether the left arm action button was pressed. */
 	private boolean leftArmPressed;
+	private boolean leftArmPrevious;
 	/** Whether the right arm action button was pressed. */
 	private boolean rightArmPressed;
+	private boolean rightArmPrevious;
 	/** Whether the left leg action button was pressed. */
 	private boolean leftLegPressed;
+	private boolean leftLegPrevious;
 	/** Whether the right leg action button was pressed. */
 	private boolean rightLegPressed;
-	
+	private boolean rightLegPrevious;
+
 	/** How much did we move horizontally left stick? */
 	private float horizontalL;
 	/** How much did we move vertically left stick? */
@@ -61,47 +60,15 @@ public class InputController {
 	private float verticalR;
 
 	/** An X-Box controller (if it is connected) */
-	XBox360Controller xbox;
-	/**
-	 * holds any extremities who's buttons were just released this timestep. cleared out every timestep
-	 */
-	private Array<Integer> justReleased = new Array<Integer>();
+	private XBox360Controller xbox;
+
 	/**
 	 * holds any extremities who's buttons are pressed during this timestep. keeps order of pressing intact
 	 */
-	private Array<Integer> nextToPress = new Array<Integer>();
+	private Array<Integer> orderPressed = new Array<Integer>();
 
-	public Array<Integer> getJustReleased(){
-		return justReleased;
-	}
-	public Array<Integer> getButtonsPressed(){
-		return nextToPress;
-	}
-	/**
-	 * if button was not pressed on the previous turn but is pressed now, add to nextToPress
-	 * note: cannot use set because order must be preserved for accurate/predictive control by player
-	 * @param part
-	 * @return true if part was just pressed, false otherwise
-	 * @author Jacob
-	 */
-	public boolean addToButtonsPressed(int part) {
-		boolean notRedundant = !nextToPress.contains(part, true);
-		if(notRedundant)
-			nextToPress.add(part);
-		return notRedundant;
-	}
-
-	/**
-	 * checks if that extremity was released on this timestep by player, if so adds to justReleased
-	 * @param part
-	 * @return true if part was just released, false otherwise
-	 * @author Jacob
-	 */
-	public boolean checkIfJustReleased(int part) {
-		boolean present = nextToPress.removeValue(part, true);
-		if (present)
-			justReleased.add(part);
-		return present;
+	public Array<Integer> getOrderPressed(){
+		return orderPressed;
 	}
 
 	/**
@@ -160,6 +127,15 @@ public class InputController {
 	}
 
 	/**
+	 * Returns true if the left arm action button was released.
+	 *
+	 * @return true if the left arm action button was just released.
+	 */
+	public boolean releasedLeftArm() {
+		return leftArmPrevious && ! leftArmPressed;
+	}
+
+	/**
 	 * Returns true if the right arm action button was pressed.
 	 *
 	 * This is a sustained button. It will returns true as long as the player
@@ -169,6 +145,15 @@ public class InputController {
 	 */
 	public boolean didRightArm() {
 		return rightArmPressed;
+	}
+
+	/**
+	 * Returns true if the left arm action button was released.
+	 *
+	 * @return true if the left arm action button was just released.
+	 */
+	public boolean releasedRightArm() {
+		return rightArmPrevious && ! rightArmPressed;
 	}
 
 	/**
@@ -184,6 +169,15 @@ public class InputController {
 	}
 
 	/**
+	 * Returns true if the left arm action button was released.
+	 *
+	 * @return true if the left arm action button was just released.
+	 */
+	public boolean releasedLeftLeg() {
+		return leftLegPrevious && ! leftLegPressed;
+	}
+
+	/**
 	 * Returns true if the right leg action button was pressed.
 	 *
 	 * This is a sustained button. It will returns true as long as the player
@@ -193,6 +187,15 @@ public class InputController {
 	 */
 	public boolean didRightLeg() {
 		return rightLegPressed;
+	}
+
+	/**
+	 * Returns true if the left arm action button was released.
+	 *
+	 * @return true if the left arm action button was just released.
+	 */
+	public boolean releasedRightLeg() {
+		return rightLegPrevious && ! rightLegPressed;
 	}
 
 	/**
@@ -237,7 +240,7 @@ public class InputController {
 	 * The input controller attempts to connect to the X-Box controller at device 0,
 	 * if it exists.  Otherwise, it falls back to the keyboard control.
 	 */
-	public InputController() { 
+	private InputController() {
 		// If we have a game-pad for id, then use it.
 		xbox = new XBox360Controller(0);
 	}
@@ -249,38 +252,41 @@ public class InputController {
 	 * the drawing scale to convert screen coordinates to world coordinates.  The
 	 * bounds are for the crosshair.  They cannot go outside of this zone.
 	 *
-	 * @param bounds The input bounds for the crosshair.  
-	 * @param scale  The drawing scale
 	 */
-	public void readInput(Rectangle bounds, Vector2 scale) {
+	public void readInput() {
 		// Copy state from last animation frame
 		// Helps us ignore buttons that are held down
 		menuPrevious = menuPressed;
 		debugPrevious = debugPressed;
 		selectPrevious = selectPressed;
 		backPrevious = backPressed;
-		justReleased.clear();
+		leftArmPrevious = leftArmPressed;
+		rightArmPrevious = rightArmPressed;
+		leftLegPrevious = leftLegPressed;
+		rightLegPrevious = rightLegPressed;
 
 		// Check to see if a GamePad is connected
 		if (xbox.isConnected()) {
-			readGamepad(bounds, scale);
-			readKeyboard(bounds, scale, true); // Read as a back-up
-		} else {
-			readKeyboard(bounds, scale, false);
-		}
+			readGamepad();
+			readKeyboard(true); // Read as a back-up
+		} else readKeyboard(false);
+
+		adjustOrderPressed(leftArmPressed, HAND_LEFT);
+		adjustOrderPressed(rightArmPressed, HAND_RIGHT);
+		adjustOrderPressed(leftLegPressed, FOOT_LEFT);
+		adjustOrderPressed(rightLegPressed, FOOT_RIGHT);
+	}
+
+	private void adjustOrderPressed(boolean pressed, int part) {
+		if (pressed && !orderPressed.contains(part, true))
+			orderPressed.add(part);
+		else if (!pressed) orderPressed.removeValue(part, true);
 	}
 
 	/**
 	 * Reads input from an X-Box controller connected to this computer.
-	 *
-	 * The method provides both the input bounds and the drawing scale.  It needs
-	 * the drawing scale to convert screen coordinates to world coordinates.  The
-	 * bounds are for the crosshair.  They cannot go outside of this zone.
-	 *
-	 * @param bounds The input bounds for the crosshair.  
-	 * @param scale  The drawing scale
 	 */
-	private void readGamepad(Rectangle bounds, Vector2 scale) {
+	private void readGamepad() {
 		menuPressed = xbox.getStart();
 		debugPressed  = xbox.getBack();
 		selectPressed = xbox.getA();
@@ -291,19 +297,11 @@ public class InputController {
 		leftLegPressed = xbox.getLeftTrigger() > 0.5;
 		rightLegPressed = xbox.getRightTrigger() < -0.5 && xbox.getRightTrigger() != -1.0f;
 
-		boolean a = leftLegPressed ? addToButtonsPressed((FOOT_LEFT)) : checkIfJustReleased(FOOT_LEFT);
-		boolean b = rightLegPressed ? addToButtonsPressed((FOOT_RIGHT)) : checkIfJustReleased(FOOT_RIGHT);
-		boolean c = leftArmPressed ? addToButtonsPressed((HAND_LEFT)) : checkIfJustReleased(HAND_LEFT);
-		boolean d = rightArmPressed ? addToButtonsPressed((HAND_RIGHT)) : checkIfJustReleased(HAND_RIGHT);
-//
 		// Movement based on change
 		horizontalL = xbox.getLeftX();
 		verticalL = -xbox.getLeftY();
-
-		if (Constants.TORSO_MODE || Constants.TWO_LIMB_MODE) {
-			horizontalR = xbox.getRightX();
-			verticalR = -xbox.getRightY();
-		}
+		horizontalR = xbox.getRightX();
+		verticalR = -xbox.getRightY();
 	}
 
 	/**
@@ -315,7 +313,7 @@ public class InputController {
 	 *
 	 * @param secondary true if the keyboard should give priority to a gamepad
 	 */
-	private void readKeyboard(Rectangle bounds, Vector2 scale, boolean secondary) {
+	private void readKeyboard(boolean secondary) {
 		// Give priority to gamepad results
 		menuPressed = (secondary && menuPressed) || (Gdx.input.isKeyPressed(Input.Keys.R));
 		debugPressed = (secondary && debugPressed) || (Gdx.input.isKeyPressed(Input.Keys.D));
@@ -327,29 +325,19 @@ public class InputController {
 		leftLegPressed = (secondary && leftLegPressed) || (Gdx.input.isKeyPressed(Input.Keys.A));
 		rightLegPressed = (secondary && rightLegPressed) || (Gdx.input.isKeyPressed(Input.Keys.S));
 
-		boolean a = leftLegPressed ? addToButtonsPressed((FOOT_LEFT)) : checkIfJustReleased(FOOT_LEFT);
-		boolean b = rightLegPressed ? addToButtonsPressed((FOOT_RIGHT)) : checkIfJustReleased(FOOT_RIGHT);
-		boolean c = leftArmPressed ? addToButtonsPressed((HAND_LEFT)) : checkIfJustReleased(HAND_LEFT);
-		boolean d = rightArmPressed ? addToButtonsPressed((HAND_RIGHT)) : checkIfJustReleased(HAND_RIGHT);
-
 		horizontalL = (secondary ? horizontalL : 0.0f);
-		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
 			horizontalL += 1.0f;
-		 }
-		 if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-		 	horizontalL -= 1.0f;
-		 }
-		 
-		 verticalL = (secondary ? verticalL : 0.0f);
-		 if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-		 	verticalL += 1.0f;
-		 }
-		 if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-		 	verticalL -= 1.0f;
-		 }
+		if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
+			horizontalL -= 1.0f;
+
+		verticalL = (secondary ? verticalL : 0.0f);
+		if (Gdx.input.isKeyPressed(Input.Keys.UP))
+			verticalL += 1.0f;
+		if (Gdx.input.isKeyPressed(Input.Keys.DOWN))
+			verticalL -= 1.0f;
 
 		horizontalR = (secondary? horizontalR :0);
 		verticalR = (secondary? verticalR :0);
-
 	}
 }

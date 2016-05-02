@@ -345,10 +345,6 @@ public class GameMode extends ModeController {
 	 */
 	private HandholdModel handhold;
 	/**
-	 * holds any extremities who's buttons were just released this timestep. cleared out every timestep
-	 */
-	private Array<Integer> justReleased = new Array<Integer>();
-	/**
 	 * holds any extremities who's buttons are pressed during this timestep. keeps order of pressing intact
 	 */
 	private Array<Integer> nextToPress = new Array<Integer>();
@@ -660,8 +656,7 @@ public class GameMode extends ModeController {
 
 		upsideDown = character.parts.get(HEAD).getPosition().y - character.parts.get(CHEST).getPosition().y <= 0;
 
-		nextToPress = input.getButtonsPressed();
-		justReleased = input.getJustReleased();
+		nextToPress = input.getOrderPressed();
 		if(input.didSelect()) tutorialToggle = !tutorialToggle;
 
 		Movement.makeHookedJointsMovable(nextToPress);
@@ -677,18 +672,13 @@ public class GameMode extends ModeController {
 			float v = input.getVerticalL();
 			float h = input.getHorizontalL();
 			Movement.findAndApplyForces(nextToPress.get(0),v,h);
-
-
 		}
 		Movement.applyTorsoForceIfApplicable();
 		//bounding velocities
 		boundBodyVelocities();
 		HandholdModel[] glowingHandholds = glowHandholds();
 
-		if (justReleased.size > 0 || timestep == 0) {
-			snapLimbsToHandholds(input,glowingHandholds);
-		}
-		
+		snapLimbsToHandholds(input,glowingHandholds);
 
 		cameraWork();
 		
@@ -1027,23 +1017,21 @@ public class GameMode extends ModeController {
 	}
 
 	/**
-	 * snaps any limbs in justReleased (limbs player controlled last timestep but no longer does) to closest handhold
+	 * snaps any released limbs (limbs player controlled last timestep but no longer does) to closest handhold
 	 * if possible
 	 * @author Jacob
 
 	 * @param input
      */
 	private void snapLimbsToHandholds(InputController input, HandholdModel[] hs) {
-		for (int i : justReleased) {
-			snapIfPossible(i, hs);
-		}
-		if (timestep == 0) {
-			snapIfPossible(FOOT_LEFT,hs);
-			snapIfPossible(HAND_LEFT,hs);
-			snapIfPossible(HAND_RIGHT,hs);
-			snapIfPossible(FOOT_RIGHT,hs);
-
-		}
+		if (input.releasedLeftArm() || timestep == 0)
+			snapIfPossible(HAND_LEFT, hs);
+		if (input.releasedRightArm() || timestep == 0)
+			snapIfPossible(HAND_RIGHT, hs);
+		if (input.releasedLeftLeg() || timestep == 0)
+			snapIfPossible(FOOT_LEFT, hs);
+		if (input.releasedRightLeg() || timestep == 0)
+			snapIfPossible(FOOT_RIGHT, hs);
 	}
 	
 	/**
@@ -1109,35 +1097,24 @@ public class GameMode extends ModeController {
 		return ((ExtremityModel)(character.parts.get(part))).isGripped();
 	}
 
-
 	private void drawToggles(){
-		Vector2 pos = character.parts.get(HAND_LEFT).getPosition(); 
-		TextureRegion t; 
-		if (nextToPress.contains(HAND_LEFT, true))
-			t = tutorialTextures[4]; 
-		else
-			t = tutorialTextures[0]; 
+		TextureRegion t;
+		InputController input = InputController.getInstance();
+
+		Vector2 pos = character.parts.get(HAND_LEFT).getPosition();
+		t = input.didLeftArm() ? tutorialTextures[4] : tutorialTextures[0];
 		canvas.draw(t, Color.WHITE, (pos.x*scale.x)-10, (pos.y*scale.y),50,50);
-		
-		pos = character.parts.get(HAND_RIGHT).getPosition(); 
-		if (nextToPress.contains(HAND_RIGHT, true))
-			t = tutorialTextures[5]; 
-		else
-			t = tutorialTextures[1]; 
+
+		pos = character.parts.get(HAND_RIGHT).getPosition();
+		t = input.didRightArm() ? tutorialTextures[5] : tutorialTextures[1];
 		canvas.draw(t, Color.WHITE, (pos.x*scale.x)+10, (pos.y*scale.y),50,50);
-		
-		pos = character.parts.get(FOOT_LEFT).getPosition(); 
-		if (nextToPress.contains(FOOT_LEFT, true))
-			t = tutorialTextures[6]; 
-		else
-			t = tutorialTextures[2]; 
+
+		pos = character.parts.get(FOOT_LEFT).getPosition();
+		t = input.didLeftLeg() ? tutorialTextures[6] : tutorialTextures[2];
 		canvas.draw(t, Color.WHITE, (pos.x*scale.x)-10, (pos.y*scale.y),40,40);
-		
-		pos = character.parts.get(FOOT_RIGHT).getPosition(); 
-		if (nextToPress.contains(FOOT_RIGHT, true))
-			t = tutorialTextures[7]; 
-		else
-			t = tutorialTextures[3]; 
+
+		pos = character.parts.get(FOOT_RIGHT).getPosition();
+		t = input.didRightLeg() ? tutorialTextures[7] : tutorialTextures[3];
 		canvas.draw(t, Color.WHITE, (pos.x*scale.x)+10, (pos.y*scale.y),40,40);
 	}
 	
@@ -1307,6 +1284,3 @@ public class GameMode extends ModeController {
 
 
 }
-
-
-
