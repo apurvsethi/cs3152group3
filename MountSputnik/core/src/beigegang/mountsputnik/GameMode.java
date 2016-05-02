@@ -55,8 +55,9 @@ public class GameMode extends ModeController {
 	private static final String UI_FILE = "assets/HUD4timeless.png"; //TODO: change back to regular after video
 	private static final String[] LEVEL_LABEL_FILES = {"assets/Tutorial.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Skycloud.png", "assets/Canyon.png"};
 	private static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
-	private static final String GLOW_FILE = "assets/glow.png"; 
-	private static final HashMap<String,Integer> NUM_HANDHOLDS = new HashMap<String,Integer>();  
+	private static final String GLOW_FILE = "assets/glow.png";
+	private static final String RUSSIAN_FLAG_FILE = "RussianFlag.png";
+	private static final HashMap<String,Integer> NUM_HANDHOLDS = new HashMap<String,Integer>();
 	//private static final String HANDHOLD_TEXTURES[] = {"assets/canyon/Handhold1.png", "assets/canyon/Handhold2.png"};
 	private static final String PART_TEXTURES[] = {"Ragdoll/Torso.png", "Ragdoll/Head.png", "Ragdoll/Hips.png",
 			"Ragdoll/ArmLeft.png", "Ragdoll/ArmRight.png", "Ragdoll/ForearmLeft.png", "Ragdoll/ForearmRight.png",
@@ -100,6 +101,7 @@ public class GameMode extends ModeController {
 	private static TextureRegion UI;
 	private static TextureRegion CANYON;
 	private static TextureRegion LOGO;
+	private static TextureRegion RUSSIAN_FLAG;
 	private static TextureRegion edge;
 	private static TextureRegion ground;
 	private static TextureRegion lavaTexture;
@@ -229,8 +231,10 @@ public class GameMode extends ModeController {
 		assets.add(WARNING_TEXTURE);
 		manager.load(LOW_ENERGY_HALO,Texture.class);
 		assets.add(LOW_ENERGY_HALO);
-		manager.load(TUTORIAL_OVERLAY_TEXTURE, Texture.class); 
+		manager.load(TUTORIAL_OVERLAY_TEXTURE, Texture.class);
 		assets.add(TUTORIAL_OVERLAY_TEXTURE);
+		manager.load(RUSSIAN_FLAG_FILE, Texture.class);
+		assets.add(RUSSIAN_FLAG_FILE);
 	}
 
 	/**
@@ -287,8 +291,9 @@ public class GameMode extends ModeController {
 		progressBackgroundTexture = createTexture(manager,PROGRESS_BACKGROUND,false);
 		progressBarTexture = createTexture(manager,PROGRESS_BAR,false);
 		lowEnergyHalo = createTexture(manager,LOW_ENERGY_HALO,false);
+		tutorialOverlay = createTexture(manager, TUTORIAL_OVERLAY_TEXTURE, false);
+		RUSSIAN_FLAG = createTexture(manager, RUSSIAN_FLAG_FILE, false);
 		assetState = AssetState.COMPLETE;
-		tutorialOverlay = createTexture(manager, TUTORIAL_OVERLAY_TEXTURE, false); 
 
 	}
 
@@ -335,7 +340,7 @@ public class GameMode extends ModeController {
 	private boolean complete = false; 
 	private boolean failed;
 	private float maxHandhold = 0f;
-
+	private int lastReachedCheckpoint = 0;
 	/**
 	 * Character of game
 	 */
@@ -351,8 +356,11 @@ public class GameMode extends ModeController {
 	/**
 	 * A list of all the blocks that were chosen for this generated level. Allows for debugging 
 	 */
-	private Array<String> levelBlocks = new Array<String>(); 
-	
+	private Array<String> levelBlocks = new Array<String>();
+	private Array<JsonValue> checkpointLevelJsons = new Array<JsonValue>();
+	private Array<Integer> checkpointLevelBlocks = new Array<Integer>();
+
+
 	/** A boolean indicating the toggle of the tutorial view, where limbs have their corresponding buttons shown*/ 
 	private boolean tutorialToggle = false; 
 
@@ -390,11 +398,117 @@ public class GameMode extends ModeController {
 		obstacleWarnings.clear();
 		addQueue.clear();
 		world.dispose();
+		checkpointLevelBlocks.clear();
+		checkpointLevelJsons.clear();
+		checkpoints.clear();
+		lastReachedCheckpoint = 0;
 		timestep = 0;
 		populateLevel();
 		progressSprite.setBounds(0,0,canvas.getWidth()/4,canvas.getHeight());
 		lowEnergySprite.setBounds(0, 0, canvas.getWidth() / 4, canvas.getHeight());
 		queuedObstacles.clear();
+
+	}
+	public void restartLastCheckpoint(){
+		levelName = LEVEL_NAMES[currLevel];
+		complete = false;
+		failed = false;
+		assetState = AssetState.LOADING;
+		loadContent(assetManager);
+
+		for (GameObject obj : objects) {
+			obj.deactivatePhysics(world);
+		}
+		risingObstacle = null;
+		objects.clear();
+		obstacles.clear();
+		obstacleWarnings.clear();
+		addQueue.clear();
+		world.dispose();
+		timestep = 0;
+		populateLevelAtLastCheckpoint();
+		progressSprite.setBounds(0,0,canvas.getWidth()/4,canvas.getHeight());
+		lowEnergySprite.setBounds(0, 0, canvas.getWidth() / 4, canvas.getHeight());
+		queuedObstacles.clear();
+
+
+	}
+	public void populateLevelAtLastCheckpoint() {
+		jsonReader = new JsonReader();
+		levelFormat = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/level.json"));
+		JsonAssetManager.getInstance().loadDirectory(levelFormat);
+		JsonAssetManager.getInstance().allocateDirectory();
+		Vector2 gravity = new Vector2(0,levelFormat.getFloat("gravity"));
+		oxygen = levelFormat.getFloat("oxygen");
+		float remainingHeight = levelFormat.getFloat("height");
+		float currentHeight=0f;
+		int diffBlocks = levelFormat.getInt("uniqueBlocks");
+		int filler = levelFormat.getInt("generalFillerSize");
+		int fillerSize = levelFormat.getInt("fillerBlocks");
+
+		world = new World(gravity, false);
+		contactListener = new ListenerClass();
+		world.setContactListener(contactListener);
+
+		levelBlocks.clear();
+		int counter = 0;
+		Array<Integer> used = new Array<Integer>();
+		maxHandhold = remainingHeight;
+		maxLevelHeight = remainingHeight;
+		while(counter < checkpointLevelBlocks.size){
+			//TODO: account for difficulty
+			int blockNumber = checkpointLevelBlocks.get(counter);
+//			blockNumber = 7;
+//			while(used.contains(blockNumber, true)&&!levelName.equals("tutorial"))
+//				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
+			used.add(blockNumber);
+			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json");
+			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
+			addChunk(levelPiece, currentHeight, levelName);
+			currentHeight += levelPiece.getFloat("size");
+			checkpoints.add(currentHeight);
+			//filler stuff not currently used.
+//			for(int i = 0; i < filler; i++){
+//				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
+//				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/general/block"+blockNumber+".json"));
+//				levelBlocks.add("Levels/general/block"+blockNumber+".json");
+//				addChunk(levelPiece, currentHeight, levelName);
+//				currentHeight += levelPiece.getInt("size");
+//			}
+			counter ++;
+		}
+		System.out.println(levelBlocks);
+
+		JsonValue lava = levelFormat.get("lava");
+		if(lava.getBoolean("present")){
+			risingObstacle = new RisingObstacle(lavaTexture, lava.getFloat("speed"));
+		}
+
+		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, Math.max(DEFAULT_HEIGHT/2, checkpoints.get(lastReachedCheckpoint)), scale);
+
+		checkpoints.insert(0,character.parts.get(CHEST).getY());
+
+		//arms
+		objects.add(character.parts.get(ARM_LEFT));
+		objects.add(character.parts.get(ARM_RIGHT));
+		objects.add(character.parts.get(FOREARM_LEFT));
+		objects.add(character.parts.get(FOREARM_RIGHT));
+		objects.add(character.parts.get(HAND_LEFT));
+		objects.add(character.parts.get(HAND_RIGHT));
+		//legs
+		objects.add(character.parts.get(THIGH_LEFT));
+		objects.add(character.parts.get(THIGH_RIGHT));
+		objects.add(character.parts.get(SHIN_LEFT));
+		objects.add(character.parts.get(SHIN_RIGHT));
+		objects.add(character.parts.get(FOOT_LEFT));
+		objects.add(character.parts.get(FOOT_RIGHT));
+		//rest
+		objects.add(character.parts.get(HEAD));
+		objects.add(character.parts.get(HIPS));
+		objects.add(character.parts.get(CHEST));
+
+		Movement.setCharacter(character);
+		makeHandholdsToGripAtStart();
 
 	}
 	// ************************************START LEVELS*********************************************** //
@@ -450,7 +564,6 @@ public class GameMode extends ModeController {
 		Array<Integer> used = new Array<Integer>();
 		maxHandhold = remainingHeight;
 		maxLevelHeight = remainingHeight;
-		checkpoints.add(0f);
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
@@ -460,18 +573,22 @@ public class GameMode extends ModeController {
 			used.add(blockNumber);
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json"); 
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
-			
+			checkpointLevelJsons.add(levelPiece);
 			addChunk(levelPiece, currentHeight, levelName);
 			currentHeight += levelPiece.getFloat("size");
-			for(int i = 0; i < filler; i++){
-				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
-				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/general/block"+blockNumber+".json"));
-				levelBlocks.add("Levels/general/block"+blockNumber+".json"); 
-				addChunk(levelPiece, currentHeight, levelName);
-				currentHeight += levelPiece.getInt("size");
-			}
+			checkpoints.add(currentHeight);
+			//filler stuff not currently used.
+//			for(int i = 0; i < filler; i++){
+//				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
+//				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/general/block"+blockNumber+".json"));
+//				levelBlocks.add("Levels/general/block"+blockNumber+".json");
+//				addChunk(levelPiece, currentHeight, levelName);
+//				currentHeight += levelPiece.getInt("size");
+//			}
 		}
+		checkpointLevelBlocks.addAll(used);
 		System.out.println(levelBlocks);
+		System.out.println(checkpointLevelBlocks);
 
 		JsonValue lava = levelFormat.get("lava");
 		if(lava.getBoolean("present")){
@@ -480,6 +597,8 @@ public class GameMode extends ModeController {
 
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale);
 			//arms
+		checkpoints.insert(0,character.parts.get(CHEST).getY());
+
 		objects.add(character.parts.get(ARM_LEFT));
 		objects.add(character.parts.get(ARM_RIGHT));
 		objects.add(character.parts.get(FOREARM_LEFT));
@@ -499,8 +618,12 @@ public class GameMode extends ModeController {
 		objects.add(character.parts.get(CHEST));
 
 		Movement.setCharacter(character);
-		
-		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),glowTexture.getTexture(), 
+		makeHandholdsToGripAtStart();
+
+	}
+
+	private void makeHandholdsToGripAtStart() {
+		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),glowTexture.getTexture(),
 				character.parts.get(HAND_LEFT).getPosition().x, character.parts.get(HAND_LEFT).getPosition().y,
 				new Vector2(.3f, .3f), scale);
 		handhold.fixtureDef.filter.maskBits = 0;
@@ -510,8 +633,8 @@ public class GameMode extends ModeController {
 		handhold.geometry.setFriction(1);
 		handhold.setBodyType(BodyDef.BodyType.StaticBody);
 		objects.add(handhold);
-		
-		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),glowTexture.getTexture(), 
+
+		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),glowTexture.getTexture(),
 				character.parts.get(HAND_RIGHT).getPosition().x, character.parts.get(HAND_RIGHT).getPosition().y,
 				new Vector2(.3f, .3f), scale);
 		handhold.fixtureDef.filter.maskBits = 0;
@@ -521,8 +644,8 @@ public class GameMode extends ModeController {
 		handhold.geometry.setFriction(1);
 		handhold.setBodyType(BodyDef.BodyType.StaticBody);
 		objects.add(handhold);
-		
-		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),glowTexture.getTexture(), 
+
+		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),glowTexture.getTexture(),
 				character.parts.get(FOOT_LEFT).getPosition().x, character.parts.get(FOOT_LEFT).getPosition().y,
 				new Vector2(.3f, .3f), scale);
 		handhold.fixtureDef.filter.maskBits = 0;
@@ -532,8 +655,8 @@ public class GameMode extends ModeController {
 		handhold.geometry.setFriction(1);
 		handhold.setBodyType(BodyDef.BodyType.StaticBody);
 		objects.add(handhold);
-		
-		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(), glowTexture.getTexture(), 
+
+		handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(), glowTexture.getTexture(),
 				character.parts.get(FOOT_RIGHT).getPosition().x, character.parts.get(FOOT_RIGHT).getPosition().y,
 				new Vector2(.3f, .3f), scale);
 		handhold.fixtureDef.filter.maskBits = 0;
@@ -544,7 +667,7 @@ public class GameMode extends ModeController {
 		handhold.setBodyType(BodyDef.BodyType.StaticBody);
 		objects.add(handhold);
 	}
-	
+
 	/** 
 	 * Adds blocks to the level based on JSON block description
 	 * 
@@ -653,8 +776,15 @@ public class GameMode extends ModeController {
 		inx = input.getHorizontalL();
 		iny = input.getVerticalL();
 
+		if (checkIfReachedCheckpoint()){
+			lastReachedCheckpoint ++;
+			System.out.println("checkpoint detection");
+		}
+		if (checkIfDied()) {
+			listener.exitScreen(this, DIED);
 
-		upsideDown = character.parts.get(HEAD).getPosition().y - character.parts.get(CHEST).getPosition().y <= 0;
+		}
+				upsideDown = character.parts.get(HEAD).getPosition().y - character.parts.get(CHEST).getPosition().y <= 0;
 
 		nextToPress = input.getOrderPressed();
 		if(input.didSelect()) tutorialToggle = !tutorialToggle;
@@ -736,6 +866,18 @@ public class GameMode extends ModeController {
 		if (timestep == 0) cposYAtTime0 = character.parts.get(HEAD).getY();
 
 		timestep += 1;
+
+	}
+
+	private boolean checkIfDied() {
+		return character.parts.get(HEAD).getY() < 0;
+
+	}
+
+	private boolean checkIfReachedCheckpoint() {
+		if (lastReachedCheckpoint == checkpoints.size - 1) return false;
+		float nextCheckpoint = checkpoints.get(lastReachedCheckpoint + 1);
+		return (character.parts.get(CHEST).getY()> nextCheckpoint);
 	}
 
 	// ************************************START MISCELLANEOUS*********************************************** //
@@ -1195,8 +1337,15 @@ public class GameMode extends ModeController {
 
 		if (currLevel == LEVEL_TUTORIAL)
 		canvas.draw(tutorialOverlay, Color.WHITE, canvas.getWidth()/4, canvas.getHeight()/8, canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
+		int i = 0;
+
+		while (i <= lastReachedCheckpoint){
+
+			canvas.draw(RUSSIAN_FLAG, Color.WHITE, canvas.getWidth()/4,checkpoints.get(i)*scale.y - canvas.getHeight()/2, canvas.getWidth()/2, canvas.getHeight());
 
 
+			i++;
+		}
 
 
 		canvas.end();

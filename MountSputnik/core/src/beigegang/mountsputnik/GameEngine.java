@@ -36,13 +36,15 @@ public class GameEngine extends Game implements ScreenListener {
 	@Override
 	public void create() {
 		canvas = new GameCanvas();
-		controllers = new ModeController[4];
+		controllers = new ModeController[5];
 		controllers[LOADING_SCREEN] = new LoadingMode(manager);
 		controllers[MENU_SCREEN] = new MenuMode();
 		controllers[GAME_SCREEN] = new GameMode();
 		controllers[PAUSE_SCREEN] = new PauseMode();
+		controllers[DEAD_SCREEN] = new DeadMode();
 		SoundController.PreLoadContent(manager);
 		for(int ii = 1; ii < controllers.length; ii++) {
+			System.out.println(controllers[ii]);
 			controllers[ii].preLoadContent(manager);
 		}
 		controllers[LOADING_SCREEN].setCanvas(canvas);
@@ -106,7 +108,11 @@ public class GameEngine extends Game implements ScreenListener {
 		} else if (exitCode == EXIT_MENU) {
 			controllers[MENU_SCREEN].reset();
 			setScreen(controllers[MENU_SCREEN]);
-		} else if (exitCode == EXIT_GAME_RESTART_LEVEL) {
+		}else if (exitCode == DIED) {
+			controllers[DEAD_SCREEN].reset();
+			setScreen(controllers[DEAD_SCREEN]);
+		}
+		else if (exitCode == EXIT_GAME_RESTART_LEVEL) {
 			controllers[GAME_SCREEN].reset();
 			setScreen(controllers[GAME_SCREEN]);
 		} else if (exitCode == EXIT_GAME_NEXT_LEVEL) {
@@ -137,6 +143,9 @@ public class GameEngine extends Game implements ScreenListener {
 		else if (exitCode == EXIT_QUIT) {
 			// We quit the main application
 			Gdx.app.exit();
+		}else if (exitCode == EXIT_GAME_RESTART_LAST_CHECKPOINT){
+			((GameMode) controllers[GAME_SCREEN]).restartLastCheckpoint();
+			setScreen(controllers[GAME_SCREEN]);
 		}
 	}
 

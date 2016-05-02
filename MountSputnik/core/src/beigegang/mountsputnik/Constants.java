@@ -10,6 +10,7 @@ public final class Constants {
 	public static final int MENU_SCREEN = 1;
 	public static final int GAME_SCREEN = 2;
 	public static final int PAUSE_SCREEN = 3;
+	public static final int DEAD_SCREEN = 4;
 
 	/** Exit codes */
 	public static final int EXIT_GAME_RESTART_LEVEL = 0;
@@ -20,6 +21,8 @@ public final class Constants {
 	public static final int EXIT_QUIT = 5;
 	public static final int EXIT_LEVEL_SELECT = 6;
 	public static final int EXIT_SETTINGS = 7;
+	public static final int EXIT_GAME_RESTART_LAST_CHECKPOINT = 8;
+	public static final int DIED = 9;
 
 	/**Level codes*/
 	public static final int NUM_LEVELS = 7;

@@ -15,7 +15,7 @@ public class PauseMode extends ModeController {
 	protected AssetState assetState = AssetState.EMPTY;
 
 	private static final String FOREGROUND_FILE = "Menu/PauseMenu/Foreground.png";
-	private static final String MENU_OPTION_FILES[] = {"Menu/PauseMenu/Resume.png","Menu/PauseMenu/Restart.png","Menu/PauseMenu/Menu.png","Menu/PauseMenu/Quit.png"};
+	private static final String MENU_OPTION_FILES[] = {"Menu/PauseMenu/Resume.png","Menu/PauseMenu/RestartLastCheckpoint.png", "Menu/PauseMenu/Restart.png","Menu/PauseMenu/Menu.png","Menu/PauseMenu/Quit.png"};
 
 	/**
 	 * Texture asset for files used, parts, etc.
@@ -24,7 +24,7 @@ public class PauseMode extends ModeController {
 	private static TextureRegion foreground;
 	private static TextureRegion[] menuOptions = new TextureRegion[MENU_OPTION_FILES.length];
 
-	private static int exitCodes[] ={EXIT_GAME_RESUME_LEVEL,EXIT_GAME_RESTART_LEVEL,EXIT_MENU,EXIT_QUIT};
+	private static int exitCodes[] ={EXIT_GAME_RESUME_LEVEL,EXIT_GAME_RESTART_LAST_CHECKPOINT,EXIT_GAME_RESTART_LEVEL,EXIT_MENU,EXIT_QUIT};
 
 	private AssetManager assetManager;
 
@@ -94,6 +94,7 @@ public class PauseMode extends ModeController {
 	}
 
 	public void draw() {
+
 		canvas.clear();
 
 		float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
@@ -113,7 +114,7 @@ public class PauseMode extends ModeController {
 		canvas.draw(foreground, Color.WHITE, 0, y,canvas.getWidth(),canvas.getHeight());
 		canvas.end();
 		canvas.begin();
-		float drawY = canvas.getHeight() / 2 + (MENU_ITEM_HEIGHT * menuOptions.length / 2) + y;
+		float drawY = canvas.getHeight() * 5f/11f + (MENU_ITEM_HEIGHT * menuOptions.length / 2) + y;
 		for (int i = 0; i < menuOptions.length; i++){
 			if (i == currSelection){
 				canvas.draw(menuOptions[i], Color.TEAL, menuOptions[i].getRegionWidth() / 2,
