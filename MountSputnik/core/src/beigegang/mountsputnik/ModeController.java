@@ -331,7 +331,7 @@ public abstract class ModeController implements Screen {
 	 */
 	public boolean preUpdate(float dt) {
 		InputController input = InputController.getInstance();
-		input.readInput(bounds, scale);
+		input.readInput();
 		if (listener == null) {
 			return true;
 		}
