@@ -177,4 +177,7 @@ public final class Constants {
 	public static short PART_BITS = 8;
 	public static short OBSTACLE_BITS = 4;
 	public static short HANDHOLD_BITS = 0;
+	/** amount of time (in 1/60 seconds) to put the warning up for an obstacle before it spawns.
+	 * currently at 3 seconds */
+	public static int TIME_TO_WARN = 180;
 }

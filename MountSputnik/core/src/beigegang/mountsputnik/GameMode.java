@@ -319,10 +319,13 @@ public class GameMode extends ModeController {
 		float center;
 		float maxHeight;
 		ObstacleModel o;
-		public warningsClass(float center, float maxHeightToDisplay,ObstacleModel ob){
+		ObstacleZone oz;
+		public warningsClass(float center, float maxHeightToDisplay,ObstacleModel ob, ObstacleZone oe){
 			this.center = center;
 			this.maxHeight = Math.min (maxLevelHeight,maxHeightToDisplay);
-			o=ob;
+			oz = oe;
+			o = ob;
+
 		}
 	}
 
@@ -330,6 +333,7 @@ public class GameMode extends ModeController {
 	private RisingObstacle risingObstacle = null;
 	private ObstacleModel obstacle;
 	private Array<ObstacleZone> queuedObstacles = new Array<ObstacleZone>();
+	private Array<warningsClass> queuedObstacleWarnings = new Array<warningsClass>();
 	/** all obstacle zones in level */
 	private Array<ObstacleZone> obstacles = new Array<ObstacleZone>();
 	/** Current obstacle warnings to display */
@@ -458,7 +462,7 @@ public class GameMode extends ModeController {
 		while(counter < checkpointLevelBlocks.size){
 			//TODO: account for difficulty
 			int blockNumber = checkpointLevelBlocks.get(counter);
-//			blockNumber = 7;
+//			blockNumber = 14;
 //			while(used.contains(blockNumber, true)&&!levelName.equals("tutorial"))
 //				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			used.add(blockNumber);
@@ -567,7 +571,7 @@ public class GameMode extends ModeController {
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
-//			blockNumber = 7;
+			blockNumber = 14;
 			while(used.contains(blockNumber, true)&&!levelName.equals("tutorial"))
 				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			used.add(blockNumber);
@@ -1025,6 +1029,7 @@ public class GameMode extends ModeController {
 
 //
 		}
+		seeIfTimeToSpawnWarning();
 		destroyObstacleWarnings();
 	}
 
@@ -1032,7 +1037,8 @@ public class GameMode extends ModeController {
 		float viewHeight = (canvas.getCamera().position.y + canvas.getHeight()/2) / scale.y;
 
 		for (warningsClass w:obstacleWarnings){
-			if (viewHeight >= w.maxHeight || viewHeight >= w.o.getY()){
+
+			if ( (viewHeight >= w.maxHeight || viewHeight >= w.o.getY())){
 				obstacleWarnings.removeValue(w,false);
 			}
 		}
@@ -1060,9 +1066,21 @@ public class GameMode extends ModeController {
 
 	private void makeObstacleWarning(ObstacleZone oz) {
 
-		obstacleWarnings.add(new warningsClass(
-				oz.getObstX() + oz.getObstacle().width/2f,oz.getBounds().y,oz.getObstacle()));
+		queuedObstacleWarnings.add(new warningsClass(
+				oz.getObstX() + oz.getObstacle().width/2f,oz.getBounds().y,oz.getObstacle(),oz));
+		seeIfTimeToSpawnWarning();
+//		obstacleWarnings.add(new warningsClass(
+//				oz.getObstX() + oz.getObstacle().width/2f,oz.getBounds().y,oz.getObstacle(),oz));
 
+	}
+
+	private void seeIfTimeToSpawnWarning() {
+		for (warningsClass wc:queuedObstacleWarnings){
+			if (wc.oz.getSpawnFrequency() - wc.oz.ticksSinceLastSpawn < TIME_TO_WARN){
+				obstacleWarnings.add(wc);
+				queuedObstacleWarnings.removeValue(wc,false);
+			}
+		}
 	}
 // ************************************END OBSTACLES*********************************************** //
 
@@ -1340,10 +1358,7 @@ public class GameMode extends ModeController {
 		int i = 0;
 
 		while (i <= lastReachedCheckpoint){
-
 			canvas.draw(RUSSIAN_FLAG, Color.WHITE, canvas.getWidth()/4,checkpoints.get(i)*scale.y - canvas.getHeight()/2, canvas.getWidth()/2, canvas.getHeight());
-
-
 			i++;
 		}
 
