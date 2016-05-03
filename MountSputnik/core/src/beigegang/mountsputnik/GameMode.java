@@ -1336,6 +1336,8 @@ public class GameMode extends ModeController {
 //			canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 
 		}
+		
+		
 		canvas.draw(fatigueTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 
 		if (currLevel == LEVEL_TUTORIAL)

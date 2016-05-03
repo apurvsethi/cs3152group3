@@ -296,6 +296,7 @@ public class CharacterModel {
 	 * @param exertion Current force being exerted by character
 	 */
 	public void updateEnergy(float gainModifier, float lossModifier, float exertion, boolean rotationGain){
+		if(gainModifier == 0) return;
 		int b = rotationGain ? 1 : 0;
 		float angle = parts.get(CHEST).getAngle();
 		float chesty = parts.get(CHEST).getPosition().y;
