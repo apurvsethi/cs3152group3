@@ -326,6 +326,7 @@ public class GameMode extends ModeController {
 		}
 	}
 
+	private MovementController movementController;
 	private ObstacleZone obstacleZone;
 	private RisingObstacle risingObstacle = null;
 	private ObstacleModel obstacle;
@@ -388,7 +389,11 @@ public class GameMode extends ModeController {
 		failed = false;
 		assetState = AssetState.LOADING;
 		loadContent(assetManager);
-		
+
+		if (movementController != null) {
+			movementController.dispose();
+			movementController = null;
+		}
 		for (GameObject obj : objects) {
 			obj.deactivatePhysics(world);
 		}
@@ -507,7 +512,7 @@ public class GameMode extends ModeController {
 		objects.add(character.parts.get(HIPS));
 		objects.add(character.parts.get(CHEST));
 
-		Movement.setCharacter(character);
+		movementController = new MovementController(character);
 		makeHandholdsToGripAtStart();
 
 	}
@@ -619,7 +624,7 @@ public class GameMode extends ModeController {
 		objects.add(character.parts.get(HIPS));
 		objects.add(character.parts.get(CHEST));
 		
-		Movement.setCharacter(character);
+		movementController = new MovementController(character);
 
 	}
 
@@ -791,11 +796,11 @@ public class GameMode extends ModeController {
 		nextToPress = input.getOrderPressed();
 		if(input.didSelect()) tutorialToggle = !tutorialToggle;
 
-		Movement.makeHookedJointsMovable(nextToPress);
+		movementController.makeHookedJointsMovable(nextToPress);
 
 		if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
 
-		Movement.resetLimbSpeedsTo0();
+		movementController.resetLimbSpeedsTo0();
 		if (nextToPress.size > 0) {
 			for (int i : nextToPress) {
 				((ExtremityModel) (character.parts.get(i))).ungrip();
@@ -803,9 +808,9 @@ public class GameMode extends ModeController {
 			}
 			float v = input.getVerticalL();
 			float h = input.getHorizontalL();
-			Movement.findAndApplyForces(nextToPress.get(0),v,h);
+			movementController.findAndApplyForces(nextToPress.get(0),v,h);
 		}
-		Movement.applyTorsoForceIfApplicable();
+		movementController.applyTorsoForceIfApplicable(input.getHorizontalR(), input.getVerticalR());
 		//bounding velocities
 		boundBodyVelocities();
 		HandholdModel[] glowingHandholds = glowHandholds();
