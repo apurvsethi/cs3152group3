@@ -329,6 +329,7 @@ public class GameMode extends ModeController {
 		}
 	}
 
+	private MovementController movementController;
 	private ObstacleZone obstacleZone;
 	private RisingObstacle risingObstacle = null;
 	private ObstacleModel obstacle;
@@ -392,7 +393,11 @@ public class GameMode extends ModeController {
 		failed = false;
 		assetState = AssetState.LOADING;
 		loadContent(assetManager);
-		
+
+		if (movementController != null) {
+			movementController.dispose();
+			movementController = null;
+		}
 		for (GameObject obj : objects) {
 			obj.deactivatePhysics(world);
 		}
@@ -511,7 +516,7 @@ public class GameMode extends ModeController {
 		objects.add(character.parts.get(HIPS));
 		objects.add(character.parts.get(CHEST));
 
-		Movement.setCharacter(character);
+		movementController = new MovementController(character);
 		makeHandholdsToGripAtStart();
 
 	}
@@ -602,7 +607,9 @@ public class GameMode extends ModeController {
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale);
 			//arms
 		checkpoints.insert(0,character.parts.get(CHEST).getY());
-
+		
+		makeHandholdsToGripAtStart();
+		
 		objects.add(character.parts.get(ARM_LEFT));
 		objects.add(character.parts.get(ARM_RIGHT));
 		objects.add(character.parts.get(FOREARM_LEFT));
@@ -620,9 +627,8 @@ public class GameMode extends ModeController {
 		objects.add(character.parts.get(HEAD));
 		objects.add(character.parts.get(HIPS));
 		objects.add(character.parts.get(CHEST));
-
-		Movement.setCharacter(character);
-		makeHandholdsToGripAtStart();
+		
+		movementController = new MovementController(character);
 
 	}
 
@@ -704,6 +710,7 @@ public class GameMode extends ModeController {
 					ty = handhold.getEndPoint().y - handhold.getStartPoint().y,
 					dist = (float) Math.sqrt(tx*tx+ty*ty);
 				handhold.setLinearVelocity(new Vector2((tx/dist)*speed, (ty/dist)*speed));
+				handhold.setVelocity(speed);
 				handhold.setPosition((handhold.getStartPoint().x+handhold.getEndPoint().x)/2,
 						(handhold.getStartPoint().y+handhold.getEndPoint().y)/2);
 			}
@@ -793,11 +800,11 @@ public class GameMode extends ModeController {
 		nextToPress = input.getOrderPressed();
 		if(input.didSelect()) tutorialToggle = !tutorialToggle;
 
-		Movement.makeHookedJointsMovable(nextToPress);
+		movementController.makeHookedJointsMovable(nextToPress);
 
 		if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
 
-		Movement.resetLimbSpeedsTo0();
+		movementController.resetLimbSpeedsTo0();
 		if (nextToPress.size > 0) {
 			for (int i : nextToPress) {
 				((ExtremityModel) (character.parts.get(i))).ungrip();
@@ -805,9 +812,9 @@ public class GameMode extends ModeController {
 			}
 			float v = input.getVerticalL();
 			float h = input.getHorizontalL();
-			Movement.findAndApplyForces(nextToPress.get(0),v,h);
+			movementController.findAndApplyForces(nextToPress.get(0),v,h);
 		}
-		Movement.applyTorsoForceIfApplicable();
+		movementController.applyTorsoForceIfApplicable(input.getHorizontalR(), input.getVerticalR());
 		//bounding velocities
 		boundBodyVelocities();
 		HandholdModel[] glowingHandholds = glowHandholds();
@@ -897,6 +904,14 @@ public class GameMode extends ModeController {
 				}
 				else{
 					HandholdModel h = (HandholdModel) extremity.getJoint().getBodyB().getFixtureList().get(0).getUserData();
+					if((e == HAND_LEFT || e == HAND_RIGHT) 
+							 && h.getVelocity() != 0 &&
+							 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > ARM_UNGRIP_LENGTH)
+						 ungrip(extremity);
+				    else if((e == FOOT_LEFT || e == FOOT_RIGHT) &&
+				    		  h.getVelocity() != 0 &&
+							 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > LEG_UNGRIP_LENGTH)
+						 ungrip(extremity);
 					if(extremity.getGripTime() > h.getSlip()*60 && h.getSlip() > 0){
 						ungrip(extremity);
 					}
@@ -907,13 +922,6 @@ public class GameMode extends ModeController {
 						h.deactivatePhysics(world);
 					}
 				}
-
-				 if((e == HAND_LEFT || e == HAND_RIGHT) &&
-						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > ARM_UNGRIP_LENGTH)
-					 ungrip(extremity);
-				 else if((e == FOOT_LEFT || e == FOOT_RIGHT) &&
-						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > LEG_UNGRIP_LENGTH)
-					 ungrip(extremity);
 			}
 
 		}
@@ -1351,6 +1359,8 @@ public class GameMode extends ModeController {
 //			canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 
 		}
+		
+		
 		canvas.draw(fatigueTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 
 		if (currLevel == LEVEL_TUTORIAL)

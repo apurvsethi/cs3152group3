@@ -1,0 +1,17 @@
+{    
+	"difficulty": "hard",
+	"height": 300,
+	"uniqueBlocks": 0,
+	"generalFillerSize": 0,
+	"fillerBlocks": 2,
+    "oxygen": 0,
+    "gravity": 0,
+    "background": "", 
+    "handholdTextures" : 2, //The number of different handhold textures available
+	"lava": {
+		"present": false,
+		"texture": "testlavatexture.png",
+		"speed": .005
+	}
+}
+
