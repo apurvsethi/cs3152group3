@@ -598,7 +598,9 @@ public class GameMode extends ModeController {
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale);
 			//arms
 		checkpoints.insert(0,character.parts.get(CHEST).getY());
-
+		
+		makeHandholdsToGripAtStart();
+		
 		objects.add(character.parts.get(ARM_LEFT));
 		objects.add(character.parts.get(ARM_RIGHT));
 		objects.add(character.parts.get(FOREARM_LEFT));
@@ -616,9 +618,8 @@ public class GameMode extends ModeController {
 		objects.add(character.parts.get(HEAD));
 		objects.add(character.parts.get(HIPS));
 		objects.add(character.parts.get(CHEST));
-
+		
 		Movement.setCharacter(character);
-		makeHandholdsToGripAtStart();
 
 	}
 
@@ -700,6 +701,7 @@ public class GameMode extends ModeController {
 					ty = handhold.getEndPoint().y - handhold.getStartPoint().y,
 					dist = (float) Math.sqrt(tx*tx+ty*ty);
 				handhold.setLinearVelocity(new Vector2((tx/dist)*speed, (ty/dist)*speed));
+				handhold.setVelocity(speed);
 				handhold.setPosition((handhold.getStartPoint().x+handhold.getEndPoint().x)/2,
 						(handhold.getStartPoint().y+handhold.getEndPoint().y)/2);
 			}
@@ -893,6 +895,14 @@ public class GameMode extends ModeController {
 				}
 				else{
 					HandholdModel h = (HandholdModel) extremity.getJoint().getBodyB().getFixtureList().get(0).getUserData();
+					if((e == HAND_LEFT || e == HAND_RIGHT) 
+							 && h.getVelocity() != 0 &&
+							 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > ARM_UNGRIP_LENGTH)
+						 ungrip(extremity);
+				    else if((e == FOOT_LEFT || e == FOOT_RIGHT) &&
+				    		  h.getVelocity() != 0 &&
+							 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > LEG_UNGRIP_LENGTH)
+						 ungrip(extremity);
 					if(extremity.getGripTime() > h.getSlip()*60 && h.getSlip() > 0){
 						ungrip(extremity);
 					}
@@ -903,13 +913,6 @@ public class GameMode extends ModeController {
 						h.deactivatePhysics(world);
 					}
 				}
-
-				 if((e == HAND_LEFT || e == HAND_RIGHT) &&
-						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > ARM_UNGRIP_LENGTH)
-					 ungrip(extremity);
-				 else if((e == FOOT_LEFT || e == FOOT_RIGHT) &&
-						 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > LEG_UNGRIP_LENGTH)
-					 ungrip(extremity);
 			}
 
 		}
