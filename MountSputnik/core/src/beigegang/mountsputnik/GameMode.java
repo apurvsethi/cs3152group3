@@ -20,9 +20,7 @@ import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.utils.*;
-import com.oracle.javafx.jmx.json.JSONWriter;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -44,6 +42,7 @@ public class GameMode extends ModeController {
 	 * used for tracking the game timestep - used to snap limbs to handholds on original timestep
 	 */
 	private static int timestep = 0;
+	private static int checkpointTimestep = 0;
 /**	both are updated every timestep with horizontal and vertical input left joystick from player */
 	private static float inx = 0f;
 	private static float iny = 0f;
@@ -51,6 +50,8 @@ public class GameMode extends ModeController {
 
 	private static float rinx = 0f;
 	private static float riny = 0f;
+	/** int used in every single loop in the program */
+	private static int counterInt;
 	/**
 	 * Strings for files used, string[] for parts, etc.
 	 */
@@ -190,17 +191,17 @@ public class GameMode extends ModeController {
 			manager.load(name,Texture.class);
 			assets.add(name);
 		}
-		for (int i = 0; i<ENERGY_TEXTURES.length; i++){
-			String name = "Energy/e" + i + ".png";
+		for (counterInt = 0; counterInt<ENERGY_TEXTURES.length; counterInt++){
+			String name = "Energy/e" + counterInt + ".png";
 			manager.load(name, Texture.class);
 			assets.add(name);
-			ENERGY_TEXTURES[i] = name;
+			ENERGY_TEXTURES[counterInt] = name;
 		}
-		for (int i = 1; i<=PROGRESS_TEXTURES.length; i++){
-			String name = "Progress/p" + i + ".png";
+		for (counterInt = 1; counterInt<=PROGRESS_TEXTURES.length; counterInt++){
+			String name = "Progress/p" + counterInt + ".png";
 			manager.load(name, Texture.class);
 			assets.add(name);
-			PROGRESS_TEXTURES[i-1] = name;
+			PROGRESS_TEXTURES[counterInt-1] = name;
 		}
 		manager.load(UI_FILE, Texture.class);
 		assets.add(UI_FILE);
@@ -213,9 +214,9 @@ public class GameMode extends ModeController {
 		assets.add(GLOW_FILE);
 
 		for (Entry<String, Integer> entry : NUM_HANDHOLDS.entrySet()){
-			for(int i = 1; i <= entry.getValue(); i++){
-				manager.load("assets/"+entry.getKey()+"/Handhold"+i+".png",Texture.class);
-				assets.add("assets/"+entry.getKey()+"/Handhold"+i+".png");
+			for(counterInt = 1; counterInt <= entry.getValue(); counterInt++){
+				manager.load("assets/"+entry.getKey()+"/Handhold"+counterInt+".png",Texture.class);
+				assets.add("assets/"+entry.getKey()+"/Handhold"+counterInt+".png");
 			}
 		}
 		for (String PART_TEXTURE : PART_TEXTURES) {
@@ -269,29 +270,29 @@ public class GameMode extends ModeController {
 		staticObstacle = createTexture(manager, "assets/"+levelName+"/StaticObstacle.png", false); 
 		fallingObstacle = createTexture(manager, "assets/"+levelName+"/FallingRock.png", false); 
 
-		for (int i = 0;  i < LEVEL_LABEL_FILES.length; i++){
-			levelLabels[i] = createTexture(manager, LEVEL_LABEL_FILES[i], false);
+		for (counterInt = 0;  counterInt < LEVEL_LABEL_FILES.length; counterInt++){
+			levelLabels[counterInt] = createTexture(manager, LEVEL_LABEL_FILES[counterInt], false);
 
 		}
 
-		for (int i = 0; i < PART_TEXTURES.length; i++) {
-			partTextures[i] = createTexture(manager, PART_TEXTURES[i], false);
+		for (counterInt = 0; counterInt < PART_TEXTURES.length; counterInt++) {
+			partTextures[counterInt] = createTexture(manager, PART_TEXTURES[counterInt], false);
 		}
 		
-		for (int i = 0; i < TUTORIAL_TEXTURES.length; i++) {
-			tutorialTextures[i] = createTexture(manager, TUTORIAL_TEXTURES[i], false);
+		for (counterInt = 0; counterInt < TUTORIAL_TEXTURES.length; counterInt++) {
+			tutorialTextures[counterInt] = createTexture(manager, TUTORIAL_TEXTURES[counterInt], false);
 		}
 		
 		handholdTextures = new TextureRegion[NUM_HANDHOLDS.get(levelName)];
-		for (int i = 1; i <= NUM_HANDHOLDS.get(levelName); i++) {
-			handholdTextures[i-1] = createTexture(manager, "assets/"+levelName+"/Handhold"+i+".png", false);
+		for (counterInt = 1; counterInt <= NUM_HANDHOLDS.get(levelName); counterInt++) {
+			handholdTextures[counterInt-1] = createTexture(manager, "assets/"+levelName+"/Handhold"+counterInt+".png", false);
 		}
 
-		for (int i = 0; i < ENERGY_TEXTURES.length; i++) {
-			energyTextures[i] = createTexture(manager, ENERGY_TEXTURES[i], false);
+		for (counterInt = 0; counterInt < ENERGY_TEXTURES.length; counterInt++) {
+			energyTextures[counterInt] = createTexture(manager, ENERGY_TEXTURES[counterInt], false);
 		}
-		for (int i = 0; i < PROGRESS_TEXTURES.length; i++) {
-			progressTextures[i] = createTexture(manager, PROGRESS_TEXTURES[i], false);
+		for (counterInt = 0; counterInt < PROGRESS_TEXTURES.length; counterInt++) {
+			progressTextures[counterInt] = createTexture(manager, PROGRESS_TEXTURES[counterInt], false);
 		}
 		blackoutTexture = createTexture(manager,BLACKOUT,false);
 		fatigueTexture = createTexture(manager,FATIGUE_BAR,false);
@@ -363,7 +364,9 @@ public class GameMode extends ModeController {
 	private Array<Integer> animationJustReleased = new Array<Integer>();
 	private FileWriter animationToFile;
 	private String fullJson = "{";
-
+	private JsonValue jsonValue;
+	private InputController input;
+	private Vector2 vector;
 	/**
 	 * Character of game
 	 */
@@ -393,12 +396,15 @@ public class GameMode extends ModeController {
 	/** level-related values*/
 	private Array<Float> checkpoints = new Array();
 	private Vector2 gravity;
-	float remainingHeight;
-	float currentHeight;
+	float remainingHeight = 0f;
+	float currentHeight = 0f;
 	int diffBlocks;
 	int filler;
 	int fillerSize;
 	Array<Integer> used = new Array<Integer>();
+	Array<Integer> intArray = new Array<Integer>();
+	int[] ints;
+
 
 	public GameMode() {
 		super(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_GRAVITY);
@@ -420,22 +426,23 @@ public class GameMode extends ModeController {
 	}
 	public void writeNextStepJsonForAnimation(float lx, float ly, float rx, float ry, Array<Integer> pressed){
 		String e = "";
-		for (int i: pressed){
-			e = e + " " + i + ",";
+		for (counterInt = 0; counterInt <pressed.size; counterInt++){
+			e = e + " " + pressed.get(counterInt) + ",";
 		}
 		String s = "\"" + animationTimestep + "\":[" + lx + "," + ly + "," + rx + "," + ry + ",[" + e + "],";
-		InputController in = InputController.getInstance();
+		input = InputController.getInstance();
 		String released = "[";
-		released += (in.releasedLeftArm()) ? "1, ":"0, ";
-		released += (in.releasedRightArm()) ? "1, ":"0, ";
-		released += (in.releasedLeftLeg()) ? "1, ":"0, ";
-		released += (in.releasedRightLeg()) ? "1, ":"0 ,";
+		released += (input.releasedLeftArm()) ? "1, ":"0, ";
+		released += (input.releasedRightArm()) ? "1, ":"0, ";
+		released += (input.releasedLeftLeg()) ? "1, ":"0, ";
+		released += (input.releasedRightLeg()) ? "1, ":"0 ,";
 
 		released += "]]";
 
 		fullJson += s;
 		fullJson += released;
 		fullJson += ",";
+		animationTimestep ++;
 	}
 	public void writeJsonToFile(){
 		fullJson += "}";
@@ -455,26 +462,29 @@ public class GameMode extends ModeController {
 		JsonAssetManager.getInstance().allocateDirectory();
 	}
 	public void getAnimationInformation(){
+		if (animationFormat == null) setAnimationReader();
 		//0 will be animationTimestep in the future.
-		JsonValue info = animationFormat.get(animationTimestep);
-		JsonValue pressed = info.get(4);
-		JsonValue released = info.get(5);
-		animationLX = info.get(0).asFloat();
-		animationLY = info.get(1).asFloat();
-		animationRX = info.get(2).asFloat();
-		animationRY = info.get(3).asFloat();
+		jsonValue = animationFormat.get(animationTimestep);
 
-		int[] buttonsPressed = pressed.asIntArray();
-		int[] buttonsReleased = released.asIntArray();
+		animationLX = jsonValue.get(0).asFloat();
+		animationLY = jsonValue.get(1).asFloat();
+		animationRX = jsonValue.get(2).asFloat();
+		animationRY = jsonValue.get(3).asFloat();
+
 		animationNextToPress.clear();
 		animationJustReleased.clear();
 
-		for (int i: buttonsPressed){
-			animationNextToPress.add(i);
+		ints = jsonValue.get(4).asIntArray();
+		for (counterInt = 0;counterInt<ints.length; counterInt++){
+			animationNextToPress.add(ints[counterInt]);
 		}
-		for (int i: buttonsReleased){
-			animationJustReleased.add(i);
+
+		ints = jsonValue.get(5).asIntArray();
+		for (counterInt = 0;counterInt<ints.length; counterInt++){
+			animationJustReleased.add(ints[counterInt]);
 		}
+		animationTimestep++;
+
 	}
 
 	@Override
@@ -511,6 +521,7 @@ public class GameMode extends ModeController {
 		addQueue.clear();
 		world.dispose();
 		timestep = 0;
+		animationTimestep = 0;
 		progressSprite.setBounds(0,0,canvas.getWidth()/4,canvas.getHeight());
 		lowEnergySprite.setBounds(0, 0, canvas.getWidth() / 4, canvas.getHeight());
 		queuedObstacles.clear();
@@ -533,12 +544,12 @@ public class GameMode extends ModeController {
 //			blockNumber = 14;
 			used.add(blockNumber);
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json");
-			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
-			addChunk(levelPiece, currentHeight, levelName);
-			currentHeight += levelPiece.getFloat("size");
+			jsonValue = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
+			addChunk(jsonValue, currentHeight, levelName);
+			currentHeight += jsonValue.getFloat("size");
 			checkpoints.add(currentHeight);
 			//filler stuff not currently used.
-//			for(int i = 0; i < filler; i++){
+//			for(counterInt = 0; counterInt < filler; counterInt++){
 //				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
 //				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/general/block"+blockNumber+".json"));
 //				levelBlocks.add("Levels/general/block"+blockNumber+".json");
@@ -549,9 +560,9 @@ public class GameMode extends ModeController {
 		}
 		System.out.println(levelBlocks);
 
-		JsonValue lava = levelFormat.get("lava");
-		if(lava.getBoolean("present")){
-			risingObstacle = new RisingObstacle(lavaTexture, lava.getFloat("speed"));
+		jsonValue = levelFormat.get("lava");
+		if(jsonValue.getBoolean("present")){
+			risingObstacle = new RisingObstacle(lavaTexture, jsonValue.getFloat("speed"));
 		}
 
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, Math.max(DEFAULT_HEIGHT/2, checkpoints.get(lastReachedCheckpoint)), scale);
@@ -607,14 +618,14 @@ public class GameMode extends ModeController {
 			while(used.contains(blockNumber, true)&&!levelName.equals("tutorial"))
 				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			used.add(blockNumber);
-			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json"); 
-			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
-			checkpointLevelJsons.add(levelPiece);
-			addChunk(levelPiece, currentHeight, levelName);
-			currentHeight += levelPiece.getFloat("size");
+			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json");
+			jsonValue = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
+			checkpointLevelJsons.add(jsonValue);
+			addChunk(jsonValue, currentHeight, levelName);
+			currentHeight += jsonValue.getFloat("size");
 			checkpoints.add(currentHeight);
 			//filler stuff not currently used.
-//			for(int i = 0; i < filler; i++){
+//			for(counterInt = 0; counterInt < filler; counterInt++){
 //				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
 //				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/general/block"+blockNumber+".json"));
 //				levelBlocks.add("Levels/general/block"+blockNumber+".json");
@@ -626,9 +637,9 @@ public class GameMode extends ModeController {
 		System.out.println(levelBlocks);
 //		System.out.println(checkpointLevelBlocks);
 
-		JsonValue lava = levelFormat.get("lava");
-		if(lava.getBoolean("present")){
-			risingObstacle = new RisingObstacle(lavaTexture, lava.getFloat("speed"));
+		jsonValue = levelFormat.get("lava");
+		if(jsonValue.getBoolean("present")){
+			risingObstacle = new RisingObstacle(lavaTexture, jsonValue.getFloat("speed"));
 		}
 
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale);
@@ -786,7 +797,6 @@ public class GameMode extends ModeController {
 			obstacles.add(obstacleZone);
 			obstacleDesc = obstacleDesc.next();
 		}
-		
 
 
 		JsonValue staticDesc;
@@ -831,8 +841,8 @@ public class GameMode extends ModeController {
 	 * @author Jacob, Daniel
 	 */
 	public void update(float dt) {
-		InputController input = InputController.getInstance();
-		if (input.animationPressed) doingAnimation = true;
+		input = InputController.getInstance();
+		doingAnimation = input.watchAnimation();
 		if (doingAnimation){
 			getAnimationInformation();
 			inx = animationLX;
@@ -854,10 +864,9 @@ public class GameMode extends ModeController {
 			justReleased.add(input.releasedRightLeg() ? 1:0);
 
 		}
+		//don't uncomment createAnimation unless you know what you are doing!!
 //		createAnimation();
-//		watchAnimation();
 
-		animationTimestep ++;
 
 		if (checkIfReachedCheckpoint()){
 			lastReachedCheckpoint ++;
@@ -890,7 +899,7 @@ public class GameMode extends ModeController {
 		boundBodyVelocities();
 		HandholdModel[] glowingHandholds = glowHandholds();
 
-		snapLimbsToHandholds(input,glowingHandholds);
+		snapLimbsToHandholds(glowingHandholds);
 
 		cameraWork();
 		
@@ -916,8 +925,8 @@ public class GameMode extends ModeController {
 		}
 		
 		// TODO: Update energy quantity (fill in these values)
-		Vector2 force = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
-		character.updateEnergy(oxygen, 1, force.len(), true);
+		vector = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
+		character.updateEnergy(oxygen, 1, vector.len(), true);
 
 		if(risingObstacle != null){
 			risingObstacle.setHeight(risingObstacle.getHeight()+risingObstacle.getSpeed());
@@ -939,14 +948,14 @@ public class GameMode extends ModeController {
 				 extremity.setTexture(partTextures[e].getTexture());
 			}
 		}
-		energyLevel = Math.round(Math.abs(character.getEnergy()-100)/10);
+		energyLevel = Math.abs((int)Math.ceil(character.getEnergy()/10f));
 		checkHasCompleted(); 
 		if(complete){
 			//TODO: properly change level
 			changeLevel(currLevel);
 		}
-		if (timestep == 0) cposYAtTime0 = character.parts.get(HEAD).getY();
-
+		if (checkpointTimestep == 0) cposYAtTime0 = character.parts.get(HEAD).getY();
+		checkpointTimestep+=1;
 		timestep += 1;
 
 	}
@@ -1044,8 +1053,8 @@ public class GameMode extends ModeController {
 	private void boundBodyVelocities() {
 		if (isGripping(HAND_LEFT) || isGripping(HAND_RIGHT)|| isGripping(FOOT_LEFT)|| isGripping(FOOT_RIGHT)){
 			for (PartModel p:character.parts){
-				Vector2 vect =  p.getLinearVelocity();
-				p.setLinearVelocity(boundVelocity(vect));
+				vector =  p.getLinearVelocity();
+				p.setLinearVelocity(boundVelocity(vector));
 			}
 		}
 	}
@@ -1203,25 +1212,25 @@ public class GameMode extends ModeController {
 			if (!isGripping(ext)){
 				float thisDampX = DAMPENING_X;
 				float thisDampY = DAMPENING_Y;
-				Vector2 vel = character.parts.get(ext).getLinearVelocity();
+				vector = character.parts.get(ext).getLinearVelocity();
 
-				if (vel.y > 0) {
-					if (vel.y - DAMPENING_Y < 0) thisDampY = vel.y;
-					character.parts.get(ext).setVY(vel.y - thisDampY);
+				if (vector.y > 0) {
+					if (vector.y - DAMPENING_Y < 0) thisDampY = vector.y;
+					character.parts.get(ext).setVY(vector.y - thisDampY);
 				}
-				if (vel.x > 0) {
-					if (vel.x - DAMPENING_X < 0) thisDampX = vel.x;
-					character.parts.get(ext).setVX(vel.x - thisDampX);
+				if (vector.x > 0) {
+					if (vector.x - DAMPENING_X < 0) thisDampX = vector.x;
+					character.parts.get(ext).setVX(vector.x - thisDampX);
 
 				}
 				//if neg both
-				if (vel.y < 0) {
-					if (vel.y + DAMPENING_Y > 0) thisDampY = -1 * vel.y;
-					character.parts.get(ext).setVY(vel.y + thisDampY);
+				if (vector.y < 0) {
+					if (vector.y + DAMPENING_Y > 0) thisDampY = -1 * vector.y;
+					character.parts.get(ext).setVY(vector.y + thisDampY);
 				}
-				if (vel.x < 0) {
-					if (vel.x + DAMPENING_X > 0) thisDampX = -1 * vel.x;
-					character.parts.get(ext).setVX(vel.x + thisDampX);
+				if (vector.x < 0) {
+					if (vector.x + DAMPENING_X > 0) thisDampX = -1 * vector.x;
+					character.parts.get(ext).setVX(vector.x + thisDampX);
 				}
 			}
 		}
@@ -1235,7 +1244,7 @@ public class GameMode extends ModeController {
 	 */
 	private HandholdModel[] glowHandholds() {
 		HandholdModel[] newGlowingHandholds = new HandholdModel[4];
-		for (int i = 0; i<EXTREMITIES.length; i++) {
+		for (counterInt = 0; counterInt<EXTREMITIES.length; counterInt++) {
 			HandholdModel closest = null;
 			double dist;
 			double closestdist = HANDHOLD_SNAP_RADIUS + 1;
@@ -1243,11 +1252,11 @@ public class GameMode extends ModeController {
 			for (GameObject obj : objects) {
 				if (obj.getType() == GameObject.ObjectType.HANDHOLD) {
 					HandholdModel h = (HandholdModel) obj;
-					if (i<1)
+					if (counterInt<1)
 						h.unglow();
 
 					for (Vector2 snapPoint : h.snapPoints) {
-						dist = distanceFrom(EXTREMITIES[i], snapPoint);
+						dist = distanceFrom(EXTREMITIES[counterInt], snapPoint);
 						if (dist<=HANDHOLD_SNAP_RADIUS) {
 							closest = closestdist > dist ? h:closest;
 							closestdist = closestdist > dist ? dist:closestdist;
@@ -1258,7 +1267,7 @@ public class GameMode extends ModeController {
 				}
 			}
 
-			newGlowingHandholds[i] = closest;
+			newGlowingHandholds[counterInt] = closest;
 
 		}
 		for (HandholdModel g : newGlowingHandholds){
@@ -1272,10 +1281,9 @@ public class GameMode extends ModeController {
 	 * snaps any released limbs (limbs player controlled last timestep but no longer does) to closest handhold
 	 * if possible
 	 * @author Jacob
-
-	 * @param input
+	 * @param hs - handholds in game
      */
-	private void snapLimbsToHandholds(InputController input, HandholdModel[] hs) {
+	private void snapLimbsToHandholds(HandholdModel[] hs) {
 
 		if (justReleased.get(0) == 1|| timestep == 0)
 			snapIfPossible(HAND_LEFT, hs);
@@ -1340,12 +1348,12 @@ public class GameMode extends ModeController {
 	*/
 
 	private boolean closeEnough(int limb, Vector2 snapPoint) {
-		Vector2 dist = new Vector2 (character.parts.get(limb).getPosition().sub(snapPoint));
-		return (Math.sqrt(dist.x * dist.x + dist.y * dist.y) <= HANDHOLD_SNAP_RADIUS);
+		vector = new Vector2 (character.parts.get(limb).getPosition().sub(snapPoint));
+		return (Math.sqrt(vector.x * vector.x + vector.y * vector.y) <= HANDHOLD_SNAP_RADIUS);
 	}
 	private double distanceFrom(int limb, Vector2 snapPoint) {
-		Vector2 dist = new Vector2 (character.parts.get(limb).getPosition().sub(snapPoint));
-		return Math.sqrt(dist.x * dist.x + dist.y * dist.y);
+		vector = new Vector2 (character.parts.get(limb).getPosition().sub(snapPoint));
+		return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
 	}
 
 	public PooledList<GameObject> getGameObjects(){
@@ -1360,23 +1368,23 @@ public class GameMode extends ModeController {
 
 	private void drawToggles(){
 		TextureRegion t;
-		InputController input = InputController.getInstance();
+		input = InputController.getInstance();
 
-		Vector2 pos = character.parts.get(HAND_LEFT).getPosition();
+		vector = character.parts.get(HAND_LEFT).getPosition();
 		t = input.didLeftArm() ? tutorialTextures[4] : tutorialTextures[0];
-		canvas.draw(t, Color.WHITE, (pos.x*scale.x)-10, (pos.y*scale.y),50,50);
+		canvas.draw(t, Color.WHITE, (vector.x*scale.x)-10, (vector.y*scale.y),50,50);
 
-		pos = character.parts.get(HAND_RIGHT).getPosition();
+		vector = character.parts.get(HAND_RIGHT).getPosition();
 		t = input.didRightArm() ? tutorialTextures[5] : tutorialTextures[1];
-		canvas.draw(t, Color.WHITE, (pos.x*scale.x)+10, (pos.y*scale.y),50,50);
+		canvas.draw(t, Color.WHITE, (vector.x*scale.x)+10, (vector.y*scale.y),50,50);
 
-		pos = character.parts.get(FOOT_LEFT).getPosition();
+		vector = character.parts.get(FOOT_LEFT).getPosition();
 		t = input.didLeftLeg() ? tutorialTextures[6] : tutorialTextures[2];
-		canvas.draw(t, Color.WHITE, (pos.x*scale.x)-10, (pos.y*scale.y),40,40);
+		canvas.draw(t, Color.WHITE, (vector.x*scale.x)-10, (vector.y*scale.y),40,40);
 
-		pos = character.parts.get(FOOT_RIGHT).getPosition();
+		vector = character.parts.get(FOOT_RIGHT).getPosition();
 		t = input.didRightLeg() ? tutorialTextures[7] : tutorialTextures[3];
-		canvas.draw(t, Color.WHITE, (pos.x*scale.x)+10, (pos.y*scale.y),40,40);
+		canvas.draw(t, Color.WHITE, (vector.x*scale.x)+10, (vector.y*scale.y),40,40);
 	}
 	
 	private void checkHasCompleted(){
@@ -1395,20 +1403,20 @@ public class GameMode extends ModeController {
 	public void draw() {
 		canvas.clear();
 		canvas.begin();
-		Vector2 v = character.parts.get(CHEST).getPosition();
-		Vector2 v2 = character.parts.get(HEAD).getPosition();
+//		Vector2 v = character.parts.get(CHEST).getPosition();
+		vector = character.parts.get(HEAD).getPosition();
 		float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
 		float tileY = y - (y % (canvas.getWidth() / 4));
 		canvas.draw(background, Color.WHITE, canvas.getWidth() * 3 / 4, y, canvas.getWidth() / 4, canvas.getHeight());
 		canvas.draw(midground, Color.WHITE, canvas.getWidth() * 3 / 4, y * MIDGROUND_SCROLL, canvas.getWidth() / 4, canvas.getHeight());
 
-		for (int i = 0; i < 5; i++) {
+		for (counterInt = 0; counterInt < 5; counterInt++) {
 			canvas.draw(tile, Color.WHITE, canvas.getWidth() / 4, tileY, canvas.getWidth() / 4, canvas.getWidth() / 4);
 			canvas.draw(tile, Color.WHITE, canvas.getWidth() / 2, tileY, canvas.getWidth() / 4, canvas.getWidth() / 4);
 			canvas.draw(edge, Color.WHITE, canvas.getWidth() * 3 / 4, tileY, canvas.getWidth() / 16, canvas.getHeight());
 			tileY += canvas.getWidth() / 4;
 		}
-		float a = (v2.y - cposYAtTime0)/(maxHandhold - cposYAtTime0);
+		float a = (vector.y - cposYAtTime0)/(maxHandhold - cposYAtTime0);
 		if (timestep%60 == 0 && character.getEnergy() != 0)
 			progressLevel = Math.min(6,Math.max(0,Math.round(a * 6 - .1f)));
 		canvas.draw(ground, Color.WHITE, canvas.getWidth() / 4, 0, canvas.getWidth() / 2, canvas.getHeight() / 8);
@@ -1458,11 +1466,11 @@ public class GameMode extends ModeController {
 
 		if (currLevel == LEVEL_TUTORIAL)
 		canvas.draw(tutorialOverlay, Color.WHITE, canvas.getWidth()/4, canvas.getHeight()/8, canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
-		int i = 0;
+		counterInt = 0;
 
-		while (i <= lastReachedCheckpoint){
-			canvas.draw(RUSSIAN_FLAG, Color.WHITE, canvas.getWidth()/4,checkpoints.get(i)*scale.y - canvas.getHeight()/2, canvas.getWidth()/2, canvas.getHeight());
-			i++;
+		while (counterInt <= lastReachedCheckpoint){
+			canvas.draw(RUSSIAN_FLAG, Color.WHITE, canvas.getWidth()/4,checkpoints.get(counterInt)*scale.y - canvas.getHeight()/2, canvas.getWidth()/2, canvas.getHeight());
+			counterInt++;
 		}
 
 

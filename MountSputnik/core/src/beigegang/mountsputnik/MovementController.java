@@ -131,7 +131,8 @@ public class MovementController {
         float absoluteAngle = findAbsoluteAngleOfPart(root, shoot);
         float desiredAngle = findAbsoluteAngle(-v, -h);
         boolean posJointSpeedV, posJointSpeedH;
-
+        float speedToRotate = (upperJoint == THIGH_LEFT ||  upperJoint == SHIN_LEFT
+                || upperJoint == THIGH_RIGHT || upperJoint == SHIN_RIGHT) ? SHIN_JOINT_SPEED : FOREARM_JOINT_SPEED;
         posJointSpeedV = absoluteAngle > -180 && absoluteAngle < 0;
         if (v < 0) posJointSpeedV = !posJointSpeedV;
 
@@ -140,16 +141,16 @@ public class MovementController {
 
         if (!isForceDiagonal(v, h)) {
             if (Math.abs(v) > 0.2)
-                setSpeedPart(upperJoint, FOREARM_JOINT_SPEED, posJointSpeedV);
+                setSpeedPart(upperJoint, speedToRotate, posJointSpeedV);
             if (Math.abs(h) > 0.2)
-                setSpeedPart(upperJoint, FOREARM_JOINT_SPEED, posJointSpeedH);
+                setSpeedPart(upperJoint, speedToRotate, posJointSpeedH);
         }
         else if ((v > 0 && absoluteAngle < 0 && desiredAngle > absoluteAngle)
                     || (v > 0 && absoluteAngle >= 0 && desiredAngle < absoluteAngle)
                     || (v <= 0 && absoluteAngle < 0 && desiredAngle <= absoluteAngle)
                     || (v <= 0 && absoluteAngle >= 0 && desiredAngle >= absoluteAngle))
-            setSpeedPart(upperJoint, FOREARM_JOINT_SPEED, posJointSpeedV);
-        else setSpeedPart(upperJoint, FOREARM_JOINT_SPEED, posJointSpeedH);
+            setSpeedPart(upperJoint, speedToRotate, posJointSpeedV);
+        else setSpeedPart(upperJoint, speedToRotate, posJointSpeedH);
     }
 
     private void rotateJoint(float v, float h, int inPart, int midPart,

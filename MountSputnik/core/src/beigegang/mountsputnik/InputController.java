@@ -208,7 +208,9 @@ public class InputController {
 	public boolean didMenu() {
 		return menuPressed && !menuPrevious;
 	}
-
+	public boolean watchAnimation(){
+		return animationPressed;
+	}
 	/**
 	 * Returns true if the player wants to select menu item.
 	 *
