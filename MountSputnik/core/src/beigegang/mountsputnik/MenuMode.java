@@ -125,8 +125,6 @@ public class MenuMode extends ModeController {
 
 		InputController input = InputController.getInstance();
 		
-		
-		System.out.println(input.getVerticalL() +"|"+input.getVerticalR());
 		if (changeCooldown == 0 && 
 				((Math.abs(input.getVerticalL()) > 0.5 && !input.getStickScheme()) || 
 				 (Math.abs(input.getVerticalR()) > 0.5 && input.getStickScheme()))) {
