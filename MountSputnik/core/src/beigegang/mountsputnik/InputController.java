@@ -35,7 +35,9 @@ public class InputController {
 	/** Whether the back button was pressed (menus). */
 	private boolean backPressed;
 	private boolean backPrevious;
-	
+	/** if animation help wanted */
+	public boolean animationPressed;
+
 	/** Whether the left arm action button was pressed. */
 	private boolean leftArmPressed;
 	private boolean leftArmPrevious;
@@ -291,7 +293,8 @@ public class InputController {
 		debugPressed  = xbox.getBack();
 		selectPressed = xbox.getA();
 		backPressed = xbox.getB();
-		
+		animationPressed = xbox.getY();
+
 		leftArmPressed = xbox.getLB();
 		rightArmPressed = xbox.getRB();
 		leftLegPressed = xbox.getLeftTrigger() > 0.5;

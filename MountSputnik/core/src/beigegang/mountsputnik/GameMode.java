@@ -20,7 +20,10 @@ import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.utils.*;
+import com.oracle.javafx.jmx.json.JSONWriter;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -41,10 +44,13 @@ public class GameMode extends ModeController {
 	 * used for tracking the game timestep - used to snap limbs to handholds on original timestep
 	 */
 	private static int timestep = 0;
-/**	both are updated every timestep with horizontal and vertical input from player */
+/**	both are updated every timestep with horizontal and vertical input left joystick from player */
 	private static float inx = 0f;
 	private static float iny = 0f;
+	/**	both are updated every timestep with horizontal and vertical input right stick from player */
 
+	private static float rinx = 0f;
+	private static float riny = 0f;
 	/**
 	 * Strings for files used, string[] for parts, etc.
 	 */
@@ -135,6 +141,7 @@ public class GameMode extends ModeController {
 	private JsonReader jsonReader;
 	/** The JSON defining the level model */
 	private JsonValue levelFormat;
+	private JsonValue animationFormat;
 	/** The level's oxygen concentration (environmental energy gain modifier"*/
 	private float oxygen;
 	/** which energy bar to display, 1-10 */
@@ -346,6 +353,17 @@ public class GameMode extends ModeController {
 	private boolean failed;
 	private float maxHandhold = 0f;
 	private int lastReachedCheckpoint = 0;
+	private boolean doingAnimation = false;
+	private int animationTimestep = 0;
+	private float animationLX;
+	private float animationLY;
+	private float animationRX;
+	private float animationRY;
+	private Array<Integer> animationNextToPress = new Array<Integer>();
+	private Array<Integer> animationJustReleased = new Array<Integer>();
+	private FileWriter animationToFile;
+	private String fullJson = "{";
+
 	/**
 	 * Character of game
 	 */
@@ -359,6 +377,10 @@ public class GameMode extends ModeController {
 	 */
 	private Array<Integer> nextToPress = new Array<Integer>();
 	/**
+	 * holds any extremities who's buttons were released during this timestep.
+	 */
+	private Array<Integer> justReleased = new Array<Integer>();
+	/**
 	 * A list of all the blocks that were chosen for this generated level. Allows for debugging 
 	 */
 	private Array<String> levelBlocks = new Array<String>();
@@ -368,10 +390,15 @@ public class GameMode extends ModeController {
 
 	/** A boolean indicating the toggle of the tutorial view, where limbs have their corresponding buttons shown*/ 
 	private boolean tutorialToggle = false; 
-
+	/** level-related values*/
 	private Array<Float> checkpoints = new Array();
-
-
+	private Vector2 gravity;
+	float remainingHeight;
+	float currentHeight;
+	int diffBlocks;
+	int filler;
+	int fillerSize;
+	Array<Integer> used = new Array<Integer>();
 
 	public GameMode() {
 		super(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_GRAVITY);
@@ -385,9 +412,85 @@ public class GameMode extends ModeController {
 		NUM_HANDHOLDS.put("sky", 1); 
 
 	}
+	public void makeJsonForAnimation(){
+		try{
+
+			animationToFile = new FileWriter(("tutorialAnimations/animations.json"));
+		}catch(Exception e){System.out.println("what happened" + e);}
+	}
+	public void writeNextStepJsonForAnimation(float lx, float ly, float rx, float ry, Array<Integer> pressed){
+		String e = "";
+		for (int i: pressed){
+			e = e + " " + i + ",";
+		}
+		String s = "\"" + animationTimestep + "\":[" + lx + "," + ly + "," + rx + "," + ry + ",[" + e + "],";
+		InputController in = InputController.getInstance();
+		String released = "[";
+		released += (in.releasedLeftArm()) ? "1, ":"0, ";
+		released += (in.releasedRightArm()) ? "1, ":"0, ";
+		released += (in.releasedLeftLeg()) ? "1, ":"0, ";
+		released += (in.releasedRightLeg()) ? "1, ":"0 ,";
+
+		released += "]]";
+
+		fullJson += s;
+		fullJson += released;
+		fullJson += ",";
+	}
+	public void writeJsonToFile(){
+		fullJson += "}";
+
+		try{
+			animationToFile.write(fullJson);
+			animationToFile.flush();
+			animationToFile.close();
+		}catch(Exception e){ System.out.println("unhandled exception" + e); }
+	}
+
+
+	public void setAnimationReader(){
+		jsonReader = new JsonReader();
+		animationFormat = jsonReader.parse(Gdx.files.internal("tutorialAnimations/animations.json"));
+		JsonAssetManager.getInstance().loadDirectory(levelFormat);
+		JsonAssetManager.getInstance().allocateDirectory();
+	}
+	public void getAnimationInformation(){
+		//0 will be animationTimestep in the future.
+		JsonValue info = animationFormat.get(animationTimestep);
+		JsonValue pressed = info.get(4);
+		JsonValue released = info.get(5);
+		animationLX = info.get(0).asFloat();
+		animationLY = info.get(1).asFloat();
+		animationRX = info.get(2).asFloat();
+		animationRY = info.get(3).asFloat();
+
+		int[] buttonsPressed = pressed.asIntArray();
+		int[] buttonsReleased = released.asIntArray();
+		animationNextToPress.clear();
+		animationJustReleased.clear();
+
+		for (int i: buttonsPressed){
+			animationNextToPress.add(i);
+		}
+		for (int i: buttonsReleased){
+			animationJustReleased.add(i);
+		}
+	}
 
 	@Override
 	public void reset() {
+//		if (timestep != 0)		writeJsonToFile();
+		resetAllButCheckpoints();
+		checkpointLevelBlocks.clear();
+		checkpointLevelJsons.clear();
+		checkpoints.clear();
+		lastReachedCheckpoint = 0;
+		populateLevel();
+
+
+	}
+
+	private void resetAllButCheckpoints() {
 		levelName = LEVEL_NAMES[currLevel];
 		complete = false;
 		failed = false;
@@ -407,69 +510,27 @@ public class GameMode extends ModeController {
 		obstacleWarnings.clear();
 		addQueue.clear();
 		world.dispose();
-		checkpointLevelBlocks.clear();
-		checkpointLevelJsons.clear();
-		checkpoints.clear();
-		lastReachedCheckpoint = 0;
 		timestep = 0;
-		populateLevel();
 		progressSprite.setBounds(0,0,canvas.getWidth()/4,canvas.getHeight());
 		lowEnergySprite.setBounds(0, 0, canvas.getWidth() / 4, canvas.getHeight());
 		queuedObstacles.clear();
-
 	}
+
 	public void restartLastCheckpoint(){
-		levelName = LEVEL_NAMES[currLevel];
-		complete = false;
-		failed = false;
-		assetState = AssetState.LOADING;
-		loadContent(assetManager);
-
-		for (GameObject obj : objects) {
-			obj.deactivatePhysics(world);
-		}
-		risingObstacle = null;
-		objects.clear();
-		obstacles.clear();
-		obstacleWarnings.clear();
-		addQueue.clear();
-		world.dispose();
-		timestep = 0;
+		resetAllButCheckpoints();
 		populateLevelAtLastCheckpoint();
-		progressSprite.setBounds(0,0,canvas.getWidth()/4,canvas.getHeight());
-		lowEnergySprite.setBounds(0, 0, canvas.getWidth() / 4, canvas.getHeight());
-		queuedObstacles.clear();
-
 
 	}
 	public void populateLevelAtLastCheckpoint() {
-		jsonReader = new JsonReader();
-		levelFormat = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/level.json"));
-		JsonAssetManager.getInstance().loadDirectory(levelFormat);
-		JsonAssetManager.getInstance().allocateDirectory();
-		Vector2 gravity = new Vector2(0,levelFormat.getFloat("gravity"));
-		oxygen = levelFormat.getFloat("oxygen");
-		float remainingHeight = levelFormat.getFloat("height");
-		float currentHeight=0f;
-		int diffBlocks = levelFormat.getInt("uniqueBlocks");
-		int filler = levelFormat.getInt("generalFillerSize");
-		int fillerSize = levelFormat.getInt("fillerBlocks");
+		readLevelStats();
 
-		world = new World(gravity, false);
-		contactListener = new ListenerClass();
-		world.setContactListener(contactListener);
-
-		levelBlocks.clear();
 		int counter = 0;
-		Array<Integer> used = new Array<Integer>();
 		maxHandhold = remainingHeight;
 		maxLevelHeight = remainingHeight;
 		while(counter < checkpointLevelBlocks.size){
 			//TODO: account for difficulty
 			int blockNumber = checkpointLevelBlocks.get(counter);
 //			blockNumber = 14;
-//			while(used.contains(blockNumber, true)&&!levelName.equals("tutorial"))
-//				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			used.add(blockNumber);
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json");
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
@@ -494,32 +555,14 @@ public class GameMode extends ModeController {
 		}
 
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, Math.max(DEFAULT_HEIGHT/2, checkpoints.get(lastReachedCheckpoint)), scale);
-
-		checkpoints.insert(0,character.parts.get(CHEST).getY());
-
-		//arms
-		objects.add(character.parts.get(ARM_LEFT));
-		objects.add(character.parts.get(ARM_RIGHT));
-		objects.add(character.parts.get(FOREARM_LEFT));
-		objects.add(character.parts.get(FOREARM_RIGHT));
-		objects.add(character.parts.get(HAND_LEFT));
-		objects.add(character.parts.get(HAND_RIGHT));
-		//legs
-		objects.add(character.parts.get(THIGH_LEFT));
-		objects.add(character.parts.get(THIGH_RIGHT));
-		objects.add(character.parts.get(SHIN_LEFT));
-		objects.add(character.parts.get(SHIN_RIGHT));
-		objects.add(character.parts.get(FOOT_LEFT));
-		objects.add(character.parts.get(FOOT_RIGHT));
-		//rest
-		objects.add(character.parts.get(HEAD));
-		objects.add(character.parts.get(HIPS));
-		objects.add(character.parts.get(CHEST));
+		addCharacterToGame();
 
 		movementController = new MovementController(character);
 		makeHandholdsToGripAtStart();
 
 	}
+
+
 	// ************************************START LEVELS*********************************************** //
 
 	/**
@@ -552,31 +595,15 @@ public class GameMode extends ModeController {
 	 */
 //	@param levelName: the level to be generated
 	public void populateLevel() {
-		jsonReader = new JsonReader();
-		levelFormat = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/level.json"));
-		JsonAssetManager.getInstance().loadDirectory(levelFormat);
-		JsonAssetManager.getInstance().allocateDirectory();
-		Vector2 gravity = new Vector2(0,levelFormat.getFloat("gravity"));
-		oxygen = levelFormat.getFloat("oxygen");
-		float remainingHeight = levelFormat.getFloat("height");
-		float currentHeight=0f;
-		int diffBlocks = levelFormat.getInt("uniqueBlocks");
-		int filler = levelFormat.getInt("generalFillerSize");
-		int fillerSize = levelFormat.getInt("fillerBlocks");
+		readLevelStats();
 
-		world = new World(gravity, false);
-		contactListener = new ListenerClass();
-		world.setContactListener(contactListener);
 
-		levelBlocks.clear();
-		int counter = 0;
-		Array<Integer> used = new Array<Integer>();
 		maxHandhold = remainingHeight;
 		maxLevelHeight = remainingHeight;
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
-			blockNumber = 14;
+//			blockNumber = 14;
 			while(used.contains(blockNumber, true)&&!levelName.equals("tutorial"))
 				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			used.add(blockNumber);
@@ -597,7 +624,7 @@ public class GameMode extends ModeController {
 		}
 		checkpointLevelBlocks.addAll(used);
 		System.out.println(levelBlocks);
-		System.out.println(checkpointLevelBlocks);
+//		System.out.println(checkpointLevelBlocks);
 
 		JsonValue lava = levelFormat.get("lava");
 		if(lava.getBoolean("present")){
@@ -609,7 +636,30 @@ public class GameMode extends ModeController {
 		checkpoints.insert(0,character.parts.get(CHEST).getY());
 		
 		makeHandholdsToGripAtStart();
-		
+		addCharacterToGame();
+		movementController = new MovementController(character);
+
+	}
+	private void readLevelStats() {
+		jsonReader = new JsonReader();
+		levelFormat = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/level.json"));
+		JsonAssetManager.getInstance().loadDirectory(levelFormat);
+		JsonAssetManager.getInstance().allocateDirectory();
+		gravity = new Vector2(0,levelFormat.getFloat("gravity"));
+		oxygen = levelFormat.getFloat("oxygen");
+		world = new World(gravity, false);
+		contactListener = new ListenerClass();
+		world.setContactListener(contactListener);
+		levelBlocks.clear();
+		remainingHeight = levelFormat.getFloat("height");
+		currentHeight=0f;
+		diffBlocks = levelFormat.getInt("uniqueBlocks");
+		filler = levelFormat.getInt("generalFillerSize");
+		fillerSize = levelFormat.getInt("fillerBlocks");
+
+
+	}
+	private void addCharacterToGame() {
 		objects.add(character.parts.get(ARM_LEFT));
 		objects.add(character.parts.get(ARM_RIGHT));
 		objects.add(character.parts.get(FOREARM_LEFT));
@@ -627,8 +677,6 @@ public class GameMode extends ModeController {
 		objects.add(character.parts.get(HEAD));
 		objects.add(character.parts.get(HIPS));
 		objects.add(character.parts.get(CHEST));
-		
-		movementController = new MovementController(character);
 
 	}
 
@@ -784,8 +832,32 @@ public class GameMode extends ModeController {
 	 */
 	public void update(float dt) {
 		InputController input = InputController.getInstance();
-		inx = input.getHorizontalL();
-		iny = input.getVerticalL();
+		if (input.animationPressed) doingAnimation = true;
+		if (doingAnimation){
+			getAnimationInformation();
+			inx = animationLX;
+			iny = animationLY;
+			rinx = animationRX;
+			riny = animationRY;
+			nextToPress = animationNextToPress;
+			justReleased = animationJustReleased;
+		}else{
+			inx = input.getHorizontalL();
+			iny = input.getVerticalL();
+			rinx = input.getHorizontalR();
+			riny = input.getVerticalR();
+			nextToPress = input.getOrderPressed();
+			justReleased.clear();
+			justReleased.add(input.releasedLeftArm() ? 1:0);
+			justReleased.add(input.releasedRightArm() ? 1:0);
+			justReleased.add(input.releasedLeftLeg() ? 1:0);
+			justReleased.add(input.releasedRightLeg() ? 1:0);
+
+		}
+//		createAnimation();
+//		watchAnimation();
+
+		animationTimestep ++;
 
 		if (checkIfReachedCheckpoint()){
 			lastReachedCheckpoint ++;
@@ -795,9 +867,9 @@ public class GameMode extends ModeController {
 			listener.exitScreen(this, DIED);
 
 		}
-				upsideDown = character.parts.get(HEAD).getPosition().y - character.parts.get(CHEST).getPosition().y <= 0;
+//		upsideDown = character.parts.get(HEAD).getPosition().y - character.parts.get(CHEST).getPosition().y <= 0;
 
-		nextToPress = input.getOrderPressed();
+
 		if(input.didSelect()) tutorialToggle = !tutorialToggle;
 
 		movementController.makeHookedJointsMovable(nextToPress);
@@ -810,11 +882,10 @@ public class GameMode extends ModeController {
 				((ExtremityModel) (character.parts.get(i))).ungrip();
 				ungrip(((ExtremityModel) (character.parts.get(i)))); 
 			}
-			float v = input.getVerticalL();
-			float h = input.getHorizontalL();
-			movementController.findAndApplyForces(nextToPress.get(0),v,h);
+
+			movementController.findAndApplyForces(nextToPress.get(0),iny,inx);
 		}
-		movementController.applyTorsoForceIfApplicable(input.getHorizontalR(), input.getVerticalR());
+		movementController.applyTorsoForceIfApplicable(rinx, riny);
 		//bounding velocities
 		boundBodyVelocities();
 		HandholdModel[] glowingHandholds = glowHandholds();
@@ -877,6 +948,19 @@ public class GameMode extends ModeController {
 		if (timestep == 0) cposYAtTime0 = character.parts.get(HEAD).getY();
 
 		timestep += 1;
+
+	}
+
+	private void watchAnimation() {
+		if (timestep == 0) setAnimationReader();
+		doingAnimation = true;
+	}
+
+	private void createAnimation() {
+		if (timestep == 0) makeJsonForAnimation();
+		writeNextStepJsonForAnimation(inx,iny, rinx, riny, nextToPress);
+	}
+	private void saveAnimation(){
 
 	}
 
@@ -1192,14 +1276,23 @@ public class GameMode extends ModeController {
 	 * @param input
      */
 	private void snapLimbsToHandholds(InputController input, HandholdModel[] hs) {
-		if (input.releasedLeftArm() || timestep == 0)
+
+		if (justReleased.get(0) == 1|| timestep == 0)
 			snapIfPossible(HAND_LEFT, hs);
-		if (input.releasedRightArm() || timestep == 0)
+		if (justReleased.get(1) == 1 || timestep == 0)
 			snapIfPossible(HAND_RIGHT, hs);
-		if (input.releasedLeftLeg() || timestep == 0)
+		if (justReleased.get(2) == 1 || timestep == 0)
 			snapIfPossible(FOOT_LEFT, hs);
-		if (input.releasedRightLeg() || timestep == 0)
+		if (justReleased.get(3) == 1|| timestep == 0)
 			snapIfPossible(FOOT_RIGHT, hs);
+//		if (input.releasedLeftArm() || timestep == 0)
+//			snapIfPossible(HAND_LEFT, hs);
+//		if (input.releasedRightArm() || timestep == 0)
+//			snapIfPossible(HAND_RIGHT, hs);
+//		if (input.releasedLeftLeg() || timestep == 0)
+//			snapIfPossible(FOOT_LEFT, hs);
+//		if (input.releasedRightLeg() || timestep == 0)
+//			snapIfPossible(FOOT_RIGHT, hs);
 	}
 	
 	/**
@@ -1392,15 +1485,14 @@ public class GameMode extends ModeController {
 		}
 		canvas.end();
 		//draw the obstacle warnings.
-		if (queuedObstacles.size > 0) {
-			for (warningsClass oz : obstacleWarnings) {
-				warningSprite.setBounds(oz.center * scale.x -  1.5f * scale.x, y/scale.y + canvas.getHeight()*9f/10f, 3f * scale.x , canvas.getHeight()/10f);
-				warningSprite.setAlpha(1f);
-				batch.begin();
-				warningSprite.draw(batch);
-				batch.end();
-			}
+		for (warningsClass oz : obstacleWarnings) {
+			warningSprite.setBounds(oz.center * scale.x -  1.5f * scale.x, y/scale.y + canvas.getHeight()*9f/10f, 3f * scale.x , canvas.getHeight()/10f);
+			warningSprite.setAlpha(1f);
+			batch.begin();
+			warningSprite.draw(batch);
+			batch.end();
 		}
+
 
 
 		if (debug) {
