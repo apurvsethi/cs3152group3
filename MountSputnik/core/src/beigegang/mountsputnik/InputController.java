@@ -352,6 +352,8 @@ public class InputController {
 		leftLegPressed = (secondary && leftLegPressed) || (Gdx.input.isKeyPressed(Input.Keys.A));
 		rightLegPressed = (secondary && rightLegPressed) || (Gdx.input.isKeyPressed(Input.Keys.S));
 
+		animationPressed = (secondary && animationPressed)||(Gdx.input.isKeyPressed(Input.Keys.Y));
+
 		horizontalL = (secondary ? horizontalL : 0.0f);
 		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
 			horizontalL += 1.0f;
