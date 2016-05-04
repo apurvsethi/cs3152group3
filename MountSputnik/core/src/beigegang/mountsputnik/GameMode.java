@@ -147,8 +147,7 @@ public class GameMode extends ModeController {
 	private float oxygen;
 	/** which energy bar to display, 1-10 */
 	private int energyLevel;
-	/** not sure if needed yet - could be for displaying low energy warning*/
-	private int energyTimer;
+
 	/** AssetManager for loading textures for Handholds*/
 	private AssetManager assetManager;
 	private float maxLevelHeight;
@@ -321,6 +320,9 @@ public class GameMode extends ModeController {
 		listener.exitScreen(this, EXIT_GAME_NEXT_LEVEL);
 	}
 	/** private class for obstacleWarnings
+	 * contains center of the warning, maxHeight of the obstacle, the obstacle itself, and the zone
+	 * to which the obstacle belongs
+	 * opacity used for displaying it only (warning fades in as obstacle spawns)
 	 * @author Jacob
 	 * */
 	private class warningsClass{
@@ -328,6 +330,7 @@ public class GameMode extends ModeController {
 		float maxHeight;
 		ObstacleModel o;
 		ObstacleZone oz;
+		float opacity = 0f;
 		public warningsClass(float center, float maxHeightToDisplay,ObstacleModel ob, ObstacleZone oe){
 			this.center = center;
 			this.maxHeight = Math.min (maxLevelHeight,maxHeightToDisplay);
@@ -338,10 +341,14 @@ public class GameMode extends ModeController {
 	}
 
 	private MovementController movementController;
+
 	private ObstacleZone obstacleZone;
+	/** only for lava so far */
 	private RisingObstacle risingObstacle = null;
 	private ObstacleModel obstacle;
+	/** obstacles that have been initialized but not introduced into the world yet*/
 	private Array<ObstacleZone> queuedObstacles = new Array<ObstacleZone>();
+	/** obstacleWarnings only appear within TIME_TO_WARN timesteps. Warnings not shown wait here */
 	private Array<warningsClass> queuedObstacleWarnings = new Array<warningsClass>();
 	/** all obstacle zones in level */
 	private Array<ObstacleZone> obstacles = new Array<ObstacleZone>();
@@ -354,17 +361,21 @@ public class GameMode extends ModeController {
 	private boolean failed;
 	private float maxHandhold = 0f;
 	private int lastReachedCheckpoint = 0;
+	/** if player is watching "animation" in tutorial */
 	private boolean doingAnimation = false;
+	/** which step to show the animation at (starts at 0) */
 	private int animationTimestep = 0;
+	/** following 6 values are animation values to override the inputController with*/
 	private float animationLX;
 	private float animationLY;
 	private float animationRX;
 	private float animationRY;
 	private Array<Integer> animationNextToPress = new Array<Integer>();
 	private Array<Integer> animationJustReleased = new Array<Integer>();
+	/** writes fullJson to file when animating creator (a dev) finishes creating the animation */
 	private FileWriter animationToFile;
+	/** json value to write to file */
 	private String fullJson = "{";
-	private JsonValue jsonValue;
 	private InputController input;
 	private Vector2 vector;
 	/**
@@ -464,22 +475,22 @@ public class GameMode extends ModeController {
 	public void getAnimationInformation(){
 		if (animationFormat == null) setAnimationReader();
 		//0 will be animationTimestep in the future.
-		jsonValue = animationFormat.get(animationTimestep);
+		JsonValue timestepInfo = animationFormat.get(animationTimestep);
 
-		animationLX = jsonValue.get(0).asFloat();
-		animationLY = jsonValue.get(1).asFloat();
-		animationRX = jsonValue.get(2).asFloat();
-		animationRY = jsonValue.get(3).asFloat();
+		animationLX = timestepInfo.get(0).asFloat();
+		animationLY = timestepInfo.get(1).asFloat();
+		animationRX = timestepInfo.get(2).asFloat();
+		animationRY = timestepInfo.get(3).asFloat();
 
 		animationNextToPress.clear();
 		animationJustReleased.clear();
 
-		ints = jsonValue.get(4).asIntArray();
+		ints = timestepInfo.get(4).asIntArray();
 		for (counterInt = 0;counterInt<ints.length; counterInt++){
 			animationNextToPress.add(ints[counterInt]);
 		}
 
-		ints = jsonValue.get(5).asIntArray();
+		ints = timestepInfo.get(5).asIntArray();
 		for (counterInt = 0;counterInt<ints.length; counterInt++){
 			animationJustReleased.add(ints[counterInt]);
 		}
@@ -536,6 +547,7 @@ public class GameMode extends ModeController {
 		readLevelStats();
 
 		int counter = 0;
+		used.clear();
 		maxHandhold = remainingHeight;
 		maxLevelHeight = remainingHeight;
 		while(counter < checkpointLevelBlocks.size){
@@ -544,9 +556,9 @@ public class GameMode extends ModeController {
 //			blockNumber = 14;
 			used.add(blockNumber);
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json");
-			jsonValue = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
-			addChunk(jsonValue, currentHeight, levelName);
-			currentHeight += jsonValue.getFloat("size");
+			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
+			addChunk(levelPiece, currentHeight, levelName);
+			currentHeight += levelPiece.getFloat("size");
 			checkpoints.add(currentHeight);
 			//filler stuff not currently used.
 //			for(counterInt = 0; counterInt < filler; counterInt++){
@@ -560,10 +572,7 @@ public class GameMode extends ModeController {
 		}
 		System.out.println(levelBlocks);
 
-		jsonValue = levelFormat.get("lava");
-		if(jsonValue.getBoolean("present")){
-			risingObstacle = new RisingObstacle(lavaTexture, jsonValue.getFloat("speed"));
-		}
+
 
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, Math.max(DEFAULT_HEIGHT/2, checkpoints.get(lastReachedCheckpoint)), scale);
 		addCharacterToGame();
@@ -607,10 +616,10 @@ public class GameMode extends ModeController {
 //	@param levelName: the level to be generated
 	public void populateLevel() {
 		readLevelStats();
-
-
+		used.clear();
 		maxHandhold = remainingHeight;
 		maxLevelHeight = remainingHeight;
+
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
@@ -619,10 +628,10 @@ public class GameMode extends ModeController {
 				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			used.add(blockNumber);
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json");
-			jsonValue = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
-			checkpointLevelJsons.add(jsonValue);
-			addChunk(jsonValue, currentHeight, levelName);
-			currentHeight += jsonValue.getFloat("size");
+			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
+			checkpointLevelJsons.add(levelPiece);
+			addChunk(levelPiece, currentHeight, levelName);
+			currentHeight += levelPiece.getFloat("size");
 			checkpoints.add(currentHeight);
 			//filler stuff not currently used.
 //			for(counterInt = 0; counterInt < filler; counterInt++){
@@ -635,12 +644,8 @@ public class GameMode extends ModeController {
 		}
 		checkpointLevelBlocks.addAll(used);
 		System.out.println(levelBlocks);
-//		System.out.println(checkpointLevelBlocks);
+		System.out.println(checkpointLevelBlocks);
 
-		jsonValue = levelFormat.get("lava");
-		if(jsonValue.getBoolean("present")){
-			risingObstacle = new RisingObstacle(lavaTexture, jsonValue.getFloat("speed"));
-		}
 
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale);
 			//arms
@@ -667,7 +672,10 @@ public class GameMode extends ModeController {
 		diffBlocks = levelFormat.getInt("uniqueBlocks");
 		filler = levelFormat.getInt("generalFillerSize");
 		fillerSize = levelFormat.getInt("fillerBlocks");
-
+		JsonValue lava = levelFormat.get("lava");
+		if(lava.getBoolean("present")){
+			risingObstacle = new RisingObstacle(lavaTexture, lava.getFloat("speed"));
+		}
 
 	}
 	private void addCharacterToGame() {
@@ -1416,6 +1424,7 @@ public class GameMode extends ModeController {
 			canvas.draw(edge, Color.WHITE, canvas.getWidth() * 3 / 4, tileY, canvas.getWidth() / 16, canvas.getHeight());
 			tileY += canvas.getWidth() / 4;
 		}
+
 		float a = (vector.y - cposYAtTime0)/(maxHandhold - cposYAtTime0);
 		if (timestep%60 == 0 && character.getEnergy() != 0)
 			progressLevel = Math.min(6,Math.max(0,Math.round(a * 6 - .1f)));
@@ -1434,8 +1443,8 @@ public class GameMode extends ModeController {
 
 		float f = character.getEnergy();
 		canvas.end();
-
-		if ( f<= 30){
+		//draw flashing for bar.
+		if (f<= 30){
 			lowEnergySprite.setAlpha(.5f + Math.min((30-f)/f,.5f));
 			batch.begin();
 			lowEnergySprite.draw(batch);
@@ -1454,14 +1463,9 @@ public class GameMode extends ModeController {
 			}
 		}else{
 			canvas.begin();
-
 			canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-
-//			canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-
 		}
-		
-		
+
 		canvas.draw(fatigueTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 
 		if (currLevel == LEVEL_TUTORIAL)
@@ -1493,9 +1497,11 @@ public class GameMode extends ModeController {
 		}
 		canvas.end();
 		//draw the obstacle warnings.
-		for (warningsClass oz : obstacleWarnings) {
-			warningSprite.setBounds(oz.center * scale.x -  1.5f * scale.x, y/scale.y + canvas.getHeight()*9f/10f, 3f * scale.x , canvas.getHeight()/10f);
-			warningSprite.setAlpha(1f);
+		for (warningsClass wc : obstacleWarnings) {
+			warningSprite.setBounds(wc.center * scale.x -  1.5f * scale.x, y/scale.y + canvas.getHeight()*9f/10f, 3f * scale.x , canvas.getHeight()/10f);
+//			System.out.println(Math.min(1,(wc.opacity)/(Math.min(TIME_TO_WARN,wc.oz.getSpawnFrequency()))));
+			warningSprite.setAlpha(Math.min(1,(wc.opacity)/(Math.min(TIME_TO_WARN,wc.oz.getSpawnFrequency()))));
+			wc.opacity ++;
 			batch.begin();
 			warningSprite.draw(batch);
 			batch.end();
