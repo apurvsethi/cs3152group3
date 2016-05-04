@@ -9,6 +9,9 @@ import com.badlogic.gdx.utils.Array;
 import static beigegang.mountsputnik.Constants.*;
 
 public class InputController {
+	private boolean triggerScheme;
+	private boolean stickScheme;
+	
 	/** Singleton instance for the controller */
 	private static InputController theController = null;
 
@@ -115,7 +118,22 @@ public class InputController {
 	public float getVerticalR() {
 		return verticalR;
 	}
-
+	
+	public boolean getStickScheme(){
+		return stickScheme;
+	}
+	
+	public boolean getTriggerScheme(){
+		return triggerScheme;
+	}
+	
+	public void swapTriggerScheme(){
+		triggerScheme = !triggerScheme;
+	}
+	
+	public void swapStickScheme(){
+		stickScheme = !stickScheme;
+	}
 	/**
 	 * Returns true if the left arm action button was pressed.
 	 *
@@ -247,6 +265,8 @@ public class InputController {
 	private InputController() {
 		// If we have a game-pad for id, then use it.
 		xbox = new XBox360Controller(0);
+		triggerScheme = false; //TODO read in values from file
+		stickScheme = false;
 	}
 
 	/**
@@ -297,16 +317,18 @@ public class InputController {
 		backPressed = xbox.getB();
 		animationPressed = xbox.getY();
 
-		leftArmPressed = xbox.getLB();
-		rightArmPressed = xbox.getRB();
-		leftLegPressed = xbox.getLeftTrigger() > 0.5;
-		rightLegPressed = xbox.getRightTrigger() < -0.5 && xbox.getRightTrigger() != -1.0f;
+		leftArmPressed = triggerScheme ? xbox.getLeftTrigger() > 0.5 : xbox.getLB();
+		rightArmPressed = triggerScheme ? 
+				(xbox.getRightTrigger() < -0.5 && xbox.getRightTrigger() != -1.0f) : xbox.getRB();
+		leftLegPressed = triggerScheme ? xbox.getLB() : xbox.getLeftTrigger() > 0.5;
+		rightLegPressed = triggerScheme ? xbox.getRB() :
+				xbox.getRightTrigger() < -0.5 && xbox.getRightTrigger() != -1.0f;
 
 		// Movement based on change
-		horizontalL = xbox.getLeftX();
-		verticalL = -xbox.getLeftY();
-		horizontalR = xbox.getRightX();
-		verticalR = -xbox.getRightY();
+		horizontalL  =  stickScheme  ?   xbox.getRightX()  :   xbox.getLeftX();
+		verticalL    =  stickScheme  ?  -xbox.getRightY()  :  -xbox.getLeftY();
+		horizontalR  =  stickScheme  ?   xbox.getLeftX()   :   xbox.getRightX();
+		verticalR    =  stickScheme  ?  -xbox.getLeftY()   :  -xbox.getRightY();
 	}
 
 	/**

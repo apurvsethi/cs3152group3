@@ -25,6 +25,11 @@ public class MenuMode extends ModeController {
 			"Menu/StartMenu/LevelSelect/Snowy.png","Menu/StartMenu/LevelSelect/Volcano.png","Menu/StartMenu/LevelSelect/Sky.png","Menu/StartMenu/LevelSelect/Space.png"};
 	private static final String LEVEL_LOCKED_FILE = "Menu/StartMenu/LevelSelect/Locked.png";
 	private static final String MENU_BACK_FILE = "Menu/StartMenu/Menu.png";
+	private static final String CLASSIC_FILE = "Menu/StartMenu/classic.png";
+	private static final String SWAPPED_FILE = "Menu/StartMenu/swapped.png";
+	private static final String TRIGGER_SCHEME_FILE = "Menu/StartMenu/trigger_scheme.png";
+	private static final String STICK_SCHEME_FILE = "Menu/StartMenu/stick_scheme.png";
+			
 	/**
 	 * Texture asset for files used, parts, etc.
 	 */
@@ -33,6 +38,11 @@ public class MenuMode extends ModeController {
 	private static TextureRegion[] levelSelectOptions = new TextureRegion[LEVEL_SELECT_OPTION_FILES.length];
 	private static TextureRegion menuBack;
 	private static TextureRegion levelLocked;
+	private static TextureRegion classic;
+	private static TextureRegion swapped;
+	private static TextureRegion triggerScheme;
+	private static TextureRegion stickScheme;
+	private static TextureRegion[] settingsOptions = {triggerScheme, stickScheme, menuBack};
 	private static int exitCodes[] ={EXIT_GAME_RESTART_LEVEL, EXIT_LEVEL_SELECT, EXIT_SETTINGS, EXIT_QUIT};
 	private static int levelSelectCodes[] = {LEVEL_TUTORIAL, LEVEL_CANYON, LEVEL_WATERFALL, LEVEL_SNOWY_MOUNTAIN, LEVEL_VOLCANO, LEVEL_SKY, LEVEL_SPACE};
 	private static int backCode = EXIT_MENU;
@@ -62,6 +72,14 @@ public class MenuMode extends ModeController {
 			manager.load(LEVEL_SELECT_OPTION_FILE, Texture.class);
 			assets.add(LEVEL_SELECT_OPTION_FILE);
 		}
+		manager.load(CLASSIC_FILE, Texture.class);
+		assets.add(CLASSIC_FILE);
+		manager.load(SWAPPED_FILE, Texture.class);
+		assets.add(SWAPPED_FILE);
+		manager.load(TRIGGER_SCHEME_FILE, Texture.class);
+		assets.add(TRIGGER_SCHEME_FILE);
+		manager.load(STICK_SCHEME_FILE, Texture.class);
+		assets.add(STICK_SCHEME_FILE);
 	}
 
 	/**
@@ -78,6 +96,10 @@ public class MenuMode extends ModeController {
 
 		background = createTexture(manager, BACKGROUND_FILE, false);
 		menuBack = createTexture(manager, MENU_BACK_FILE, false);
+		classic = createTexture(manager, CLASSIC_FILE, false);
+		swapped = createTexture(manager, SWAPPED_FILE, false);
+		triggerScheme = createTexture(manager, TRIGGER_SCHEME_FILE, false);
+		stickScheme = createTexture(manager, STICK_SCHEME_FILE, false);
 		levelLocked = createTexture(manager, LEVEL_LOCKED_FILE, false);
 		for (int i = 0; i < MENU_OPTION_FILES.length; i++) {
 			menuOptions[i] = createTexture(manager, MENU_OPTION_FILES[i], false);
@@ -102,11 +124,21 @@ public class MenuMode extends ModeController {
 		if (changeCooldown > 0) changeCooldown --;
 
 		InputController input = InputController.getInstance();
-
-		if (changeCooldown == 0 && Math.abs(input.getVerticalL()) > 0.5) {
+		
+		
+		System.out.println(input.getVerticalL() +"|"+input.getVerticalR());
+		if (changeCooldown == 0 && 
+				((Math.abs(input.getVerticalL()) > 0.5 && !input.getStickScheme()) || 
+				 (Math.abs(input.getVerticalR()) > 0.5 && input.getStickScheme()))) {
 			SoundController.get(SoundController.SCROLL_SOUND).play();
-			int selectionLength = currView == MAIN_MENU? menuOptions.length : (currView == LEVEL_SELECT ? levelSelectOptions.length + 1 : 1);
+			int selectionLength = currView == MAIN_MENU? menuOptions.length : 
+				(currView == LEVEL_SELECT ? levelSelectOptions.length + 1 : 1);
+			if (currView == SETTINGS){
+				selectionLength = settingsOptions.length; 
+			}
 			currSelection = (currSelection + (input.getVerticalL() > 0.5 ? -1 : (input.getVerticalL() < -0.5 ? 1 : 0))+ selectionLength) % selectionLength;
+			if(input.getStickScheme())
+				currSelection = (currSelection + (input.getVerticalR() > 0.5 ? -1 : (input.getVerticalR() < -0.5 ? 1 : 0))+ selectionLength) % selectionLength;
 			changeCooldown = MENU_CHANGE_COOLDOWN;
 		}
 
@@ -125,8 +157,18 @@ public class MenuMode extends ModeController {
 			}
 		}
 		else if (input.didSelect() && currView == SETTINGS){
-			SoundController.get(SoundController.DECLINE_SOUND).play();
-			listener.exitScreen(this, EXIT_MENU);
+			if(currSelection == 0){
+					input.swapTriggerScheme();
+					SoundController.get(SoundController.SELECT_SOUND).play();
+				}
+			else if(currSelection == 1){
+				input.swapStickScheme();
+				SoundController.get(SoundController.SELECT_SOUND).play();
+			}
+			else{
+				SoundController.get(SoundController.DECLINE_SOUND).play();
+				listener.exitScreen(this, backCode);
+			}
 		} else if (input.didSelect()){
 			SoundController.get(SoundController.SELECT_SOUND).play();
 			listener.exitScreen(this, exitCodes[currSelection]);
@@ -181,8 +223,30 @@ public class MenuMode extends ModeController {
 
 		} else if (currView == SETTINGS) {
 			drawY = SETTINGS_DRAW_LOCATION * canvas.getHeight() + y;
+			InputController input = InputController.getInstance();
 			//draw settings
-			canvas.draw(menuBack, Color.TEAL, menuBack.getRegionWidth() / 2,
+			TextureRegion currentTriggerScheme = input.getTriggerScheme() ? swapped : classic;
+			TextureRegion currentStickScheme = input.getStickScheme() ? swapped : classic;
+			
+			canvas.draw(triggerScheme, currSelection == 0 ? Color.TEAL : Color.WHITE, 
+					triggerScheme.getRegionWidth() / 2, triggerScheme.getRegionHeight() / 2, 
+					(canvas.getWidth() / 2) - classic.getRegionWidth(), drawY, 0, 0.75f, 0.75f);
+			canvas.draw(currentTriggerScheme, currSelection == 0 ? Color.TEAL : Color.WHITE, 
+					currentTriggerScheme.getRegionWidth() / 2, currentTriggerScheme.getRegionHeight() / 2, 
+					(canvas.getWidth() / 2) + classic.getRegionWidth(), drawY, 0, 0.75f, 0.75f);
+			
+			drawY -= MENU_ITEM_HEIGHT;
+			
+			canvas.draw(stickScheme, currSelection == 1 ? Color.TEAL : Color.WHITE, 
+					stickScheme.getRegionWidth() / 2, stickScheme.getRegionHeight() / 2, 
+					(canvas.getWidth() / 2) - classic.getRegionWidth(), drawY, 0, 0.75f, 0.75f);
+			canvas.draw(currentStickScheme, currSelection == 1 ? Color.TEAL : Color.WHITE, 
+					currentStickScheme.getRegionWidth() / 2, currentStickScheme.getRegionHeight() / 2, 
+					(canvas.getWidth() / 2) + classic.getRegionWidth(), drawY, 0, 0.75f, 0.75f);
+			
+			drawY -= MENU_ITEM_HEIGHT;
+			
+			canvas.draw(menuBack, currSelection == 2 ? Color.TEAL : Color.WHITE, menuBack.getRegionWidth() / 2,
 					menuBack.getRegionHeight() / 2, (canvas.getWidth() / 2), drawY, 0, 0.75f, 0.75f);
 
 		} else {
