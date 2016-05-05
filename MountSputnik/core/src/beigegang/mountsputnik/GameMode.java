@@ -433,7 +433,7 @@ public class GameMode extends ModeController {
 		try{
 
 			animationToFile = new FileWriter(("tutorialAnimations/animations.json"));
-		}catch(Exception e){System.out.println("what happened" + e);}
+		}catch(Exception e){}
 	}
 	public void writeNextStepJsonForAnimation(float lx, float ly, float rx, float ry, Array<Integer> pressed){
 		String e = "";
@@ -462,7 +462,7 @@ public class GameMode extends ModeController {
 			animationToFile.write(fullJson);
 			animationToFile.flush();
 			animationToFile.close();
-		}catch(Exception e){ System.out.println("unhandled exception" + e); }
+		}catch(Exception e){ }
 	}
 
 
@@ -878,7 +878,6 @@ public class GameMode extends ModeController {
 
 		if (checkIfReachedCheckpoint()){
 			lastReachedCheckpoint ++;
-			System.out.println("checkpoint detection");
 		}
 		if (checkIfDied()) {
 			listener.exitScreen(this, DIED);
@@ -1499,7 +1498,6 @@ public class GameMode extends ModeController {
 		//draw the obstacle warnings.
 		for (warningsClass wc : obstacleWarnings) {
 			warningSprite.setBounds(wc.center * scale.x -  1.5f * scale.x, y/scale.y + canvas.getHeight()*9f/10f, 3f * scale.x , canvas.getHeight()/10f);
-//			System.out.println(Math.min(1,(wc.opacity)/(Math.min(TIME_TO_WARN,wc.oz.getSpawnFrequency()))));
 			warningSprite.setAlpha(Math.min(1,(wc.opacity)/(Math.min(TIME_TO_WARN,wc.oz.getSpawnFrequency()))));
 			wc.opacity ++;
 			batch.begin();

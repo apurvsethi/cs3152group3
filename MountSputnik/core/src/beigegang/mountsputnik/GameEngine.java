@@ -44,7 +44,6 @@ public class GameEngine extends Game implements ScreenListener {
 		controllers[DEAD_SCREEN] = new DeadMode();
 		SoundController.PreLoadContent(manager);
 		for(int ii = 1; ii < controllers.length; ii++) {
-			System.out.println(controllers[ii]);
 			controllers[ii].preLoadContent(manager);
 		}
 		controllers[LOADING_SCREEN].setCanvas(canvas);

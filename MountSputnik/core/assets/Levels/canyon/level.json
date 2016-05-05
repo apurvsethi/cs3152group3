@@ -9,7 +9,7 @@
     "background": "canyon", 
     "handholdTextures" : 2, //The number of different handhold textures available
 	"lava": {
-		"present": true,
+		"present": false,
 		"texture": "lava.png",
 		"speed": .005
 	}
