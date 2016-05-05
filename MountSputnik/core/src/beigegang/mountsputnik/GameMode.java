@@ -968,10 +968,7 @@ public class GameMode extends ModeController {
 
 	}
 
-	private void watchAnimation() {
-		if (timestep == 0) setAnimationReader();
-		doingAnimation = true;
-	}
+
 
 	private void createAnimation() {
 		if (timestep == 0) makeJsonForAnimation();
