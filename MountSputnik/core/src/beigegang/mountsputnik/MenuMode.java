@@ -22,7 +22,7 @@ public class MenuMode extends ModeController {
 	private static final String BACKGROUND_FILE = "Menu/StartMenu/Background.png";
 	private static final String MENU_OPTION_FILES[] = {"Menu/StartMenu/Start.png","Menu/StartMenu/Levels.png","Menu/StartMenu/Settings.png","Menu/StartMenu/Quit.png"};
 	private static final String LEVEL_SELECT_OPTION_FILES[] = {"Menu/StartMenu/LevelSelect/Tutorial.png","Menu/StartMenu/LevelSelect/Canyon.png","Menu/StartMenu/LevelSelect/Waterfall.png",
-			"Menu/StartMenu/LevelSelect/Snowy.png","Menu/StartMenu/LevelSelect/Volcano.png","Menu/StartMenu/LevelSelect/Sky.png","Menu/StartMenu/LevelSelect/Space.png"};
+			"Menu/StartMenu/LevelSelect/Volcano.png","Menu/StartMenu/LevelSelect/Snowy.png","Menu/StartMenu/LevelSelect/Sky.png","Menu/StartMenu/LevelSelect/Space.png"};
 	private static final String LEVEL_LOCKED_FILE = "Menu/StartMenu/LevelSelect/Locked.png";
 	private static final String MENU_BACK_FILE = "Menu/StartMenu/Menu.png";
 	private static final String CLASSIC_FILE = "Menu/StartMenu/classic.png";
@@ -44,7 +44,7 @@ public class MenuMode extends ModeController {
 	private static TextureRegion stickScheme;
 	private static TextureRegion[] settingsOptions = {triggerScheme, stickScheme, menuBack};
 	private static int exitCodes[] ={EXIT_GAME_RESTART_LEVEL, EXIT_LEVEL_SELECT, EXIT_SETTINGS, EXIT_QUIT};
-	private static int levelSelectCodes[] = {LEVEL_TUTORIAL, LEVEL_CANYON, LEVEL_WATERFALL, LEVEL_SNOWY_MOUNTAIN, LEVEL_VOLCANO, LEVEL_SKY, LEVEL_SPACE};
+	private static int levelSelectCodes[] = {LEVEL_TUTORIAL, LEVEL_CANYON, LEVEL_WATERFALL, LEVEL_VOLCANO, LEVEL_SNOWY_MOUNTAIN, LEVEL_SKY, LEVEL_SPACE};
 	private static int backCode = EXIT_MENU;
 
 
@@ -147,6 +147,7 @@ public class MenuMode extends ModeController {
 				listener.exitScreen(this, backCode);
 			}
 			else if (levelSelectAllowed[currSelection]) {
+				System.out.println(currSelection);
 				SoundController.get(SoundController.SELECT_SOUND).play();
 				((GameEngine) listener).exitLevelSelect(this, levelSelectCodes[currSelection]);
 			}

@@ -55,9 +55,7 @@ public class GameMode extends ModeController {
 	/**
 	 * Strings for files used, string[] for parts, etc.
 	 */
-	//We need to preload every single texture, regardless of which level we're currently using. Loading can't be
-	//dynamically
-	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "canyon", "mountain", "volcano", "sky", "space"};//,"mountain","sky","space"}; <-- Add the rest of these in as they are given assets
+	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "canyon", "volcano", "mountain", "sky", "space"}; //TODO: change second canyon to waterfall
 	private static final String LAVA_FILE = "assets/lava.png";
 	private static final String UI_FILE = "assets/HUD4timeless.png";
 	private static final String[] LEVEL_LABEL_FILES = {"assets/Tutorial.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Skycloud.png", "assets/Canyon.png"};
@@ -65,7 +63,6 @@ public class GameMode extends ModeController {
 	private static final String GLOW_FILE = "assets/glow.png";
 	private static final String RUSSIAN_FLAG_FILE = "RussianFlag.png";
 	private static final HashMap<String,Integer> NUM_HANDHOLDS = new HashMap<String,Integer>();
-	//private static final String HANDHOLD_TEXTURES[] = {"assets/canyon/Handhold1.png", "assets/canyon/Handhold2.png"};
 	private static final String PART_TEXTURES[] = {"Ragdoll/Torso.png", "Ragdoll/Head.png", "Ragdoll/Hips.png",
 			"Ragdoll/ArmLeft.png", "Ragdoll/ArmRight.png", "Ragdoll/ForearmLeft.png", "Ragdoll/ForearmRight.png",
 			"Ragdoll/HandLeftUngripped.png", "Ragdoll/HandRightUngripped.png", "Ragdoll/ThighLeft.png",
