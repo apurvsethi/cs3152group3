@@ -1,6 +1,6 @@
 #must include the level:    cayon/block10.json
 #							mountain/block3.json
-LEVEL_TO_LOAD = "canyon/block14.json"
+LEVEL_TO_LOAD = "mountain/block2.json"
 
 '''
 Repeat Texture on Resize
@@ -26,7 +26,7 @@ from kivy.core.window import Window
 from kivy.graphics import * 
 from math import sqrt
 from glob import glob 
-import json 
+import simplejson 
 
 
 Builder.load_string('''
@@ -652,7 +652,8 @@ class LinePlayground(FloatLayout):
     	if LEVEL_TO_LOAD == "":
     		return 
     	jfile = open(glob("levels/"+LEVEL_TO_LOAD)[0], 'r')
-    	level = json.load(jfile)
+    	print jfile
+    	level = simplejson.load(jfile)
     	jfile.close()
     	self.difficulty = level['difficulty']
     	self.blockHeight = level['size']
@@ -661,36 +662,54 @@ class LinePlayground(FloatLayout):
     		hold = level['handholds'][h]
     		if 'movement' in hold: 
     			scale = hold['width']/handhold_width*3.0
-    			crumble = hold['crumble']
-    			slip = hold['slip']
+    			if 'crumble' in hold: 
+    				crumble = hold['crumble']
+    			else: 
+    				crumble = 0
+    			if 'slip' in hold: 
+    				slip = hold['slip']
+    			else: 
+    				slip = 0
     			speed = hold['movement']['speed']
     			startX = (hold['movement']['startX']-8.5)*scaling
     			startY = hold['movement']['startY']*scaling
-    			endX = (hold['movement'][endX]-8.5)*scaling
+    			endX = (hold['movement']['endX']-8.5)*scaling
     			endY = hold['movement']['endY']*scaling
     			movingHandholds.append(MovingHandhold(startX,startY,scale,crumble,slip,speed))
     			movingHandholds.append(MovingHandhold(endX,endY,scale,crumble,slip,speed))
     		else:
     			scale = hold['width']/handhold_width*3.0
-    			crumble = hold['crumble']
-    			slip = hold['slip']
+    			if 'crumble' in hold: 
+    				crumble = hold['crumble']
+    			else: 
+    				crumble = 0
+    			if 'slip' in hold: 
+    				slip = hold['slip']
+    			else: 
+    				slip = 0
     			startX = (hold['positionX']-8.5)*scaling
     			startY = hold['positionY']*scaling
     			handholds.append(Handhold(startX, startY, scale, crumble, slip))
-    	for s in level['static']: 
-    		static = level['static'][s]
-    		x = (static['x']-8.5)*scaling
-    		y = static['y']*scaling
-    		size = static['size']*3.0
-    		staticObstacles.append(StaticObstacle(x,y,size))
-    	for o in level['obstacles']:
-    		obstacle = level['obstacles'][o]
-    		originX = (obstacle['originX']-8.5)*scaling 
-    		originY = obstacle['originY']*scaling - 18
-    		width = obstacle['width']*3
-    		height = obstacle['height']*3
-    		frequency = obstacle['frequency']/60.0
-    		fallingObstacles.append(FallingObstacle(originX,originY,width,height,frequency))
+    	if not 'static' in level: 
+    		pass
+    	else: 
+	    	for s in level['static']: 
+	    	    static = level['static'][s]
+	    	    x = (static['x']-8.5)*scaling
+	    	    y = static['y']*scaling
+	    	    size = static['size']*3.0
+	    	    staticObstacles.append(StaticObstacle(x,y,size))
+	   	if not 'obstacles' in level: 
+	   		pass 
+	   	else: 
+		    for o in level['obstacles']:
+	    		obstacle = level['obstacles'][o]
+	    		originX = (obstacle['originX']-8.5)*scaling
+	    		originY = obstacle['originY']*scaling - 18
+	    		width = obstacle['width']*3
+	    		height = obstacle['height']*3
+	    		frequency = obstacle['frequency']/60.0
+	    		fallingObstacles.append(FallingObstacle(originX,originY,width,height,frequency))
     	self.resize()
 
     def changeDirectory(self, btn):
