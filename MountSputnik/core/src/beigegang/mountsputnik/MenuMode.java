@@ -147,7 +147,6 @@ public class MenuMode extends ModeController {
 				listener.exitScreen(this, backCode);
 			}
 			else if (levelSelectAllowed[currSelection]) {
-				System.out.println(currSelection);
 				SoundController.get(SoundController.SELECT_SOUND).play();
 				((GameEngine) listener).exitLevelSelect(this, levelSelectCodes[currSelection]);
 			}
