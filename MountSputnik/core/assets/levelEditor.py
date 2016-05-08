@@ -1,3 +1,5 @@
+LEVEL_TO_LOAD = ""
+
 '''
 Repeat Texture on Resize
 ========================
@@ -243,7 +245,52 @@ Builder.load_string('''
 
                 Label: 
                     text: ''
-      
+
+                Label: 
+                	text: 'Difficulty'
+                	size_hint_y: None
+                	height: '40px'
+
+	            Button:
+	                id: diff
+	                text: 'Easy'
+	                on_release: diffdropdown.open(self)
+	                size_hint_y: None
+	                height: '48dp'
+
+	            DropDown:
+
+	                id: diffdropdown
+	                on_parent: self.dismiss()
+	                on_select: diff.text = '{}'.format(args[1])
+
+	                Button:
+	                    text: 'Easy'
+	                    size_hint_y: None
+	                    height: '48dp'
+	                    on_release: diffdropdown.select('Easy')  
+	                    on_release: root.difficulty = 'easy'
+
+	                Button:
+	                    text: 'Medium'
+	                    size_hint_y: None
+	                    height: '48dp'
+	                    on_release: diffdropdown.select('Medium')
+	                    on_release: root.difficulty = 'medium'
+
+	                Button:
+	                    text: 'Hard'
+	                    size_hint_y: None
+	                    height: '48dp'
+	                    on_release: diffdropdown.select('Hard')
+	                    on_release: root.difficulty = 'hard'
+	                
+
+	            Label:
+	            	text: ''
+	            	size_hint_y: None
+	            	height: '30px'
+	      
                 Button: 
                     size_hint_y: 0.1
                     text: 'Submit'
@@ -315,6 +362,7 @@ class LinePlayground(FloatLayout):
     crumbling = NumericProperty(0)
     slipping = NumericProperty(0)
     movingSpeed = NumericProperty(0)
+    difficulty = StringProperty('easy')
 
     horizontalRange = NumericProperty(5)
     verticalRange = NumericProperty(5)
@@ -509,7 +557,7 @@ class LinePlayground(FloatLayout):
         new_file = open('levels/' + self.directory[7:] + 'block'+str(new_id)+'.json', 'w+')
 
         level = {'id': new_id, 
-                 'difficulty': 'notRanked', 
+                 'difficulty': self.difficulty, 
                  'size': self.blockHeight, 
                  'handholds': {}, 
                  'static': {},
@@ -566,7 +614,7 @@ class LinePlayground(FloatLayout):
             obstacle = fallingObstacles[i]
             level['obstacles']['obstacle'+str(i)] = {
                 'originX': 8.5 + obstacle.pos[0]/scaling, 
-                'originY': obstacle.pos[1]/scaling, 
+                'originY': (obstacle.pos[1]/scaling) + 18, 
                 'width': obstacle.width/3.0, 
                 'height': obstacle.height/3.0, 
                 'frequency': obstacle.frequency * 60
