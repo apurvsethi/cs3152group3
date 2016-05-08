@@ -2,6 +2,7 @@ package beigegang.mountsputnik;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
+import com.badlogic.gdx.utils.Array;
 
 import static beigegang.mountsputnik.Constants.*;
 
@@ -46,25 +47,27 @@ public class PositionMovementController {
         momentum = 0f;
     }
 
-    public void moveCharacter() {
+    public void moveCharacter(float inx,float iny, float rinx,float riny, Array<Integer> nextToPress, Array<Integer> justReleased) {
         InputController input = InputController.getInstance();
-        float horizontalL = input.getHorizontalL();
-        float verticalL = input.getVerticalL();
+        float horizontalL = inx;
+        float verticalL = iny;
+        boolean np = nextToPress.size > 0;
+        boolean jr = justReleased.size > 0;
 
-        if (input.didLeftArm() && input.getOrderPressed().first() == HAND_LEFT)
+        if ( np && nextToPress.get(0) == HAND_LEFT)
             moveLimb(ARM_LEFT, FOREARM_LEFT, HAND_LEFT, horizontalL, verticalL, true);
-        else if (input.releasedLeftArm()) lockLimb(ARM_LEFT, FOREARM_LEFT);
-        if (input.didRightArm() && input.getOrderPressed().first() == HAND_RIGHT)
+        else if (jr && justReleased.contains(HAND_LEFT,false)) lockLimb(ARM_LEFT, FOREARM_LEFT);
+        if ( np && nextToPress.get(0) == HAND_RIGHT)
             moveLimb(ARM_RIGHT, FOREARM_RIGHT, HAND_RIGHT, horizontalL, verticalL, true);
-        else if (input.releasedRightArm()) lockLimb(ARM_RIGHT, FOREARM_RIGHT);
-        if (input.didLeftLeg() && input.getOrderPressed().first() == FOOT_LEFT)
+        else if (jr && justReleased.contains(HAND_RIGHT,false)) lockLimb(ARM_RIGHT, FOREARM_RIGHT);
+        if ( np && nextToPress.get(0) == FOOT_LEFT)
             moveLimb(THIGH_LEFT, SHIN_LEFT, FOOT_LEFT, horizontalL, verticalL, false);
-        else if (input.releasedLeftLeg()) lockLimb(THIGH_LEFT, SHIN_LEFT);
-        if (input.didRightLeg() && input.getOrderPressed().first() == FOOT_RIGHT)
+        else if (jr && justReleased.contains(FOOT_LEFT,false)) lockLimb(THIGH_LEFT, SHIN_LEFT);
+        if ( np && nextToPress.get(0) == FOOT_RIGHT)
             moveLimb(THIGH_RIGHT, SHIN_RIGHT, FOOT_RIGHT, horizontalL, verticalL, false);
-        else if (input.releasedRightLeg()) lockLimb(THIGH_RIGHT, SHIN_RIGHT);
+        else if (jr && justReleased.contains(FOOT_RIGHT,false)) lockLimb(THIGH_RIGHT, SHIN_RIGHT);
 
-        moveTorso(input.getHorizontalR(), input.getVerticalR());
+        moveTorso(rinx, riny);
     }
 
     private void moveLimb(int root, int mid, int extremity,

@@ -432,7 +432,7 @@ public class GameMode extends ModeController {
 	public void makeJsonForAnimation(){
 		try{
 
-			animationToFile = new FileWriter(("tutorialAnimations/animations.json"));
+			animationToFile = new FileWriter(("tutorialAnimations/animationsP.json"));
 		}catch(Exception e){}
 	}
 	public void writeNextStepJsonForAnimation(float lx, float ly, float rx, float ry, Array<Integer> pressed){
@@ -468,7 +468,7 @@ public class GameMode extends ModeController {
 
 	public void setAnimationReader(){
 		jsonReader = new JsonReader();
-		animationFormat = jsonReader.parse(Gdx.files.internal("tutorialAnimations/animations.json"));
+		animationFormat = jsonReader.parse(Gdx.files.internal("tutorialAnimations/animationsP.json"));
 		JsonAssetManager.getInstance().loadDirectory(levelFormat);
 		JsonAssetManager.getInstance().allocateDirectory();
 	}
@@ -922,7 +922,7 @@ public class GameMode extends ModeController {
 
 		if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
 
-		movementController.moveCharacter();
+		movementController.moveCharacter(inx,iny,rinx,riny,nextToPress,justReleased);
 		if (nextToPress.size > 0) {
 			for (int i : nextToPress) {
 				((ExtremityModel) (character.parts.get(i))).ungrip();
