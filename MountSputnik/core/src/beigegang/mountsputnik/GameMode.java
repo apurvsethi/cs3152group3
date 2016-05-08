@@ -441,8 +441,6 @@ public class GameMode extends ModeController {
 		font.getData().setScale(5);
 
 		NUM_HANDHOLDS.put("canyon", 1);
-		NUM_HANDHOLDS.put("snowy", 1);
-		NUM_HANDHOLDS.put("volcano", 1);
 		NUM_HANDHOLDS.put("tutorial",4);
 		NUM_HANDHOLDS.put("sky", 1);
 		NUM_HANDHOLDS.put("mountain", 1);
@@ -504,7 +502,6 @@ public class GameMode extends ModeController {
 		animationRY = timestepInfo.get(3).asFloat();
 
 		animationNextToPress.clear();
-
 		animationJustReleased.clear();
 
 		ints = timestepInfo.get(4).asIntArray();
@@ -635,7 +632,7 @@ public class GameMode extends ModeController {
 	 *
 	 * @author Daniel
 	 *
-//	 *
+	//	 *
 	 */
 //	@param levelName: the level to be generated
 	public void populateLevel() {
@@ -677,7 +674,7 @@ public class GameMode extends ModeController {
 
 
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale);
-			//arms
+		//arms
 		checkpoints.insert(0,character.parts.get(CHEST).getY());
 
 		makeHandholdsToGripAtStart();
@@ -834,9 +831,9 @@ public class GameMode extends ModeController {
 				handhold.setStartPoint(movement.getFloat("startX"),movement.getFloat("startY")+currentHeight);
 				handhold.setEndPoint(movement.getFloat("endX"),movement.getFloat("endY")+currentHeight);
 				float speed = movement.getFloat("speed"),
-					tx = handhold.getEndPoint().x - handhold.getStartPoint().x,
-					ty = handhold.getEndPoint().y - handhold.getStartPoint().y,
-					dist = (float) Math.sqrt(tx*tx+ty*ty);
+						tx = handhold.getEndPoint().x - handhold.getStartPoint().x,
+						ty = handhold.getEndPoint().y - handhold.getStartPoint().y,
+						dist = (float) Math.sqrt(tx*tx+ty*ty);
 				handhold.setLinearVelocity(new Vector2((tx/dist)*speed, (ty/dist)*speed));
 				handhold.setVelocity(speed);
 				handhold.setPosition((handhold.getStartPoint().x+handhold.getEndPoint().x)/2,
@@ -907,9 +904,9 @@ public class GameMode extends ModeController {
 	 */
 	public void update(float dt) {
 
-		if (isDead) deadMode.update(dt, listener);
+		if (isPaused) pauseMode.update(dt, listener);
+		else if (isDead) deadMode.update(dt, listener);
 		else if (isVictorious) victoryMode.update(dt, listener);
-		else if (isPaused) pauseMode.update(dt, listener);
 		else {
 			input = InputController.getInstance();
 			doingAnimation = input.watchAnimation();
@@ -943,25 +940,27 @@ public class GameMode extends ModeController {
 			}
 			if (checkIfDied()) {
 				listener.exitScreen(this, EXIT_DIED);
+
 			}
 //		upsideDown = character.parts.get(HEAD).getPosition().y - character.parts.get(CHEST).getPosition().y <= 0;
 
 
 			if (input.didSelect()) tutorialToggle = !tutorialToggle;
 
-		if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
+			if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
 
-		movementController.moveCharacter();
-		if (nextToPress.size > 0) {
-			for (int i : nextToPress) {
-				((ExtremityModel) (character.parts.get(i))).ungrip();
-				ungrip(((ExtremityModel) (character.parts.get(i))));
+			movementController.moveCharacter();
+			if (nextToPress.size > 0) {
+				for (int i : nextToPress) {
+					((ExtremityModel) (character.parts.get(i))).ungrip();
+					ungrip(((ExtremityModel) (character.parts.get(i))));
+				}
 			}
-		}
-		//bounding velocities
-		boundBodyVelocities();
-		HandholdModel[] glowingHandholds = glowHandholds();
+			//bounding velocities
+			boundBodyVelocities();
+			HandholdModel[] glowingHandholds = glowHandholds();
 
+			snapLimbsToHandholds(glowingHandholds);
 
 			cameraWork();
 
@@ -1013,21 +1012,16 @@ public class GameMode extends ModeController {
 			energyLevel = Math.abs((int) Math.ceil(character.getEnergy() / 10f));
 			checkHasCompleted();
 			if (complete) {
-				//TODO: properly change level
 				listener.exitScreen(this, EXIT_VICTORY);
 			}
 			if (checkpointTimestep == 0) cposYAtTime0 = character.parts.get(HEAD).getY();
 			checkpointTimestep += 1;
 			timestep += 1;
-
 		}
 
 	}
 
-	private void watchAnimation() {
-		if (timestep == 0) setAnimationReader();
-		doingAnimation = true;
-	}
+
 
 	private void createAnimation() {
 		if (timestep == 0) makeJsonForAnimation();
@@ -1062,13 +1056,13 @@ public class GameMode extends ModeController {
 				else{
 					HandholdModel h = (HandholdModel) extremity.getJoint().getBodyB().getFixtureList().get(0).getUserData();
 					if((e == HAND_LEFT || e == HAND_RIGHT)
-							 && h.getVelocity() != 0 &&
-							 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > ARM_UNGRIP_LENGTH)
-						 ungrip(extremity);
-				    else if((e == FOOT_LEFT || e == FOOT_RIGHT) &&
-				    		  h.getVelocity() != 0 &&
-							 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > LEG_UNGRIP_LENGTH)
-						 ungrip(extremity);
+							&& h.getVelocity() != 0 &&
+							character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > ARM_UNGRIP_LENGTH)
+						ungrip(extremity);
+					else if((e == FOOT_LEFT || e == FOOT_RIGHT) &&
+							h.getVelocity() != 0 &&
+							character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > LEG_UNGRIP_LENGTH)
+						ungrip(extremity);
 					if(extremity.getGripTime() > h.getSlip()*60 && h.getSlip() > 0){
 						ungrip(extremity);
 					}
@@ -1098,12 +1092,12 @@ public class GameMode extends ModeController {
 	}
 
 	private void ungripAllFrom(HandholdModel h){
-		 for(int e : EXTREMITIES){
-			 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
-			 if(extremity.isGripped() && extremity.getJoint().getBodyB().getFixtureList().get(0).getUserData() == h){
-				 ungrip(extremity);
-			 }
-		 }
+		for(int e : EXTREMITIES){
+			ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
+			if(extremity.isGripped() && extremity.getJoint().getBodyB().getFixtureList().get(0).getUserData() == h){
+				ungrip(extremity);
+			}
+		}
 	}
 
 	private boolean withinBounds(Vector2 position, Vector2 target) {
@@ -1213,7 +1207,7 @@ public class GameMode extends ModeController {
 				qo.ticksSinceLastSpawn = 0;
 			}
 
-			}
+		}
 	}
 
 	private void spawnObstacle(ObstacleZone oz) {
@@ -1251,10 +1245,9 @@ public class GameMode extends ModeController {
 
 	/**
 	 * @param vect - current linear velocity vector of any body part
-     * @return bounded linear velocity vector
+	 * @return bounded linear velocity vector
 	 * @author Jacob
-
-     */
+	 */
 	private Vector2 boundVelocity(Vector2 vect) {
 		if (Math.abs(vect.x) > 1 || Math.abs(vect.y) > 1) {
 		}
@@ -1311,7 +1304,7 @@ public class GameMode extends ModeController {
 	 * if possible
 	 * @author Jacob
 	 * @param hs - handholds in game
-     */
+	 */
 	private void snapLimbsToHandholds(HandholdModel[] hs) {
 
 		if (justReleased.get(0) == 1|| timestep == 0)
@@ -1347,7 +1340,7 @@ public class GameMode extends ModeController {
 		Vector2 closestSnapPoint = new Vector2(0,0);
 		for (HandholdModel h: hs) {
 			if (h == null) continue;
- 			for (Vector2 snapPoint : h.snapPoints) {
+			for (Vector2 snapPoint : h.snapPoints) {
 				dist = distanceFrom(limb, snapPoint);
 				if (dist <= HANDHOLD_SNAP_RADIUS){
 					closest = closestdist > dist ? h:closest;
@@ -1475,7 +1468,7 @@ public class GameMode extends ModeController {
 		canvas.draw(fatigueTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 
 		if (currLevel == LEVEL_TUTORIAL)
-		canvas.draw(tutorialOverlay, Color.WHITE, canvas.getWidth()/4, canvas.getHeight()/8, canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
+			canvas.draw(tutorialOverlay, Color.WHITE, canvas.getWidth()/4, canvas.getHeight()/8, canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
 		counterInt = 0;
 
 		while (counterInt <= lastReachedCheckpoint){
@@ -1492,9 +1485,9 @@ public class GameMode extends ModeController {
 		canvas.end();
 
 		canvas.begin();
-//		if (complete) {
-//			canvas.drawText("YOU WIN", font, canvas.getWidth() / 2, canvas.getCamera().position.y);
-//		}
+		if (complete) {
+			canvas.drawText("YOU WIN", font, canvas.getWidth() / 2, canvas.getCamera().position.y);
+		}
 
 		if (risingObstacle != null) {
 			float lavaOrigin = risingObstacle.getHeight() * scale.y -
@@ -1522,9 +1515,9 @@ public class GameMode extends ModeController {
 			canvas.endDebug();
 		}
 
-		if (isDead) deadMode.draw(canvas);
+		if (isPaused) pauseMode.draw(canvas);
+		else if (isDead) deadMode.draw(canvas);
 		else if (isVictorious) victoryMode.draw(canvas);
-		else if (isPaused) pauseMode.draw(canvas);
 	}
 
 	public void setLevel(int level){
@@ -1543,7 +1536,12 @@ public class GameMode extends ModeController {
 		return currLevel;
 	}
 
-	public int getNextLevel(){ return (currLevel != NUM_LEVELS - 1 ? currLevel + 1 : currLevel); }
+	public int getNextLevel(){
+		if (currLevel != NUM_LEVELS - 1){
+			return currLevel + 1;
+		}
+		return currLevel;
+	}
 
 	/**
 	 * Called when the Screen is paused.
@@ -1562,6 +1560,7 @@ public class GameMode extends ModeController {
 	 * This is usually when it regains focus.
 	 */
 	public void resume() {
+		// Shouldn't need to do anything to resume for now, can change focus of screen
 		isPaused = false;
 	}
 
