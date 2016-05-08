@@ -545,7 +545,6 @@ public class GameMode extends ModeController {
 	}
 	public void populateLevelAtLastCheckpoint() {
 		readLevelStats();
-
 		int counter = 0;
 		used.clear();
 		maxHandhold = remainingHeight;
@@ -612,25 +611,30 @@ public class GameMode extends ModeController {
 		used.clear();
 		maxHandhold = remainingHeight;
 		maxLevelHeight = remainingHeight;
-
+		String levelDiff = levelFormat.getString("difficulty");
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
-//			blockNumber = 14;
-			while(used.contains(blockNumber, true)&&!levelName.equals("tutorial"))
+			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
+			String blockDiff = levelPiece.getString("difficulty");
+			while((used.contains(blockNumber, true)|| 
+					getDifficultyProb(levelDiff, blockDiff, currentHeight, remainingHeight) > Math.random())
+					&&!levelName.equals("tutorial")){
 				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
+				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
+				blockDiff = levelPiece.getString("difficulty");
+			}
 			used.add(blockNumber);
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json");
-			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
 			checkpointLevelJsons.add(levelPiece);
 			addChunk(levelPiece, currentHeight, levelName);
 			currentHeight += levelPiece.getFloat("size");
 			checkpoints.add(currentHeight);
 
 		}
+		
 		checkpointLevelBlocks.addAll(used);
 		System.out.println(levelBlocks);
-		System.out.println(checkpointLevelBlocks);
 
 
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale);
@@ -642,6 +646,38 @@ public class GameMode extends ModeController {
 		movementController = new MovementController(character);
 
 	}
+	/**
+	 * Calculates a number for use by the level generator to prioritize difficulty based on height, 
+	 * and relative difficulty to level average
+	 * @param level the difficulty of the overall level
+	 * @param block the difficulty of the block
+	 * @param current the current height
+	 * @param remaining the total height
+	 * @return probability estimate for level generator
+	 */
+	private float getDifficultyProb(String levelDiff, String blockDiff, float current, float total) {
+		switch (levelDiff){
+			case "easy":
+				if(blockDiff.equals("hard")) return 1;
+				if(blockDiff.equals("medium") && current < total/2) return 1;
+				if(blockDiff.equals("medium")) return (current/total)/2;
+				return 0;
+			case "medium":
+				if(blockDiff.equals("hard") && current < total/2) return 1;
+				if(blockDiff.equals("hard")) return (current/total)/2;
+				if(blockDiff.equals("easy") && current > total/2) return 1;
+				if(blockDiff.equals("easy")) return (1 - current/total)/2;
+				return 0;
+			case "hard":
+				if(blockDiff.equals("easy")) return 1;
+				if(blockDiff.equals("medium") && current > total/2) return 1;
+				if(blockDiff.equals("medium")) return (1 - current/total)/2;
+				return 0;
+			default:
+				return 1;
+		}
+	}
+	
 	private void readLevelStats() {
 		jsonReader = new JsonReader();
 		levelFormat = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/level.json"));
@@ -813,10 +849,6 @@ public class GameMode extends ModeController {
 		catch(Exception e){}
 	}
 
-	/*private void makeTestLevel() {
-		obstacleZone = new ObstacleZone(handholdTextures[0].getTexture(), warningTexture, 0, 200, new Rectangle(9,30,2,5));
-		obstacles.add(obstacleZone);
-	}*/
 	// ************************************END LEVELS*********************************************** //
 
 
@@ -1190,41 +1222,6 @@ public class GameMode extends ModeController {
 
 		return vect;
 	}
-	/**
-	 * !!!currently not functioning!!!
-	 * will apply dampening to any limb not currently controlled by the player & are unattached to a handhold
-	 * will help limbs not swing around wildly after player releases them.
-	 * @author Jacob
-	 *
- 	 */
-	private void applyDampening() {
-		for (int ext : EXTREMITIES){
-			if (!isGripping(ext)){
-				float thisDampX = DAMPENING_X;
-				float thisDampY = DAMPENING_Y;
-				vector = character.parts.get(ext).getLinearVelocity();
-
-				if (vector.y > 0) {
-					if (vector.y - DAMPENING_Y < 0) thisDampY = vector.y;
-					character.parts.get(ext).setVY(vector.y - thisDampY);
-				}
-				if (vector.x > 0) {
-					if (vector.x - DAMPENING_X < 0) thisDampX = vector.x;
-					character.parts.get(ext).setVX(vector.x - thisDampX);
-
-				}
-				//if neg both
-				if (vector.y < 0) {
-					if (vector.y + DAMPENING_Y > 0) thisDampY = -1 * vector.y;
-					character.parts.get(ext).setVY(vector.y + thisDampY);
-				}
-				if (vector.x < 0) {
-					if (vector.x + DAMPENING_X > 0) thisDampX = -1 * vector.x;
-					character.parts.get(ext).setVX(vector.x + thisDampX);
-				}
-			}
-		}
-	}
 
 	/**
 	 * this method glows any handholds close enough for the person's extremity to grab.
@@ -1326,21 +1323,6 @@ public class GameMode extends ModeController {
 //		}
 	}
 
-	/**
-	 * helper function to check if limb is close enough to a snapPoint on a handhold
-	 * used for both snapping limbs to handholds and glowing handholds showing player they're close enough to snap
-	 *
-	 * @param limb - limb to check for closeness
-	 * @param snapPoint - point on handhold to check distance to
-	 * @author Jacob
-	 *
-	 *
-	*/
-
-	private boolean closeEnough(int limb, Vector2 snapPoint) {
-		vector = new Vector2 (character.parts.get(limb).getPosition().sub(snapPoint));
-		return (Math.sqrt(vector.x * vector.x + vector.y * vector.y) <= HANDHOLD_SNAP_RADIUS);
-	}
 	private double distanceFrom(int limb, Vector2 snapPoint) {
 		vector = new Vector2 (character.parts.get(limb).getPosition().sub(snapPoint));
 		return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
