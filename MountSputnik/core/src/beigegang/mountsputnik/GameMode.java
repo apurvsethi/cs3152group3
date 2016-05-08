@@ -340,7 +340,7 @@ public class GameMode extends ModeController {
 		}
 	}
 
-	private MovementController movementController;
+	private PositionMovementController movementController;
 
 	private ObstacleZone obstacleZone;
 	/** only for lava so far */
@@ -579,7 +579,7 @@ public class GameMode extends ModeController {
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, Math.max(DEFAULT_HEIGHT/2, checkpoints.get(lastReachedCheckpoint)), scale);
 		addCharacterToGame();
 
-		movementController = new MovementController(character);
+		movementController = new PositionMovementController(character, scale);
 		makeHandholdsToGripAtStart();
 
 	}
@@ -660,16 +660,16 @@ public class GameMode extends ModeController {
 		
 		makeHandholdsToGripAtStart();
 		addCharacterToGame();
-		movementController = new MovementController(character);
+		movementController = new PositionMovementController(character, scale);
 
 	}
 	/**
 	 * Calculates a number for use by the level generator to prioritize difficulty based on height, 
 	 * and relative difficulty to level average
-	 * @param level the difficulty of the overall level
-	 * @param block the difficulty of the block
+	 * @param levelDiff the difficulty of the overall level
+	 * @param blockDiff the difficulty of the block
 	 * @param current the current height
-	 * @param remaining the total height
+	 * @param total the total height
 	 * @return probability estimate for level generator
 	 */
 	private float getDifficultyProb(String levelDiff, String blockDiff, float current, float total) {
@@ -923,20 +923,15 @@ public class GameMode extends ModeController {
 
 		if(input.didSelect()) tutorialToggle = !tutorialToggle;
 
-		movementController.makeHookedJointsMovable(nextToPress);
-
 		if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
 
-		movementController.resetLimbSpeedsTo0();
+		movementController.moveCharacter();
 		if (nextToPress.size > 0) {
 			for (int i : nextToPress) {
 				((ExtremityModel) (character.parts.get(i))).ungrip();
 				ungrip(((ExtremityModel) (character.parts.get(i)))); 
 			}
-
-			movementController.findAndApplyForces(nextToPress.get(0),iny,inx);
 		}
-		movementController.applyTorsoForceIfApplicable(rinx, riny);
 		//bounding velocities
 		boundBodyVelocities();
 		HandholdModel[] glowingHandholds = glowHandholds();
