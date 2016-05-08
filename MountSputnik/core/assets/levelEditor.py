@@ -1,3 +1,7 @@
+#must include the level:    cayon/block10.json
+#							mountain/block3.json
+LEVEL_TO_LOAD = "canyon/block3.json"
+
 '''
 Repeat Texture on Resize
 ========================
@@ -22,10 +26,15 @@ from kivy.core.window import Window
 from kivy.graphics import * 
 from math import sqrt
 from glob import glob 
+import json 
 
 
 Builder.load_string('''
 <LinePlayground>:
+	diffdropdown: diffdropdown.__self__
+	dropdown: dropdown.__self__
+                
+
     BoxLayout:
         size_hint: 1, 1
         orientation: 'horizontal' 
@@ -149,8 +158,7 @@ Builder.load_string('''
                 height: '48dp'
 
             DropDown:
-
-                id: dropdown
+            	id: dropdown
                 on_parent: self.dismiss()
                 on_select: btn.text = '{}'.format(args[1])
 
@@ -243,7 +251,55 @@ Builder.load_string('''
 
                 Label: 
                     text: ''
-      
+
+                Label: 
+                	text: 'Difficulty'
+                	size_hint_y: None
+                	height: '40px'
+
+	            Button:
+	                id: diff
+	                text: 'Easy'
+	                on_release: diffdropdown.open(self)
+	                size_hint_y: None
+	                height: '48dp'
+
+	            DropDown:
+	            	id: diffdropdown
+	                on_parent: self.dismiss()
+	                on_select: diff.text = '{}'.format(args[1])
+
+	                Button:
+	                    text: 'Easy'
+	                    size_hint_y: None
+	                    height: '48dp'
+	                    on_release: diffdropdown.select('Easy')  
+	                    on_release: root.changeDifficulty('easy')
+
+	                Button:
+	                    text: 'Medium'
+	                    size_hint_y: None
+	                    height: '48dp'
+	                    on_release: diffdropdown.select('Medium')
+	                    on_release: root.changeDifficulty('medium')
+
+	                Button:
+	                    text: 'Hard'
+	                    size_hint_y: None
+	                    height: '48dp'
+	                    on_release: diffdropdown.select('Hard')
+	                    on_release: root.changeDifficulty('hard')
+	                
+
+	            Label:
+	            	text: ''
+	            	size_hint_y: None
+	            	height: '30px'
+
+	            Button: 
+	            	size_hint_y: 0.1
+	            	text: 'Load'
+	            	on_release: root.loadJSON()
                 Button: 
                     size_hint_y: 0.1
                     text: 'Submit'
@@ -259,7 +315,6 @@ Builder.load_string('''
 
 class Handhold(object): 
 
-    #TODO: crumbling, moving, and slipping not yet implemented 
     def __init__(self,x,y,scale,c,s): 
         self.pos = [x,y]
         self.scale = scale
@@ -315,6 +370,7 @@ class LinePlayground(FloatLayout):
     crumbling = NumericProperty(0)
     slipping = NumericProperty(0)
     movingSpeed = NumericProperty(0)
+    difficulty = StringProperty('easy')
 
     horizontalRange = NumericProperty(5)
     verticalRange = NumericProperty(5)
@@ -451,12 +507,7 @@ class LinePlayground(FloatLayout):
                 else: 
                     Color(1,0,0,0.3)
                 Rectangle(pos=[canvas_left + obstacle.pos[0] - (scaling*(obstacle.width/2)),canvas_origin + obstacle.pos[1] - (scaling*(obstacle.height/2))],size=[obstacle.width*scaling, obstacle.height*scaling])
-                
-                
-            
-
                         
-
 
     def doSelection(self, touch): 
         global selected
@@ -498,18 +549,21 @@ class LinePlayground(FloatLayout):
         self.resize()   
 
     def createJSON(self): 
-        new_id = 0
-        for link in glob('levels/' + self.directory[7:] + 'block*'): 
-            link_num = link[link.find("block")+5:-5]
-            if int(link_num) > new_id: 
-                new_id = int(link_num)
-            pass
-        new_id += 1
-        print "Creating " + 'levels/' + self.directory[7:] + 'block'+str(new_id)+'.json'
-        new_file = open('levels/' + self.directory[7:] + 'block'+str(new_id)+'.json', 'w+')
+    	if LEVEL_TO_LOAD != "": 
+    		new_file = open('levels/'+LEVEL_TO_LOAD, 'w')
+    		print "Updating " + LEVEL_TO_LOAD
+    	else: 
+	        new_id = 0
+	        for link in glob('levels/' + self.directory[7:] + 'block*'): 
+	            link_num = link[link.find("block")+5:-5]
+	            if int(link_num) > new_id: 
+	                new_id = int(link_num)
+	            pass
+	        new_id += 1
+	        print "Creating " + 'levels/' + self.directory[7:] + 'block'+str(new_id)+'.json'
+	        new_file = open('levels/' + self.directory[7:] + 'block'+str(new_id)+'.json', 'w+')
 
-        level = {'id': new_id, 
-                 'difficulty': 'notRanked', 
+        level = {'difficulty': self.difficulty, 
                  'size': self.blockHeight, 
                  'handholds': {}, 
                  'static': {},
@@ -566,7 +620,7 @@ class LinePlayground(FloatLayout):
             obstacle = fallingObstacles[i]
             level['obstacles']['obstacle'+str(i)] = {
                 'originX': 8.5 + obstacle.pos[0]/scaling, 
-                'originY': obstacle.pos[1]/scaling, 
+                'originY': (obstacle.pos[1]/scaling) + 18, 
                 'width': obstacle.width/3.0, 
                 'height': obstacle.height/3.0, 
                 'frequency': obstacle.frequency * 60
@@ -578,6 +632,49 @@ class LinePlayground(FloatLayout):
         new_file.close()
         #self.clear()
 
+    def loadJSON(self):
+    	if LEVEL_TO_LOAD == "":
+    		return 
+    	jfile = open(glob("levels/"+LEVEL_TO_LOAD)[0], 'r')
+    	level = json.load(jfile)
+    	jfile.close()
+    	self.difficulty = level['difficulty']
+    	self.blockHeight = level['size']
+    	self.directory = "assets/" + LEVEL_TO_LOAD[:LEVEL_TO_LOAD.find('/')+1]
+    	for h in level['handholds']: 
+    		hold = level['handholds'][h]
+    		if 'movement' in hold: 
+    			scale = hold['width']/handhold_width*3.0
+    			crumble = hold['crumble']
+    			slip = hold['slip']
+    			speed = hold['movement']['speed']
+    			startX = (hold['movement']['startX']-8.5)*scaling
+    			startY = hold['movement']['startY']*scaling
+    			endX = (hold['movement'][endX]-8.5)*scaling
+    			endY = hold['movement']['endY']*scaling
+    			movingHandholds.append(MovingHandhold(startX,startY,scale,crumble,slip,speed))
+    			movingHandholds.append(MovingHandhold(endX,endY,scale,crumble,slip,speed))
+    		else:
+    			scale = hold['width']/handhold_width*3.0
+    			crumble = hold['crumble']
+    			slip = hold['slip']
+    			startX = (hold['positionX']-8.5)*scaling
+    			startY = hold['positionY']*scaling
+    			handholds.append(Handhold(startX, startY, scale, crumble, slip))
+    	for static in level['static']: 
+    		x = (static['x']-8.5)*scaling
+    		y = static['y']*scaling
+    		size = static['size']*3.0
+    		staticObstacles.append(StaticObstacle(x,y,size))
+    	for obstacle in level['obstacles']: 
+    		originX = (obstacle['originX']-8.5)*scaling 
+    		originY = obstacle['originY']*scaling - 18
+    		width = obstacle['width']*3
+    		height = obstacle['height']*3
+    		frequency = obstacle['frequency']/60.0
+    		fallingObstacles.append(FallingObstacle(originX,originY,width,height,frequency))
+    	self.resize()
+
     def changeDirectory(self, btn):
         self.directory = "assets/" + btn + "/"
         self.resize() 
@@ -585,6 +682,9 @@ class LinePlayground(FloatLayout):
     def changePlacement(self, btn):
         self.whatToPlace = btn
         self.resize()
+
+    def changeDifficulty(self, btn): 
+    	self.difficulty = btn
 
     def removeBadHandholds(self): 
         for L in [handholds, movingHandholds, fallingObstacles, staticObstacles]: 
