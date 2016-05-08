@@ -1,6 +1,6 @@
 #must include the level:    cayon/block10.json
 #							mountain/block3.json
-LEVEL_TO_LOAD = "canyon/block3.json"
+LEVEL_TO_LOAD = "canyon/block14.json"
 
 '''
 Repeat Texture on Resize
@@ -176,6 +176,20 @@ Builder.load_string('''
                     on_release: dropdown.select('Mountain')
                     on_release: root.changeDirectory("mountain")
 
+				Button:
+                    text: 'Waterfall'
+                    size_hint_y: None
+                    height: '48dp'
+                    on_release: dropdown.select('Waterfall')
+                    on_release: root.changeDirectory("waterfall")
+
+                Button:
+                    text: 'Volcano'
+                    size_hint_y: None
+                    height: '48dp'
+                    on_release: dropdown.select('Volcano')
+                    on_release: root.changeDirectory("volcano")                
+
                 Button:
                     text: 'Sky'
                     size_hint_y: None
@@ -299,6 +313,7 @@ Builder.load_string('''
 	            Button: 
 	            	size_hint_y: 0.1
 	            	text: 'Load'
+	            	on_release: root.didLoad = True
 	            	on_release: root.loadJSON()
                 Button: 
                     size_hint_y: 0.1
@@ -371,6 +386,7 @@ class LinePlayground(FloatLayout):
     slipping = NumericProperty(0)
     movingSpeed = NumericProperty(0)
     difficulty = StringProperty('easy')
+    didLoad = BooleanProperty(False)
 
     horizontalRange = NumericProperty(5)
     verticalRange = NumericProperty(5)
@@ -549,7 +565,7 @@ class LinePlayground(FloatLayout):
         self.resize()   
 
     def createJSON(self): 
-    	if LEVEL_TO_LOAD != "": 
+    	if self.didLoad: 
     		new_file = open('levels/'+LEVEL_TO_LOAD, 'w')
     		print "Updating " + LEVEL_TO_LOAD
     	else: 
@@ -661,12 +677,14 @@ class LinePlayground(FloatLayout):
     			startX = (hold['positionX']-8.5)*scaling
     			startY = hold['positionY']*scaling
     			handholds.append(Handhold(startX, startY, scale, crumble, slip))
-    	for static in level['static']: 
+    	for s in level['static']: 
+    		static = level['static'][s]
     		x = (static['x']-8.5)*scaling
     		y = static['y']*scaling
     		size = static['size']*3.0
     		staticObstacles.append(StaticObstacle(x,y,size))
-    	for obstacle in level['obstacles']: 
+    	for o in level['obstacles']:
+    		obstacle = level['obstacles'][o]
     		originX = (obstacle['originX']-8.5)*scaling 
     		originY = obstacle['originY']*scaling - 18
     		width = obstacle['width']*3
