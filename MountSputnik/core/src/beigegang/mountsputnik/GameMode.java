@@ -561,7 +561,7 @@ public class GameMode extends ModeController {
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
 			addChunk(levelPiece, currentHeight, levelName);
 			currentHeight += levelPiece.getFloat("size");
-			checkpoints.add(currentHeight);
+			if(!levelName.equals("volcano")) checkpoints.add(currentHeight);
 			//filler stuff not currently used.
 //			for(counterInt = 0; counterInt < filler; counterInt++){
 //				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
@@ -639,7 +639,7 @@ public class GameMode extends ModeController {
 			checkpointLevelJsons.add(levelPiece);
 			addChunk(levelPiece, currentHeight, levelName);
 			currentHeight += levelPiece.getFloat("size");
-			checkpoints.add(currentHeight);
+			if(!levelName.equals("volcano")) checkpoints.add(currentHeight);
 			//filler stuff not currently used.
 //			for(counterInt = 0; counterInt < filler; counterInt++){
 //				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
@@ -1476,7 +1476,7 @@ public class GameMode extends ModeController {
 
 		if (risingObstacle != null) {
 			float lavaOrigin = risingObstacle.getHeight() * scale.y -
-					canvas.getHeight();
+					canvas.getHeight() + 50;
 			canvas.draw(risingObstacle.getTexture(), Color.WHITE, canvas.getWidth() / 4, lavaOrigin, canvas.getWidth() * 3 / 4, canvas.getHeight());
 		}
 		canvas.end();
