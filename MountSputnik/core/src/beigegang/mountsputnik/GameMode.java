@@ -55,9 +55,7 @@ public class GameMode extends ModeController {
 	/**
 	 * Strings for files used, string[] for parts, etc.
 	 */
-	//We need to preload every single texture, regardless of which level we're currently using. Loading can't be
-	//dynamically
-	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "canyon", "mountain", "volcano", "sky", "space"};//,"mountain","sky","space"}; <-- Add the rest of these in as they are given assets
+	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "canyon", "volcano", "mountain", "sky", "space"}; //TODO: change second canyon to waterfall
 	private static final String LAVA_FILE = "assets/lava.png";
 	private static final String UI_FILE = "assets/HUD4timeless.png";
 	private static final String[] LEVEL_LABEL_FILES = {"assets/Tutorial.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Skycloud.png", "assets/Canyon.png"};
@@ -65,7 +63,6 @@ public class GameMode extends ModeController {
 	private static final String GLOW_FILE = "assets/glow.png";
 	private static final String RUSSIAN_FLAG_FILE = "RussianFlag.png";
 	private static final HashMap<String,Integer> NUM_HANDHOLDS = new HashMap<String,Integer>();
-	//private static final String HANDHOLD_TEXTURES[] = {"assets/canyon/Handhold1.png", "assets/canyon/Handhold2.png"};
 	private static final String PART_TEXTURES[] = {"Ragdoll/Torso.png", "Ragdoll/Head.png", "Ragdoll/Hips.png",
 			"Ragdoll/ArmLeft.png", "Ragdoll/ArmRight.png", "Ragdoll/ForearmLeft.png", "Ragdoll/ForearmRight.png",
 			"Ragdoll/HandLeftUngripped.png", "Ragdoll/HandRightUngripped.png", "Ragdoll/ThighLeft.png",
@@ -340,7 +337,7 @@ public class GameMode extends ModeController {
 		}
 	}
 
-	private MovementController movementController;
+	private PositionMovementController movementController;
 
 	private ObstacleZone obstacleZone;
 	/** only for lava so far */
@@ -561,8 +558,15 @@ public class GameMode extends ModeController {
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
 			addChunk(levelPiece, currentHeight, levelName);
 			currentHeight += levelPiece.getFloat("size");
-			checkpoints.add(currentHeight);
-
+			if(!levelName.equals("volcano")) checkpoints.add(currentHeight);
+			//filler stuff not currently used.
+//			for(counterInt = 0; counterInt < filler; counterInt++){
+//				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
+//				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/general/block"+blockNumber+".json"));
+//				levelBlocks.add("Levels/general/block"+blockNumber+".json");
+//				addChunk(levelPiece, currentHeight, levelName);
+//				currentHeight += levelPiece.getInt("size");
+//			}
 			counter ++;
 		}
 		System.out.println(levelBlocks);
@@ -572,7 +576,7 @@ public class GameMode extends ModeController {
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, Math.max(DEFAULT_HEIGHT/2, checkpoints.get(lastReachedCheckpoint)), scale);
 		addCharacterToGame();
 
-		movementController = new MovementController(character);
+		movementController = new PositionMovementController(character, scale);
 		makeHandholdsToGripAtStart();
 
 	}
@@ -632,8 +636,15 @@ public class GameMode extends ModeController {
 			checkpointLevelJsons.add(levelPiece);
 			addChunk(levelPiece, currentHeight, levelName);
 			currentHeight += levelPiece.getFloat("size");
-			checkpoints.add(currentHeight);
-
+			if(!levelName.equals("volcano")) checkpoints.add(currentHeight);
+			//filler stuff not currently used.
+//			for(counterInt = 0; counterInt < filler; counterInt++){
+//				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
+//				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/general/block"+blockNumber+".json"));
+//				levelBlocks.add("Levels/general/block"+blockNumber+".json");
+//				addChunk(levelPiece, currentHeight, levelName);
+//				currentHeight += levelPiece.getInt("size");
+//			}
 		}
 		
 		checkpointLevelBlocks.addAll(used);
@@ -646,16 +657,16 @@ public class GameMode extends ModeController {
 		
 		makeHandholdsToGripAtStart();
 		addCharacterToGame();
-		movementController = new MovementController(character);
+		movementController = new PositionMovementController(character, scale);
 
 	}
 	/**
 	 * Calculates a number for use by the level generator to prioritize difficulty based on height, 
 	 * and relative difficulty to level average
-	 * @param level the difficulty of the overall level
-	 * @param block the difficulty of the block
+	 * @param levelDiff the difficulty of the overall level
+	 * @param blockDiff the difficulty of the block
 	 * @param current the current height
-	 * @param remaining the total height
+	 * @param total the total height
 	 * @return probability estimate for level generator
 	 */
 	private float getDifficultyProb(String levelDiff, String blockDiff, float current, float total) {
@@ -909,20 +920,15 @@ public class GameMode extends ModeController {
 
 		if(input.didSelect()) tutorialToggle = !tutorialToggle;
 
-		movementController.makeHookedJointsMovable(nextToPress);
-
 		if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
 
-		movementController.resetLimbSpeedsTo0();
+		movementController.moveCharacter();
 		if (nextToPress.size > 0) {
 			for (int i : nextToPress) {
 				((ExtremityModel) (character.parts.get(i))).ungrip();
 				ungrip(((ExtremityModel) (character.parts.get(i)))); 
 			}
-
-			movementController.findAndApplyForces(nextToPress.get(0),iny,inx);
 		}
-		movementController.applyTorsoForceIfApplicable(rinx, riny);
 		//bounding velocities
 		boundBodyVelocities();
 		HandholdModel[] glowingHandholds = glowHandholds();
@@ -1459,7 +1465,7 @@ public class GameMode extends ModeController {
 
 		if (risingObstacle != null) {
 			float lavaOrigin = risingObstacle.getHeight() * scale.y -
-					canvas.getHeight();
+					canvas.getHeight() + 50;
 			canvas.draw(risingObstacle.getTexture(), Color.WHITE, canvas.getWidth() / 4, lavaOrigin, canvas.getWidth() * 3 / 4, canvas.getHeight());
 		}
 		canvas.end();

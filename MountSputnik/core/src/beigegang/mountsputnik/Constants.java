@@ -28,9 +28,9 @@ public final class Constants {
 	public static final int NUM_LEVELS = 7;
 	public static final int LEVEL_TUTORIAL = 0;
 	public static final int LEVEL_CANYON = 1;
-	public static final int LEVEL_SNOWY_MOUNTAIN = 3;
+	public static final int LEVEL_SNOWY_MOUNTAIN = 4;
 	public static final int LEVEL_WATERFALL = 2;
-	public static final int LEVEL_VOLCANO = 4;
+	public static final int LEVEL_VOLCANO = 3;
 	public static final int LEVEL_SKY = 5;
 	public static final int LEVEL_SPACE = 6;
 
