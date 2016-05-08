@@ -20,7 +20,7 @@ public class ObstacleModel extends GameObject{
 	
 	@Override
 	public void draw(GameCanvas canvas){
-		if (getX() * drawPositionScale.x > canvas.getWidth() / 4 && getX() * drawPositionScale.x < canvas.getWidth() * 3 / 4) {		
+		if (drawPositionScale.x < canvas.getWidth() * 3 / 4) {		
 				canvas.draw(animator, Color.WHITE, origin.x, origin.y,
 						getX() * drawPositionScale.x, getY() * drawPositionScale.y,
 						getAngle(), drawSizeScale.x, drawSizeScale.y);
