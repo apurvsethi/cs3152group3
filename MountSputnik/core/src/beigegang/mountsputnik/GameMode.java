@@ -58,8 +58,8 @@ public class GameMode extends ModeController {
 	//We need to preload every single texture, regardless of which level we're currently using. Loading can't be
 	//dynamically
 	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "canyon", "canyon", "canyon", "sky", "canyon"};//,"mountain","sky","space"}; <-- Add the rest of these in as they are given assets
-	private static final String LAVA_FILE = "assets/testlavatexture.png"; //TODO: make this a better texture
-	private static final String UI_FILE = "assets/HUD4timeless.png"; //TODO: change back to regular after video
+	private static final String LAVA_FILE = "assets/lava.png";
+	private static final String UI_FILE = "assets/HUD4timeless.png";
 	private static final String[] LEVEL_LABEL_FILES = {"assets/Tutorial.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Skycloud.png", "assets/Canyon.png"};
 	private static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
 	private static final String GLOW_FILE = "assets/glow.png";
@@ -433,7 +433,7 @@ public class GameMode extends ModeController {
 		try{
 
 			animationToFile = new FileWriter(("tutorialAnimations/animations.json"));
-		}catch(Exception e){System.out.println("what happened" + e);}
+		}catch(Exception e){}
 	}
 	public void writeNextStepJsonForAnimation(float lx, float ly, float rx, float ry, Array<Integer> pressed){
 		String e = "";
@@ -462,7 +462,7 @@ public class GameMode extends ModeController {
 			animationToFile.write(fullJson);
 			animationToFile.flush();
 			animationToFile.close();
-		}catch(Exception e){ System.out.println("unhandled exception" + e); }
+		}catch(Exception e){ }
 	}
 
 
@@ -560,14 +560,7 @@ public class GameMode extends ModeController {
 			addChunk(levelPiece, currentHeight, levelName);
 			currentHeight += levelPiece.getFloat("size");
 			checkpoints.add(currentHeight);
-			//filler stuff not currently used.
-//			for(counterInt = 0; counterInt < filler; counterInt++){
-//				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
-//				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/general/block"+blockNumber+".json"));
-//				levelBlocks.add("Levels/general/block"+blockNumber+".json");
-//				addChunk(levelPiece, currentHeight, levelName);
-//				currentHeight += levelPiece.getInt("size");
-//			}
+
 			counter ++;
 		}
 		System.out.println(levelBlocks);
@@ -633,14 +626,7 @@ public class GameMode extends ModeController {
 			addChunk(levelPiece, currentHeight, levelName);
 			currentHeight += levelPiece.getFloat("size");
 			checkpoints.add(currentHeight);
-			//filler stuff not currently used.
-//			for(counterInt = 0; counterInt < filler; counterInt++){
-//				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
-//				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/general/block"+blockNumber+".json"));
-//				levelBlocks.add("Levels/general/block"+blockNumber+".json");
-//				addChunk(levelPiece, currentHeight, levelName);
-//				currentHeight += levelPiece.getInt("size");
-//			}
+
 		}
 		checkpointLevelBlocks.addAll(used);
 		System.out.println(levelBlocks);
@@ -878,7 +864,6 @@ public class GameMode extends ModeController {
 
 		if (checkIfReachedCheckpoint()){
 			lastReachedCheckpoint ++;
-			System.out.println("checkpoint detection");
 		}
 		if (checkIfDied()) {
 			listener.exitScreen(this, DIED);
@@ -1496,7 +1481,6 @@ public class GameMode extends ModeController {
 		//draw the obstacle warnings.
 		for (warningsClass wc : obstacleWarnings) {
 			warningSprite.setBounds(wc.center * scale.x -  1.5f * scale.x, y/scale.y + canvas.getHeight()*9f/10f, 3f * scale.x , canvas.getHeight()/10f);
-//			System.out.println(Math.min(1,(wc.opacity)/(Math.min(TIME_TO_WARN,wc.oz.getSpawnFrequency()))));
 			warningSprite.setAlpha(Math.min(1,(wc.opacity)/(Math.min(TIME_TO_WARN,wc.oz.getSpawnFrequency()))));
 			wc.opacity ++;
 			batch.begin();

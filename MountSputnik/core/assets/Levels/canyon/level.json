@@ -10,7 +10,7 @@
     "handholdTextures" : 2, //The number of different handhold textures available
 	"lava": {
 		"present": false,
-		"texture": "testlavatexture.png",
+		"texture": "lava.png",
 		"speed": .005
 	}
 }
