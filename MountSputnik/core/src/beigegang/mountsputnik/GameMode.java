@@ -634,7 +634,6 @@ public class GameMode extends ModeController {
 	 *
 	//	 *
 	 */
-//	@param levelName: the level to be generated
 	public void populateLevel() {
 		readLevelStats();
 		used.clear();
@@ -643,16 +642,16 @@ public class GameMode extends ModeController {
 		String levelDiff = levelFormat.getString("difficulty");
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
-			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
+			int blockNumber = 2; //((int) (Math.random() * diffBlocks)) + 1;
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
 			String blockDiff = levelPiece.getString("difficulty");
-			while((used.contains(blockNumber, true)||
-					getDifficultyProb(levelDiff, blockDiff, currentHeight, remainingHeight) > Math.random())
-					&&!levelName.equals("tutorial")){
-				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
-				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
-				blockDiff = levelPiece.getString("difficulty");
-			}
+//			while((used.contains(blockNumber, true)||
+//					getDifficultyProb(levelDiff, blockDiff, currentHeight, remainingHeight) > Math.random())
+//					&&!levelName.equals("tutorial")){
+//				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
+//				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
+//				blockDiff = levelPiece.getString("difficulty");
+//			}
 			used.add(blockNumber);
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json");
 			checkpointLevelJsons.add(levelPiece);
@@ -1162,9 +1161,6 @@ public class GameMode extends ModeController {
 		float cpos = character.parts.get(CHEST).getBody().getPosition().y;
 		for(ObstacleZone oz : obstacles){
 			float viewHeight = (canvas.getCamera().position.y + canvas.getHeight()/2) / scale.y;
-//			if(oz.canSpawnObstacle() && viewHeight < oz.getBounds().y &&
-//					oz.isTriggered()){
-			//couldnt figure out why viewHeight<oz.getBounds().y was needed...
 
 			if(oz.ticksSinceLastSpawn == 0 && viewHeight < oz.getBounds().y && cpos > oz.getMinSpawnHeight()){
 				obstacle = new ObstacleModel(oz.getObstacleTexture(), 1f, scale);
@@ -1172,6 +1168,10 @@ public class GameMode extends ModeController {
 				oz.setObstY(oz.getBounds().y + rand.nextFloat()*oz.getBounds().height);
 				obstacle.setX(oz.getObstX());
 				obstacle.setY(oz.getObstY());
+				if(levelName.equals("space")) {
+					obstacle.setVY((float) (Math.random()*-10));
+					obstacle.setVX((float) (Math.random()*4-2));
+				}
 
 				oz.setObstacle(obstacle);
 				queuedObstacles.add(oz);
