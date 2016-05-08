@@ -1,9 +1,9 @@
 {    
 	"difficulty": "hard",
 	"height": 100,
-	"uniqueBlocks": 5,
+	"uniqueBlocks": 3,
 	"generalFillerSize": 0,
-	"fillerBlocks": 2,
+	"fillerBlocks": 0,
     "oxygen": 0,
     "gravity": 0,
     "background": "", 

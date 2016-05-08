@@ -1,6 +1,6 @@
 #must include the level:    cayon/block10.json
 #							mountain/block3.json
-LEVEL_TO_LOAD = "canyon/block14.json"
+LEVEL_TO_LOAD = "space/block3.json"
 
 '''
 Repeat Texture on Resize
@@ -666,7 +666,7 @@ class LinePlayground(FloatLayout):
     			speed = hold['movement']['speed']
     			startX = (hold['movement']['startX']-8.5)*scaling
     			startY = hold['movement']['startY']*scaling
-    			endX = (hold['movement'][endX]-8.5)*scaling
+    			endX = (hold['movement']['endX']-8.5)*scaling
     			endY = hold['movement']['endY']*scaling
     			movingHandholds.append(MovingHandhold(startX,startY,scale,crumble,slip,speed))
     			movingHandholds.append(MovingHandhold(endX,endY,scale,crumble,slip,speed))

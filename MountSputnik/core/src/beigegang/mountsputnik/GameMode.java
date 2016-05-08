@@ -642,16 +642,16 @@ public class GameMode extends ModeController {
 		String levelDiff = levelFormat.getString("difficulty");
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
-			int blockNumber = 2; //((int) (Math.random() * diffBlocks)) + 1;
+			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
 			String blockDiff = levelPiece.getString("difficulty");
-//			while((used.contains(blockNumber, true)||
-//					getDifficultyProb(levelDiff, blockDiff, currentHeight, remainingHeight) > Math.random())
-//					&&!levelName.equals("tutorial")){
-//				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
-//				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
-//				blockDiff = levelPiece.getString("difficulty");
-//			}
+			while((used.contains(blockNumber, true)||
+					getDifficultyProb(levelDiff, blockDiff, currentHeight, remainingHeight) > Math.random())
+					&&!levelName.equals("tutorial")){
+				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
+				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
+				blockDiff = levelPiece.getString("difficulty");
+			}
 			used.add(blockNumber);
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json");
 			checkpointLevelJsons.add(levelPiece);
