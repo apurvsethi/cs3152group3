@@ -1,6 +1,7 @@
 package beigegang.mountsputnik;
 
 import beigegang.util.PooledList;
+import beigegang.util.ScreenListener;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -75,7 +76,9 @@ public class PauseMode extends ModeController {
 	}
 
 	@Override
-	public void update(float dt) {
+	public void update(float dt){};
+
+	public void update(float dt, ScreenListener listener) {
 		// TODO Auto-generated method stub
 		InputController input = InputController.getInstance();
 
@@ -93,9 +96,7 @@ public class PauseMode extends ModeController {
 
 	}
 
-	public void draw() {
-
-		canvas.clear();
+	public void draw(GameCanvas canvas) {
 
 		float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
 

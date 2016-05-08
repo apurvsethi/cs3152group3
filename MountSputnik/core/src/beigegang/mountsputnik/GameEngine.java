@@ -36,12 +36,10 @@ public class GameEngine extends Game implements ScreenListener {
 	@Override
 	public void create() {
 		canvas = new GameCanvas();
-		controllers = new ModeController[5];
+		controllers = new ModeController[3];
 		controllers[LOADING_SCREEN] = new LoadingMode(manager);
 		controllers[MENU_SCREEN] = new MenuMode();
 		controllers[GAME_SCREEN] = new GameMode();
-		controllers[PAUSE_SCREEN] = new PauseMode();
-		controllers[DEAD_SCREEN] = new DeadMode();
 		SoundController.PreLoadContent(manager);
 		for(int ii = 1; ii < controllers.length; ii++) {
 			controllers[ii].preLoadContent(manager);
@@ -50,9 +48,9 @@ public class GameEngine extends Game implements ScreenListener {
 		controllers[LOADING_SCREEN].setScreenListener(this);
 		setScreen(controllers[LOADING_SCREEN]);
 		MenuMode m = (MenuMode) controllers[MENU_SCREEN]; 
-		m.unlockLevel(0); 
-		m.unlockLevel(1);
-		m.unlockLevel(5);
+//		m.unlockLevel(0);
+//		m.unlockLevel(1);
+//		m.unlockLevel(5);
 	}
 	
 	@Override
@@ -107,29 +105,31 @@ public class GameEngine extends Game implements ScreenListener {
 		} else if (exitCode == EXIT_MENU) {
 			controllers[MENU_SCREEN].reset();
 			setScreen(controllers[MENU_SCREEN]);
-		}else if (exitCode == DIED) {
-			controllers[DEAD_SCREEN].reset();
-			setScreen(controllers[DEAD_SCREEN]);
+		}else if (exitCode == EXIT_DIED) {
+			GameMode game = (GameMode) controllers[GAME_SCREEN];
+			game.dead();
+		} else if (exitCode == EXIT_VICTORY) {
+			GameMode gameMode = (GameMode) controllers[GAME_SCREEN];
+			MenuMode menuMode = (MenuMode) controllers[MENU_SCREEN];
+			menuMode.unlockLevel(gameMode.getNextLevel());
+			gameMode.victorious();
 		}
 		else if (exitCode == EXIT_GAME_RESTART_LEVEL) {
 			controllers[GAME_SCREEN].reset();
 			setScreen(controllers[GAME_SCREEN]);
 		} else if (exitCode == EXIT_GAME_NEXT_LEVEL) {
 			GameMode gameMode = (GameMode) controllers[GAME_SCREEN];
-			MenuMode menuMode = (MenuMode) controllers[MENU_SCREEN];
+			//MenuMode menuMode = (MenuMode) controllers[MENU_SCREEN];
 			gameMode.nextLevel();
 			gameMode.reset();
-			menuMode.unlockLevel(gameMode.getCurrLevel());
+			//menuMode.unlockLevel(gameMode.getCurrLevel());
 			setScreen(controllers[GAME_SCREEN]);
 		} else if (exitCode == EXIT_PAUSE) {
-			PauseMode pause = (PauseMode) controllers[PAUSE_SCREEN];
 			GameMode game = (GameMode) controllers[GAME_SCREEN];
-			pause.setGameBackground(game.getGameBackground());
-			pause.setGameObjects(game.getGameObjects());
-			controllers[PAUSE_SCREEN].reset();
-			setScreen(controllers[PAUSE_SCREEN]);
+			game.pause();
 		} else if (exitCode == EXIT_GAME_RESUME_LEVEL) {
-			setScreen(controllers[GAME_SCREEN]);
+			GameMode game = (GameMode) controllers[GAME_SCREEN];
+			game.resume();
 		} else if (exitCode == EXIT_LEVEL_SELECT){
 			MenuMode menu = (MenuMode) controllers[MENU_SCREEN];
 			menu.changeView(LEVEL_SELECT);

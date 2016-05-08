@@ -11,7 +11,7 @@
 	"lava": {
 		"present": true,
 		"texture": "testlavatexture.png",
-		"speed": .005
+		"speed": .01
 	}
 }
 
