@@ -18,13 +18,15 @@ public class ListenerClass implements ContactListener {
         GameObject objA = (GameObject) fixtureA.getUserData();
         GameObject objB = (GameObject) fixtureB.getUserData();
         
-        if(objA instanceof ObstacleModel && objB instanceof PartModel){
+        if(objA instanceof ObstacleModel && objB instanceof PartModel && !((ObstacleModel)objA).breaking){
         	CharacterModel c = ((PartModel) objB).getCharacter();
         	c.setEnergy(c.getEnergy()-40);
+            ((ObstacleModel) objA).breakObstacle();
         }
-        else if(objB instanceof ObstacleModel && objA instanceof PartModel){
+        else if(objB instanceof ObstacleModel && objA instanceof PartModel && !((ObstacleModel)objB).breaking){
         	CharacterModel c = ((PartModel) objA).getCharacter();
         	c.setEnergy(c.getEnergy()-40);
+            ((ObstacleModel) objB).breakObstacle();
         }
     }
 

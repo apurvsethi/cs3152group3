@@ -66,9 +66,9 @@ public class GameMode extends ModeController {
 	private static final HashMap<String,Integer> NUM_HANDHOLDS = new HashMap<String,Integer>();
 	private static final String PART_TEXTURES[] = {"Ragdoll/Torso.png", "Ragdoll/Head.png", "Ragdoll/Hips.png",
 			"Ragdoll/ArmLeft.png", "Ragdoll/ArmRight.png", "Ragdoll/ForearmLeft.png", "Ragdoll/ForearmRight.png",
-			"Ragdoll/HandLeftUngripped.png", "Ragdoll/HandRightUngripped.png", "Ragdoll/ThighLeft.png",
+			"Ragdoll/HandLeft.png", "Ragdoll/HandRight.png", "Ragdoll/ThighLeft.png",
 			"Ragdoll/ThighRight.png", "Ragdoll/CalfLeft.png", "Ragdoll/CalfRight.png", "Ragdoll/FeetShoeLeft.png",
-			"Ragdoll/FeetShoeRight.png", "Ragdoll/HandLeftGripped.png", "Ragdoll/HandRightGripped.png"};
+			"Ragdoll/FeetShoeRight.png"};
 	private static final String TUTORIAL_TEXTURES[] = {
 			"Ragdoll/controls/360_LB.png",
 			"Ragdoll/controls/360_RB.png",
@@ -112,8 +112,8 @@ public class GameMode extends ModeController {
 	private static TextureRegion lavaTexture;
 	private static TextureRegion glowTexture;
 	private static TextureRegion staticObstacle;
-	private static TextureRegion fallingObstacle;
-	private static TextureRegion[] partTextures = new TextureRegion[PART_TEXTURES.length];
+	private static FilmStrip fallingObstacle;
+	private static FilmStrip[] partTextures = new FilmStrip[PART_TEXTURES.length];
 	private static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length];
 	private static TextureRegion[] handholdTextures;
 	private static TextureRegion[] levelLabels = new TextureRegion[LEVEL_LABEL_FILES.length];
@@ -191,8 +191,8 @@ public class GameMode extends ModeController {
 			assets.add("assets/"+name+"/LevelStart.png");
 			manager.load("assets/"+name+"/StaticObstacle.png", Texture.class);
 			assets.add("assets/"+name+"/StaticObstacle.png");
-			manager.load("assets/"+name+"/FallingRock.png", Texture.class);
-			assets.add("assets/"+name+"/FallingRock.png");
+			manager.load("assets/"+name+"/Rockbust_Animation.png", Texture.class);
+			assets.add("assets/"+name+"/Rockbust_Animation.png");
 
 
 		}
@@ -281,7 +281,7 @@ public class GameMode extends ModeController {
 		lavaTexture = createTexture(manager, LAVA_FILE, false);
 		glowTexture = createTexture(manager, GLOW_FILE, false);
 		staticObstacle = createTexture(manager, "assets/"+levelName+"/StaticObstacle.png", false);
-		fallingObstacle = createTexture(manager, "assets/"+levelName+"/FallingRock.png", false);
+		fallingObstacle = createFilmStrip(manager, "assets/"+levelName+"/Rockbust_Animation.png", 1, 5, 5);
 
 		for (counterInt = 0;  counterInt < LEVEL_LABEL_FILES.length; counterInt++){
 			levelLabels[counterInt] = createTexture(manager, LEVEL_LABEL_FILES[counterInt], false);
@@ -289,7 +289,8 @@ public class GameMode extends ModeController {
 		}
 
 		for (counterInt = 0; counterInt < PART_TEXTURES.length; counterInt++) {
-			partTextures[counterInt] = createTexture(manager, PART_TEXTURES[counterInt], false);
+			partTextures[counterInt] = createFilmStrip(manager, PART_TEXTURES[counterInt], 1,
+					BODY_PART_ANIMATION_FRAMES[counterInt], BODY_PART_ANIMATION_FRAMES[counterInt]);
 		}
 
 		for (counterInt = 0; counterInt < TUTORIAL_TEXTURES.length; counterInt++) {
@@ -575,7 +576,7 @@ public class GameMode extends ModeController {
 		while(counter < checkpointLevelBlocks.size){
 			//TODO: account for difficulty
 			int blockNumber = checkpointLevelBlocks.get(counter);
-//			blockNumber = 14;
+//			blockNumber = 11;
 			used.add(blockNumber);
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json");
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
@@ -858,8 +859,7 @@ public class GameMode extends ModeController {
 		while(obstacleDesc != null){
 			bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY")+currentHeight,
 					obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
-			//TODO: Set texture to something other than null once we have textures for obstacles
-			obstacleZone = new ObstacleZone(fallingObstacle.getTexture(), null, currentHeight, obstacleDesc.getInt("frequency"), bound);
+			obstacleZone = new ObstacleZone(fallingObstacle, null, currentHeight, obstacleDesc.getInt("frequency"), bound);
 			obstacles.add(obstacleZone);
 			obstacleDesc = obstacleDesc.next();
 		}
@@ -870,8 +870,6 @@ public class GameMode extends ModeController {
 			staticDesc = levelPiece.get("static").child();
 			ObstacleModel obstacle;
 			while(staticDesc != null){
-				//TODO: Set texture to something other than null once we have textures for obstacles
-
 				obstacle = new ObstacleModel(staticObstacle.getTexture(), staticDesc.getFloat("size"), scale);
 				obstacle.setX(staticDesc.getFloat("x"));
 				obstacle.setY(staticDesc.getFloat("y")+currentHeight);
@@ -971,8 +969,8 @@ public class GameMode extends ModeController {
 			for (GameObject g : objects) {
 
 				if (g instanceof ObstacleModel &&
-						g.getBody().getPosition().y < (canvas.getCamera().position.y - canvas.getWidth()) / scale.y &&
-						g.getBody().getType() != BodyDef.BodyType.StaticBody) {
+						((g.getBody().getPosition().y < (canvas.getCamera().position.y - canvas.getWidth()) / scale.y &&
+						g.getBody().getType() != BodyDef.BodyType.StaticBody) || ((ObstacleModel)g).broken)) {
 					objects.remove(g);
 				}
 				if (g instanceof HandholdModel && ((HandholdModel) (g)).getStartPoint() != null) {

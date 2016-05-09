@@ -92,6 +92,16 @@ public abstract class GameObject {
 		animator = new FilmStrip(texture,1,1,1);
 		origin = new Vector2(animator.getRegionWidth()/2.0f, animator.getRegionHeight()/2.0f);
 	}
+
+	/**
+	 * Sets the filmStrip of this object
+	 *
+	 * @param filmStrip the film strip of this object
+	 */
+	public void setFilmStrip(FilmStrip filmStrip) {
+		animator = new FilmStrip(filmStrip);
+		origin = new Vector2(animator.getRegionWidth()/2.0f, animator.getRegionHeight()/2.0f);
+	}
 	
 	/**
 	 * Returns the texture of this object 
@@ -386,24 +396,6 @@ public abstract class GameObject {
 	 *
 	 * @param texture the texture of this object
 	 */
-	public GameObject(Texture texture, float drawSizeScale, Vector2 drawPositionScale) {
-		this(texture, drawSizeScale, drawSizeScale, drawPositionScale);
-	}
-	
-	/**
-	 * Constructs a game object
-	 *
-	 * @param texture the texture of this object
-	 */
-	public GameObject(Texture texture, Vector2 dimensions, Vector2 drawPositionScale) {
-		this(texture, dimensions.x, dimensions.y, drawPositionScale);
-	}
-
-	/**
-	 * Constructs a game object
-	 *
-	 * @param texture the texture of this object
-	 */
 	public GameObject(Texture texture, float xDimension, float yDimension, Vector2 drawPositionScale) {
 		setTexture(texture);
 		setDrawPositionScale(drawPositionScale);
@@ -412,6 +404,33 @@ public abstract class GameObject {
 		shape = new PolygonShape();
 		shape.setAsBox(texture.getWidth() * this.drawSizeScale.x / (2 * this.drawPositionScale.x),
 				texture.getHeight() * this.drawSizeScale.y / (2 * this.drawPositionScale.y));
+	}
+	public GameObject(Texture texture, Vector2 dimensions, Vector2 drawPositionScale) {
+		this(texture, dimensions.x, dimensions.y, drawPositionScale);
+	}
+	public GameObject(Texture texture, float drawSizeScale, Vector2 drawPositionScale) {
+		this(texture, drawSizeScale, drawSizeScale, drawPositionScale);
+	}
+
+	/**
+	 * Constructs a game object
+	 *
+	 * @param filmStrip the texture of this object
+	 */
+	public GameObject(FilmStrip filmStrip, float xDimension, float yDimension, Vector2 drawPositionScale) {
+		setFilmStrip(filmStrip);
+		setDrawPositionScale(drawPositionScale);
+		setDrawSizeScale(xDimension, yDimension);
+
+		shape = new PolygonShape();
+		shape.setAsBox(animator.getRegionWidth() * this.drawSizeScale.x / (2 * this.drawPositionScale.x),
+				animator.getRegionHeight() * this.drawSizeScale.y / (2 * this.drawPositionScale.y));
+	}
+	public GameObject(FilmStrip filmStrip, Vector2 dimensions, Vector2 drawPositionScale) {
+		this(filmStrip, dimensions.x, dimensions.y, drawPositionScale);
+	}
+	public GameObject(FilmStrip filmStrip, float drawSizeScale, Vector2 drawPositionScale) {
+		this(filmStrip, drawSizeScale, drawSizeScale, drawPositionScale);
 	}
 
 	/**

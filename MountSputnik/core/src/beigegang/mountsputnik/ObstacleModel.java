@@ -1,5 +1,6 @@
 package beigegang.mountsputnik;
 
+import beigegang.util.FilmStrip;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
@@ -7,24 +8,37 @@ import static beigegang.mountsputnik.Constants.*;
 
 public class ObstacleModel extends GameObject{
 	public float width;
-	public ObstacleModel(Texture obstacleTexture, float f, Vector2 scale) {
+	public boolean breaking;
+	public boolean broken;
 
+	public ObstacleModel(Texture obstacleTexture, float f, Vector2 scale) {
 		super(obstacleTexture, f, scale);
 		width = getX() * drawPositionScale.x;
+	}
+
+	public ObstacleModel(FilmStrip fallingObstacleTexture, float f, Vector2 scale) {
+		super(fallingObstacleTexture, f, scale);
+		width = getX() * drawPositionScale.x;
+		shape.setAsBox(animator.getRegionWidth() * this.drawSizeScale.x / (7 * this.drawPositionScale.x),
+				animator.getRegionHeight() * this.drawSizeScale.y / (7 * this.drawPositionScale.y));
 	}
 
 	@Override
 	public ObjectType getType() {
 		return ObjectType.OBSTACLE;
 	}
-	
+
 	@Override
 	public void draw(GameCanvas canvas){
-		if (drawPositionScale.x < canvas.getWidth() * 3 / 4) {		
+		if (breaking && animator.getFrame() == animator.getSize() - 1)
+			broken = true;
+		else if (breaking) animator.setFrame(animator.getFrame() + 1);
+
+		if (drawPositionScale.x < canvas.getWidth() * 3 / 4) {
 				canvas.draw(animator, Color.WHITE, origin.x, origin.y,
 						getX() * drawPositionScale.x, getY() * drawPositionScale.y,
 						getAngle(), drawSizeScale.x, drawSizeScale.y);
-			
+
 		}
 	}
 
@@ -46,4 +60,7 @@ public class ObstacleModel extends GameObject{
 
 	}
 
+	public void breakObstacle() {
+		breaking = true;
+	}
 }

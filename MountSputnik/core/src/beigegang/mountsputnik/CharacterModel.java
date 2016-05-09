@@ -1,6 +1,6 @@
 package beigegang.mountsputnik;
 
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import beigegang.util.FilmStrip;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
@@ -17,7 +17,7 @@ public class CharacterModel {
 	/** Cache vector for organizing body parts */
 	private Vector2 partCache = new Vector2();
 	/** Texture assets for the body parts */
-	private TextureRegion[] partTextures;
+	private FilmStrip[] partTextures;
 	/** Character energy */
 	private float energy;
 	private RevoluteJointDef jointDef = new RevoluteJointDef();
@@ -121,8 +121,6 @@ public class CharacterModel {
 	 */
 	private PartModel makePart(int part, int connect, float partX, float connectX,
 							   float partY, float connectY, Vector2 drawPositionScale) {
-		TextureRegion texture = partTextures[part];
-
 		if (connect != NONE) {
 			partCache.set(-partX, -partY);
 			partCache.add(parts.get(connect).getPosition());
@@ -130,7 +128,7 @@ public class CharacterModel {
 		}
 		else partCache.set(partX, partY);
 
-		PartModel partModel = new PartModel(partCache.x, partCache.y, texture.getTexture(),
+		PartModel partModel = new PartModel(partCache.x, partCache.y, partTextures[part],
 				CHARACTER_DRAW_SIZE_SCALE, drawPositionScale, this);
 		partModel.setBodyType(BodyDef.BodyType.DynamicBody);
 
@@ -153,8 +151,6 @@ public class CharacterModel {
 	 */
 	private PartModel makeExtremity(int part, int connect, float partX, float connectX,
 							   float partY, float connectY, Vector2 drawPositionScale) {
-		TextureRegion texture = partTextures[part];
-
 		if (connect != NONE) {
 			partCache.set(-partX, -partY);
 			partCache.add(parts.get(connect).getPosition());
@@ -162,11 +158,8 @@ public class CharacterModel {
 		}
 		else partCache.set(partX, partY);
 
-		// TODO: Do this better, most likely with film strip
-		TextureRegion grippedTexture = part + 8 > partTextures.length ? texture : partTextures[part + 8];
-
 		ExtremityModel extremityModel = new ExtremityModel(partCache.x, partCache.y,
-				texture.getTexture(), grippedTexture.getTexture(), CHARACTER_DRAW_SIZE_SCALE,
+				partTextures[part], CHARACTER_DRAW_SIZE_SCALE,
 				drawPositionScale, this);
 		extremityModel.setBodyType(BodyDef.BodyType.DynamicBody);
 		parts.add(extremityModel);
@@ -282,7 +275,7 @@ public class CharacterModel {
 	 * @param initialPositionY where character's chest should be to start (y value)
 	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
 	 */
-	public CharacterModel(TextureRegion[] textures, World w, float initialPositionX,
+	public CharacterModel(FilmStrip[] textures, World w, float initialPositionX,
 						  float initialPositionY, Vector2 drawPositionScale){
 		parts = new Array<PartModel>();
 		joints = new Array<Joint>();
