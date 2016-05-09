@@ -26,7 +26,7 @@ from kivy.core.window import Window
 from kivy.graphics import * 
 from math import sqrt
 from glob import glob 
-import json 
+import simplejson 
 
 
 Builder.load_string('''
