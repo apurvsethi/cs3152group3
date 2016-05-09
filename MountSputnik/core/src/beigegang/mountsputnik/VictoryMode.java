@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import static beigegang.mountsputnik.Constants.*;
 
-public class DeadMode extends ModeController {
+public class VictoryMode extends ModeController {
 
     /**
      * Track asset loading from all instances and subclasses
@@ -16,18 +16,17 @@ public class DeadMode extends ModeController {
     protected AssetState assetState = AssetState.EMPTY;
 
     private static final String FOREGROUND_FILE = "Menu/PauseMenu/Foreground.png";
-    private static final String DEAD_FILE = "Menu/PauseMenu/YouDied.png";
-    private static final String MENU_OPTION_FILES[] = {"Menu/PauseMenu/RestartLastCheckpoint.png","Menu/PauseMenu/Restart.png","Menu/PauseMenu/Menu.png","Menu/PauseMenu/Quit.png"};
-
+    private static final String WIN_FILE = "Menu/PauseMenu/LevelComplete.png";
+    private static final String MENU_OPTION_FILES[] = {"Menu/PauseMenu/NextLevel.png", "Menu/PauseMenu/Restart.png","Menu/PauseMenu/Menu.png","Menu/PauseMenu/Quit.png"};
+    private static final String STAT_OPTION_FILES[] = {"Menu/PauseMenu/TimeTaken.png","Menu/PauseMenu/DistanceClimbed.png","Menu/PauseMenu/LowestEnergy.png","Menu/PauseMenu/CheckpointRestarts.png","Menu/PauseMenu/TotalFalls.png"};
     /**
      * Texture asset for files used, parts, etc.
      */
-
     private static TextureRegion foreground;
-    private static TextureRegion deadMessage;
+    private static TextureRegion winMessage;
     private static TextureRegion[] menuOptions = new TextureRegion[MENU_OPTION_FILES.length];
 
-    private static int exitCodes[] ={EXIT_GAME_RESTART_LAST_CHECKPOINT,EXIT_GAME_RESTART_LEVEL,EXIT_MENU,EXIT_QUIT};
+    private static int exitCodes[] ={EXIT_GAME_NEXT_LEVEL,EXIT_GAME_RESTART_LEVEL,EXIT_MENU,EXIT_QUIT};
 
     private AssetManager assetManager;
 
@@ -42,8 +41,8 @@ public class DeadMode extends ModeController {
         assetState = AssetState.LOADING;
         manager.load(FOREGROUND_FILE, Texture.class);
         assets.add(FOREGROUND_FILE);
-        manager.load(DEAD_FILE, Texture.class);
-        assets.add(DEAD_FILE);
+        manager.load(WIN_FILE, Texture.class);
+        assets.add(WIN_FILE);
         for (String MENU_OPTION_FILE : MENU_OPTION_FILES) {
             manager.load(MENU_OPTION_FILE, Texture.class);
             assets.add(MENU_OPTION_FILE);
@@ -63,7 +62,8 @@ public class DeadMode extends ModeController {
         if (assetState != AssetState.LOADING) return;
 
         foreground = createTexture(manager, FOREGROUND_FILE, false);
-        deadMessage = createTexture(manager, DEAD_FILE, false);
+        winMessage = createTexture(manager, WIN_FILE, false);
+
         for (int i = 0; i < MENU_OPTION_FILES.length; i++) {
             menuOptions[i] = createTexture(manager, MENU_OPTION_FILES[i], false);
         }
@@ -102,14 +102,13 @@ public class DeadMode extends ModeController {
 
         float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
 
-
         canvas.begin();
         canvas.draw(foreground, Color.WHITE, 0, y,canvas.getWidth(),canvas.getHeight());
         canvas.end();
         canvas.begin();
-        float drawY = canvas.getHeight()* 5f/11f + (MENU_ITEM_HEIGHT * menuOptions.length / 2) + y;
-        canvas.draw(deadMessage, Color.WHITE, deadMessage.getRegionWidth() / 2,
-                deadMessage.getRegionHeight()/ 2, (canvas.getWidth() / 2), drawY + MENU_ITEM_HEIGHT, 0, 1f, 1f);
+        float drawY = canvas.getHeight() * 5f/11f + (MENU_ITEM_HEIGHT * menuOptions.length / 2) + y;
+        canvas.draw(winMessage, Color.WHITE, winMessage.getRegionWidth() / 2,
+                winMessage.getRegionHeight()/ 2, (canvas.getWidth() / 2), drawY + MENU_ITEM_HEIGHT, 0, 1f, 1f);
         for (int i = 0; i < menuOptions.length; i++){
             if (i == currSelection){
                 canvas.draw(menuOptions[i], Color.TEAL, menuOptions[i].getRegionWidth() / 2,
@@ -125,6 +124,7 @@ public class DeadMode extends ModeController {
         canvas.end();
 
     }
+
 
     @Override
     public void resize(int width, int height) {

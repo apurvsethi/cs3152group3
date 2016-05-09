@@ -48,14 +48,17 @@ public class PositionMovementController {
     }
 
     public void moveCharacter(float inx,float iny, float rinx,float riny, Array<Integer> nextToPress, Array<Integer> justReleased) {
-        InputController input = InputController.getInstance();
         float horizontalL = inx;
         float verticalL = iny;
+
         boolean np = nextToPress.size > 0;
         boolean jr = justReleased.size > 0;
+//        System.out.println(np + " " + jr + " " + horizontalL + " " + verticalL);
+        if ( np && nextToPress.get(0) == HAND_LEFT) {
+            System.out.println(np + " " + jr + " " + horizontalL + " " + verticalL);
 
-        if ( np && nextToPress.get(0) == HAND_LEFT)
             moveLimb(ARM_LEFT, FOREARM_LEFT, HAND_LEFT, horizontalL, verticalL, true);
+        }
         else if (jr && justReleased.contains(HAND_LEFT,false)) lockLimb(ARM_LEFT, FOREARM_LEFT);
         if ( np && nextToPress.get(0) == HAND_RIGHT)
             moveLimb(ARM_RIGHT, FOREARM_RIGHT, HAND_RIGHT, horizontalL, verticalL, true);

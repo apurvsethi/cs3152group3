@@ -1,30 +1,31 @@
-package beigegang.mountsputnik;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import static beigegang.mountsputnik.Constants.*;
+		package beigegang.mountsputnik;
 
-import beigegang.util.*;
+		import com.badlogic.gdx.Gdx;
+		import com.badlogic.gdx.assets.AssetManager;
+		import com.badlogic.gdx.graphics.Color;
+		import com.badlogic.gdx.graphics.Texture;
+		import com.badlogic.gdx.graphics.g2d.BitmapFont;
+		import com.badlogic.gdx.graphics.g2d.Sprite;
+		import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+		import com.badlogic.gdx.graphics.g2d.TextureRegion;
+		import static beigegang.mountsputnik.Constants.*;
 
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
-import com.badlogic.gdx.physics.box2d.Joint;
-import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
-import com.badlogic.gdx.utils.*;
+		import beigegang.util.*;
 
-import java.io.FileWriter;
-import java.util.HashMap;
-import java.util.Map.Entry;
-import java.util.Random;
+		import com.badlogic.gdx.math.Rectangle;
+		import com.badlogic.gdx.math.Vector2;
+		import com.badlogic.gdx.physics.box2d.BodyDef;
+		import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+		import com.badlogic.gdx.physics.box2d.Joint;
+		import com.badlogic.gdx.physics.box2d.World;
+		import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
+		import com.badlogic.gdx.utils.*;
+
+		import java.io.FileWriter;
+		import java.util.HashMap;
+		import java.util.Map.Entry;
+		import java.util.Random;
 
 public class GameMode extends ModeController {
 
@@ -32,8 +33,8 @@ public class GameMode extends ModeController {
 	private boolean flashing = false;
 	private int flashing2 = 10;
 	/** A string representing the name of the current level */
-	private String levelName = "canyon"; 
-	
+	private String levelName = "canyon";
+
 	/**
 	 * Track asset loading from all instances and subclasses
 	 */
@@ -43,7 +44,7 @@ public class GameMode extends ModeController {
 	 */
 	private static int timestep = 0;
 	private static int checkpointTimestep = 0;
-/**	both are updated every timestep with horizontal and vertical input left joystick from player */
+	/**	both are updated every timestep with horizontal and vertical input left joystick from player */
 	private static float inx = 0f;
 	private static float iny = 0f;
 	/**	both are updated every timestep with horizontal and vertical input right stick from player */
@@ -69,13 +70,13 @@ public class GameMode extends ModeController {
 			"Ragdoll/ThighRight.png", "Ragdoll/CalfLeft.png", "Ragdoll/CalfRight.png", "Ragdoll/FeetShoeLeft.png",
 			"Ragdoll/FeetShoeRight.png", "Ragdoll/HandLeftGripped.png", "Ragdoll/HandRightGripped.png"};
 	private static final String TUTORIAL_TEXTURES[] = {
-			"Ragdoll/controls/360_LB.png", 
-			"Ragdoll/controls/360_RB.png", 
-			"Ragdoll/controls/360_LT.png", 
-			"Ragdoll/controls/360_RT.png", 
-			"Ragdoll/controls/360_LB_selected.png", 
-			"Ragdoll/controls/360_RB_selected.png", 
-			"Ragdoll/controls/360_LT_selected.png", 
+			"Ragdoll/controls/360_LB.png",
+			"Ragdoll/controls/360_RB.png",
+			"Ragdoll/controls/360_LT.png",
+			"Ragdoll/controls/360_RT.png",
+			"Ragdoll/controls/360_LB_selected.png",
+			"Ragdoll/controls/360_RB_selected.png",
+			"Ragdoll/controls/360_LT_selected.png",
 			"Ragdoll/controls/360_RT_selected.png"
 	};
 	private static final String TUTORIAL_OVERLAY_TEXTURE = "assets/tutorial/TutorialOverlay.png";
@@ -87,7 +88,7 @@ public class GameMode extends ModeController {
 	private static final String ENERGY_TEXTURES[] = new String[11];
 	private static final String PROGRESS_TEXTURES[] = new String[6];
 
-//	private static final String ENERGY_TEXTURES2[] = new String[]
+	//	private static final String ENERGY_TEXTURES2[] = new String[]
 //			{"Energy/e1.png","Energy/e2.png","Energy/e3.png","Energy/e4.png","Energy/e5.png","Energy/e6.png","Energy/e7.png","Energy/e8.png","Energy/e9.png","Energy/e10.png"};
 	private static TextureRegion[] energyTextures =  new TextureRegion[ENERGY_TEXTURES.length];
 	private static TextureRegion[] progressTextures =  new TextureRegion[PROGRESS_TEXTURES.length];
@@ -109,15 +110,15 @@ public class GameMode extends ModeController {
 	private static TextureRegion edge;
 	private static TextureRegion ground;
 	private static TextureRegion lavaTexture;
-	private static TextureRegion glowTexture; 
-	private static TextureRegion staticObstacle; 
-	private static TextureRegion fallingObstacle; 
+	private static TextureRegion glowTexture;
+	private static TextureRegion staticObstacle;
+	private static TextureRegion fallingObstacle;
 	private static TextureRegion[] partTextures = new TextureRegion[PART_TEXTURES.length];
 	private static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length];
 	private static TextureRegion[] handholdTextures;
 	private static TextureRegion[] levelLabels = new TextureRegion[LEVEL_LABEL_FILES.length];
 	private static TextureRegion tutorialOverlay;
-	
+
 	private static TextureRegion blackoutTexture;
 	private static String BLACKOUT = "assets/blackout.png";
 	private static String FATIGUE_BAR = "Energy/Fatigue Gauge.png";
@@ -148,6 +149,14 @@ public class GameMode extends ModeController {
 	/** AssetManager for loading textures for Handholds*/
 	private AssetManager assetManager;
 	private float maxLevelHeight;
+
+	private PauseMode pauseMode;
+	private VictoryMode victoryMode;
+	private DeadMode deadMode;
+
+	private boolean isPaused = false;
+	private boolean isDead = false;
+	private boolean isVictorious = false;
 	// ************************************START CONTENT LOADING*********************************************** //
 
 	/**
@@ -159,12 +168,16 @@ public class GameMode extends ModeController {
 	 *
 	 * @param manager Reference to global asset manager.
 	 */
-	public void preLoadContent(AssetManager manager) {	
+	public void preLoadContent(AssetManager manager) {
 		assetManager = manager;
 		if (assetState != AssetState.EMPTY) return;
-		
+
 		assetState = AssetState.LOADING;
-		
+
+		pauseMode.preLoadContent(manager);
+		deadMode.preLoadContent(manager);
+		victoryMode.preLoadContent(manager);
+
 		for(String name : LEVEL_NAMES){
 			manager.load("assets/"+name+"/background.png", Texture.class);
 			assets.add("assets/"+name+"/background.png");
@@ -180,7 +193,7 @@ public class GameMode extends ModeController {
 			assets.add("assets/"+name+"/StaticObstacle.png");
 			manager.load("assets/"+name+"/FallingRock.png", Texture.class);
 			assets.add("assets/"+name+"/FallingRock.png");
-		
+
 
 		}
 		for (String name:LEVEL_LABEL_FILES){
@@ -251,8 +264,12 @@ public class GameMode extends ModeController {
 	 * @param manager Reference to global asset manager.
 	 */
 	public void loadContent(AssetManager manager) {
-	
+
 		if (assetState != AssetState.LOADING) return;
+
+		pauseMode.loadContent(manager);
+		deadMode.loadContent(manager);
+		victoryMode.loadContent(manager);
 
 		background = createTexture(manager, "assets/"+levelName+"/background.png", false);
 		midground = createTexture(manager, "assets/"+levelName+"/Midground.png", false);
@@ -262,9 +279,9 @@ public class GameMode extends ModeController {
 		edge = createTexture(manager, "assets/"+levelName+"/SurfaceEdge.png", false);
 		ground = createTexture(manager, "assets/"+levelName+"/LevelStart.png", false);
 		lavaTexture = createTexture(manager, LAVA_FILE, false);
-		glowTexture = createTexture(manager, GLOW_FILE, false); 
-		staticObstacle = createTexture(manager, "assets/"+levelName+"/StaticObstacle.png", false); 
-		fallingObstacle = createTexture(manager, "assets/"+levelName+"/FallingRock.png", false); 
+		glowTexture = createTexture(manager, GLOW_FILE, false);
+		staticObstacle = createTexture(manager, "assets/"+levelName+"/StaticObstacle.png", false);
+		fallingObstacle = createTexture(manager, "assets/"+levelName+"/FallingRock.png", false);
 
 		for (counterInt = 0;  counterInt < LEVEL_LABEL_FILES.length; counterInt++){
 			levelLabels[counterInt] = createTexture(manager, LEVEL_LABEL_FILES[counterInt], false);
@@ -274,11 +291,11 @@ public class GameMode extends ModeController {
 		for (counterInt = 0; counterInt < PART_TEXTURES.length; counterInt++) {
 			partTextures[counterInt] = createTexture(manager, PART_TEXTURES[counterInt], false);
 		}
-		
+
 		for (counterInt = 0; counterInt < TUTORIAL_TEXTURES.length; counterInt++) {
 			tutorialTextures[counterInt] = createTexture(manager, TUTORIAL_TEXTURES[counterInt], false);
 		}
-		
+
 		handholdTextures = new TextureRegion[NUM_HANDHOLDS.get(levelName)];
 		for (counterInt = 1; counterInt <= NUM_HANDHOLDS.get(levelName); counterInt++) {
 			handholdTextures[counterInt-1] = createTexture(manager, "assets/"+levelName+"/Handhold"+counterInt+".png", false);
@@ -301,10 +318,10 @@ public class GameMode extends ModeController {
 
 	}
 
-	/** 
+	/**
 	 * Unloads the assets for this game.
-	 * 
-	 * This method erases the static variables.  It also deletes the associated textures 
+	 *
+	 * This method erases the static variables.  It also deletes the associated textures
 	 * from the asset manager. If no assets are loaded, this method does nothing.
 	 */
 	public void unloadContent() {
@@ -354,7 +371,7 @@ public class GameMode extends ModeController {
 	/**
 	 * Whether we have completed this level
 	 */
-	private boolean complete = false; 
+	private boolean complete = false;
 	private boolean failed;
 	private float maxHandhold = 0f;
 	private int lastReachedCheckpoint = 0;
@@ -392,15 +409,15 @@ public class GameMode extends ModeController {
 	 */
 	private Array<Integer> justReleased = new Array<Integer>();
 	/**
-	 * A list of all the blocks that were chosen for this generated level. Allows for debugging 
+	 * A list of all the blocks that were chosen for this generated level. Allows for debugging
 	 */
 	private Array<String> levelBlocks = new Array<String>();
 	private Array<JsonValue> checkpointLevelJsons = new Array<JsonValue>();
 	private Array<Integer> checkpointLevelBlocks = new Array<Integer>();
 
 
-	/** A boolean indicating the toggle of the tutorial view, where limbs have their corresponding buttons shown*/ 
-	private boolean tutorialToggle = false; 
+	/** A boolean indicating the toggle of the tutorial view, where limbs have their corresponding buttons shown*/
+	private boolean tutorialToggle = false;
 	/** level-related values*/
 	private Array<Float> checkpoints = new Array();
 	private Vector2 gravity;
@@ -417,16 +434,19 @@ public class GameMode extends ModeController {
 	public GameMode() {
 		super(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_GRAVITY);
 
+		pauseMode = new PauseMode();
+		victoryMode = new VictoryMode();
+		deadMode = new DeadMode();
 		//create debug font
 		font.setColor(Color.RED);
 		font.getData().setScale(5);
 
-		NUM_HANDHOLDS.put("canyon", 1); 
-		NUM_HANDHOLDS.put("tutorial",4); 
-		NUM_HANDHOLDS.put("sky", 1); 
-		NUM_HANDHOLDS.put("mountain", 1); 
-		NUM_HANDHOLDS.put("space",1); 
-		NUM_HANDHOLDS.put("volcano", 1); 
+		NUM_HANDHOLDS.put("canyon", 1);
+		NUM_HANDHOLDS.put("tutorial",4);
+		NUM_HANDHOLDS.put("sky", 1);
+		NUM_HANDHOLDS.put("mountain", 1);
+		NUM_HANDHOLDS.put("space",1);
+		NUM_HANDHOLDS.put("volcano", 1);
 
 	}
 	public void makeJsonForAnimation(){
@@ -515,6 +535,9 @@ public class GameMode extends ModeController {
 		levelName = LEVEL_NAMES[currLevel];
 		complete = false;
 		failed = false;
+		isPaused = false;
+		isDead = false;
+		isVictorious = false;
 		assetState = AssetState.LOADING;
 		loadContent(assetManager);
 
@@ -585,34 +608,33 @@ public class GameMode extends ModeController {
 	// ************************************START LEVELS*********************************************** //
 
 	/**
-	 * Creates the character, and then generates the level according to specified environment. 
-	 * Currently, all level assets should be stored in the appropriate location according to this 
-	 * path within the assets folder: the general level description will be in "Levels/[levelName]/level.json" 
+	 * Creates the character, and then generates the level according to specified environment.
+	 * Currently, all level assets should be stored in the appropriate location according to this
+	 * path within the assets folder: the general level description will be in "Levels/[levelName]/level.json"
 	 * and the individual blocks will be in "Levels/[levelName]/block[x].json" where x is a whole number.
-	 * 
+	 *
 	 * The general level description contains such things as the physics constants like gravity or oxygen
-	 * the desired height of the level, the total number of different blocks usable in generation, and 
-	 * descriptors of certain level-wide obstacles like rising lava, if they exist. 
-	 * 
-	 * The blocks will describe individual building blocks. They will contain a height in meters, to be 
-	 * determined by their size when created by the level editor, and a difficulty rating. They will also contain two 
+	 * the desired height of the level, the total number of different blocks usable in generation, and
+	 * descriptors of certain level-wide obstacles like rising lava, if they exist.
+	 *
+	 * The blocks will describe individual building blocks. They will contain a height in meters, to be
+	 * determined by their size when created by the level editor, and a difficulty rating. They will also contain two
 	 * important objects:
-	 * 
-	 * 1) Handholds will be a list of handhold objects, which in turn will contain location, friction, restitution,  
+	 *
+	 * 1) Handholds will be a list of handhold objects, which in turn will contain location, friction, restitution,
 	 * crumble and size values, as well as a texture.
-	 * 
+	 *
 	 * 2) Obstacles will be a list of locations in which falling obstacles like rocks or meteors will be described. Each obstacle
-	 * object will include a specific region in which falling obstacles can spawn (they will only spawn when they are offscreen to 
+	 * object will include a specific region in which falling obstacles can spawn (they will only spawn when they are offscreen to
 	 * the player
-	 * 
-	 * Levels are generated by adding randomly selected building blocks on top of the previous level generated until the desired 
+	 *
+	 * Levels are generated by adding randomly selected building blocks on top of the previous level generated until the desired
 	 * height of the level (in units) is reached.
-	 * 
+	 *
 	 * @author Daniel
-	 * 
-//	 *
+	 *
+	//	 *
 	 */
-//	@param levelName: the level to be generated
 	public void populateLevel() {
 		readLevelStats();
 		used.clear();
@@ -624,7 +646,7 @@ public class GameMode extends ModeController {
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
 			String blockDiff = levelPiece.getString("difficulty");
-			while((used.contains(blockNumber, true)|| 
+			while((used.contains(blockNumber, true)||
 					getDifficultyProb(levelDiff, blockDiff, currentHeight, remainingHeight) > Math.random())
 					&&!levelName.equals("tutorial")){
 				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
@@ -646,22 +668,22 @@ public class GameMode extends ModeController {
 //				currentHeight += levelPiece.getInt("size");
 //			}
 		}
-		
+
 		checkpointLevelBlocks.addAll(used);
 		System.out.println(levelBlocks);
 
 
 		character = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale);
-			//arms
+		//arms
 		checkpoints.insert(0,character.parts.get(CHEST).getY());
-		
+
 		makeHandholdsToGripAtStart();
 		addCharacterToGame();
 		movementController = new PositionMovementController(character, scale);
 
 	}
 	/**
-	 * Calculates a number for use by the level generator to prioritize difficulty based on height, 
+	 * Calculates a number for use by the level generator to prioritize difficulty based on height,
 	 * and relative difficulty to level average
 	 * @param levelDiff the difficulty of the overall level
 	 * @param blockDiff the difficulty of the block
@@ -691,7 +713,7 @@ public class GameMode extends ModeController {
 				return 1;
 		}
 	}
-	
+
 	private void readLevelStats() {
 		jsonReader = new JsonReader();
 		levelFormat = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/level.json"));
@@ -781,21 +803,21 @@ public class GameMode extends ModeController {
 		objects.add(handhold);
 	}
 
-	/** 
+	/**
 	 * Adds blocks to the level based on JSON block description
-	 * 
+	 *
 	 * @param levelPiece: The block description
 	 * @param currentHeight: y offset from the bottom of the screen
 	 * @param levelName: the name of the level
 	 * @author Daniel
 	 */
 	private void addChunk(JsonValue levelPiece, float currentHeight, String levelName){
-		
+
 		JsonValue handholdDesc = levelPiece.get("handholds").child();
 
 		Random rand = new Random();
 		while(handholdDesc != null){
-			handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(), glowTexture.getTexture(), 
+			handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(), glowTexture.getTexture(),
 					handholdDesc.getFloat("positionX"), handholdDesc.getFloat("positionY")+currentHeight,
 					new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
 			handhold.fixtureDef.filter.maskBits = 0;
@@ -808,10 +830,10 @@ public class GameMode extends ModeController {
 				JsonValue movement = handholdDesc.get("movement");
 				handhold.setStartPoint(movement.getFloat("startX"),movement.getFloat("startY")+currentHeight);
 				handhold.setEndPoint(movement.getFloat("endX"),movement.getFloat("endY")+currentHeight);
-				float speed = movement.getFloat("speed"), 
-					tx = handhold.getEndPoint().x - handhold.getStartPoint().x,
-					ty = handhold.getEndPoint().y - handhold.getStartPoint().y,
-					dist = (float) Math.sqrt(tx*tx+ty*ty);
+				float speed = movement.getFloat("speed"),
+						tx = handhold.getEndPoint().x - handhold.getStartPoint().x,
+						ty = handhold.getEndPoint().y - handhold.getStartPoint().y,
+						dist = (float) Math.sqrt(tx*tx+ty*ty);
 				handhold.setLinearVelocity(new Vector2((tx/dist)*speed, (ty/dist)*speed));
 				handhold.setVelocity(speed);
 				handhold.setPosition((handhold.getStartPoint().x+handhold.getEndPoint().x)/2,
@@ -824,7 +846,7 @@ public class GameMode extends ModeController {
 			catch(Exception e){handhold.setCrumble(0);}
 			try{handhold.setSlip(handholdDesc.getFloat("slip"));}
 			catch(Exception e){handhold.setSlip(0);}
-			
+
 			handholdDesc = handholdDesc.next();
 		}
 
@@ -876,121 +898,129 @@ public class GameMode extends ModeController {
 	 *           <p/>
 	 *           special case: on the zeroth timestep/very first call to update at start of game,
 	 *           it snaps limbs to any handhold in radius.
-	 * 
+	 *
 	 * @param dt
 	 * @author Jacob, Daniel
 	 */
 	public void update(float dt) {
-		input = InputController.getInstance();
-		doingAnimation = input.watchAnimation();
-		if (doingAnimation){
-			getAnimationInformation();
-			inx = animationLX;
-			iny = animationLY;
-			rinx = animationRX;
-			riny = animationRY;
-			nextToPress = animationNextToPress;
-			justReleased = animationJustReleased;
-		}else{
-			inx = input.getHorizontalL();
-			iny = input.getVerticalL();
-			rinx = input.getHorizontalR();
-			riny = input.getVerticalR();
-			nextToPress = input.getOrderPressed();
-			justReleased.clear();
-			justReleased.add(input.releasedLeftArm() ? 1:0);
-			justReleased.add(input.releasedRightArm() ? 1:0);
-			justReleased.add(input.releasedLeftLeg() ? 1:0);
-			justReleased.add(input.releasedRightLeg() ? 1:0);
 
-		}
-		//don't uncomment createAnimation unless you know what you are doing!!
+		if (isPaused) pauseMode.update(dt, listener);
+		else if (isDead) deadMode.update(dt, listener);
+		else if (isVictorious) victoryMode.update(dt, listener);
+		else {
+			input = InputController.getInstance();
+			doingAnimation = input.watchAnimation();
+			if (doingAnimation) {
+				getAnimationInformation();
+				inx = animationLX;
+				iny = animationLY;
+				rinx = animationRX;
+				riny = animationRY;
+				nextToPress = animationNextToPress;
+				justReleased = animationJustReleased;
+			} else {
+				inx = input.getHorizontalL();
+				iny = input.getVerticalL();
+				rinx = input.getHorizontalR();
+				riny = input.getVerticalR();
+				nextToPress = input.getOrderPressed();
+				justReleased.clear();
+				justReleased.add(input.releasedLeftArm() ? 1 : 0);
+				justReleased.add(input.releasedRightArm() ? 1 : 0);
+				justReleased.add(input.releasedLeftLeg() ? 1 : 0);
+				justReleased.add(input.releasedRightLeg() ? 1 : 0);
+
+			}
+			//don't uncomment createAnimation unless you know what you are doing!!
 //		createAnimation();
 
 
-		if (checkIfReachedCheckpoint()){
-			lastReachedCheckpoint ++;
-		}
-		if (checkIfDied()) {
-			listener.exitScreen(this, DIED);
+			if (checkIfReachedCheckpoint()) {
+				lastReachedCheckpoint++;
+			}
+			if (checkIfDied()) {
+				listener.exitScreen(this, EXIT_DIED);
 
-		}
+			}
 //		upsideDown = character.parts.get(HEAD).getPosition().y - character.parts.get(CHEST).getPosition().y <= 0;
 
 
-		if(input.didSelect()) tutorialToggle = !tutorialToggle;
+			if (input.didSelect()) tutorialToggle = !tutorialToggle;
 
-		if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
+			if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
 
-		movementController.moveCharacter(inx,iny,rinx,riny,nextToPress,justReleased);
-		if (nextToPress.size > 0) {
-			for (int i : nextToPress) {
-				((ExtremityModel) (character.parts.get(i))).ungrip();
-				ungrip(((ExtremityModel) (character.parts.get(i)))); 
-			}
-		}
-		//bounding velocities
-		boundBodyVelocities();
-		HandholdModel[] glowingHandholds = glowHandholds();
-
-		snapLimbsToHandholds(glowingHandholds);
-
-		cameraWork();
-		
-		dealWithSlipperyAndCrumblyHandholds();
-		
-		spawnObstacles();
-
-		for(GameObject g : objects){
-
-			if(g instanceof ObstacleModel &&
-					g.getBody().getPosition().y  < (canvas.getCamera().position.y-canvas.getWidth())/scale.y &&
-					g.getBody().getType() != BodyDef.BodyType.StaticBody){
-				objects.remove(g);
-			}
-			if(g instanceof HandholdModel && ((HandholdModel) (g)).getStartPoint() != null){
-				HandholdModel h = (HandholdModel) g;
-				h.updateSnapPoints();
-				if(withinBounds(h.getBody().getPosition(),  h.getEndPoint()) || 
-				   withinBounds(h.getBody().getPosition(),  h.getStartPoint())){
-					h.getBody().setLinearVelocity(h.getBody().getLinearVelocity().x*-1, h.getBody().getLinearVelocity().y*-1);
+			movementController.moveCharacter(inx,iny,rinx,riny,nextToPress,justReleased);
+			if (nextToPress.size > 0) {
+				for (int i : nextToPress) {
+					((ExtremityModel) (character.parts.get(i))).ungrip();
+					ungrip(((ExtremityModel) (character.parts.get(i))));
 				}
 			}
-		}
-		
-		// TODO: Update energy quantity (fill in these values)
-		vector = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
-		character.updateEnergy(oxygen, 1, vector.len(), true);
+			//bounding velocities
+			boundBodyVelocities();
+			HandholdModel[] glowingHandholds = glowHandholds();
 
-		if(risingObstacle != null){
-			risingObstacle.setHeight(risingObstacle.getHeight()+risingObstacle.getSpeed());
-			for(PartModel p : character.parts){
-				if(risingObstacle.getHeight() >= p.getPosition().y){
-					character.setEnergy(0);
-					failed = true;
+			snapLimbsToHandholds(glowingHandholds);
+
+			cameraWork();
+
+			dealWithSlipperyAndCrumblyHandholds();
+
+			spawnObstacles();
+
+			for (GameObject g : objects) {
+
+				if (g instanceof ObstacleModel &&
+						g.getBody().getPosition().y < (canvas.getCamera().position.y - canvas.getWidth()) / scale.y &&
+						g.getBody().getType() != BodyDef.BodyType.StaticBody) {
+					objects.remove(g);
+				}
+				if (g instanceof HandholdModel && ((HandholdModel) (g)).getStartPoint() != null) {
+					HandholdModel h = (HandholdModel) g;
+					h.updateSnapPoints();
+					if (withinBounds(h.getBody().getPosition(), h.getEndPoint()) ||
+							withinBounds(h.getBody().getPosition(), h.getStartPoint())) {
+						h.getBody().setLinearVelocity(h.getBody().getLinearVelocity().x * -1, h.getBody().getLinearVelocity().y * -1);
+					}
 				}
 			}
-		}
-		
-		if (character.getEnergy() <= 0){
-			failed = true;
-			for(int e : EXTREMITIES){
-				 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
-				 ungrip(extremity);
-				 extremity.ungrip();
-				 extremity.body.setType(BodyDef.BodyType.DynamicBody);
-				 extremity.setTexture(partTextures[e].getTexture());
+
+			// TODO: Update energy quantity (fill in these values)
+			vector = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
+			character.updateEnergy(oxygen, 1, vector.len(), true);
+
+			if (risingObstacle != null) {
+				risingObstacle.setHeight(risingObstacle.getHeight() + risingObstacle.getSpeed());
+				for (PartModel p : character.parts) {
+					if (risingObstacle.getHeight() >= p.getPosition().y) {
+						character.setEnergy(0);
+						failed = true;
+					}
+				}
+				if(risingObstacle.getHeight() < character.parts.get(CHEST).getPosition().y - DEFAULT_HEIGHT/2 -1 ){
+					risingObstacle.setHeight(character.parts.get(CHEST).getPosition().y - DEFAULT_HEIGHT/2 -1);
+				}
 			}
+
+			if (character.getEnergy() <= 0) {
+				failed = true;
+				for (int e : EXTREMITIES) {
+					ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
+					ungrip(extremity);
+					extremity.ungrip();
+					extremity.body.setType(BodyDef.BodyType.DynamicBody);
+					extremity.setTexture(partTextures[e].getTexture());
+				}
+			}
+			energyLevel = Math.abs((int) Math.ceil(character.getEnergy() / 10f));
+			checkHasCompleted();
+			if (complete) {
+				listener.exitScreen(this, EXIT_VICTORY);
+			}
+			if (checkpointTimestep == 0) cposYAtTime0 = character.parts.get(HEAD).getY();
+			checkpointTimestep += 1;
+			timestep += 1;
 		}
-		energyLevel = Math.abs((int)Math.ceil(character.getEnergy()/10f));
-		checkHasCompleted(); 
-		if(complete){
-			//TODO: properly change level
-			changeLevel(currLevel);
-		}
-		if (checkpointTimestep == 0) cposYAtTime0 = character.parts.get(HEAD).getY();
-		checkpointTimestep+=1;
-		timestep += 1;
 
 	}
 
@@ -1028,14 +1058,14 @@ public class GameMode extends ModeController {
 				}
 				else{
 					HandholdModel h = (HandholdModel) extremity.getJoint().getBodyB().getFixtureList().get(0).getUserData();
-					if((e == HAND_LEFT || e == HAND_RIGHT) 
-							 && h.getVelocity() != 0 &&
-							 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > ARM_UNGRIP_LENGTH)
-						 ungrip(extremity);
-				    else if((e == FOOT_LEFT || e == FOOT_RIGHT) &&
-				    		  h.getVelocity() != 0 &&
-							 character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > LEG_UNGRIP_LENGTH)
-						 ungrip(extremity);
+					if((e == HAND_LEFT || e == HAND_RIGHT)
+							&& h.getVelocity() != 0 &&
+							character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > ARM_UNGRIP_LENGTH)
+						ungrip(extremity);
+					else if((e == FOOT_LEFT || e == FOOT_RIGHT) &&
+							h.getVelocity() != 0 &&
+							character.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > LEG_UNGRIP_LENGTH)
+						ungrip(extremity);
 					if(extremity.getGripTime() > h.getSlip()*60 && h.getSlip() > 0){
 						ungrip(extremity);
 					}
@@ -1065,14 +1095,14 @@ public class GameMode extends ModeController {
 	}
 
 	private void ungripAllFrom(HandholdModel h){
-		 for(int e : EXTREMITIES){
-			 ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
-			 if(extremity.isGripped() && extremity.getJoint().getBodyB().getFixtureList().get(0).getUserData() == h){
-				 ungrip(extremity);
-			 }
-		 }
+		for(int e : EXTREMITIES){
+			ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
+			if(extremity.isGripped() && extremity.getJoint().getBodyB().getFixtureList().get(0).getUserData() == h){
+				ungrip(extremity);
+			}
+		}
 	}
-	
+
 	private boolean withinBounds(Vector2 position, Vector2 target) {
 		float xError = Math.abs(position.x - target.x);
 		float yError = Math.abs(position.y - target.y);
@@ -1092,10 +1122,10 @@ public class GameMode extends ModeController {
 
 
 
-	/** Grips a handhold by adding a revolute joint between the handhold and the extremity **/ 
+	/** Grips a handhold by adding a revolute joint between the handhold and the extremity **/
 	public void grip(ExtremityModel e, HandholdModel h){
 		if (e.getJoint() == null){
-			RevoluteJointDef jointD = new RevoluteJointDef(); 
+			RevoluteJointDef jointD = new RevoluteJointDef();
 			jointD.initialize(e.getBody(), h.getBody(), e.getPosition());
 			jointD.collideConnected = false;
 			setJointMotor(jointD,0,10);
@@ -1112,8 +1142,8 @@ public class GameMode extends ModeController {
 	public void ungrip(ExtremityModel e){
 		if (e.getJoint() != null){
 			world.destroyJoint(e.getJoint());
-			e.setJoint(null); 
-			
+			e.setJoint(null);
+
 		}
 		e.ungrip();
 	}
@@ -1126,15 +1156,12 @@ public class GameMode extends ModeController {
 	 * Spawns obstacles for active obstacle zones at a random point within the zone. For an obstacle zone to be active,
 	 * three conditions must hold true. 1) It must have been at least oz.getSpawnFrequency() frames since the last obstacle
 	 * spawn, 2) the top of the screen must be lower than the bottom of the obstacle zone, 3) The character must be in the
-	 * level chunk that contains that obstacle zone. 
+	 * level chunk that contains that obstacle zone.
 	 */
 	private void spawnObstacles(){
 		float cpos = character.parts.get(CHEST).getBody().getPosition().y;
 		for(ObstacleZone oz : obstacles){
 			float viewHeight = (canvas.getCamera().position.y + canvas.getHeight()/2) / scale.y;
-//			if(oz.canSpawnObstacle() && viewHeight < oz.getBounds().y &&
-//					oz.isTriggered()){
-			//couldnt figure out why viewHeight<oz.getBounds().y was needed...
 
 			if(oz.ticksSinceLastSpawn == 0 && viewHeight < oz.getBounds().y && cpos > oz.getMinSpawnHeight()){
 				obstacle = new ObstacleModel(oz.getObstacleTexture(), 1f, scale);
@@ -1142,6 +1169,10 @@ public class GameMode extends ModeController {
 				oz.setObstY(oz.getBounds().y + rand.nextFloat()*oz.getBounds().height);
 				obstacle.setX(oz.getObstX());
 				obstacle.setY(oz.getObstY());
+				if(levelName.equals("space")) {
+					obstacle.setVY((float) (Math.random()*-10));
+					obstacle.setVX((float) (Math.random()*4-2));
+				}
 
 				oz.setObstacle(obstacle);
 				queuedObstacles.add(oz);
@@ -1180,7 +1211,7 @@ public class GameMode extends ModeController {
 				qo.ticksSinceLastSpawn = 0;
 			}
 
-			}
+		}
 	}
 
 	private void spawnObstacle(ObstacleZone oz) {
@@ -1218,10 +1249,9 @@ public class GameMode extends ModeController {
 
 	/**
 	 * @param vect - current linear velocity vector of any body part
-     * @return bounded linear velocity vector
+	 * @return bounded linear velocity vector
 	 * @author Jacob
-
-     */
+	 */
 	private Vector2 boundVelocity(Vector2 vect) {
 		if (Math.abs(vect.x) > 1 || Math.abs(vect.y) > 1) {
 		}
@@ -1278,7 +1308,7 @@ public class GameMode extends ModeController {
 	 * if possible
 	 * @author Jacob
 	 * @param hs - handholds in game
-     */
+	 */
 	private void snapLimbsToHandholds(HandholdModel[] hs) {
 
 		if (justReleased.get(0) == 1|| timestep == 0)
@@ -1298,7 +1328,7 @@ public class GameMode extends ModeController {
 //		if (input.releasedRightLeg() || timestep == 0)
 //			snapIfPossible(FOOT_RIGHT, hs);
 	}
-	
+
 	/**
 	 * snaps limb to handhold if possible.
 	 * @param limb - limb to snap if possible
@@ -1314,7 +1344,7 @@ public class GameMode extends ModeController {
 		Vector2 closestSnapPoint = new Vector2(0,0);
 		for (HandholdModel h: hs) {
 			if (h == null) continue;
- 			for (Vector2 snapPoint : h.snapPoints) {
+			for (Vector2 snapPoint : h.snapPoints) {
 				dist = distanceFrom(limb, snapPoint);
 				if (dist <= HANDHOLD_SNAP_RADIUS){
 					closest = closestdist > dist ? h:closest;
@@ -1367,12 +1397,12 @@ public class GameMode extends ModeController {
 		t = input.didRightLeg() ? tutorialTextures[7] : tutorialTextures[3];
 		canvas.draw(t, Color.WHITE, (vector.x*scale.x)+10, (vector.y*scale.y),40,40);
 	}
-	
+
 	private void checkHasCompleted(){
 		this.complete =  character.parts.get(HAND_RIGHT).getPosition().y >= levelFormat.getFloat("height")
 				||character.parts.get(HAND_LEFT).getPosition().y >= levelFormat.getFloat("height")
 				||character.parts.get(FOOT_RIGHT).getPosition().y >= levelFormat.getFloat("height")
-				||character.parts.get(FOOT_LEFT).getPosition().y >= levelFormat.getFloat("height");  
+				||character.parts.get(FOOT_LEFT).getPosition().y >= levelFormat.getFloat("height");
 	}
 
 
@@ -1442,7 +1472,7 @@ public class GameMode extends ModeController {
 		canvas.draw(fatigueTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 
 		if (currLevel == LEVEL_TUTORIAL)
-		canvas.draw(tutorialOverlay, Color.WHITE, canvas.getWidth()/4, canvas.getHeight()/8, canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
+			canvas.draw(tutorialOverlay, Color.WHITE, canvas.getWidth()/4, canvas.getHeight()/8, canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
 		counterInt = 0;
 
 		while (counterInt <= lastReachedCheckpoint){
@@ -1488,6 +1518,10 @@ public class GameMode extends ModeController {
 			}
 			canvas.endDebug();
 		}
+
+		if (isPaused) pauseMode.draw(canvas);
+		else if (isDead) deadMode.draw(canvas);
+		else if (isVictorious) victoryMode.draw(canvas);
 	}
 
 	public void setLevel(int level){
@@ -1506,14 +1540,22 @@ public class GameMode extends ModeController {
 		return currLevel;
 	}
 
+	public int getNextLevel(){
+		if (currLevel != NUM_LEVELS - 1){
+			return currLevel + 1;
+		}
+		return currLevel;
+	}
+
 	/**
 	 * Called when the Screen is paused.
-	 * 
-	 * This is usually when it's not active or visible on screen. An Application is 
+	 *
+	 * This is usually when it's not active or visible on screen. An Application is
 	 * also paused before it is destroyed.
 	 */
 	public void pause() {
-		listener.exitScreen(this, EXIT_PAUSE);
+		pauseMode.reset();
+		isPaused = true;
 	}
 
 	/**
@@ -1523,12 +1565,23 @@ public class GameMode extends ModeController {
 	 */
 	public void resume() {
 		// Shouldn't need to do anything to resume for now, can change focus of screen
+		isPaused = false;
+	}
+
+	public void dead(){
+		deadMode.reset();
+		isDead = true;
+	}
+
+	public void victorious(){
+		victoryMode.reset();
+		isVictorious = true;
 	}
 
 	@Override
 	public void resize(int width, int height) {
 	}
-	
+
 	public void dispose(){
 		font.dispose();
 		super.dispose();
@@ -1536,3 +1589,4 @@ public class GameMode extends ModeController {
 
 
 }
+
