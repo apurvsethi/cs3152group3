@@ -1,31 +1,31 @@
 
-		package beigegang.mountsputnik;
+package beigegang.mountsputnik;
 
-		import com.badlogic.gdx.Gdx;
-		import com.badlogic.gdx.assets.AssetManager;
-		import com.badlogic.gdx.graphics.Color;
-		import com.badlogic.gdx.graphics.Texture;
-		import com.badlogic.gdx.graphics.g2d.BitmapFont;
-		import com.badlogic.gdx.graphics.g2d.Sprite;
-		import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-		import com.badlogic.gdx.graphics.g2d.TextureRegion;
-		import static beigegang.mountsputnik.Constants.*;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import static beigegang.mountsputnik.Constants.*;
 
-		import beigegang.util.*;
+import beigegang.util.*;
 
-		import com.badlogic.gdx.math.Rectangle;
-		import com.badlogic.gdx.math.Vector2;
-		import com.badlogic.gdx.physics.box2d.BodyDef;
-		import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
-		import com.badlogic.gdx.physics.box2d.Joint;
-		import com.badlogic.gdx.physics.box2d.World;
-		import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
-		import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.badlogic.gdx.physics.box2d.Joint;
+import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
+import com.badlogic.gdx.utils.*;
 
-		import java.io.FileWriter;
-		import java.util.HashMap;
-		import java.util.Map.Entry;
-		import java.util.Random;
+import java.io.FileWriter;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Random;
 
 public class GameMode extends ModeController {
 
@@ -66,9 +66,14 @@ public class GameMode extends ModeController {
 	private static final HashMap<String,Integer> NUM_HANDHOLDS = new HashMap<String,Integer>();
 	private static final String PART_TEXTURES[] = {"Ragdoll/Torso.png", "Ragdoll/Head.png", "Ragdoll/Hips.png",
 			"Ragdoll/ArmLeft.png", "Ragdoll/ArmRight.png", "Ragdoll/ForearmLeft.png", "Ragdoll/ForearmRight.png",
-			"Ragdoll/HandLeftUngripped.png", "Ragdoll/HandRightUngripped.png", "Ragdoll/ThighLeft.png",
+			"Ragdoll/HandLeft.png", "Ragdoll/HandRight.png", "Ragdoll/ThighLeft.png",
 			"Ragdoll/ThighRight.png", "Ragdoll/CalfLeft.png", "Ragdoll/CalfRight.png", "Ragdoll/FeetShoeLeft.png",
-			"Ragdoll/FeetShoeRight.png", "Ragdoll/HandLeftGripped.png", "Ragdoll/HandRightGripped.png"};
+			"Ragdoll/FeetShoeRight.png"};
+	private static final String SHADOW_TEXTURES[] = {"Ragdoll/shadow/Torso.png", "Ragdoll/shadow/Head.png", "Ragdoll/shadow/Hips.png",
+			"Ragdoll/shadow/ArmLeft.png", "Ragdoll/shadow/ArmRight.png", "Ragdoll/shadow/ForearmLeft.png", "Ragdoll/shadow/ForearmRight.png",
+			"Ragdoll/shadow/HandLeftUngripped.png", "Ragdoll/shadow/HandRightUngripped.png", "Ragdoll/shadow/ThighLeft.png",
+			"Ragdoll/shadow/ThighRight.png", "Ragdoll/shadow/CalfLeft.png", "Ragdoll/shadow/CalfRight.png", "Ragdoll/shadow/FeetShoeLeft.png",
+			"Ragdoll/shadow/FeetShoeRight.png", "Ragdoll/shadow/HandLeftGripped.png", "Ragdoll/shadow/HandRightGripped.png"};
 	private static final String TUTORIAL_TEXTURES[] = {
 			"Ragdoll/controls/360_LB.png",
 			"Ragdoll/controls/360_RB.png",
@@ -112,8 +117,9 @@ public class GameMode extends ModeController {
 	private static TextureRegion lavaTexture;
 	private static TextureRegion glowTexture;
 	private static TextureRegion staticObstacle;
-	private static TextureRegion fallingObstacle;
-	private static TextureRegion[] partTextures = new TextureRegion[PART_TEXTURES.length];
+	private static FilmStrip fallingObstacle;
+	private static FilmStrip[] partTextures = new FilmStrip[PART_TEXTURES.length];
+	private static TextureRegion[] shadowTextures = new TextureRegion[SHADOW_TEXTURES.length];
 	private static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length];
 	private static TextureRegion[] handholdTextures;
 	private static TextureRegion[] levelLabels = new TextureRegion[LEVEL_LABEL_FILES.length];
@@ -191,8 +197,8 @@ public class GameMode extends ModeController {
 			assets.add("assets/"+name+"/LevelStart.png");
 			manager.load("assets/"+name+"/StaticObstacle.png", Texture.class);
 			assets.add("assets/"+name+"/StaticObstacle.png");
-			manager.load("assets/"+name+"/FallingRock.png", Texture.class);
-			assets.add("assets/"+name+"/FallingRock.png");
+			manager.load("assets/"+name+"/Rockbust_Animation.png", Texture.class);
+			assets.add("assets/"+name+"/Rockbust_Animation.png");
 
 
 		}
@@ -232,6 +238,11 @@ public class GameMode extends ModeController {
 			manager.load(PART_TEXTURE, Texture.class);
 			assets.add(PART_TEXTURE);
 		}
+		for(String SHADOW_TEXTURE: SHADOW_TEXTURES){
+			manager.load(SHADOW_TEXTURE, Texture.class);
+			assets.add(SHADOW_TEXTURE);
+		}
+		
 		for(String TUTORIAL_TEXTURE : TUTORIAL_TEXTURES){
 			manager.load(TUTORIAL_TEXTURE, Texture.class);
 			assets.add(TUTORIAL_TEXTURE);
@@ -281,7 +292,7 @@ public class GameMode extends ModeController {
 		lavaTexture = createTexture(manager, LAVA_FILE, false);
 		glowTexture = createTexture(manager, GLOW_FILE, false);
 		staticObstacle = createTexture(manager, "assets/"+levelName+"/StaticObstacle.png", false);
-		fallingObstacle = createTexture(manager, "assets/"+levelName+"/FallingRock.png", false);
+		fallingObstacle = createFilmStrip(manager, "assets/"+levelName+"/Rockbust_Animation.png", 1, 5, 5);
 
 		for (counterInt = 0;  counterInt < LEVEL_LABEL_FILES.length; counterInt++){
 			levelLabels[counterInt] = createTexture(manager, LEVEL_LABEL_FILES[counterInt], false);
@@ -289,7 +300,12 @@ public class GameMode extends ModeController {
 		}
 
 		for (counterInt = 0; counterInt < PART_TEXTURES.length; counterInt++) {
-			partTextures[counterInt] = createTexture(manager, PART_TEXTURES[counterInt], false);
+			partTextures[counterInt] = createFilmStrip(manager, PART_TEXTURES[counterInt], 1,
+					BODY_PART_ANIMATION_FRAMES[counterInt], BODY_PART_ANIMATION_FRAMES[counterInt]);
+		}
+		
+		for (counterInt = 0; counterInt < SHADOW_TEXTURES.length; counterInt++){
+			shadowTextures[counterInt] = createTexture(manager, SHADOW_TEXTURES[counterInt], false); 
 		}
 
 		for (counterInt = 0; counterInt < TUTORIAL_TEXTURES.length; counterInt++) {
@@ -583,7 +599,7 @@ public class GameMode extends ModeController {
 		while(counter < checkpointLevelBlocks.size){
 			//TODO: account for difficulty
 			int blockNumber = checkpointLevelBlocks.get(counter);
-//			blockNumber = 14;
+//			blockNumber = 11;
 			used.add(blockNumber);
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json");
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
@@ -868,8 +884,7 @@ public class GameMode extends ModeController {
 		while(obstacleDesc != null){
 			bound = new Rectangle(obstacleDesc.getFloat("originX"), obstacleDesc.getFloat("originY")+currentHeight,
 					obstacleDesc.getFloat("width"),obstacleDesc.getFloat("height"));
-			//TODO: Set texture to something other than null once we have textures for obstacles
-			obstacleZone = new ObstacleZone(fallingObstacle.getTexture(), null, currentHeight, obstacleDesc.getInt("frequency"), bound);
+			obstacleZone = new ObstacleZone(fallingObstacle, null, currentHeight, obstacleDesc.getInt("frequency"), bound);
 			obstacles.add(obstacleZone);
 			obstacleDesc = obstacleDesc.next();
 		}
@@ -880,8 +895,6 @@ public class GameMode extends ModeController {
 			staticDesc = levelPiece.get("static").child();
 			ObstacleModel obstacle;
 			while(staticDesc != null){
-				//TODO: Set texture to something other than null once we have textures for obstacles
-
 				obstacle = new ObstacleModel(staticObstacle.getTexture(), staticDesc.getFloat("size"), scale);
 				obstacle.setX(staticDesc.getFloat("x"));
 				obstacle.setY(staticDesc.getFloat("y")+currentHeight);
@@ -996,8 +1009,8 @@ public class GameMode extends ModeController {
 			for (GameObject g : objects) {
 
 				if (g instanceof ObstacleModel &&
-						g.getBody().getPosition().y < (canvas.getCamera().position.y - canvas.getWidth()) / scale.y &&
-						g.getBody().getType() != BodyDef.BodyType.StaticBody) {
+						((g.getBody().getPosition().y < (canvas.getCamera().position.y - canvas.getWidth()) / scale.y &&
+						g.getBody().getType() != BodyDef.BodyType.StaticBody) || ((ObstacleModel)g).broken)) {
 					objects.remove(g);
 				}
 				if (g instanceof HandholdModel && ((HandholdModel) (g)).getStartPoint() != null) {
@@ -1507,6 +1520,10 @@ public class GameMode extends ModeController {
 		canvas.end();
 
 		canvas.begin();
+		if(currLevel != LEVEL_SKY)
+			for (int i = 0; i < character.parts.size; i++){
+				character.parts.get(i).drawShadow(shadowTextures[i], canvas);
+			}
 		for (GameObject obj : objects) obj.draw(canvas);
 		if (tutorialToggle) drawToggles();
 		canvas.end();

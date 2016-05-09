@@ -2,6 +2,7 @@ package beigegang.mountsputnik;
 
 import static beigegang.mountsputnik.Constants.*;
 
+import beigegang.util.FilmStrip;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -18,7 +19,7 @@ public class ObstacleZone {
 	private float maxSpawnHeight;
 	private int spawnFrequency;
 	private Rectangle bounds;
-	private Texture obstacleTexture;
+	private FilmStrip obstacleTexture;
 	private TextureRegion warningTexture;
 	private boolean triggered = false;
 	private boolean triggeredAlready = false;
@@ -96,16 +97,16 @@ public class ObstacleZone {
 	public void setSpawnFrequency(int spawnFrequency) {
 		this.spawnFrequency = spawnFrequency;
 	}
-	
+
 	/**
 	 * Generates an ObstacleZone in the level
-	 * 
-	 * @param t the Texture of obstacles generated here
+	 *
+	 * @param t the filmStrip of obstacles generated here
 	 * @param minHeight minimumHeight of character at which to spawn obstacles
 	 * @param freq obstacle spawn frequency (in frames)
 	 * @param bounds the bounds of this zone
 	 */
-	public ObstacleZone(Texture t, TextureRegion tr, float minHeight, int freq, Rectangle bounds){
+	public ObstacleZone(FilmStrip t, TextureRegion tr, float minHeight, int freq, Rectangle bounds){
 		minSpawnHeight = minHeight;
 		maxSpawnHeight = minSpawnHeight + SCREEN_HEIGHT;
 		spawnFrequency = freq;
@@ -113,26 +114,6 @@ public class ObstacleZone {
 		ticksSinceLastSpawn = 0;
 		obstacleTexture  = t;
 		warningTexture = tr;
-
-	}
-	
-	/**
-	 * Generates an ObstacleZone in the level
-	 * 
-	 * @param t the Texture of obstacles generated here
-	 * @param minHeight minimumHeight of character at which to spawn obstacles
-	 * @param freq obstacle spawn frequency (in seconds)
-	 * @param bounds the bounds of this zone
-	 */
-	public ObstacleZone(Texture t, TextureRegion tr, float minHeight, float freq, Rectangle bounds){
-
-		minSpawnHeight = minHeight;
-		spawnFrequency = (int)(freq/WORLD_STEP);
-		this.bounds = bounds;
-		ticksSinceLastSpawn = 0;
-		obstacleTexture  = t;
-		warningTexture = tr;
-
 	}
 
 	/**
@@ -152,14 +133,14 @@ public class ObstacleZone {
 	/**
 	 * @return the obstacleTexture
 	 */
-	public Texture getObstacleTexture() {
+	public FilmStrip getObstacleTexture() {
 		return obstacleTexture;
 	}
 
 	/**
 	 * @param obstacleTexture the obstacleTexture to set
 	 */
-	public void setObstacleTexture(Texture obstacleTexture) {
+	public void setObstacleTexture(FilmStrip obstacleTexture) {
 		this.obstacleTexture = obstacleTexture;
 	}
 	

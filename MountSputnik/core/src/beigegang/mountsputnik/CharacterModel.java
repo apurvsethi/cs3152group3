@@ -1,6 +1,6 @@
 package beigegang.mountsputnik;
 
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import beigegang.util.FilmStrip;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
@@ -17,7 +17,7 @@ public class CharacterModel {
 	/** Cache vector for organizing body parts */
 	private Vector2 partCache = new Vector2();
 	/** Texture assets for the body parts */
-	private TextureRegion[] partTextures;
+	private FilmStrip[] partTextures;
 	/** Character energy */
 	private float energy;
 	private RevoluteJointDef jointDef = new RevoluteJointDef();
@@ -121,8 +121,6 @@ public class CharacterModel {
 	 */
 	private PartModel makePart(int part, int connect, float partX, float connectX,
 							   float partY, float connectY, Vector2 drawPositionScale) {
-		TextureRegion texture = partTextures[part];
-
 		if (connect != NONE) {
 			partCache.set(-partX, -partY);
 			partCache.add(parts.get(connect).getPosition());
@@ -130,7 +128,7 @@ public class CharacterModel {
 		}
 		else partCache.set(partX, partY);
 
-		PartModel partModel = new PartModel(partCache.x, partCache.y, texture.getTexture(),
+		PartModel partModel = new PartModel(partCache.x, partCache.y, partTextures[part],
 				CHARACTER_DRAW_SIZE_SCALE, drawPositionScale, this);
 		partModel.setBodyType(BodyDef.BodyType.DynamicBody);
 
@@ -153,8 +151,6 @@ public class CharacterModel {
 	 */
 	private PartModel makeExtremity(int part, int connect, float partX, float connectX,
 							   float partY, float connectY, Vector2 drawPositionScale) {
-		TextureRegion texture = partTextures[part];
-
 		if (connect != NONE) {
 			partCache.set(-partX, -partY);
 			partCache.add(parts.get(connect).getPosition());
@@ -162,11 +158,8 @@ public class CharacterModel {
 		}
 		else partCache.set(partX, partY);
 
-		// TODO: Do this better, most likely with film strip
-		TextureRegion grippedTexture = part + 8 > partTextures.length ? texture : partTextures[part + 8];
-
 		ExtremityModel extremityModel = new ExtremityModel(partCache.x, partCache.y,
-				texture.getTexture(), grippedTexture.getTexture(), CHARACTER_DRAW_SIZE_SCALE,
+				partTextures[part], CHARACTER_DRAW_SIZE_SCALE,
 				drawPositionScale, this);
 		extremityModel.setBodyType(BodyDef.BodyType.DynamicBody);
 		parts.add(extremityModel);
@@ -176,66 +169,66 @@ public class CharacterModel {
 	private void makeJoints(World world) {
 		makeJoint(CHEST, HEAD, 0, CHEST_HEAD_OFFSET, 0);
 		setJointAngleLimits(-10, 10);
-		setJointMotor(0, 100);
+		setJointMotor(0, 50);
 		addJoint(world);
 
 		makeJoint(HIPS, CHEST, 0, HIP_CHEST_OFFSET, 0);
 		setJointAngleLimits(-45, 45);
-		setJointMotor(0, 100);
+		setJointMotor(0, 50);
 		addJoint(world);
 
 		makeJoint(ARM_LEFT, CHEST, ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0);
 		setJointAngleLimits(-90, 90);
-		setJointMotor(0, 100);
+		setJointMotor(0, 50);
 		addJoint(world);
 		makeJoint(ARM_RIGHT, CHEST, -ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, -180);
 		setJointAngleLimits(-90, 90);
-		setJointMotor(0, 100);
+		setJointMotor(0, 50);
 		addJoint(world);
 
 		makeJoint(FOREARM_LEFT, ARM_LEFT, FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, 0);
 		setJointAngleLimits(FOREARM_PULLING_LOWER_LIMIT, FOREARM_PULLING_UPPER_LIMIT);
-		setJointMotor(0, 100);
+		setJointMotor(0, 50);
 		addJoint(world);
 		makeJoint(FOREARM_RIGHT, ARM_RIGHT, -FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, -90);
 		setJointAngleLimits(FOREARM_PULLING_LOWER_LIMIT, FOREARM_PULLING_UPPER_LIMIT);
-		setJointMotor(0, 100);
+		setJointMotor(0, 50);
 		addJoint(world);
 
 		makeJoint(HAND_LEFT, FOREARM_LEFT, HAND_X_OFFSET, HAND_Y_OFFSET, 0);
 		setJointAngleLimits(-20, 60);
-		setJointMotor(0, 100);
+		setJointMotor(0, 50);
 		addJoint(world);
 		makeJoint(HAND_RIGHT, FOREARM_RIGHT, -HAND_X_OFFSET, HAND_Y_OFFSET, 0);
 		setJointAngleLimits(-20, 60);
-		setJointMotor(0, 100);
+		setJointMotor(0, 50);
 		addJoint(world);
 
 		makeJoint(THIGH_LEFT, HIPS, THIGH_X_HIP_OFFSET, THIGH_Y_HIP_OFFSET, 0);
 		setJointAngleLimits(-45, 90);
-		setJointMotor(0, 100);
+		setJointMotor(0, 50);
 		addJoint(world);
 		makeJoint(THIGH_RIGHT, HIPS, THIGH_X_HIP_OFFSET, THIGH_Y_HIP_OFFSET, 0);
 		setJointAngleLimits(-90, 45);
-		setJointMotor(0, 100);
+		setJointMotor(0, 50);
 		addJoint(world);
 
 		makeJoint(SHIN_LEFT,  THIGH_LEFT, SHIN_X_THIGH_OFFSET, SHIN_Y_THIGH_OFFSET, 0);
 		setJointAngleLimits(-150, -2);
-		setJointMotor(0, 100);
+		setJointMotor(0, 50);
 		addJoint(world);
 		makeJoint(SHIN_RIGHT, THIGH_RIGHT, -SHIN_X_THIGH_OFFSET, SHIN_Y_THIGH_OFFSET, 0);
 		setJointAngleLimits(2, 150);
-		setJointMotor(0, 100);
+		setJointMotor(0, 50);
 		addJoint(world);
 
 		makeJoint(FOOT_LEFT, SHIN_LEFT, FOOT_X_OFFSET, FOOT_Y_OFFSET, 0);
 		setJointAngleLimits(-90, 90);
-		setJointMotor(0, 100);
+		setJointMotor(0, 50);
 		addJoint(world);
 		makeJoint(FOOT_RIGHT, SHIN_RIGHT, -FOOT_X_OFFSET, FOOT_Y_OFFSET, 0);
 		setJointAngleLimits(-90, 90);
-		setJointMotor(0, 100);
+		setJointMotor(0, 50);
 		addJoint(world);
 	}
 
@@ -282,7 +275,7 @@ public class CharacterModel {
 	 * @param initialPositionY where character's chest should be to start (y value)
 	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
 	 */
-	public CharacterModel(TextureRegion[] textures, World w, float initialPositionX,
+	public CharacterModel(FilmStrip[] textures, World w, float initialPositionX,
 						  float initialPositionY, Vector2 drawPositionScale){
 		parts = new Array<PartModel>();
 		joints = new Array<Joint>();
