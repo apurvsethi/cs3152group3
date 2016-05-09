@@ -190,8 +190,8 @@ public class CharacterModel {
 		setJointAngleLimits(2, 135);
 		setJointMotor(0, 50);
 		addJoint(world);
-		makeJoint(FOREARM_RIGHT, ARM_RIGHT, -FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, -135);
-		setJointAngleLimits(2, 135);
+		makeJoint(FOREARM_RIGHT, ARM_RIGHT, -FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, 0);
+		setJointAngleLimits(-135, -2);
 		setJointMotor(0, 50);
 		addJoint(world);
 
