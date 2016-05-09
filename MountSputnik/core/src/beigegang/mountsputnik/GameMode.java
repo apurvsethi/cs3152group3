@@ -1120,8 +1120,11 @@ public class GameMode extends ModeController {
 
 
 	private void cameraWork() {
+		float characterPos = character.parts.get(CHEST).getBody().getPosition().y*scale.y; 
+		float cameraPos = canvas.getCamera().position.y; 
+		float cameraDist = (characterPos - cameraPos); 
 		canvas.setCameraPosition(canvas.getWidth() / 2,
-				character.parts.get(CHEST).getBody().getPosition().y*scale.y);
+				cameraPos + 0.01f*cameraDist);
 		if(canvas.getCamera().position.y < canvas.getHeight()/2){
 			canvas.setCameraPosition(canvas.getWidth()/2, canvas.getHeight()/2);
 		}
