@@ -10,6 +10,7 @@ public class ObstacleModel extends GameObject{
 	public float width;
 	public boolean breaking;
 	public boolean broken;
+	private int timestepsBrokenCurrent;
 
 	public ObstacleModel(Texture obstacleTexture, float f, Vector2 scale) {
 		super(obstacleTexture, f, scale);
@@ -21,6 +22,7 @@ public class ObstacleModel extends GameObject{
 		width = getX() * drawPositionScale.x;
 		shape.setAsBox(animator.getRegionWidth() * this.drawSizeScale.x / (7 * this.drawPositionScale.x),
 				animator.getRegionHeight() * this.drawSizeScale.y / (7 * this.drawPositionScale.y));
+		timestepsBrokenCurrent = 0;
 	}
 
 	@Override
@@ -30,9 +32,12 @@ public class ObstacleModel extends GameObject{
 
 	@Override
 	public void draw(GameCanvas canvas){
-		if (breaking && animator.getFrame() == animator.getSize() - 1)
+		if (breaking) timestepsBrokenCurrent = (timestepsBrokenCurrent + 1) % 4;
+
+		if (breaking && timestepsBrokenCurrent == 3 && animator.getFrame() == animator.getSize() - 1)
 			broken = true;
-		else if (breaking) animator.setFrame(animator.getFrame() + 1);
+		else if (breaking && timestepsBrokenCurrent == 3)
+			animator.setFrame(animator.getFrame() + 1);
 
 		if (drawPositionScale.x < canvas.getWidth() * 3 / 4) {
 				canvas.draw(animator, Color.WHITE, origin.x, origin.y,
