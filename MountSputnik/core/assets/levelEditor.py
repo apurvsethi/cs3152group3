@@ -1,6 +1,6 @@
 #must include the level:    cayon/block10.json
 #							mountain/block3.json
-LEVEL_TO_LOAD = "mountain/block2.json"
+LEVEL_TO_LOAD = "space/block3.json"
 
 '''
 Repeat Texture on Resize
@@ -26,7 +26,7 @@ from kivy.core.window import Window
 from kivy.graphics import * 
 from math import sqrt
 from glob import glob 
-import simplejson 
+import json 
 
 
 Builder.load_string('''
