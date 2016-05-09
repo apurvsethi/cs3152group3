@@ -187,11 +187,11 @@ public class CharacterModel {
 		addJoint(world);
 
 		makeJoint(FOREARM_LEFT, ARM_LEFT, FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, 0);
-		setJointAngleLimits(FOREARM_PULLING_LOWER_LIMIT, FOREARM_PULLING_UPPER_LIMIT);
+		setJointAngleLimits(2, 135);
 		setJointMotor(0, 50);
 		addJoint(world);
-		makeJoint(FOREARM_RIGHT, ARM_RIGHT, -FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, -90);
-		setJointAngleLimits(FOREARM_PULLING_LOWER_LIMIT, FOREARM_PULLING_UPPER_LIMIT);
+		makeJoint(FOREARM_RIGHT, ARM_RIGHT, -FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, -135);
+		setJointAngleLimits(2, 135);
 		setJointMotor(0, 50);
 		addJoint(world);
 

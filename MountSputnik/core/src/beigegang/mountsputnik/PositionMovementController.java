@@ -15,8 +15,8 @@ import static beigegang.mountsputnik.Constants.*;
  */
 public class PositionMovementController {
     // Sensitivity for moving crosshair with gameplay
-    private static final float GP_ACCELERATE = 1.0f;
-    private static final float GP_MAX_SPEED  = 10.0f;
+    private static final float GP_ACCELERATE = 1.1f;
+    private static final float GP_MAX_SPEED  = 11.0f;
     private static final float GP_THRESHOLD  = 0.20f;
 
     private CharacterModel character;
@@ -47,30 +47,30 @@ public class PositionMovementController {
         momentum = 0f;
     }
 
-    public void moveCharacter(float inx,float iny, float rinx,float riny,
+    public void moveCharacter(float horizontalL, float verticalL, float horizontalR, float verticalR,
                               Array<Integer> nextToPress, Array<Integer> justReleased) {
         boolean np = nextToPress.size > 0;
         boolean jr = justReleased.size > 0;
 
         if (np && nextToPress.get(0) == HAND_LEFT)
-            moveLimb(ARM_LEFT, FOREARM_LEFT, HAND_LEFT, inx, iny, true);
+            moveLimb(ARM_LEFT, FOREARM_LEFT, HAND_LEFT, horizontalL, verticalL, true, true);
         else if (jr && justReleased.contains(HAND_LEFT,false)) lockLimb(ARM_LEFT, FOREARM_LEFT);
         if (np && nextToPress.get(0) == HAND_RIGHT)
-            moveLimb(ARM_RIGHT, FOREARM_RIGHT, HAND_RIGHT, inx, iny, true);
+            moveLimb(ARM_RIGHT, FOREARM_RIGHT, HAND_RIGHT, horizontalL, verticalL, true, false);
         else if (jr && justReleased.contains(HAND_RIGHT,false)) lockLimb(ARM_RIGHT, FOREARM_RIGHT);
         if (np && nextToPress.get(0) == FOOT_LEFT)
-            moveLimb(THIGH_LEFT, SHIN_LEFT, FOOT_LEFT, inx, iny, false);
+            moveLimb(THIGH_LEFT, SHIN_LEFT, FOOT_LEFT, horizontalL, verticalL, false, true);
         else if (jr && justReleased.contains(FOOT_LEFT,false)) lockLimb(THIGH_LEFT, SHIN_LEFT);
         if (np && nextToPress.get(0) == FOOT_RIGHT)
-            moveLimb(THIGH_RIGHT, SHIN_RIGHT, FOOT_RIGHT, inx, iny, false);
+            moveLimb(THIGH_RIGHT, SHIN_RIGHT, FOOT_RIGHT, horizontalL, verticalL, false, false);
         else if (jr && justReleased.contains(FOOT_RIGHT,false)) lockLimb(THIGH_RIGHT, SHIN_RIGHT);
 
-        moveTorso(rinx, riny);
+        moveTorso(horizontalR, verticalR);
     }
 
     private void moveLimb(int root, int mid, int extremity,
-                          float horizontalJoystick, float verticalJoystick,
-                          boolean isArm) {
+                          float horizontal, float vertical,
+                          boolean isArm, boolean isLeft) {
         PartModel extremityPart = character.parts.get(extremity);
         RevoluteJoint rootJoint = (RevoluteJoint) character.getInnerJoint(root);
         RevoluteJoint midJoint = (RevoluteJoint) character.getJoint(root, mid);
@@ -78,7 +78,7 @@ public class PositionMovementController {
         Vector2 initial = extremityPart.getPosition();
         posCache.set(initial);
 
-        crossCache.set(horizontalJoystick, verticalJoystick);
+        crossCache.set(horizontal, vertical);
         if (crossCache.len2() > GP_THRESHOLD) {
             momentum += GP_ACCELERATE;
             momentum = Math.min(momentum, GP_MAX_SPEED);
@@ -91,7 +91,7 @@ public class PositionMovementController {
         }
         else momentum = 0;
 
-        adjustTowardsLimits(rootJoint, midJoint);
+        adjustTowardsLimits(rootJoint, midJoint, isArm, isLeft);
     }
 
     private void adjustToRadius(RevoluteJoint rootJoint, boolean isArm) {
@@ -107,11 +107,16 @@ public class PositionMovementController {
         }
     }
 
-    private void adjustTowardsLimits(RevoluteJoint rootJoint, RevoluteJoint midJoint) {
+    private void adjustTowardsLimits(RevoluteJoint rootJoint, RevoluteJoint midJoint,
+                                     boolean isArm, boolean isLeft) {
         moveTowardLimits(rootJoint);
         moveTowardLimits(midJoint);
-        if (midJoint.getMotorSpeed() != 0 && rootJoint.getMotorSpeed() == 0)
-            rootJoint.setMotorSpeed(-midJoint.getMotorSpeed() / 2);
+        if (midJoint.getMotorSpeed() != 0 && rootJoint.getMotorSpeed() == 0) {
+            float motorSpeed = ((isArm && isLeft) || (!isArm && !isLeft)) ? -20f : 20f;
+            if ((isArm && isLeft) || (!isArm && !isLeft))
+                rootJoint.setMotorSpeed(motorSpeed);
+            else rootJoint.setMotorSpeed(motorSpeed);
+        }
     }
 
     private void moveTowardLimits(RevoluteJoint joint) {
