@@ -925,10 +925,10 @@ public class GameMode extends ModeController {
 				riny = input.getVerticalR();
 				nextToPress = input.getOrderPressed();
 				justReleased.clear();
-				justReleased.add(input.releasedLeftArm() ? 1 : 0);
-				justReleased.add(input.releasedRightArm() ? 1 : 0);
-				justReleased.add(input.releasedLeftLeg() ? 1 : 0);
-				justReleased.add(input.releasedRightLeg() ? 1 : 0);
+				if (input.releasedLeftArm()) justReleased.add(HAND_LEFT);
+				if (input.releasedRightArm()) justReleased.add(HAND_RIGHT);
+				if (input.releasedLeftLeg()) justReleased.add(FOOT_LEFT);
+				if (input.releasedRightLeg()) justReleased.add(FOOT_RIGHT);
 
 			}
 			//don't uncomment createAnimation unless you know what you are doing!!
@@ -1311,13 +1311,13 @@ public class GameMode extends ModeController {
 	 */
 	private void snapLimbsToHandholds(HandholdModel[] hs) {
 
-		if (justReleased.get(0) == 1|| timestep == 0)
+		if (justReleased.contains(HAND_LEFT,false)|| timestep == 0)
 			snapIfPossible(HAND_LEFT, hs);
-		if (justReleased.get(1) == 1 || timestep == 0)
+		if (justReleased.contains(HAND_RIGHT,false) || timestep == 0)
 			snapIfPossible(HAND_RIGHT, hs);
-		if (justReleased.get(2) == 1 || timestep == 0)
+		if (justReleased.contains(FOOT_LEFT,false) || timestep == 0)
 			snapIfPossible(FOOT_LEFT, hs);
-		if (justReleased.get(3) == 1|| timestep == 0)
+		if (justReleased.contains(FOOT_RIGHT,false)|| timestep == 0)
 			snapIfPossible(FOOT_RIGHT, hs);
 //		if (input.releasedLeftArm() || timestep == 0)
 //			snapIfPossible(HAND_LEFT, hs);

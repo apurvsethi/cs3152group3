@@ -53,19 +53,18 @@ public class PositionMovementController {
 
         boolean np = nextToPress.size > 0;
         boolean jr = justReleased.size > 0;
-//        System.out.println(np + " " + jr + " " + horizontalL + " " + verticalL);
-        if ( np && nextToPress.get(0) == HAND_LEFT) {
-            System.out.println(np + " " + jr + " " + horizontalL + " " + verticalL);
-
+        if ( np && nextToPress.get(0) == HAND_LEFT)
             moveLimb(ARM_LEFT, FOREARM_LEFT, HAND_LEFT, horizontalL, verticalL, true);
-        }
         else if (jr && justReleased.contains(HAND_LEFT,false)) lockLimb(ARM_LEFT, FOREARM_LEFT);
+
         if ( np && nextToPress.get(0) == HAND_RIGHT)
             moveLimb(ARM_RIGHT, FOREARM_RIGHT, HAND_RIGHT, horizontalL, verticalL, true);
         else if (jr && justReleased.contains(HAND_RIGHT,false)) lockLimb(ARM_RIGHT, FOREARM_RIGHT);
+
         if ( np && nextToPress.get(0) == FOOT_LEFT)
             moveLimb(THIGH_LEFT, SHIN_LEFT, FOOT_LEFT, horizontalL, verticalL, false);
         else if (jr && justReleased.contains(FOOT_LEFT,false)) lockLimb(THIGH_LEFT, SHIN_LEFT);
+
         if ( np && nextToPress.get(0) == FOOT_RIGHT)
             moveLimb(THIGH_RIGHT, SHIN_RIGHT, FOOT_RIGHT, horizontalL, verticalL, false);
         else if (jr && justReleased.contains(FOOT_RIGHT,false)) lockLimb(THIGH_RIGHT, SHIN_RIGHT);
