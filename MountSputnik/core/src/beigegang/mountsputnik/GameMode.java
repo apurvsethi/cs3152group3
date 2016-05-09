@@ -996,8 +996,8 @@ public class GameMode extends ModeController {
 						failed = true;
 					}
 				}
-				if(risingObstacle.getHeight() < character.parts.get(CHEST).getPosition().y - DEFAULT_HEIGHT/2 -3 ){
-					risingObstacle.setHeight(character.parts.get(CHEST).getPosition().y - DEFAULT_HEIGHT/2 -3);
+				if(risingObstacle.getHeight() < character.parts.get(CHEST).getPosition().y - DEFAULT_HEIGHT/2 -1 ){
+					risingObstacle.setHeight(character.parts.get(CHEST).getPosition().y - DEFAULT_HEIGHT/2 -1);
 				}
 			}
 
