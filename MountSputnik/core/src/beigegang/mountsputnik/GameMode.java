@@ -355,6 +355,7 @@ public class GameMode extends ModeController {
 	}
 
 	private PositionMovementController movementController;
+	private MovementController oldMovementController;
 
 	private ObstacleZone obstacleZone;
 	/** only for lava so far */
@@ -548,6 +549,10 @@ public class GameMode extends ModeController {
 			movementController.dispose();
 			movementController = null;
 		}
+//		if (oldMovementController != null) {
+//			oldMovementController.dispose();
+//			oldMovementController = null;
+//		}
 		for (GameObject obj : objects) {
 			obj.deactivatePhysics(world);
 		}
@@ -603,6 +608,7 @@ public class GameMode extends ModeController {
 		addCharacterToGame();
 
 		movementController = new PositionMovementController(character, scale);
+//		oldMovementController = new MovementController(character);
 		makeHandholdsToGripAtStart();
 
 	}
@@ -683,6 +689,7 @@ public class GameMode extends ModeController {
 		makeHandholdsToGripAtStart();
 		addCharacterToGame();
 		movementController = new PositionMovementController(character, scale);
+//		oldMovementController = new MovementController(character);
 
 	}
 	/**
@@ -966,6 +973,8 @@ public class GameMode extends ModeController {
 			if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
 
 			movementController.moveCharacter(inx,iny,rinx,riny,nextToPress,justReleased);
+//			if (nextToPress.size > 0)
+//				oldMovementController.findAndApplyForces(nextToPress.get(0),inx,iny);
 			if (nextToPress.size > 0) {
 				for (int i : nextToPress) {
 					((ExtremityModel) (character.parts.get(i))).ungrip();

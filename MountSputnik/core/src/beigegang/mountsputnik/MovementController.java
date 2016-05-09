@@ -68,32 +68,32 @@ public class MovementController {
 
     public void findAndApplyForces(int part, float v, float h) {
         RevoluteJoint upperJoint;
-        resetLimbSpeedsTo0();
+//        resetLimbSpeedsTo0();
 
         switch (part) {
             case HAND_LEFT:
                 upperJoint = ((RevoluteJoint) character.joints.get(ARM_LEFT - 1));
                 upperJoint.setMaxMotorTorque(100);
                 rotateLimbPiece(v, h, ARM_LEFT, FOREARM_LEFT);
-                rotateJoint(v, h, ARM_LEFT, FOREARM_LEFT, HAND_LEFT, true, true);
+//                rotateJoint(v, h, ARM_LEFT, FOREARM_LEFT, HAND_LEFT, true, true);
                 break;
             case HAND_RIGHT:
                 upperJoint = ((RevoluteJoint) character.joints.get(ARM_RIGHT - 1));
                 upperJoint.setMaxMotorTorque(100);
                 rotateLimbPiece(v, h, ARM_RIGHT, FOREARM_RIGHT);
-                rotateJoint(v, h, ARM_RIGHT, FOREARM_RIGHT, HAND_RIGHT, true, false);
+//                rotateJoint(v, h, ARM_RIGHT, FOREARM_RIGHT, HAND_RIGHT, true, false);
                 break;
             case FOOT_LEFT:
                 upperJoint = ((RevoluteJoint) character.joints.get(THIGH_LEFT - 1));
                 upperJoint.setMaxMotorTorque(100);
                 rotateLimbPiece(v, h, THIGH_LEFT, SHIN_LEFT);
-                rotateJoint(v, h, THIGH_LEFT, SHIN_LEFT, FOOT_LEFT, false, true);
+//                rotateJoint(v, h, THIGH_LEFT, SHIN_LEFT, FOOT_LEFT, false, true);
                 break;
             case FOOT_RIGHT:
                 upperJoint = ((RevoluteJoint) character.joints.get(THIGH_RIGHT - 1));
                 upperJoint.setMaxMotorTorque(100);
                 rotateLimbPiece(v, h, THIGH_RIGHT, SHIN_RIGHT);
-                rotateJoint(v, h, THIGH_RIGHT, SHIN_RIGHT, FOOT_RIGHT, false, false);
+//                rotateJoint(v, h, THIGH_RIGHT, SHIN_RIGHT, FOOT_RIGHT, false, false);
                 break;
             default:
                 break;
