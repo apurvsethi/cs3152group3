@@ -48,7 +48,7 @@ public class GameMode extends ModeController {
 	private static float inx = 0f;
 	private static float iny = 0f;
 	/**	both are updated every timestep with horizontal and vertical input right stick from player */
-
+	public static boolean writtenToFile = false;
 	private static float rinx = 0f;
 	private static float riny = 0f;
 	/** int used in every single loop in the program */
@@ -452,8 +452,8 @@ public class GameMode extends ModeController {
 	public void makeJsonForAnimation(){
 		try{
 
-			animationToFile = new FileWriter(("tutorialAnimations/animationsP.json"));
-		}catch(Exception e){}
+			animationToFile = new FileWriter(("tutorialAnimations/animationsW.json"));
+		}catch(Exception e){System.out.println("OHNO" + e );}
 	}
 	public void writeNextStepJsonForAnimation(float lx, float ly, float rx, float ry, Array<Integer> pressed){
 		String e = "";
@@ -463,10 +463,10 @@ public class GameMode extends ModeController {
 		String s = "\"" + animationTimestep + "\":[" + lx + "," + ly + "," + rx + "," + ry + ",[" + e + "],";
 		input = InputController.getInstance();
 		String released = "[";
-		released += (input.releasedLeftArm()) ? "1, ":"0, ";
-		released += (input.releasedRightArm()) ? "1, ":"0, ";
-		released += (input.releasedLeftLeg()) ? "1, ":"0, ";
-		released += (input.releasedRightLeg()) ? "1, ":"0 ,";
+		released += (input.releasedLeftArm()) ? String.valueOf(HAND_LEFT) + ", " :"";
+		released += (input.releasedRightArm()) ? String.valueOf(HAND_RIGHT) + ", ":"";
+		released += (input.releasedLeftLeg()) ? String.valueOf(FOOT_LEFT) + ", ":"";;
+		released += (input.releasedRightLeg()) ? String.valueOf(FOOT_RIGHT) + ", ":"";;
 
 		released += "]]";
 
@@ -477,18 +477,21 @@ public class GameMode extends ModeController {
 	}
 	public void writeJsonToFile(){
 		fullJson += "}";
+		if (!writtenToFile){
+			try{
+				animationToFile.write(fullJson);
 
-		try{
-			animationToFile.write(fullJson);
-			animationToFile.flush();
-			animationToFile.close();
-		}catch(Exception e){ }
+			}catch(Exception e){System.out.println("here" + e); }
+			try{animationToFile.flush();
+			}catch(Exception e){System.out.println("two" + e);}
+		}
 	}
 
 
 	public void setAnimationReader(){
+		writtenToFile = true;
 		jsonReader = new JsonReader();
-		animationFormat = jsonReader.parse(Gdx.files.internal("tutorialAnimations/animationsP.json"));
+		animationFormat = jsonReader.parse(Gdx.files.internal("tutorialAnimations/animationsW.json"));
 		JsonAssetManager.getInstance().loadDirectory(levelFormat);
 		JsonAssetManager.getInstance().allocateDirectory();
 	}
@@ -496,7 +499,6 @@ public class GameMode extends ModeController {
 		if (animationFormat == null) setAnimationReader();
 		//0 will be animationTimestep in the future.
 		JsonValue timestepInfo = animationFormat.get(animationTimestep);
-
 		animationLX = timestepInfo.get(0).asFloat();
 		animationLY = timestepInfo.get(1).asFloat();
 		animationRX = timestepInfo.get(2).asFloat();
@@ -514,13 +516,14 @@ public class GameMode extends ModeController {
 		for (counterInt = 0;counterInt<ints.length; counterInt++){
 			animationJustReleased.add(ints[counterInt]);
 		}
+
 		animationTimestep++;
 
 	}
 
 	@Override
 	public void reset() {
-//		if (timestep != 0)		writeJsonToFile();
+		if (timestep != 0)		writeJsonToFile();
 		resetAllButCheckpoints();
 		checkpointLevelBlocks.clear();
 		checkpointLevelJsons.clear();
@@ -906,7 +909,20 @@ public class GameMode extends ModeController {
 
 		if (isPaused) pauseMode.update(dt, listener);
 		else if (isDead) deadMode.update(dt, listener);
-		else if (isVictorious) victoryMode.update(dt, listener);
+		else if (isVictorious){
+			if (!writtenToFile) {
+				try {
+					makeJsonForAnimation();
+
+					writeJsonToFile();
+
+					writtenToFile = true;
+				} catch (Exception e) {
+					System.out.println("here3" + e);
+				}
+			}
+			victoryMode.update(dt, listener);
+		}
 		else {
 			input = InputController.getInstance();
 			doingAnimation = input.watchAnimation();
@@ -934,7 +950,7 @@ public class GameMode extends ModeController {
 			//don't uncomment createAnimation unless you know what you are doing!!
 //		createAnimation();
 
-
+//
 			if (checkIfReachedCheckpoint()) {
 				lastReachedCheckpoint++;
 			}
@@ -1027,12 +1043,10 @@ public class GameMode extends ModeController {
 
 
 	private void createAnimation() {
-		if (timestep == 0) makeJsonForAnimation();
+
 		writeNextStepJsonForAnimation(inx,iny, rinx, riny, nextToPress);
 	}
-	private void saveAnimation(){
 
-	}
 
 	private boolean checkIfDied() {
 		return character.parts.get(HEAD).getY() < 0;
@@ -1574,6 +1588,7 @@ public class GameMode extends ModeController {
 	}
 
 	public void victorious(){
+
 		victoryMode.reset();
 		isVictorious = true;
 	}
