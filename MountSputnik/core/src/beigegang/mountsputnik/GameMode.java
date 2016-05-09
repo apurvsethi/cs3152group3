@@ -56,7 +56,7 @@ public class GameMode extends ModeController {
 	/**
 	 * Strings for files used, string[] for parts, etc.
 	 */
-	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "canyon", "volcano", "mountain", "sky", "space"}; //TODO: change second canyon to waterfall
+	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "waterfall", "volcano", "mountain", "sky", "space"}; //TODO: change second canyon to waterfall
 	private static final String LAVA_FILE = "assets/lava.png";
 	private static final String UI_FILE = "assets/HUD4timeless.png";
 	private static final String[] LEVEL_LABEL_FILES = {"assets/Tutorial.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Skycloud.png", "assets/Canyon.png"};
@@ -464,6 +464,7 @@ public class GameMode extends ModeController {
 		NUM_HANDHOLDS.put("mountain", 1);
 		NUM_HANDHOLDS.put("space",1);
 		NUM_HANDHOLDS.put("volcano", 1);
+		NUM_HANDHOLDS.put("waterfall", 1); 
 
 	}
 	public void makeJsonForAnimation(){
