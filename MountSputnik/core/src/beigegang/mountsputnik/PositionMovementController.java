@@ -15,8 +15,8 @@ import static beigegang.mountsputnik.Constants.*;
  */
 public class PositionMovementController {
     // Sensitivity for moving crosshair with gameplay
-    private static final float GP_ACCELERATE = 1.5f;
-    private static final float GP_MAX_SPEED  = 15.0f;
+    private static final float GP_ACCELERATE = 1.0f;
+    private static final float GP_MAX_SPEED  = 10.0f;
     private static final float GP_THRESHOLD  = 0.20f;
 
     private CharacterModel character;
@@ -116,9 +116,9 @@ public class PositionMovementController {
 
     private void moveTowardLimits(RevoluteJoint joint) {
         if (joint.getJointAngle() < joint.getLowerLimit())
-            joint.setMotorSpeed(50);
+            joint.setMotorSpeed(5);
         else if (joint.getJointAngle() > joint.getUpperLimit())
-            joint.setMotorSpeed(-50);
+            joint.setMotorSpeed(-5);
         else joint.setMotorSpeed(0);
     }
 
@@ -141,7 +141,7 @@ public class PositionMovementController {
         if (rightHand) counter++;
         if (leftLeg) counter++;
         if (rightLeg) counter++;
-        if (counter > 2) counter +=2;
+        if (counter > 2) counter += 2;
         torsoCache.scl(counter);
 
         if (leftHand|| rightHand || leftLeg || rightLeg) {
