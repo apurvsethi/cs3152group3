@@ -85,6 +85,16 @@ public class FilmStrip extends TextureRegion {
 		rheight = texture.getHeight()/rows;
 		setFrame(0);
 	}
+
+	public FilmStrip(FilmStrip other) {
+		super(other.getTexture());
+		this.cols = other.cols;
+		this.size = other.size;
+		rwidth = getTexture().getWidth()/cols;
+		int rows = size / cols;
+		rheight = getTexture().getHeight()/rows;
+		setFrame(0);
+	}
 	
 	/**
 	 * Returns the number of frames in this filmstrip.
@@ -121,5 +131,4 @@ public class FilmStrip extends TextureRegion {
 		int y = (frame / cols)*rheight;
 		setRegion(x,y,rwidth,rheight);
 	}
-
 }

@@ -15,9 +15,9 @@ import static beigegang.mountsputnik.Constants.*;
  */
 public class PositionMovementController {
     // Sensitivity for moving crosshair with gameplay
-    private static final float GP_ACCELERATE = 1.0f;
-    private static final float GP_MAX_SPEED  = 10.0f;
-    private static final float GP_THRESHOLD  = 0.50f;
+    private static final float GP_ACCELERATE = 1.5f;
+    private static final float GP_MAX_SPEED  = 15.0f;
+    private static final float GP_THRESHOLD  = 0.20f;
 
     private CharacterModel character;
     private Vector2 posCache;
@@ -47,26 +47,22 @@ public class PositionMovementController {
         momentum = 0f;
     }
 
-    public void moveCharacter(float inx,float iny, float rinx,float riny, Array<Integer> nextToPress, Array<Integer> justReleased) {
-        float horizontalL = inx;
-        float verticalL = iny;
-
+    public void moveCharacter(float inx,float iny, float rinx,float riny,
+                              Array<Integer> nextToPress, Array<Integer> justReleased) {
         boolean np = nextToPress.size > 0;
         boolean jr = justReleased.size > 0;
-        if ( np && nextToPress.get(0) == HAND_LEFT)
-            moveLimb(ARM_LEFT, FOREARM_LEFT, HAND_LEFT, horizontalL, verticalL, true);
+
+        if (np && nextToPress.get(0) == HAND_LEFT)
+            moveLimb(ARM_LEFT, FOREARM_LEFT, HAND_LEFT, inx, iny, true);
         else if (jr && justReleased.contains(HAND_LEFT,false)) lockLimb(ARM_LEFT, FOREARM_LEFT);
-
-        if ( np && nextToPress.get(0) == HAND_RIGHT)
-            moveLimb(ARM_RIGHT, FOREARM_RIGHT, HAND_RIGHT, horizontalL, verticalL, true);
+        if (np && nextToPress.get(0) == HAND_RIGHT)
+            moveLimb(ARM_RIGHT, FOREARM_RIGHT, HAND_RIGHT, inx, iny, true);
         else if (jr && justReleased.contains(HAND_RIGHT,false)) lockLimb(ARM_RIGHT, FOREARM_RIGHT);
-
-        if ( np && nextToPress.get(0) == FOOT_LEFT)
-            moveLimb(THIGH_LEFT, SHIN_LEFT, FOOT_LEFT, horizontalL, verticalL, false);
+        if (np && nextToPress.get(0) == FOOT_LEFT)
+            moveLimb(THIGH_LEFT, SHIN_LEFT, FOOT_LEFT, inx, iny, false);
         else if (jr && justReleased.contains(FOOT_LEFT,false)) lockLimb(THIGH_LEFT, SHIN_LEFT);
-
-        if ( np && nextToPress.get(0) == FOOT_RIGHT)
-            moveLimb(THIGH_RIGHT, SHIN_RIGHT, FOOT_RIGHT, horizontalL, verticalL, false);
+        if (np && nextToPress.get(0) == FOOT_RIGHT)
+            moveLimb(THIGH_RIGHT, SHIN_RIGHT, FOOT_RIGHT, inx, iny, false);
         else if (jr && justReleased.contains(FOOT_RIGHT,false)) lockLimb(THIGH_RIGHT, SHIN_RIGHT);
 
         moveTorso(rinx, riny);
@@ -87,7 +83,7 @@ public class PositionMovementController {
             momentum += GP_ACCELERATE;
             momentum = Math.min(momentum, GP_MAX_SPEED);
             crossCache.scl(momentum);
-            crossCache.scl(1/scale.x,1/scale.y);
+            crossCache.scl(1 / scale.x, 1 / scale.y);
             posCache.add(crossCache);
 
             adjustToRadius(rootJoint, isArm);
@@ -120,9 +116,9 @@ public class PositionMovementController {
 
     private void moveTowardLimits(RevoluteJoint joint) {
         if (joint.getJointAngle() < joint.getLowerLimit())
-            joint.setMotorSpeed(5);
+            joint.setMotorSpeed(50);
         else if (joint.getJointAngle() > joint.getUpperLimit())
-            joint.setMotorSpeed(-5);
+            joint.setMotorSpeed(-50);
         else joint.setMotorSpeed(0);
     }
 

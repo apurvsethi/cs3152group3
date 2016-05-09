@@ -1,7 +1,7 @@
 package beigegang.mountsputnik;
 
+import beigegang.util.FilmStrip;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import static beigegang.mountsputnik.Constants.*;
@@ -29,7 +29,7 @@ public class PartModel extends GameObject{
 	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
 	 * @param character the character that this is a part of
 	 */
-	public PartModel(float x, float y, Texture t, float drawSizeScale, Vector2 drawPositionScale, CharacterModel character){
+	public PartModel(float x, float y, FilmStrip t, float drawSizeScale, Vector2 drawPositionScale, CharacterModel character){
 		super(t, drawSizeScale, drawPositionScale);
 		setX(x);
 		setY(y);

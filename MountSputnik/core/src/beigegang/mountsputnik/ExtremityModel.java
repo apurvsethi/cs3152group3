@@ -1,69 +1,23 @@
 package beigegang.mountsputnik;
 
+import beigegang.util.FilmStrip;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Joint;
 import static beigegang.mountsputnik.SoundController.*;
 
-public class ExtremityModel extends PartModel{
-
-	/** How hard this extremity can push
-	 *  Range from 0.0 - 1.0*/
-	private float pushFactor;
-	/** How hard this extremity can pull
-	 *  Range from 0.0 - 1.0*/
-	private float pullFactor;
+public class ExtremityModel extends PartModel {
 	/** Whether or not this extremity is gripping*/
 	private boolean gripped;
-	/** Texture for when extremity is gripping */ 
-	private Texture grip;
-	/** Texture for when extremity is not gripping */ 
-	private Texture notGrip;
 	/** A revolute joint for when this extremity is gripping a hold **/ 
 	private Joint joint; 
-	
+	/** Updated for how long the extremity has gripped the handhold it is on */
 	private int gripTime; 
 	
 	@Override
 	public ObjectType getType() {
 		return ObjectType.EXTREMITY;
-	}
-	
-	/**
-	 * Returns the push factor of this object.
-	 *
-	 * @return the push factor of this object.
-	 */
-	public float getPush(){
-		return pushFactor;
-	}
-	
-	/**
-	 * Sets the push factor of this object.
-	 *
-	 * @param push the push factor of this extremity
-	 */
-	public void setPush(float push){
-		pushFactor = push;
-	}
-	
-	/**
-	 * Returns the pull factor of this object.
-	 *
-	 * @return the pull factor of this object.
-	 */
-	public float getPull(){
-		return pullFactor;
-	}
-	
-	/**
-	 * Sets the pull factor of this object.
-	 *
-	 * @param pull the pull factor of this extremity
-	 */
-	public void setPull(float pull){
-		pullFactor = pull;
 	}
 	
 	/**
@@ -80,7 +34,7 @@ public class ExtremityModel extends PartModel{
 		SoundController.get(SoundController.GRIP_SOUND).play();
 		gripped = true;
 		gripTime = 0;
-		this.setTexture(grip);
+		if (animator.getSize() != 1) animator.setFrame(1);
 	}
 
 	public boolean isGripped(){
@@ -91,7 +45,7 @@ public class ExtremityModel extends PartModel{
 		if (gripped) SoundController.get(SoundController.UNGRIP_SOUND).play();
 		gripped = false;
 		gripTime = 0;
-		setTexture(notGrip); 
+		animator.setFrame(0);
 	}
 	
 	public int getGripTime(){
@@ -114,17 +68,15 @@ public class ExtremityModel extends PartModel{
 	 * 
 	 * @param x the x position of this extremity
 	 * @param y the y position of this extremity
-	 * @param ungripTexture	the texture of this extremity
-	 * @param gripTexture the gripped texture of this extremity
+	 * @param texture	the texture of this extremity, film strip with second
+	 *                     frame gripped
 	 * @param drawSizeScale the scaling between object size and drawn size
 	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
 	 * @param character the character this is a part of
 	 */
-	public ExtremityModel(float x, float y, Texture ungripTexture, Texture gripTexture, float drawSizeScale, 
-			Vector2 drawPositionScale, CharacterModel character){
-		super(x, y, ungripTexture, drawSizeScale, drawPositionScale, character);
+	public ExtremityModel(float x, float y, FilmStrip texture, float drawSizeScale,
+						  Vector2 drawPositionScale, CharacterModel character){
+		super(x, y, texture, drawSizeScale, drawPositionScale, character);
 		gripped = false;
-		notGrip = ungripTexture;
-		grip = gripTexture;
 	}
 }
