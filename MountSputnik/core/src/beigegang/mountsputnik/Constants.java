@@ -67,23 +67,10 @@ public final class Constants {
 	/** Scrolling speeds for parallax. Higher floats scroll SLOWER*/
 	public static final float MIDGROUND_SCROLL = 0.75f;
 
-	/** The number of handholds on the given level. TODO: remove. For testing purposes only */
-	public static final int HANDHOLD_NUMBER = 5;
-
 	public static final float DEG_TO_RAD = 0.0174532925199432957f;
 	public static final float RAD_TO_DEG = 57.295779513082320876f;
 
 	/** Parameters to pass into extremities*/
-	//TODO: determine actual push / pull factor through playtesting
-	public static final float HAND_PUSH = 1.0f;
-	public static final float HAND_PULL = 1.0f;
-	public static final float FOOT_PUSH = 1.0f;
-	public static final float FOOT_PULL = 1.0f;
-
-	public static final float MAX_PULLFORCE_LEG = 50f;
-	public static final float MAX_PULLFORCE_ARM = 50f;
-	public static final float MAX_PUSHFORCE_ARM = 80f;
-	public static final float MAX_PUSHFORCE_LEG = 1000f;
 	public static final float CONSTANT_X_FORCE = 70f;
 
 	public static final int[] BODY_PART_ANIMATION_FRAMES = {1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1};
@@ -108,11 +95,6 @@ public final class Constants {
 	public static final int NONE = -1;
 
 	public static final int[] EXTREMITIES = new int[]{FOOT_LEFT, FOOT_RIGHT, HAND_LEFT, HAND_RIGHT};
-	public static final int[] NON_EXTREMITY_LIMBS = new int[]{ARM_LEFT,ARM_RIGHT,FOREARM_LEFT,FOREARM_RIGHT,THIGH_LEFT,THIGH_RIGHT,SHIN_LEFT,SHIN_RIGHT};
-
-
-	public static final float DAMPENING_Y = .2f;
-	public static final float DAMPENING_X = .2f;
 
 	public static final float CHARACTER_DRAW_SIZE_SCALE = 0.3f;
 	public static final float CHARACTER_DRAW_SIZE_SCALE_TWO = 0.3f;
@@ -160,20 +142,6 @@ public final class Constants {
 
 	public static final float PART_MAX_X_VELOCITY = -DEFAULT_GRAVITY;
 	public static final float PART_MAX_Y_VELOCITY = -DEFAULT_GRAVITY;
-	/** if player can control torso */
-	public static boolean TORSO_MODE = true;
-	/** if player can control multiple limbs */
-	public static boolean TWO_LIMB_MODE = false;
-
-
-	public static float FOREARM_PUSHING_LOWER_LIMIT = -90f;
-	public static float FOREARM_PUSHING_UPPER_LIMIT = .5f;
-	public static float FOREARM_PULLING_LOWER_LIMIT = 2f;
-	public static float FOREARM_PULLING_UPPER_LIMIT = 90f;
-	//to make sure it could
-	public static float FOREARM_SWITCHING_EITHER_WAY = 0f;
-	public static float FOREARM_JOINT_SPEED = 5f;
-	public static float SHIN_JOINT_SPEED = 6f;
 
 	public static short PART_BITS = 8;
 	public static short OBSTACLE_BITS = 4;
