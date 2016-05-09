@@ -1,6 +1,6 @@
 #must include the level:    cayon/block10.json
 #							mountain/block3.json
-LEVEL_TO_LOAD = "tutorial/block1.json"
+LEVEL_TO_LOAD = "volcano/block5.json"
 
 '''
 Repeat Texture on Resize
@@ -79,7 +79,7 @@ Builder.load_string('''
                 on_value: root.slipping = args[1]
                 on_value: root.updateSelected()
                 min:0
-                max:10            
+                max:20           
 
             Label:
                 size_hint_y: None

@@ -109,9 +109,6 @@ public class MenuMode extends ModeController {
 		levelSelectAllowed[LEVEL_VOLCANO] = saveGame.getBoolean("volcano"); 
 		levelSelectAllowed[LEVEL_SKY] = saveGame.getBoolean("sky"); 
 		levelSelectAllowed[LEVEL_SPACE] = saveGame.getBoolean("space");
-		for(Boolean b: levelSelectAllowed){
-			System.out.println(b);
-		}
 		
 		
 		if (assetState != AssetState.LOADING) return;

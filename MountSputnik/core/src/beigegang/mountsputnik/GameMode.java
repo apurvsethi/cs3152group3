@@ -1035,8 +1035,9 @@ public class GameMode extends ModeController {
 						failed = true;
 					}
 				}
-				if(risingObstacle.getHeight() < canvas.getCamera().position.y - DEFAULT_HEIGHT/2 -1 ){
-					risingObstacle.setHeight(canvas.getCamera().position.y - DEFAULT_HEIGHT/2 -1);
+				float yToSet = Math.min(canvas.getCamera().position.y/character.parts.get(CHEST).drawPositionScale.y, character.parts.get(CHEST).getPosition().y);
+				if(risingObstacle.getHeight() < yToSet - DEFAULT_HEIGHT/2 -1){
+					risingObstacle.setHeight(yToSet - DEFAULT_HEIGHT/2 -1);
 				}
 			}
 
