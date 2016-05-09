@@ -1,6 +1,6 @@
 #must include the level:    cayon/block10.json
 #							mountain/block3.json
-LEVEL_TO_LOAD = "mountain/block2.json"
+LEVEL_TO_LOAD = "tutorial/block1.json"
 
 '''
 Repeat Texture on Resize
@@ -384,7 +384,7 @@ class LinePlayground(FloatLayout):
     whatToPlace = StringProperty("Handhold")
     crumbling = NumericProperty(0)
     slipping = NumericProperty(0)
-    movingSpeed = NumericProperty(0)
+    movingSpeed = NumericProperty(1)
     difficulty = StringProperty('easy')
     didLoad = BooleanProperty(False)
 

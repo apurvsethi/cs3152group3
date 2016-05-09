@@ -68,6 +68,11 @@ public class GameMode extends ModeController {
 			"Ragdoll/HandLeftUngripped.png", "Ragdoll/HandRightUngripped.png", "Ragdoll/ThighLeft.png",
 			"Ragdoll/ThighRight.png", "Ragdoll/CalfLeft.png", "Ragdoll/CalfRight.png", "Ragdoll/FeetShoeLeft.png",
 			"Ragdoll/FeetShoeRight.png", "Ragdoll/HandLeftGripped.png", "Ragdoll/HandRightGripped.png"};
+	private static final String SHADOW_TEXTURES[] = {"Ragdoll/shadow/Torso.png", "Ragdoll/shadow/Head.png", "Ragdoll/shadow/Hips.png",
+			"Ragdoll/shadow/ArmLeft.png", "Ragdoll/shadow/ArmRight.png", "Ragdoll/shadow/ForearmLeft.png", "Ragdoll/shadow/ForearmRight.png",
+			"Ragdoll/shadow/HandLeftUngripped.png", "Ragdoll/shadow/HandRightUngripped.png", "Ragdoll/shadow/ThighLeft.png",
+			"Ragdoll/shadow/ThighRight.png", "Ragdoll/shadow/CalfLeft.png", "Ragdoll/shadow/CalfRight.png", "Ragdoll/shadow/FeetShoeLeft.png",
+			"Ragdoll/shadow/FeetShoeRight.png", "Ragdoll/shadow/HandLeftGripped.png", "Ragdoll/shadow/HandRightGripped.png"}; 
 	private static final String TUTORIAL_TEXTURES[] = {
 			"Ragdoll/controls/360_LB.png",
 			"Ragdoll/controls/360_RB.png",
@@ -113,6 +118,7 @@ public class GameMode extends ModeController {
 	private static TextureRegion staticObstacle;
 	private static TextureRegion fallingObstacle;
 	private static TextureRegion[] partTextures = new TextureRegion[PART_TEXTURES.length];
+	private static TextureRegion[] shadowTextures = new TextureRegion[SHADOW_TEXTURES.length]; 
 	private static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length];
 	private static TextureRegion[] handholdTextures;
 	private static TextureRegion[] levelLabels = new TextureRegion[LEVEL_LABEL_FILES.length];
@@ -231,6 +237,11 @@ public class GameMode extends ModeController {
 			manager.load(PART_TEXTURE, Texture.class);
 			assets.add(PART_TEXTURE);
 		}
+		for(String SHADOW_TEXTURE: SHADOW_TEXTURES){
+			manager.load(SHADOW_TEXTURE, Texture.class);
+			assets.add(SHADOW_TEXTURE);
+		}
+		
 		for(String TUTORIAL_TEXTURE : TUTORIAL_TEXTURES){
 			manager.load(TUTORIAL_TEXTURE, Texture.class);
 			assets.add(TUTORIAL_TEXTURE);
@@ -289,6 +300,10 @@ public class GameMode extends ModeController {
 
 		for (counterInt = 0; counterInt < PART_TEXTURES.length; counterInt++) {
 			partTextures[counterInt] = createTexture(manager, PART_TEXTURES[counterInt], false);
+		}
+		
+		for (counterInt = 0; counterInt < SHADOW_TEXTURES.length; counterInt++){
+			shadowTextures[counterInt] = createTexture(manager, SHADOW_TEXTURES[counterInt], false); 
 		}
 
 		for (counterInt = 0; counterInt < TUTORIAL_TEXTURES.length; counterInt++) {
@@ -642,16 +657,16 @@ public class GameMode extends ModeController {
 		String levelDiff = levelFormat.getString("difficulty");
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
-			int blockNumber = 2; //((int) (Math.random() * diffBlocks)) + 1;
+			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
 			String blockDiff = levelPiece.getString("difficulty");
-//			while((used.contains(blockNumber, true)||
-//					getDifficultyProb(levelDiff, blockDiff, currentHeight, remainingHeight) > Math.random())
-//					&&!levelName.equals("tutorial")){
-//				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
-//				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
-//				blockDiff = levelPiece.getString("difficulty");
-//			}
+			while((used.contains(blockNumber, true)||
+					getDifficultyProb(levelDiff, blockDiff, currentHeight, remainingHeight) > Math.random())
+					&&!levelName.equals("tutorial")){
+				blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
+				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
+				blockDiff = levelPiece.getString("difficulty");
+			}
 			used.add(blockNumber);
 			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json");
 			checkpointLevelJsons.add(levelPiece);
@@ -1483,6 +1498,10 @@ public class GameMode extends ModeController {
 		canvas.end();
 
 		canvas.begin();
+		if(currLevel != LEVEL_SKY)
+			for (int i = 0; i < character.parts.size; i++){
+				character.parts.get(i).drawShadow(shadowTextures[i], canvas);
+			}
 		for (GameObject obj : objects) obj.draw(canvas);
 		if (tutorialToggle) drawToggles();
 		canvas.end();
