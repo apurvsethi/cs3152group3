@@ -3,6 +3,9 @@ package beigegang.mountsputnik;
 import beigegang.util.ScreenListener;
 import static beigegang.mountsputnik.Constants.*;
 
+import java.io.FileWriter;
+import java.io.IOException;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;

@@ -1,12 +1,18 @@
 package beigegang.mountsputnik;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.JsonWriter;
 import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
 import static beigegang.mountsputnik.Constants.*;
+
+import java.io.FileWriter; 
 
 public class MenuMode extends ModeController {
 
@@ -17,8 +23,10 @@ public class MenuMode extends ModeController {
 
 	private int currView = MAIN_MENU;
 	//TODO: read in from file so these don't reset each time
-	private boolean levelSelectAllowed [] = {true, true, true, true, true, true, true, true};
-
+	JsonReader jsonReader = new JsonReader(); 
+	JsonValue saveGame = (jsonReader.parse(Gdx.files.internal("savegame.json"))).get("levels");
+	private boolean levelSelectAllowed [] = {true, saveGame.getBoolean("canyon"), saveGame.getBoolean("waterfall"), saveGame.getBoolean("mountain"), saveGame.getBoolean("volcano"), saveGame.getBoolean("sky"), saveGame.getBoolean("space")};
+	
 	private static final String BACKGROUND_FILE = "Menu/StartMenu/Background.png";
 	private static final String MENU_OPTION_FILES[] = {"Menu/StartMenu/Start.png","Menu/StartMenu/Levels.png","Menu/StartMenu/Settings.png","Menu/StartMenu/Quit.png"};
 	private static final String LEVEL_SELECT_OPTION_FILES[] = {"Menu/StartMenu/LevelSelect/Tutorial.png","Menu/StartMenu/LevelSelect/Canyon.png","Menu/StartMenu/LevelSelect/Waterfall.png",
@@ -92,6 +100,20 @@ public class MenuMode extends ModeController {
 	 * @param manager Reference to global asset manager.
 	 */
 	public void loadContent(AssetManager manager) {
+		JsonReader jsonReader = new JsonReader(); 
+		JsonValue saveGame = (jsonReader.parse(Gdx.files.internal("savegame.json"))).get("levels");
+		levelSelectAllowed[LEVEL_TUTORIAL] = true; 
+		levelSelectAllowed[LEVEL_CANYON] = saveGame.getBoolean("canyon"); 
+		levelSelectAllowed[LEVEL_WATERFALL] = saveGame.getBoolean("waterfall"); 
+		levelSelectAllowed[LEVEL_SNOWY_MOUNTAIN] = saveGame.getBoolean("mountain"); 
+		levelSelectAllowed[LEVEL_VOLCANO] = saveGame.getBoolean("volcano"); 
+		levelSelectAllowed[LEVEL_SKY] = saveGame.getBoolean("sky"); 
+		levelSelectAllowed[LEVEL_SPACE] = saveGame.getBoolean("space");
+		for(Boolean b: levelSelectAllowed){
+			System.out.println(b);
+		}
+		
+		
 		if (assetState != AssetState.LOADING) return;
 
 		background = createTexture(manager, BACKGROUND_FILE, false);
@@ -273,6 +295,19 @@ public class MenuMode extends ModeController {
 
 	public void unlockLevel(int level){
 		levelSelectAllowed[level] = true;
+		String json = "{\"levels\": {\"canyon\":" + levelSelectAllowed[LEVEL_CANYON] + 
+				                  ", \"mountain\":" + levelSelectAllowed[LEVEL_SNOWY_MOUNTAIN] +
+				                  ", \"volcano\":" + levelSelectAllowed[LEVEL_VOLCANO] + 
+				                  ", \"sky\":" + levelSelectAllowed[LEVEL_SKY] + 
+				                  ", \"space\":" + levelSelectAllowed[LEVEL_SPACE] + 
+				                  ", \"waterfall\":" + levelSelectAllowed[LEVEL_WATERFALL] + "}}"; 
+		System.out.println(levelSelectAllowed.toString()); 
+		try {
+			FileWriter jsonWriter = new FileWriter(("savegame.json")); 
+			jsonWriter.write(json); 
+			jsonWriter.flush();
+			} catch (Exception e) {}
+		
 	}
 
 	@Override

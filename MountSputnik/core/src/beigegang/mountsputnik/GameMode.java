@@ -71,9 +71,9 @@ public class GameMode extends ModeController {
 			"Ragdoll/FeetShoeRight.png"};
 	private static final String SHADOW_TEXTURES[] = {"Ragdoll/shadow/Torso.png", "Ragdoll/shadow/Head.png", "Ragdoll/shadow/Hips.png",
 			"Ragdoll/shadow/ArmLeft.png", "Ragdoll/shadow/ArmRight.png", "Ragdoll/shadow/ForearmLeft.png", "Ragdoll/shadow/ForearmRight.png",
-			"Ragdoll/shadow/HandLeftUngripped.png", "Ragdoll/shadow/HandRightUngripped.png", "Ragdoll/shadow/ThighLeft.png",
+			"Ragdoll/shadow/HandLeftGripped.png", "Ragdoll/shadow/HandRightGripped.png", "Ragdoll/shadow/ThighLeft.png",
 			"Ragdoll/shadow/ThighRight.png", "Ragdoll/shadow/CalfLeft.png", "Ragdoll/shadow/CalfRight.png", "Ragdoll/shadow/FeetShoeLeft.png",
-			"Ragdoll/shadow/FeetShoeRight.png", "Ragdoll/shadow/HandLeftGripped.png", "Ragdoll/shadow/HandRightGripped.png"};
+			"Ragdoll/shadow/FeetShoeRight.png"};
 	private static final String TUTORIAL_TEXTURES[] = {
 			"Ragdoll/controls/360_LB.png",
 			"Ragdoll/controls/360_RB.png",
@@ -1026,8 +1026,8 @@ public class GameMode extends ModeController {
 						failed = true;
 					}
 				}
-				if(risingObstacle.getHeight() < character.parts.get(CHEST).getPosition().y - DEFAULT_HEIGHT/2 -1 ){
-					risingObstacle.setHeight(character.parts.get(CHEST).getPosition().y - DEFAULT_HEIGHT/2 -1);
+				if(risingObstacle.getHeight() < canvas.getCamera().position.y - DEFAULT_HEIGHT/2 -1 ){
+					risingObstacle.setHeight(canvas.getCamera().position.y - DEFAULT_HEIGHT/2 -1);
 				}
 			}
 
