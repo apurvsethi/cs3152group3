@@ -149,6 +149,8 @@ public final class Constants {
 	public static final float SHIN_Y_FOOT_OFFSET = -2.0f * CHARACTER_DRAW_SIZE_SCALE_TWO;
 	public static final float FOOT_X_OFFSET = 0.7f * CHARACTER_DRAW_SIZE_SCALE_TWO;
 	public static final float FOOT_Y_OFFSET = 0.7f * CHARACTER_DRAW_SIZE_SCALE_TWO;
+	public static final float SHADOW_X_OFFSET = 0.2f * CHARACTER_DRAW_SIZE_SCALE_TWO; 
+	public static final float SHADOW_Y_OFFSET = -0.4f * CHARACTER_DRAW_SIZE_SCALE_TWO; 
 
 	public static final float MAX_ARM_DIST = ARM_X_CHEST_OFFSET + FOREARM_X_ARM_OFFSET + HAND_X_OFFSET;
 	public static final float MAX_LEG_DIST = THIGH_Y_HIP_OFFSET + SHIN_Y_THIGH_OFFSET + FOOT_Y_OFFSET ;

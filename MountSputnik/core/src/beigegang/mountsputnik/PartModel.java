@@ -1,7 +1,8 @@
 package beigegang.mountsputnik;
 
 import beigegang.util.FilmStrip;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import static beigegang.mountsputnik.Constants.*;
 
@@ -18,6 +19,7 @@ public class PartModel extends GameObject{
 		return character;
 	}
 	
+	
 	/** Contructs a PartModel
 	 *
 	 * @param x horizontal positioning of part
@@ -32,6 +34,13 @@ public class PartModel extends GameObject{
 		setX(x);
 		setY(y);
 		this.character = character;
+	}
+	
+	public void drawShadow(TextureRegion shadowTexture, GameCanvas canvas){
+		canvas.draw(shadowTexture, Color.WHITE, origin.x, origin.y,
+				(getX()+SHADOW_X_OFFSET) * drawPositionScale.x, (getY()+SHADOW_Y_OFFSET) * drawPositionScale.y,
+				getAngle(), drawSizeScale.x / SCREEN_WIDTH * canvas.getWidth(),
+				drawSizeScale.y / SCREEN_HEIGHT * canvas.getHeight());
 	}
 
 	/**

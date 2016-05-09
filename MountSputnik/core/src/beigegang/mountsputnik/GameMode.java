@@ -1,31 +1,31 @@
 
-		package beigegang.mountsputnik;
+package beigegang.mountsputnik;
 
-		import com.badlogic.gdx.Gdx;
-		import com.badlogic.gdx.assets.AssetManager;
-		import com.badlogic.gdx.graphics.Color;
-		import com.badlogic.gdx.graphics.Texture;
-		import com.badlogic.gdx.graphics.g2d.BitmapFont;
-		import com.badlogic.gdx.graphics.g2d.Sprite;
-		import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-		import com.badlogic.gdx.graphics.g2d.TextureRegion;
-		import static beigegang.mountsputnik.Constants.*;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import static beigegang.mountsputnik.Constants.*;
 
-		import beigegang.util.*;
+import beigegang.util.*;
 
-		import com.badlogic.gdx.math.Rectangle;
-		import com.badlogic.gdx.math.Vector2;
-		import com.badlogic.gdx.physics.box2d.BodyDef;
-		import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
-		import com.badlogic.gdx.physics.box2d.Joint;
-		import com.badlogic.gdx.physics.box2d.World;
-		import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
-		import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.badlogic.gdx.physics.box2d.Joint;
+import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
+import com.badlogic.gdx.utils.*;
 
-		import java.io.FileWriter;
-		import java.util.HashMap;
-		import java.util.Map.Entry;
-		import java.util.Random;
+import java.io.FileWriter;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Random;
 
 public class GameMode extends ModeController {
 
@@ -48,7 +48,7 @@ public class GameMode extends ModeController {
 	private static float inx = 0f;
 	private static float iny = 0f;
 	/**	both are updated every timestep with horizontal and vertical input right stick from player */
-
+	public static boolean writtenToFile = false;
 	private static float rinx = 0f;
 	private static float riny = 0f;
 	/** int used in every single loop in the program */
@@ -69,6 +69,11 @@ public class GameMode extends ModeController {
 			"Ragdoll/HandLeft.png", "Ragdoll/HandRight.png", "Ragdoll/ThighLeft.png",
 			"Ragdoll/ThighRight.png", "Ragdoll/CalfLeft.png", "Ragdoll/CalfRight.png", "Ragdoll/FeetShoeLeft.png",
 			"Ragdoll/FeetShoeRight.png"};
+	private static final String SHADOW_TEXTURES[] = {"Ragdoll/shadow/Torso.png", "Ragdoll/shadow/Head.png", "Ragdoll/shadow/Hips.png",
+			"Ragdoll/shadow/ArmLeft.png", "Ragdoll/shadow/ArmRight.png", "Ragdoll/shadow/ForearmLeft.png", "Ragdoll/shadow/ForearmRight.png",
+			"Ragdoll/shadow/HandLeftUngripped.png", "Ragdoll/shadow/HandRightUngripped.png", "Ragdoll/shadow/ThighLeft.png",
+			"Ragdoll/shadow/ThighRight.png", "Ragdoll/shadow/CalfLeft.png", "Ragdoll/shadow/CalfRight.png", "Ragdoll/shadow/FeetShoeLeft.png",
+			"Ragdoll/shadow/FeetShoeRight.png", "Ragdoll/shadow/HandLeftGripped.png", "Ragdoll/shadow/HandRightGripped.png"};
 	private static final String TUTORIAL_TEXTURES[] = {
 			"Ragdoll/controls/360_LB.png",
 			"Ragdoll/controls/360_RB.png",
@@ -114,6 +119,7 @@ public class GameMode extends ModeController {
 	private static TextureRegion staticObstacle;
 	private static FilmStrip fallingObstacle;
 	private static FilmStrip[] partTextures = new FilmStrip[PART_TEXTURES.length];
+	private static TextureRegion[] shadowTextures = new TextureRegion[SHADOW_TEXTURES.length];
 	private static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length];
 	private static TextureRegion[] handholdTextures;
 	private static TextureRegion[] levelLabels = new TextureRegion[LEVEL_LABEL_FILES.length];
@@ -232,6 +238,11 @@ public class GameMode extends ModeController {
 			manager.load(PART_TEXTURE, Texture.class);
 			assets.add(PART_TEXTURE);
 		}
+		for(String SHADOW_TEXTURE: SHADOW_TEXTURES){
+			manager.load(SHADOW_TEXTURE, Texture.class);
+			assets.add(SHADOW_TEXTURE);
+		}
+		
 		for(String TUTORIAL_TEXTURE : TUTORIAL_TEXTURES){
 			manager.load(TUTORIAL_TEXTURE, Texture.class);
 			assets.add(TUTORIAL_TEXTURE);
@@ -291,6 +302,10 @@ public class GameMode extends ModeController {
 		for (counterInt = 0; counterInt < PART_TEXTURES.length; counterInt++) {
 			partTextures[counterInt] = createFilmStrip(manager, PART_TEXTURES[counterInt], 1,
 					BODY_PART_ANIMATION_FRAMES[counterInt], BODY_PART_ANIMATION_FRAMES[counterInt]);
+		}
+		
+		for (counterInt = 0; counterInt < SHADOW_TEXTURES.length; counterInt++){
+			shadowTextures[counterInt] = createTexture(manager, SHADOW_TEXTURES[counterInt], false); 
 		}
 
 		for (counterInt = 0; counterInt < TUTORIAL_TEXTURES.length; counterInt++) {
@@ -453,8 +468,8 @@ public class GameMode extends ModeController {
 	public void makeJsonForAnimation(){
 		try{
 
-			animationToFile = new FileWriter(("tutorialAnimations/animationsP.json"));
-		}catch(Exception e){}
+			animationToFile = new FileWriter(("tutorialAnimations/animationsW.json"));
+		}catch(Exception e){System.out.println("OHNO" + e );}
 	}
 	public void writeNextStepJsonForAnimation(float lx, float ly, float rx, float ry, Array<Integer> pressed){
 		String e = "";
@@ -464,10 +479,10 @@ public class GameMode extends ModeController {
 		String s = "\"" + animationTimestep + "\":[" + lx + "," + ly + "," + rx + "," + ry + ",[" + e + "],";
 		input = InputController.getInstance();
 		String released = "[";
-		released += (input.releasedLeftArm()) ? "1, ":"0, ";
-		released += (input.releasedRightArm()) ? "1, ":"0, ";
-		released += (input.releasedLeftLeg()) ? "1, ":"0, ";
-		released += (input.releasedRightLeg()) ? "1, ":"0 ,";
+		released += (input.releasedLeftArm()) ? String.valueOf(HAND_LEFT) + ", " :"";
+		released += (input.releasedRightArm()) ? String.valueOf(HAND_RIGHT) + ", ":"";
+		released += (input.releasedLeftLeg()) ? String.valueOf(FOOT_LEFT) + ", ":"";;
+		released += (input.releasedRightLeg()) ? String.valueOf(FOOT_RIGHT) + ", ":"";;
 
 		released += "]]";
 
@@ -478,18 +493,21 @@ public class GameMode extends ModeController {
 	}
 	public void writeJsonToFile(){
 		fullJson += "}";
+		if (!writtenToFile){
+			try{
+				animationToFile.write(fullJson);
 
-		try{
-			animationToFile.write(fullJson);
-			animationToFile.flush();
-			animationToFile.close();
-		}catch(Exception e){ }
+			}catch(Exception e){System.out.println("here" + e); }
+			try{animationToFile.flush();
+			}catch(Exception e){System.out.println("two" + e);}
+		}
 	}
 
 
 	public void setAnimationReader(){
+		writtenToFile = true;
 		jsonReader = new JsonReader();
-		animationFormat = jsonReader.parse(Gdx.files.internal("tutorialAnimations/animationsP.json"));
+		animationFormat = jsonReader.parse(Gdx.files.internal("tutorialAnimations/animationsW.json"));
 		JsonAssetManager.getInstance().loadDirectory(levelFormat);
 		JsonAssetManager.getInstance().allocateDirectory();
 	}
@@ -497,7 +515,6 @@ public class GameMode extends ModeController {
 		if (animationFormat == null) setAnimationReader();
 		//0 will be animationTimestep in the future.
 		JsonValue timestepInfo = animationFormat.get(animationTimestep);
-
 		animationLX = timestepInfo.get(0).asFloat();
 		animationLY = timestepInfo.get(1).asFloat();
 		animationRX = timestepInfo.get(2).asFloat();
@@ -515,13 +532,14 @@ public class GameMode extends ModeController {
 		for (counterInt = 0;counterInt<ints.length; counterInt++){
 			animationJustReleased.add(ints[counterInt]);
 		}
+
 		animationTimestep++;
 
 	}
 
 	@Override
 	public void reset() {
-//		if (timestep != 0)		writeJsonToFile();
+		if (timestep != 0)		writeJsonToFile();
 		resetAllButCheckpoints();
 		checkpointLevelBlocks.clear();
 		checkpointLevelJsons.clear();
@@ -904,7 +922,20 @@ public class GameMode extends ModeController {
 
 		if (isPaused) pauseMode.update(dt, listener);
 		else if (isDead) deadMode.update(dt, listener);
-		else if (isVictorious) victoryMode.update(dt, listener);
+		else if (isVictorious){
+			if (!writtenToFile) {
+				try {
+					makeJsonForAnimation();
+
+					writeJsonToFile();
+
+					writtenToFile = true;
+				} catch (Exception e) {
+					System.out.println("here3" + e);
+				}
+			}
+			victoryMode.update(dt, listener);
+		}
 		else {
 			input = InputController.getInstance();
 			doingAnimation = input.watchAnimation();
@@ -932,7 +963,7 @@ public class GameMode extends ModeController {
 			//don't uncomment createAnimation unless you know what you are doing!!
 //		createAnimation();
 
-
+//
 			if (checkIfReachedCheckpoint()) {
 				lastReachedCheckpoint++;
 			}
@@ -1025,12 +1056,10 @@ public class GameMode extends ModeController {
 
 
 	private void createAnimation() {
-		if (timestep == 0) makeJsonForAnimation();
+
 		writeNextStepJsonForAnimation(inx,iny, rinx, riny, nextToPress);
 	}
-	private void saveAnimation(){
 
-	}
 
 	private boolean checkIfDied() {
 		return character.parts.get(HEAD).getY() < 0;
@@ -1482,6 +1511,10 @@ public class GameMode extends ModeController {
 		canvas.end();
 
 		canvas.begin();
+		if(currLevel != LEVEL_SKY)
+			for (int i = 0; i < character.parts.size; i++){
+				character.parts.get(i).drawShadow(shadowTextures[i], canvas);
+			}
 		for (GameObject obj : objects) obj.draw(canvas);
 		if (tutorialToggle) drawToggles();
 		canvas.end();
@@ -1572,6 +1605,7 @@ public class GameMode extends ModeController {
 	}
 
 	public void victorious(){
+
 		victoryMode.reset();
 		isVictorious = true;
 	}
