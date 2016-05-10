@@ -1,6 +1,9 @@
 
 package beigegang.mountsputnik;
 
+import beigegang.util.FilmStrip;
+import beigegang.util.JsonAssetManager;
+import beigegang.util.PooledList;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
@@ -9,10 +12,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import static beigegang.mountsputnik.Constants.*;
-
-import beigegang.util.*;
-
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -20,12 +19,16 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
-import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
 
 import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Random;
+
+import static beigegang.mountsputnik.Constants.*;
 
 public class GameMode extends ModeController {
 
@@ -356,7 +359,7 @@ public class GameMode extends ModeController {
 	 * opacity used for displaying it only (warning fades in as obstacle spawns)
 	 * @author Jacob
 	 * */
-	private class warningsClass{
+	public class warningsClass{
 		float center;
 		float maxHeight;
 		ObstacleModel o;
@@ -1444,80 +1447,25 @@ public class GameMode extends ModeController {
 		vector = character.parts.get(HEAD).getPosition();
 		float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
 		float tileY = y - (y % (canvas.getWidth() / 4));
-		canvas.draw(background, Color.WHITE, canvas.getWidth() * 3 / 4, y, canvas.getWidth() / 4, canvas.getHeight());
-		background.flip(true,false);
-		canvas.draw(background, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-		background.flip(true,false);
-
-		canvas.draw(midground, Color.WHITE, canvas.getWidth() * 3 / 4, y * MIDGROUND_SCROLL, canvas.getWidth() / 4, canvas.getHeight());
-		midground.flip(true,false);
-		canvas.draw(midground, Color.WHITE, 0, y * MIDGROUND_SCROLL, canvas.getWidth() / 4, canvas.getHeight());
-		midground.flip(true,false);
-
-		for (counterInt = 0; counterInt < 5; counterInt++) {
-			canvas.draw(tile, Color.WHITE, canvas.getWidth() / 4, tileY, canvas.getWidth() / 4, canvas.getWidth() / 4);
-			canvas.draw(tile, Color.WHITE, canvas.getWidth() / 2, tileY, canvas.getWidth() / 4, canvas.getWidth() / 4);
-			canvas.draw(edge, Color.WHITE, canvas.getWidth() * 3 / 4, tileY, canvas.getWidth() / 16, canvas.getHeight());
-			edge.flip(true,false);
-			canvas.draw(edge, Color.WHITE, canvas.getWidth() / 4 - canvas.getWidth() / 16, tileY, canvas.getWidth() / 16, canvas.getHeight());
-			edge.flip(true,false);
-
-			tileY += canvas.getWidth() / 4;
-		}
+		DrawingMethods.drawBackgrounds(canvas,ground,background,midground,tile,edge);
 		if(currLevel != LEVEL_SKY)
-			for (int i = 0; i < character.parts.size; i++){
-				character.parts.get(i).drawShadow(shadowTextures[i], canvas);
-			}
+			DrawingMethods.drawShadow(character,shadowTextures,canvas);
+
 		for (GameObject obj : objects) obj.draw(canvas);
 		float a = (vector.y - cposYAtTime0)/(maxHandhold - cposYAtTime0);
 		if (timestep%60 == 0 && character.getEnergy() != 0)
 			progressLevel = Math.min(6,Math.max(0,Math.round(a * 6 - .1f)));
-		canvas.draw(ground, Color.WHITE, canvas.getWidth() / 4, 0, canvas.getWidth() / 2, canvas.getHeight() / 8);
 
 		canvas.draw(levelLabels[currLevel], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 
 //		canvas.draw(UI, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 		canvas.end();
-		UISprite.setBounds(0, 0, canvas.getWidth() / 4, canvas.getHeight());
-		UISprite.setAlpha(.7f);
-
-		batch.begin();
-		UISprite.draw(batch);
-		batch.end();
-
+		DrawingMethods.drawUI(canvas,0,UISprite,batch);
 		canvas.begin();
-		if (progressLevel > 0) {
-			canvas.draw(progressTextures[progressLevel-1], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-		}
-		canvas.draw(progressBackgroundTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-
-		float f = character.getEnergy();
+		DrawingMethods.drawProgress(canvas,progressTextures,progressBackgroundTexture,progressLevel,0,y );
 		canvas.end();
-		//draw flashing for bar.
-		if (f<= 30){
-			lowEnergySprite.setAlpha(.5f + Math.min((30-f)/f,.5f));
-			batch.begin();
-			lowEnergySprite.draw(batch);
-			batch.end();
 
-			flashing2 --;
-			canvas.begin();
-			if (flashing2<f/4){
-				canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.BLACK, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-
-				if (flashing2<=0)
-					flashing2 = Math.round(f/2);
-			}else {
-				canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-
-			}
-		}else{
-			canvas.begin();
-			canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-		}
-
-		canvas.draw(fatigueTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-
+		flashing2 = DrawingMethods.drawEnergy(canvas,character,energyTextures,fatigueTexture,lowEnergySprite,batch,energyLevel,0,y,flashing2);
 		if (currLevel == LEVEL_TUTORIAL)
 			canvas.draw(tutorialOverlay, Color.WHITE, canvas.getWidth()/4, canvas.getHeight()/8, canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
 		counterInt = 0;
@@ -1547,17 +1495,7 @@ public class GameMode extends ModeController {
 		}
 		canvas.end();
 		//draw the obstacle warnings.
-		for (warningsClass wc : obstacleWarnings) {
-			//hack to allow warning to move with obstacle for space!
-			wc.center = wc.o.getX() + wc.o.width/2;
-			warningSprite.setBounds(wc.center * scale.x -  1.5f * scale.x, y/scale.y + canvas.getHeight()*9f/10f, 3f * scale.x , canvas.getHeight()/10f);
-			warningSprite.setAlpha(Math.min(1,(wc.opacity)/(Math.min(TIME_TO_WARN,wc.oz.getSpawnFrequency()))));
-			wc.opacity ++;
-			batch.begin();
-			warningSprite.draw(batch);
-			batch.end();
-		}
-
+		DrawingMethods.drawObstacleWarnings( canvas, obstacleWarnings, warningSprite, batch, scale, y);
 
 
 		if (debug) {
