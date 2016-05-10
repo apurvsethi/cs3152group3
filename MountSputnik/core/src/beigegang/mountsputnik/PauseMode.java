@@ -80,7 +80,7 @@ public class PauseMode extends ModeController {
 
 	public void update(float dt, ScreenListener listener) {
 		// TODO Auto-generated method stub
-		InputController input = InputController.getInstance();
+		InputController input = InputController.getInstance(0);
 
 		if (changeCooldown > 0) changeCooldown --;
 

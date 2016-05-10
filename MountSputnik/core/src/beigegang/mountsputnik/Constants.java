@@ -9,6 +9,7 @@ public final class Constants {
 	public static final int LOADING_SCREEN = 0;
 	public static final int MENU_SCREEN = 1;
 	public static final int GAME_SCREEN = 2;
+	public static final int RACE_SCREEN = 3;
 
 	/** Exit codes */
 	public static final int EXIT_GAME_RESTART_LEVEL = 0;
@@ -22,6 +23,11 @@ public final class Constants {
 	public static final int EXIT_GAME_RESTART_LAST_CHECKPOINT = 8;
 	public static final int EXIT_DIED = 9;
 	public static final int EXIT_VICTORY = 10;
+	public static final int EXIT_RACE = 11;
+	public static final int EXIT_VICTORY_RACE = 12;
+	public static final int EXIT_GAME_RESTART_RACE_LEVEL = 13;
+	public static final int EXIT_RACE_DIED = 14;
+	public static final int EXIT_GAME_NEXT_RACE_LEVEL = 15;
 
 	/**Level codes*/
 	public static final int NUM_LEVELS = 7;
@@ -56,7 +62,7 @@ public final class Constants {
 
 	public static final int HANDHOLD_SNAP_RADIUS = 1;
 
-	public static final float START_MENU_DRAW_LOCATION = 0.35f;
+	public static final float START_MENU_DRAW_LOCATION = 0.42f;
 	public static final float LEVEL_SELECT_DRAW_LOCATION = 0.66f;
 	public static final int LEVEL_SELECT_ROWS = 2;
 	public static final int LEVEL_SELECT_SPACING = 40;
@@ -172,8 +178,8 @@ public final class Constants {
 	public static float FOREARM_PULLING_UPPER_LIMIT = 90f;
 	//to make sure it could
 	public static float FOREARM_SWITCHING_EITHER_WAY = 0f;
-	public static float FOREARM_JOINT_SPEED = 5f;
-	public static float SHIN_JOINT_SPEED = 6f;
+	public static float FOREARM_JOINT_SPEED = 3f;
+	public static float SHIN_JOINT_SPEED = 3f;
 
 	public static short PART_BITS = 8;
 	public static short OBSTACLE_BITS = 4;

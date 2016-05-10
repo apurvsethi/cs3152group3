@@ -39,10 +39,11 @@ public class GameEngine extends Game implements ScreenListener {
 	@Override
 	public void create() {
 		canvas = new GameCanvas();
-		controllers = new ModeController[3];
+		controllers = new ModeController[4];
 		controllers[LOADING_SCREEN] = new LoadingMode(manager);
 		controllers[MENU_SCREEN] = new MenuMode();
 		controllers[GAME_SCREEN] = new GameMode();
+		controllers[RACE_SCREEN] = new RaceMode();
 		SoundController.PreLoadContent(manager);
 		for(int ii = 1; ii < controllers.length; ii++) {
 			controllers[ii].preLoadContent(manager);
@@ -148,7 +149,40 @@ public class GameEngine extends Game implements ScreenListener {
 		}else if (exitCode == EXIT_GAME_RESTART_LAST_CHECKPOINT){
 			((GameMode) controllers[GAME_SCREEN]).restartLastCheckpoint();
 			setScreen(controllers[GAME_SCREEN]);
+		}else if (exitCode == EXIT_RACE){
+			(controllers[RACE_SCREEN]).reset();
+			setScreen(controllers[RACE_SCREEN]);
+
 		}
+		else if (exitCode == EXIT_VICTORY_RACE){
+			RaceMode raceMode = (RaceMode) controllers[RACE_SCREEN];
+			MenuMode menuMode = (MenuMode) controllers[MENU_SCREEN];
+			menuMode.unlockLevel(raceMode.getNextLevel());
+			raceMode.victorious();
+
+		}
+		else if (exitCode == EXIT_GAME_RESTART_RACE_LEVEL) {
+			controllers[RACE_SCREEN].reset();
+			setScreen(controllers[RACE_SCREEN]);
+		}
+		else if (exitCode == EXIT_RACE_DIED) {
+			RaceMode game = (RaceMode) controllers[RACE_SCREEN];
+			System.out.println("HERE");
+			game.dead();
+		}
+		else if (exitCode == EXIT_GAME_RESTART_RACE_LEVEL) {
+			controllers[RACE_SCREEN].reset();
+			setScreen(controllers[RACE_SCREEN]);
+		}
+		else if (exitCode == EXIT_GAME_NEXT_RACE_LEVEL) {
+			RaceMode g = (RaceMode) controllers[RACE_SCREEN];
+			//MenuMode menuMode = (MenuMode) controllers[MENU_SCREEN];
+			g.nextLevel();
+			g.reset();
+			//menuMode.unlockLevel(gameMode.getCurrLevel());
+			setScreen(controllers[RACE_SCREEN]);
+		}
+
 	}
 
 	public void exitLevelSelect(Screen screen, int level){
