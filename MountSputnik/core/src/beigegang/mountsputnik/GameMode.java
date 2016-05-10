@@ -58,7 +58,7 @@ public class GameMode extends ModeController {
 	 */
 	private static final String LEVEL_NAMES[] = {"tutorial", "canyon", "waterfall", "volcano", "mountain", "sky", "space"}; //TODO: change second canyon to waterfall
 	private static final String LAVA_FILE = "assets/lava.png";
-	private static final String UI_FILE = "assets/HUD4timeless.png";
+	private static final String UI_FILE = "assets/HUD4timelessNoBackground.png";
 	private static final String[] LEVEL_LABEL_FILES = {"assets/Tutorial.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Skycloud.png", "assets/Canyon.png"};
 	private static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
 	private static final String GLOW_FILE = "assets/glow.png";
@@ -140,6 +140,7 @@ public class GameMode extends ModeController {
 	private Sprite progressSprite = new Sprite(new Texture(PROGRESS_BAR));
 	private Sprite warningSprite = new Sprite(new Texture(WARNING_TEXTURE));
 	private Sprite lowEnergySprite = new Sprite(new Texture(LOW_ENERGY_HALO));
+	private Sprite UISprite = new Sprite(new Texture(UI_FILE));
 	private static SpriteBatch batch = new SpriteBatch();
 	private static int progressLevel = 0;
 	/** The reader to process JSON files */
@@ -670,6 +671,7 @@ public class GameMode extends ModeController {
 		while(currentHeight < remainingHeight){
 			//TODO: account for difficulty
 			int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
+//			blockNumber = 3;
 			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
 			String blockDiff = levelPiece.getString("difficulty");
 			while((used.contains(blockNumber, true)||
@@ -1443,29 +1445,50 @@ public class GameMode extends ModeController {
 		float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
 		float tileY = y - (y % (canvas.getWidth() / 4));
 		canvas.draw(background, Color.WHITE, canvas.getWidth() * 3 / 4, y, canvas.getWidth() / 4, canvas.getHeight());
+		background.flip(true,false);
+		canvas.draw(background, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+		background.flip(true,false);
+
 		canvas.draw(midground, Color.WHITE, canvas.getWidth() * 3 / 4, y * MIDGROUND_SCROLL, canvas.getWidth() / 4, canvas.getHeight());
+		midground.flip(true,false);
+		canvas.draw(midground, Color.WHITE, 0, y * MIDGROUND_SCROLL, canvas.getWidth() / 4, canvas.getHeight());
+		midground.flip(true,false);
 
 		for (counterInt = 0; counterInt < 5; counterInt++) {
 			canvas.draw(tile, Color.WHITE, canvas.getWidth() / 4, tileY, canvas.getWidth() / 4, canvas.getWidth() / 4);
 			canvas.draw(tile, Color.WHITE, canvas.getWidth() / 2, tileY, canvas.getWidth() / 4, canvas.getWidth() / 4);
 			canvas.draw(edge, Color.WHITE, canvas.getWidth() * 3 / 4, tileY, canvas.getWidth() / 16, canvas.getHeight());
+			edge.flip(true,false);
+			canvas.draw(edge, Color.WHITE, canvas.getWidth() / 4 - canvas.getWidth() / 16, tileY, canvas.getWidth() / 16, canvas.getHeight());
+			edge.flip(true,false);
+
 			tileY += canvas.getWidth() / 4;
 		}
-
+		if(currLevel != LEVEL_SKY)
+			for (int i = 0; i < character.parts.size; i++){
+				character.parts.get(i).drawShadow(shadowTextures[i], canvas);
+			}
+		for (GameObject obj : objects) obj.draw(canvas);
 		float a = (vector.y - cposYAtTime0)/(maxHandhold - cposYAtTime0);
 		if (timestep%60 == 0 && character.getEnergy() != 0)
 			progressLevel = Math.min(6,Math.max(0,Math.round(a * 6 - .1f)));
 		canvas.draw(ground, Color.WHITE, canvas.getWidth() / 4, 0, canvas.getWidth() / 2, canvas.getHeight() / 8);
-		canvas.draw(UI, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-		canvas.draw(levelLabels[currLevel], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-		canvas.end();
 
+		canvas.draw(levelLabels[currLevel], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+
+//		canvas.draw(UI, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+		canvas.end();
+		UISprite.setBounds(0, 0, canvas.getWidth() / 4, canvas.getHeight());
+		UISprite.setAlpha(.7f);
+
+		batch.begin();
+		UISprite.draw(batch);
+		batch.end();
 
 		canvas.begin();
 		if (progressLevel > 0) {
 			canvas.draw(progressTextures[progressLevel-1], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 		}
-
 		canvas.draw(progressBackgroundTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
 
 		float f = character.getEnergy();
@@ -1508,11 +1531,7 @@ public class GameMode extends ModeController {
 		canvas.end();
 
 		canvas.begin();
-		if(currLevel != LEVEL_SKY)
-			for (int i = 0; i < character.parts.size; i++){
-				character.parts.get(i).drawShadow(shadowTextures[i], canvas);
-			}
-		for (GameObject obj : objects) obj.draw(canvas);
+
 		if (tutorialToggle) drawToggles();
 		canvas.end();
 
@@ -1529,6 +1548,8 @@ public class GameMode extends ModeController {
 		canvas.end();
 		//draw the obstacle warnings.
 		for (warningsClass wc : obstacleWarnings) {
+			//hack to allow warning to move with obstacle for space!
+			wc.center = wc.o.getX() + wc.o.width/2;
 			warningSprite.setBounds(wc.center * scale.x -  1.5f * scale.x, y/scale.y + canvas.getHeight()*9f/10f, 3f * scale.x , canvas.getHeight()/10f);
 			warningSprite.setAlpha(Math.min(1,(wc.opacity)/(Math.min(TIME_TO_WARN,wc.oz.getSpawnFrequency()))));
 			wc.opacity ++;
