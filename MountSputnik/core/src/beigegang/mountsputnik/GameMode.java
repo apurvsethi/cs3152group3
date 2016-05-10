@@ -946,7 +946,7 @@ public class GameMode extends ModeController {
 		}
 		else {
 			input = InputController.getInstance(0);
-			doingAnimation = input.watchAnimation();
+			doingAnimation = input.watchAnimation() && currLevel == LEVEL_TUTORIAL;
 			if (doingAnimation) {
 				getAnimationInformation();
 				inx = animationLX;

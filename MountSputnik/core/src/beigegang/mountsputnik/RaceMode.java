@@ -984,7 +984,7 @@ public class RaceMode extends ModeController {
             victoryMode.update(dt, listener,true);
         }
         else {
-            doingAnimation = input.watchAnimation();
+            doingAnimation = input.watchAnimation() && currLevel == LEVEL_TUTORIAL;
             if (doingAnimation) {
                 getAnimationInformation();
                 inx = animationLX;
