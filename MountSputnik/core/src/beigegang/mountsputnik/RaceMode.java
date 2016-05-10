@@ -1388,13 +1388,13 @@ public class RaceMode extends ModeController {
      */
     private void snapLimbsToHandholds(HandholdModel[] hs,CharacterModel c,Array<Integer> jr) {
 
-        if (timestep == 0 || jr.contains(HAND_LEFT,false))
+        if (timestep <2 || jr.contains(HAND_LEFT,false))
             snapIfPossible(HAND_LEFT, hs,c);
-        if (jr.contains(HAND_RIGHT,false) || timestep == 0)
+        if (jr.contains(HAND_RIGHT,false) || timestep < 2 )
             snapIfPossible(HAND_RIGHT, hs,c);
-        if (jr.contains(FOOT_LEFT,false) || timestep == 0)
+        if (jr.contains(FOOT_LEFT,false) || timestep < 2)
             snapIfPossible(FOOT_LEFT, hs,c);
-        if (jr.contains(FOOT_RIGHT,false)|| timestep == 0)
+        if (jr.contains(FOOT_RIGHT,false)|| timestep < 2)
             snapIfPossible(FOOT_RIGHT, hs,c);
 //		if (input.releasedLeftArm() || timestep == 0)
 //			snapIfPossible(HAND_LEFT, hs);
