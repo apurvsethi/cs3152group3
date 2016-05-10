@@ -991,8 +991,8 @@ public class GameMode extends ModeController {
 //				oldMovementController.findAndApplyForces(nextToPress.get(0),inx,iny);
 			if (nextToPress.size > 0) {
 				for (int i : nextToPress) {
-					((ExtremityModel) (character.parts.get(i))).ungrip();
-					ungrip(((ExtremityModel) (character.parts.get(i))));
+					if (((ExtremityModel) (character.parts.get(i))).isGripped())
+						ungrip(((ExtremityModel) (character.parts.get(i))));
 				}
 			}
 			//bounding velocities
@@ -1024,9 +1024,7 @@ public class GameMode extends ModeController {
 				}
 			}
 
-			// TODO: Update energy quantity (fill in these values)
-			vector = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
-			character.updateEnergy(oxygen, 1, vector.len(), true);
+			character.updateEnergy(oxygen, 1, character.parts.get(CHEST).getLinearVelocity().len(), true);
 
 			if (risingObstacle != null) {
 				risingObstacle.setHeight(risingObstacle.getHeight() + risingObstacle.getSpeed());
@@ -1155,8 +1153,7 @@ public class GameMode extends ModeController {
 	private void boundBodyVelocities() {
 		if (isGripping(HAND_LEFT) || isGripping(HAND_RIGHT)|| isGripping(FOOT_LEFT)|| isGripping(FOOT_RIGHT)){
 			for (PartModel p:character.parts){
-				vector =  p.getLinearVelocity();
-				p.setLinearVelocity(boundVelocity(vector));
+				p.setLinearVelocity(boundVelocity(p.getLinearVelocity()));
 			}
 		}
 	}
@@ -1396,7 +1393,6 @@ public class GameMode extends ModeController {
 		}
 		if (closest !=null){
 			character.parts.get(limb).setPosition(closestSnapPoint);
-			((ExtremityModel) character.parts.get(limb)).grip();
 			grip(((ExtremityModel) character.parts.get(limb)), closest);
 		}
 //			}
@@ -1404,8 +1400,7 @@ public class GameMode extends ModeController {
 	}
 
 	private double distanceFrom(int limb, Vector2 snapPoint) {
-		vector = new Vector2 (character.parts.get(limb).getPosition().sub(snapPoint));
-		return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+		return (character.parts.get(limb).getPosition().sub(snapPoint)).len();
 	}
 
 	public PooledList<GameObject> getGameObjects(){
