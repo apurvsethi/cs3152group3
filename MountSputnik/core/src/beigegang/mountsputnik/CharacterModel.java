@@ -4,6 +4,7 @@ import beigegang.util.FilmStrip;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
+import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 import com.badlogic.gdx.utils.Array;
 
 import static beigegang.mountsputnik.Constants.*;
@@ -20,7 +21,8 @@ public class CharacterModel {
 	private FilmStrip[] partTextures;
 	/** Character energy */
 	private float energy;
-	private RevoluteJointDef jointDef = new RevoluteJointDef();
+	private RevoluteJointDef revoluteJointDef = new RevoluteJointDef();
+	private WeldJointDef weldJointDef = new WeldJointDef();
 
 	/**
 	 * Gets the energy of this character
@@ -167,69 +169,61 @@ public class CharacterModel {
 	}
 
 	private void makeJoints(World world) {
-		makeJoint(CHEST, HEAD, 0, CHEST_HEAD_OFFSET, 0);
-		setJointAngleLimits(-10, 10);
-		setJointMotor(0, 50);
-		addJoint(world);
+		makeRevoluteJoint(CHEST, HEAD, 0, CHEST_HEAD_OFFSET, 0);
+		setRevoluteJointLimits(-10, 10);
+		setRevoluteJointMotor(0, 50);
+		addJoint(world, revoluteJointDef);
 
-		makeJoint(HIPS, CHEST, 0, HIP_CHEST_OFFSET, 0);
-		setJointAngleLimits(-45, 45);
-		setJointMotor(0, 50);
-		addJoint(world);
+		makeRevoluteJoint(HIPS, CHEST, 0, HIP_CHEST_OFFSET, 0);
+		setRevoluteJointLimits(-45, 45);
+		setRevoluteJointMotor(0, 50);
+		addJoint(world, revoluteJointDef);
 
-		makeJoint(ARM_LEFT, CHEST, ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0);
-		setJointAngleLimits(-90, 90);
-		setJointMotor(0, 50);
-		addJoint(world);
-		makeJoint(ARM_RIGHT, CHEST, -ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, -180);
-		setJointAngleLimits(-90, 90);
-		setJointMotor(0, 50);
-		addJoint(world);
+		makeRevoluteJoint(ARM_LEFT, CHEST, ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, 0);
+		setRevoluteJointLimits(-90, 90);
+		setRevoluteJointMotor(0, 50);
+		addJoint(world, revoluteJointDef);
+		makeRevoluteJoint(ARM_RIGHT, CHEST, -ARM_X_CHEST_OFFSET, ARM_Y_CHEST_OFFSET, -180);
+		setRevoluteJointLimits(-90, 90);
+		setRevoluteJointMotor(0, 50);
+		addJoint(world, revoluteJointDef);
 
-		makeJoint(FOREARM_LEFT, ARM_LEFT, FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, 0);
-		setJointAngleLimits(2, 135);
-		setJointMotor(0, 50);
-		addJoint(world);
-		makeJoint(FOREARM_RIGHT, ARM_RIGHT, -FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, 0);
-		setJointAngleLimits(-135, -2);
-		setJointMotor(0, 50);
-		addJoint(world);
+		makeRevoluteJoint(FOREARM_LEFT, ARM_LEFT, FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, 0);
+		setRevoluteJointLimits(2, 135);
+		setRevoluteJointMotor(0, 50);
+		addJoint(world, revoluteJointDef);
+		makeRevoluteJoint(FOREARM_RIGHT, ARM_RIGHT, -FOREARM_X_ARM_OFFSET, FOREARM_Y_ARM_OFFSET, 0);
+		setRevoluteJointLimits(-135, -2);
+		setRevoluteJointMotor(0, 50);
+		addJoint(world, revoluteJointDef);
 
-		makeJoint(HAND_LEFT, FOREARM_LEFT, HAND_X_OFFSET, HAND_Y_OFFSET, 0);
-		setJointAngleLimits(-20, 60);
-		setJointMotor(0, 50);
-		addJoint(world);
-		makeJoint(HAND_RIGHT, FOREARM_RIGHT, -HAND_X_OFFSET, HAND_Y_OFFSET, 0);
-		setJointAngleLimits(-20, 60);
-		setJointMotor(0, 50);
-		addJoint(world);
+		makeWeldJoint(HAND_LEFT, FOREARM_LEFT, HAND_X_OFFSET, HAND_Y_OFFSET, 0);
+		addJoint(world, weldJointDef);
+		makeWeldJoint(HAND_RIGHT, FOREARM_RIGHT, -HAND_X_OFFSET, HAND_Y_OFFSET, 0);
+		addJoint(world, weldJointDef);
 
-		makeJoint(THIGH_LEFT, HIPS, THIGH_X_HIP_OFFSET, THIGH_Y_HIP_OFFSET, 0);
-		setJointAngleLimits(-45, 90);
-		setJointMotor(0, 50);
-		addJoint(world);
-		makeJoint(THIGH_RIGHT, HIPS, THIGH_X_HIP_OFFSET, THIGH_Y_HIP_OFFSET, 0);
-		setJointAngleLimits(-90, 45);
-		setJointMotor(0, 50);
-		addJoint(world);
+		makeRevoluteJoint(THIGH_LEFT, HIPS, THIGH_X_HIP_OFFSET, THIGH_Y_HIP_OFFSET, 0);
+		setRevoluteJointLimits(-45, 90);
+		setRevoluteJointMotor(0, 50);
+		addJoint(world, revoluteJointDef);
+		makeRevoluteJoint(THIGH_RIGHT, HIPS, THIGH_X_HIP_OFFSET, THIGH_Y_HIP_OFFSET, 0);
+		setRevoluteJointLimits(-90, 45);
+		setRevoluteJointMotor(0, 50);
+		addJoint(world, revoluteJointDef);
 
-		makeJoint(SHIN_LEFT,  THIGH_LEFT, SHIN_X_THIGH_OFFSET, SHIN_Y_THIGH_OFFSET, 0);
-		setJointAngleLimits(-150, -2);
-		setJointMotor(0, 50);
-		addJoint(world);
-		makeJoint(SHIN_RIGHT, THIGH_RIGHT, -SHIN_X_THIGH_OFFSET, SHIN_Y_THIGH_OFFSET, 0);
-		setJointAngleLimits(2, 150);
-		setJointMotor(0, 50);
-		addJoint(world);
+		makeRevoluteJoint(SHIN_LEFT,  THIGH_LEFT, SHIN_X_THIGH_OFFSET, SHIN_Y_THIGH_OFFSET, 0);
+		setRevoluteJointLimits(-150, -2);
+		setRevoluteJointMotor(0, 50);
+		addJoint(world, revoluteJointDef);
+		makeRevoluteJoint(SHIN_RIGHT, THIGH_RIGHT, -SHIN_X_THIGH_OFFSET, SHIN_Y_THIGH_OFFSET, 0);
+		setRevoluteJointLimits(2, 150);
+		setRevoluteJointMotor(0, 50);
+		addJoint(world, revoluteJointDef);
 
-		makeJoint(FOOT_LEFT, SHIN_LEFT, FOOT_X_OFFSET, FOOT_Y_OFFSET, 0);
-		setJointAngleLimits(-90, 90);
-		setJointMotor(0, 50);
-		addJoint(world);
-		makeJoint(FOOT_RIGHT, SHIN_RIGHT, -FOOT_X_OFFSET, FOOT_Y_OFFSET, 0);
-		setJointAngleLimits(-90, 90);
-		setJointMotor(0, 50);
-		addJoint(world);
+		makeWeldJoint(FOOT_LEFT, SHIN_LEFT, FOOT_X_OFFSET, FOOT_Y_OFFSET, 0);
+		addJoint(world, weldJointDef);
+		makeWeldJoint(FOOT_RIGHT, SHIN_RIGHT, -FOOT_X_OFFSET, FOOT_Y_OFFSET, 0);
+		addJoint(world, weldJointDef);
 	}
 
 	/**
@@ -240,31 +234,41 @@ public class CharacterModel {
 	 * @param partY    The y-offset of the part RELATIVE to the connecting part's offset
 	 * @param referenceAngle The reference angle for the joint to use
 	 */
-	private void makeJoint(int part, int connect, float partX, float partY,
-						   float referenceAngle) {
+	private void makeRevoluteJoint(int part, int connect, float partX, float partY,
+								   float referenceAngle) {
 		partCache.set(parts.get(part).getX(), parts.get(part).getY());
 		partCache.add(partX, partY);
-		jointDef.initialize(parts.get(part).getBody(), parts.get(connect).getBody(),
+		revoluteJointDef.initialize(parts.get(part).getBody(), parts.get(connect).getBody(),
 				partCache);
-		jointDef.collideConnected = false;
-		jointDef.referenceAngle = referenceAngle * DEG_TO_RAD;
+		revoluteJointDef.collideConnected = false;
+		revoluteJointDef.referenceAngle = referenceAngle * DEG_TO_RAD;
 	}
 
-	private void setJointMotor(float motorSpeed, float maxTorque) {
-		jointDef.enableMotor = true;
-		jointDef.motorSpeed = motorSpeed * DEG_TO_RAD;
-		jointDef.maxMotorTorque = maxTorque;
+	private void setRevoluteJointMotor(float motorSpeed, float maxTorque) {
+		revoluteJointDef.enableMotor = true;
+		revoluteJointDef.motorSpeed = motorSpeed * DEG_TO_RAD;
+		revoluteJointDef.maxMotorTorque = maxTorque;
 	}
 
-	private void setJointAngleLimits(float rotationLimitLower, float rotationLimitUpper) {
-		jointDef.enableLimit = true;
-		jointDef.lowerAngle = rotationLimitLower * DEG_TO_RAD;
-		jointDef.upperAngle = rotationLimitUpper * DEG_TO_RAD;
+	private void setRevoluteJointLimits(float rotationLimitLower, float rotationLimitUpper) {
+		revoluteJointDef.enableLimit = true;
+		revoluteJointDef.lowerAngle = rotationLimitLower * DEG_TO_RAD;
+		revoluteJointDef.upperAngle = rotationLimitUpper * DEG_TO_RAD;
 	}
 
-	private void addJoint(World world) {
+	private void addJoint(World world, JointDef jointDef) {
 		Joint joint = world.createJoint(jointDef);
 		joints.add(joint);
+	}
+
+	private void makeWeldJoint(int part, int connect, float partX, float partY,
+							   float referenceAngle) {
+		partCache.set(parts.get(part).getX(), parts.get(part).getY());
+		partCache.add(partX * 2, partY * 2);
+		weldJointDef.initialize(parts.get(part).getBody(), parts.get(connect).getBody(),
+				partCache);
+		weldJointDef.collideConnected = false;
+		weldJointDef.referenceAngle = referenceAngle * DEG_TO_RAD;
 	}
 
 	/** Constructs a CharacterModel

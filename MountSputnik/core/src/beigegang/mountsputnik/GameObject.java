@@ -149,6 +149,29 @@ public abstract class GameObject {
 	}
 
 	/**
+	 * Sets the current position for this physics body
+	 *
+	 * This method does not keep a reference to the parameter.
+	 *
+	 * @param value  the current position for this physics body
+	 */
+	public void setPosition(Vector2 value, float angle) {
+		if (body != null) body.setTransform(value, angle);
+		else bDef.position.set(value);
+	}
+
+	/**
+	 * Sets the current position for this physics body
+	 *
+	 * @param x  the x-coordinate for this physics body
+	 * @param y  the y-coordinate for this physics body
+	 */
+	public void setPosition(float x, float y, float angle) {
+		if (body != null) body.setTransform(x, y, angle);
+		else bDef.position.set(x, y);
+	}
+
+	/**
 	 * Returns the x-coordinate for this physics body
 	 *
 	 * @return the x-coordinate for this physics body

@@ -75,9 +75,7 @@ public class PositionMovementController {
         RevoluteJoint rootJoint = (RevoluteJoint) character.getInnerJoint(root);
         RevoluteJoint midJoint = (RevoluteJoint) character.getJoint(root, mid);
 
-        Vector2 initial = extremityPart.getPosition();
-        posCache.set(initial);
-
+        posCache.set(extremityPart.getPosition());
         crossCache.set(horizontal, vertical);
         if (crossCache.len2() > GP_THRESHOLD) {
             momentum += GP_ACCELERATE;
@@ -87,7 +85,7 @@ public class PositionMovementController {
             posCache.add(crossCache);
 
             adjustToRadius(rootJoint, isArm);
-            extremityPart.setPosition(posCache);
+            extremityPart.setPosition(posCache, extremityPart.getAngle());
         }
         else momentum = 0;
 
