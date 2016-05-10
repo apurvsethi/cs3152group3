@@ -68,13 +68,32 @@ public class InputController {
 	private XBox360Controller xbox;
 
 	/**
-	 * holds any extremities who's buttons are pressed during this timestep. keeps order of pressing intact
+	 * Holds any extremities' buttons pressed during this timestep.
+	 * Keeps order of pressing intact
 	 */
-	private Array<Integer> orderPressed = new Array<Integer>();
+	private Array<Integer> orderPressed;
+	/** Holds any extremities' buttons released during this timestep. */
+	private Array<Integer> justReleased;
 
+	/**
+	 * Returns the array of extremity ints with buttons pressed during this
+	 * timestep. Keeps order intact.
+	 *
+	 * @return array of extremity ints with buttons pressed during this
+	 *         timestep with correct order
+	 */
 	public Array<Integer> getOrderPressed(){
 		return orderPressed;
 	}
+
+	/**
+	 * Returns the array of extremity ints with buttons released during this
+	 * timestep.
+	 *
+	 * @return array of extremity ints with buttons released during this
+	 *         timestep
+	 */
+	public Array<Integer> getJustReleased() { return justReleased; }
 
 	/**
 	 * Returns the amount of sideways movement from left stick.
@@ -226,6 +245,7 @@ public class InputController {
 	public boolean didMenu() {
 		return menuPressed && !menuPrevious;
 	}
+	
 	public boolean watchAnimation(){
 		return animationPressed;
 	}
@@ -267,6 +287,8 @@ public class InputController {
 		xbox = new XBox360Controller(0);
 		triggerScheme = false; //TODO read in values from file
 		stickScheme = false;
+		orderPressed = new Array<Integer>();
+		justReleased = new Array<Integer>();
 	}
 
 	/**
@@ -288,6 +310,7 @@ public class InputController {
 		rightArmPrevious = rightArmPressed;
 		leftLegPrevious = leftLegPressed;
 		rightLegPrevious = rightLegPressed;
+		justReleased.clear();
 
 		// Check to see if a GamePad is connected
 		if (xbox.isConnected()) {
@@ -295,16 +318,18 @@ public class InputController {
 			readKeyboard(true); // Read as a back-up
 		} else readKeyboard(false);
 
-		adjustOrderPressed(leftArmPressed, HAND_LEFT);
-		adjustOrderPressed(rightArmPressed, HAND_RIGHT);
-		adjustOrderPressed(leftLegPressed, FOOT_LEFT);
-		adjustOrderPressed(rightLegPressed, FOOT_RIGHT);
+		adjustArrays(leftArmPrevious, leftArmPressed, HAND_LEFT);
+		adjustArrays(rightArmPrevious, rightArmPressed, HAND_RIGHT);
+		adjustArrays(leftLegPrevious, leftLegPressed, FOOT_LEFT);
+		adjustArrays(rightLegPrevious, rightLegPressed, FOOT_RIGHT);
 	}
 
-	private void adjustOrderPressed(boolean pressed, int part) {
-		if (pressed && !orderPressed.contains(part, true))
-			orderPressed.add(part);
-		else if (!pressed) orderPressed.removeValue(part, true);
+	private void adjustArrays(boolean previous, boolean pressed, int part) {
+		if (!previous && pressed) orderPressed.add(part);
+		else if (previous && !pressed) {
+			orderPressed.removeValue(part, true);
+			justReleased.add(part);
+		}
 	}
 
 	/**
