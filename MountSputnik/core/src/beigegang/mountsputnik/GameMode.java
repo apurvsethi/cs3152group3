@@ -1392,7 +1392,7 @@ public class GameMode extends ModeController {
 			}
 		}
 		if (closest !=null){
-			character.parts.get(limb).setPosition(closestSnapPoint);
+			character.parts.get(limb).setPosition(closestSnapPoint, (character.parts.get(limb)).getAngle());
 			grip(((ExtremityModel) character.parts.get(limb)), closest);
 		}
 //			}
