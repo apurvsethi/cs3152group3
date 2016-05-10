@@ -1,6 +1,9 @@
 
 package beigegang.mountsputnik;
 
+import beigegang.util.FilmStrip;
+import beigegang.util.JsonAssetManager;
+import beigegang.util.PooledList;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
@@ -9,10 +12,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import static beigegang.mountsputnik.Constants.*;
-
-import beigegang.util.*;
-
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -20,17 +19,22 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
-import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
 
 import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import static beigegang.mountsputnik.Constants.*;
+
 public class RaceMode extends ModeController {
 
     private int currLevel = LEVEL_TUTORIAL;
     private boolean flashing = false;
+    private int flashing1 = 10;
     private int flashing2 = 10;
     /** A string representing the name of the current level */
     private String levelName = "canyon";
@@ -140,6 +144,7 @@ public class RaceMode extends ModeController {
     private Sprite progressSprite = new Sprite(new Texture(PROGRESS_BAR));
     private Sprite warningSprite = new Sprite(new Texture(WARNING_TEXTURE));
     private Sprite lowEnergySprite = new Sprite(new Texture(LOW_ENERGY_HALO));
+    private Sprite UISprite = new Sprite(new Texture(UI_FILE));
     private static SpriteBatch batch = new SpriteBatch();
     private static int progressLevel = 0;
     /** The reader to process JSON files */
@@ -355,7 +360,7 @@ public class RaceMode extends ModeController {
      * opacity used for displaying it only (warning fades in as obstacle spawns)
      * @author Jacob
      * */
-    private class warningsClass{
+    public class warningsClass{
         float center;
         float maxHeight;
         ObstacleModel o;
@@ -439,7 +444,8 @@ public class RaceMode extends ModeController {
 
 
     /** A boolean indicating the toggle of the tutorial view, where limbs have their corresponding buttons shown*/
-    private boolean tutorialToggle = false;
+    private boolean tutorialToggle1 = false;
+    private boolean tutorialToggle2 = false;
     /** level-related values*/
     private Array<Float> checkpoints = new Array();
     private Vector2 gravity;
@@ -1019,7 +1025,10 @@ public class RaceMode extends ModeController {
 //		upsideDown = character.parts.get(HEAD).getPosition().y - character.parts.get(CHEST).getPosition().y <= 0;
 
 
-            if (input.didSelect()) tutorialToggle = !tutorialToggle;
+            if (input.didSelect()) {
+                if (id == 0) tutorialToggle1 = !tutorialToggle1;
+                else tutorialToggle2 = !tutorialToggle2;
+            }
 
             if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
 
@@ -1454,25 +1463,6 @@ public class RaceMode extends ModeController {
         return ((ExtremityModel)(c.parts.get(part))).isGripped();
     }
 
-    private void drawToggles(CharacterModel c,InputController in){
-        TextureRegion t;
-
-        vector = c.parts.get(HAND_LEFT).getPosition();
-        t = in.didLeftArm() ? tutorialTextures[4] : tutorialTextures[0];
-        canvas.draw(t, Color.WHITE, (vector.x*scale.x)-10, (vector.y*scale.y),50,50);
-
-        vector = c.parts.get(HAND_RIGHT).getPosition();
-        t = in.didRightArm() ? tutorialTextures[5] : tutorialTextures[1];
-        canvas.draw(t, Color.WHITE, (vector.x*scale.x)+10, (vector.y*scale.y),50,50);
-
-        vector = c.parts.get(FOOT_LEFT).getPosition();
-        t = in.didLeftLeg() ? tutorialTextures[6] : tutorialTextures[2];
-        canvas.draw(t, Color.WHITE, (vector.x*scale.x)-10, (vector.y*scale.y),40,40);
-
-        vector = c.parts.get(FOOT_RIGHT).getPosition();
-        t = in.didRightLeg() ? tutorialTextures[7] : tutorialTextures[3];
-        canvas.draw(t, Color.WHITE, (vector.x*scale.x)+10, (vector.y*scale.y),40,40);
-    }
 
     private void checkHasCompleted(CharacterModel c){
         float viewHeight = canvas.getHeight()*4f/5f / scale.y;
@@ -1495,7 +1485,8 @@ public class RaceMode extends ModeController {
                 || c.parts.get(HAND_RIGHT).getPosition().y >= minPart + viewHeight
                 ||c.parts.get(HAND_LEFT).getPosition().y >= minPart + viewHeight
                 ||c.parts.get(FOOT_RIGHT).getPosition().y >= minPart + viewHeight
-                ||c.parts.get(FOOT_LEFT).getPosition().y >= minPart + viewHeight;
+                ||c.parts.get(FOOT_LEFT).getPosition().y >= minPart + viewHeight
+                ||c0.parts.get(HEAD).getPosition().y < 0;
     }
 
 
@@ -1503,6 +1494,11 @@ public class RaceMode extends ModeController {
 //	should be drawn ON TOP of the hooked part.
     //TODO needs to be corrected in many cases - its just a matter of drawing anything attached to a handhold
     //first, then if an arm crosses underneath the chest/head draw it first, same with legs.
+//    public void draw(){
+//
+//        draw(0);
+//        draw(1);
+//    }
 
     public void draw() {
         canvas.clear();
@@ -1511,108 +1507,44 @@ public class RaceMode extends ModeController {
         vector = character1.parts.get(HEAD).getPosition();
         float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
         float tileY = y - (y % (canvas.getWidth() / 4));
-        canvas.draw(background, Color.WHITE, canvas.getWidth() * 3 / 4, y, canvas.getWidth() / 4, canvas.getHeight());
-        canvas.draw(midground, Color.WHITE, canvas.getWidth() * 3 / 4, y * MIDGROUND_SCROLL, canvas.getWidth() / 4, canvas.getHeight());
+        DrawingMethods.drawBackgrounds(canvas,ground,background,midground,tile,edge);
 
-        for (counterInt = 0; counterInt < 5; counterInt++) {
-            canvas.draw(tile, Color.WHITE, canvas.getWidth() / 4, tileY, canvas.getWidth() / 4, canvas.getWidth() / 4);
-            canvas.draw(tile, Color.WHITE, canvas.getWidth() / 2, tileY, canvas.getWidth() / 4, canvas.getWidth() / 4);
-            canvas.draw(edge, Color.WHITE, canvas.getWidth() * 3 / 4, tileY, canvas.getWidth() / 16, canvas.getHeight());
-            tileY += canvas.getWidth() / 4;
-        }
 
         float a = (vector.y - cposYAtTime0)/(maxHandhold - cposYAtTime0);
         if (timestep%60 == 0 && character1.getEnergy() != 0)
             progressLevel = Math.min(6,Math.max(0,Math.round(a * 6 - .1f)));
-        canvas.draw(ground, Color.WHITE, canvas.getWidth() / 4, 0, canvas.getWidth() / 2, canvas.getHeight() / 8);
-        canvas.draw(UI, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+
         canvas.draw(levelLabels[currLevel], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
         canvas.end();
-
+        //draws the UIs no bars or wood dials around them tho
+        DrawingMethods.drawUI(canvas,0,UISprite,batch);
+        DrawingMethods.drawUI(canvas,canvas.getWidth()*3/4,UISprite,batch);
 
         canvas.begin();
-        if (progressLevel > 0) {
-            canvas.draw(progressTextures[progressLevel-1], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-        }
+        DrawingMethods.drawProgress(canvas,progressTextures,progressBackgroundTexture,progressLevel,0,y );
 
-        canvas.draw(progressBackgroundTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
        //P2 draw
-        canvas.draw(UI, Color.WHITE, canvas.getWidth() * 3/ 4, y, canvas.getWidth() / 4, canvas.getHeight());
 
         vector = character2.parts.get(HEAD).getPosition();
         a = (vector.y - cposYAtTime0)/(maxHandhold - cposYAtTime0);
 
         if (timestep%60 == 0 && character2.getEnergy() != 0)
             progressLevel = Math.min(6,Math.max(0,Math.round(a * 6 - .1f)));
-        if (progressLevel > 0) {
-            canvas.draw(progressTextures[progressLevel-1], Color.WHITE, canvas.getWidth() * 3/ 4, y, canvas.getWidth() / 4, canvas.getHeight());
-        }
+        DrawingMethods.drawProgress(canvas,progressTextures,progressBackgroundTexture,progressLevel,0,y );
 
-        canvas.draw(progressBackgroundTexture, Color.WHITE, canvas.getWidth() * 3/ 4, y, canvas.getWidth() / 4, canvas.getHeight());
-//end p2 draw
+        //end p2 draw
         //p1 draw
-        float f = character1.getEnergy();
-        energyLevel = Math.abs((int) Math.ceil(f / 10f));
-
         canvas.end();
-        //draw flashing for bar.
-        if (f<= 30){
-            lowEnergySprite.setBounds(0, 0, canvas.getWidth() / 4, canvas.getHeight());
+        energyLevel = Math.abs((int) Math.ceil(character1.getEnergy() / 10f));
 
-            lowEnergySprite.setAlpha(.5f + Math.min((30-f)/f,.5f));
-            batch.begin();
-            lowEnergySprite.draw(batch);
-            batch.end();
+        flashing1 = DrawingMethods.drawEnergy(canvas,character1,energyTextures,fatigueTexture,lowEnergySprite,batch,energyLevel,0,y,flashing1);
+        canvas.end();
+        energyLevel = Math.abs((int) Math.ceil(character2.getEnergy() / 10f));
 
-            flashing2 --;
-            canvas.begin();
-            if (flashing2<f/4){
-                canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.BLACK, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-
-                if (flashing2<=0)
-                    flashing2 = Math.round(f/2);
-            }else {
-                canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-
-            }
-        }else{
-            canvas.begin();
-            canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-        }
-        canvas.draw(fatigueTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+        flashing2 = DrawingMethods.drawEnergy(canvas,character2,energyTextures,fatigueTexture,lowEnergySprite,batch,energyLevel,canvas.getWidth()*3/4,y,flashing2);
 
         //end p1 draw
         //p2 draw
-         f = character2.getEnergy();
-        canvas.end();
-        energyLevel = Math.abs((int) Math.ceil(f / 10f));
-
-        //draw flashing for bar.
-        if (f<= 30){
-            lowEnergySprite.setBounds(canvas.getWidth() * 3 / 4, 0, canvas.getWidth()/4, canvas.getHeight());
-
-            lowEnergySprite.setAlpha(.5f + Math.min((30-f)/f,.5f));
-            batch.begin();
-            lowEnergySprite.draw(batch);
-            batch.end();
-
-            flashing2 --;
-            canvas.begin();
-            if (flashing2<f/4){
-                canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.BLACK, canvas.getWidth() * 3/ 4, y, canvas.getWidth() / 4, canvas.getHeight());
-
-                if (flashing2<=0)
-                    flashing2 = Math.round(f/2);
-            }else {
-                canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, canvas.getWidth() * 3/ 4, y, canvas.getWidth() / 4, canvas.getHeight());
-
-            }
-        }else{
-            canvas.begin();
-            canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, canvas.getWidth() * 3/ 4, y, canvas.getWidth() / 4, canvas.getHeight());
-        }
-
-        canvas.draw(fatigueTexture, Color.WHITE, canvas.getWidth() * 3/ 4, y, canvas.getWidth() / 4, canvas.getHeight());
 
         if (currLevel == LEVEL_TUTORIAL)
             canvas.draw(tutorialOverlay, Color.WHITE, canvas.getWidth()/4, canvas.getHeight()/8, canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
@@ -1636,11 +1568,13 @@ public class RaceMode extends ModeController {
             }
         }
         for (GameObject obj : objects) obj.draw(canvas);
-        if (tutorialToggle){
-            drawToggles(character1,input1);
-            drawToggles(character2,input2);
+        if (tutorialToggle1)
+            DrawingMethods.drawToggles(canvas, character1, input1, tutorialTextures,  scale);
+        if (tutorialToggle2)
+            DrawingMethods.drawToggles(canvas, character2, input2, tutorialTextures,  scale);
 
-        }
+
+
         canvas.end();
 
         canvas.begin();
@@ -1655,14 +1589,8 @@ public class RaceMode extends ModeController {
         }
         canvas.end();
         //draw the obstacle warnings.
-        for (warningsClass wc : obstacleWarnings) {
-            warningSprite.setBounds(wc.center * scale.x -  1.5f * scale.x, y/scale.y + canvas.getHeight()*9f/10f, 3f * scale.x , canvas.getHeight()/10f);
-            warningSprite.setAlpha(Math.min(1,(wc.opacity)/(Math.min(TIME_TO_WARN,wc.oz.getSpawnFrequency()))));
-            wc.opacity ++;
-            batch.begin();
-            warningSprite.draw(batch);
-            batch.end();
-        }
+        //hacky code in drawingMethods. will be resolved when obstacleWarnings class created by Apurv
+        DrawingMethods.drawObstacleWarnings( canvas, obstacleWarnings, warningSprite, batch, scale, y,-1);
 
 
 

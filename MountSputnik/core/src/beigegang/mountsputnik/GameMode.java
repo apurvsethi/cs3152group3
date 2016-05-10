@@ -158,7 +158,7 @@ public class GameMode extends ModeController {
 
 	/** AssetManager for loading textures for Handholds*/
 	private AssetManager assetManager;
-	private float maxLevelHeight;
+	private static float maxLevelHeight;
 
 	private PauseMode pauseMode;
 	private VictoryMode victoryMode;
@@ -359,15 +359,15 @@ public class GameMode extends ModeController {
 	 * opacity used for displaying it only (warning fades in as obstacle spawns)
 	 * @author Jacob
 	 * */
-	public class warningsClass{
+	public static class warningsClass{
 		float center;
 		float maxHeight;
 		ObstacleModel o;
 		ObstacleZone oz;
 		float opacity = 0f;
-		public warningsClass(float center, float maxHeightToDisplay,ObstacleModel ob, ObstacleZone oe){
+		public warningsClass(float center, float maxHeightToDisplay, float levelHeight,ObstacleModel ob, ObstacleZone oe){
 			this.center = center;
-			this.maxHeight = Math.min (maxLevelHeight,maxHeightToDisplay);
+			this.maxHeight = Math.min (levelHeight,maxHeightToDisplay);
 			oz = oe;
 			o = ob;
 
@@ -1269,7 +1269,7 @@ public class GameMode extends ModeController {
 	private void makeObstacleWarning(ObstacleZone oz) {
 
 		queuedObstacleWarnings.add(new warningsClass(
-				oz.getObstX() + oz.getObstacle().width/2f,oz.getBounds().y,oz.getObstacle(),oz));
+				oz.getObstX() + oz.getObstacle().width/2f,oz.getBounds().y,maxLevelHeight,oz.getObstacle(),oz));
 		seeIfTimeToSpawnWarning();
 //		obstacleWarnings.add(new warningsClass(
 //				oz.getObstX() + oz.getObstacle().width/2f,oz.getBounds().y,oz.getObstacle(),oz));
@@ -1406,26 +1406,7 @@ public class GameMode extends ModeController {
 		return ((ExtremityModel)(character.parts.get(part))).isGripped();
 	}
 
-	private void drawToggles(){
-		TextureRegion t;
-		input = InputController.getInstance(0);
 
-		vector = character.parts.get(HAND_LEFT).getPosition();
-		t = input.didLeftArm() ? tutorialTextures[4] : tutorialTextures[0];
-		canvas.draw(t, Color.WHITE, (vector.x*scale.x)-10, (vector.y*scale.y),50,50);
-
-		vector = character.parts.get(HAND_RIGHT).getPosition();
-		t = input.didRightArm() ? tutorialTextures[5] : tutorialTextures[1];
-		canvas.draw(t, Color.WHITE, (vector.x*scale.x)+10, (vector.y*scale.y),50,50);
-
-		vector = character.parts.get(FOOT_LEFT).getPosition();
-		t = input.didLeftLeg() ? tutorialTextures[6] : tutorialTextures[2];
-		canvas.draw(t, Color.WHITE, (vector.x*scale.x)-10, (vector.y*scale.y),40,40);
-
-		vector = character.parts.get(FOOT_RIGHT).getPosition();
-		t = input.didRightLeg() ? tutorialTextures[7] : tutorialTextures[3];
-		canvas.draw(t, Color.WHITE, (vector.x*scale.x)+10, (vector.y*scale.y),40,40);
-	}
 
 	private void checkHasCompleted(){
 		this.complete =  character.parts.get(HAND_RIGHT).getPosition().y >= levelFormat.getFloat("height")
@@ -1480,7 +1461,8 @@ public class GameMode extends ModeController {
 
 		canvas.begin();
 
-		if (tutorialToggle) drawToggles();
+		if (tutorialToggle) DrawingMethods.drawToggles(canvas, character, input, tutorialTextures,  scale);
+
 		canvas.end();
 
 		canvas.begin();

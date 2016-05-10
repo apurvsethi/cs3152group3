@@ -7,8 +7,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
-import static beigegang.mountsputnik.Constants.MIDGROUND_SCROLL;
-import static beigegang.mountsputnik.Constants.TIME_TO_WARN;
+import static beigegang.mountsputnik.Constants.*;
+import static beigegang.mountsputnik.Constants.FOOT_LEFT;
+import static beigegang.mountsputnik.Constants.FOOT_RIGHT;
 
 /**
  * Created by jacobcooper on 5/10/16.
@@ -60,15 +61,16 @@ public class DrawingMethods {
         if (progressLevel > 0) {
             canvas.draw(progressTextures[progressLevel-1], Color.WHITE, xStart, yStart, canvas.getWidth() / 4, canvas.getHeight());
         }
-        canvas.draw(progressBackgroundTexture, Color.WHITE, 0, yStart, canvas.getWidth() / 4, canvas.getHeight());
+        canvas.draw(progressBackgroundTexture, Color.WHITE, xStart, yStart, canvas.getWidth() / 4, canvas.getHeight());
 
     }
 
-    public static int drawEnergy(GameCanvas canvas, CharacterModel character,TextureRegion[] energyTextures, TextureRegion fatigueTexture, Sprite lowEnergySprite,SpriteBatch batch, int energyLevel, int i, float y,int flashing2) {
+    public static int drawEnergy(GameCanvas canvas, CharacterModel character,TextureRegion[] energyTextures, TextureRegion fatigueTexture, Sprite lowEnergySprite,SpriteBatch batch, int energyLevel, int x, float y,int flashing2) {
         //draw flashing for bar.
         float f = character.getEnergy();
 
         if (f<= 30){
+            lowEnergySprite.setBounds(x,0,canvas.getWidth()/4,canvas.getHeight());
             lowEnergySprite.setAlpha(.5f + Math.min((30-f)/f,.5f));
             batch.begin();
             lowEnergySprite.draw(batch);
@@ -77,20 +79,20 @@ public class DrawingMethods {
             flashing2 --;
             canvas.begin();
             if (flashing2<f/4){
-                canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.BLACK, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+                canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.BLACK, x, y, canvas.getWidth() / 4, canvas.getHeight());
 
                 if (flashing2<=0)
                     flashing2 = Math.round(f/2);
             }else {
-                canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+                canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, x, y, canvas.getWidth() / 4, canvas.getHeight());
 
             }
         }else{
             canvas.begin();
-            canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+            canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, x, y, canvas.getWidth() / 4, canvas.getHeight());
         }
 
-        canvas.draw(fatigueTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+        canvas.draw(fatigueTexture, Color.WHITE, x, y, canvas.getWidth() / 4, canvas.getHeight());
         return flashing2;
     }
 
@@ -106,4 +108,36 @@ public class DrawingMethods {
             batch.end();
         }
     }
+    public static void drawObstacleWarnings(GameCanvas canvas, Array<RaceMode.warningsClass> obstacleWarnings,Sprite warningSprite,SpriteBatch batch,Vector2 scale,float y,float nothing) {
+        for (RaceMode.warningsClass wc : obstacleWarnings) {
+            //hack to allow warning to move with obstacle for space!
+            wc.center = wc.o.getX() + wc.o.width/2;
+            warningSprite.setBounds(wc.center * scale.x -  1.5f * scale.x, y/scale.y + canvas.getHeight()*9f/10f, 3f * scale.x , canvas.getHeight()/10f);
+            warningSprite.setAlpha(Math.min(1,(wc.opacity)/(Math.min(TIME_TO_WARN,wc.oz.getSpawnFrequency()))));
+            wc.opacity ++;
+            batch.begin();
+            warningSprite.draw(batch);
+            batch.end();
+        }
+    }
+    public static void drawToggles(GameCanvas canvas, CharacterModel c,InputController in,TextureRegion[] tutorialTextures, Vector2 scale){
+        TextureRegion t;
+
+        Vector2 vector = c.parts.get(HAND_LEFT).getPosition();
+        t = in.didLeftArm() ? tutorialTextures[4] : tutorialTextures[0];
+        canvas.draw(t, Color.WHITE, (vector.x*scale.x)-10, (vector.y*scale.y),50,50);
+
+        vector = c.parts.get(HAND_RIGHT).getPosition();
+        t = in.didRightArm() ? tutorialTextures[5] : tutorialTextures[1];
+        canvas.draw(t, Color.WHITE, (vector.x*scale.x)+10, (vector.y*scale.y),50,50);
+
+        vector = c.parts.get(FOOT_LEFT).getPosition();
+        t = in.didLeftLeg() ? tutorialTextures[6] : tutorialTextures[2];
+        canvas.draw(t, Color.WHITE, (vector.x*scale.x)-10, (vector.y*scale.y),40,40);
+
+        vector = c.parts.get(FOOT_RIGHT).getPosition();
+        t = in.didRightLeg() ? tutorialTextures[7] : tutorialTextures[3];
+        canvas.draw(t, Color.WHITE, (vector.x*scale.x)+10, (vector.y*scale.y),40,40);
+    }
+
 }
