@@ -31,7 +31,7 @@ public class Movement {
         if (TORSO_MODE){
             Vector2 force = calcTorsoForce();
             if (isGripping(FOOT_LEFT)|| isGripping(FOOT_RIGHT) || isGripping(HAND_LEFT) || isGripping(HAND_RIGHT)){
-                InputController input = InputController.getInstance();
+                InputController input = InputController.getInstance(0);
                 float h = input.getHorizontalR();
                 float v = input.getVerticalR();
                 applyIfUnderLimit(CHEST,new Vector2(force.x,force.y),h,v);

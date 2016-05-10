@@ -28,7 +28,7 @@ public class MenuMode extends ModeController {
 	private boolean levelSelectAllowed [] = {true, saveGame.getBoolean("canyon"), saveGame.getBoolean("waterfall"), saveGame.getBoolean("mountain"), saveGame.getBoolean("volcano"), saveGame.getBoolean("sky"), saveGame.getBoolean("space")};
 	
 	private static final String BACKGROUND_FILE = "Menu/StartMenu/Background.png";
-	private static final String MENU_OPTION_FILES[] = {"Menu/StartMenu/Start.png","Menu/StartMenu/Levels.png","Menu/StartMenu/Settings.png","Menu/StartMenu/Quit.png"};
+	private static final String MENU_OPTION_FILES[] = {"Menu/StartMenu/Start.png","Menu/StartMenu/Levels.png","Menu/StartMenu/Settings.png","Menu/StartMenu/Quit.png","Menu/StartMenu/Start.png"};
 	private static final String LEVEL_SELECT_OPTION_FILES[] = {"Menu/StartMenu/LevelSelect/Tutorial.png","Menu/StartMenu/LevelSelect/Canyon.png","Menu/StartMenu/LevelSelect/Waterfall.png",
 			"Menu/StartMenu/LevelSelect/Volcano.png","Menu/StartMenu/LevelSelect/Snowy.png","Menu/StartMenu/LevelSelect/Sky.png","Menu/StartMenu/LevelSelect/Space.png"};
 	private static final String LEVEL_LOCKED_FILE = "Menu/StartMenu/LevelSelect/Locked.png";
@@ -51,7 +51,7 @@ public class MenuMode extends ModeController {
 	private static TextureRegion triggerScheme;
 	private static TextureRegion stickScheme;
 	private static TextureRegion[] settingsOptions = {triggerScheme, stickScheme, menuBack};
-	private static int exitCodes[] ={EXIT_GAME_RESTART_LEVEL, EXIT_LEVEL_SELECT, EXIT_SETTINGS, EXIT_QUIT};
+	private static int exitCodes[] ={EXIT_GAME_RESTART_LEVEL, EXIT_LEVEL_SELECT, EXIT_SETTINGS, EXIT_QUIT,EXIT_RACE};
 	private static int levelSelectCodes[] = {LEVEL_TUTORIAL, LEVEL_CANYON, LEVEL_WATERFALL, LEVEL_VOLCANO, LEVEL_SNOWY_MOUNTAIN, LEVEL_SKY, LEVEL_SPACE};
 	private static int backCode = EXIT_MENU;
 
@@ -142,8 +142,7 @@ public class MenuMode extends ModeController {
 
 		if (changeCooldown > 0) changeCooldown --;
 
-		InputController input = InputController.getInstance();
-		
+		InputController input = InputController.getInstance(0);
 
 		if (changeCooldown == 0 &&
 
@@ -190,6 +189,7 @@ public class MenuMode extends ModeController {
 			}
 		} else if (input.didSelect()){
 			SoundController.get(SoundController.SELECT_SOUND).play();
+//			if (currSelection == 4)
 			listener.exitScreen(this, exitCodes[currSelection]);
 		}
 
@@ -242,7 +242,7 @@ public class MenuMode extends ModeController {
 
 		} else if (currView == SETTINGS) {
 			drawY = SETTINGS_DRAW_LOCATION * canvas.getHeight() + y;
-			InputController input = InputController.getInstance();
+			InputController input = InputController.getInstance(0);
 			//draw settings
 			TextureRegion currentTriggerScheme = input.getTriggerScheme() ? swapped : classic;
 			TextureRegion currentStickScheme = input.getStickScheme() ? swapped : classic;
@@ -298,7 +298,7 @@ public class MenuMode extends ModeController {
 				                  ", \"sky\":" + levelSelectAllowed[LEVEL_SKY] + 
 				                  ", \"space\":" + levelSelectAllowed[LEVEL_SPACE] + 
 				                  ", \"waterfall\":" + levelSelectAllowed[LEVEL_WATERFALL] + "}}"; 
-		System.out.println(levelSelectAllowed.toString()); 
+//		System.out.println(levelSelectAllowed.toString());
 		try {
 			FileWriter jsonWriter = new FileWriter(("savegame.json")); 
 			jsonWriter.write(json); 

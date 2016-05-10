@@ -109,7 +109,7 @@ public class LoadingMode extends ModeController {
 
 	@Override
 	public void update(float dt) {
-		InputController input = InputController.getInstance();
+		InputController input = InputController.getInstance(0);
 		input.readInput();
 
 		if (playButton != null) {

@@ -330,16 +330,27 @@ public abstract class ModeController implements Screen {
 	 * @return whether to process the update loop
 	 */
 	public boolean preUpdate(float dt) {
-		InputController input = InputController.getInstance();
-		input.readInput();
+		InputController input1 = InputController.getInstance(0);
+		input1.readInput();
 		if (listener == null) {
 			return true;
 		}
 
 		// Toggle debug
-		if (input.didDebug()) {
+		if (input1.didDebug()) {
 			debug = !debug;
 		}
+		InputController input2 = InputController.getInstance(1);
+		input2.readInput();
+		if (listener == null) {
+			return true;
+		}
+
+		// Toggle debug
+		if (input2.didDebug()) {
+			debug = !debug;
+		}
+
 		
 		// Now it is time to maybe switch screens.
 //		if (input.didMenu()) {

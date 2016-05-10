@@ -13,16 +13,22 @@ public class InputController {
 	private boolean stickScheme;
 	
 	/** Singleton instance for the controller */
-	private static InputController theController = null;
+	private static InputController theController1 = null;
+	private static InputController theController2 = null;
 
 	/**
 	 * Return the singleton instance of the input controller
 	 *
 	 * @return the singleton instance of the input controller
 	 */
-	public static InputController getInstance() {
-		if (theController == null) theController = new InputController();
-		return theController;
+	public static InputController getInstance(int id) {
+		if (id == 0){
+			if (theController1 == null) theController1 = new InputController(id);
+			return theController1;
+		}else{
+			if (theController2 == null) theController2 = new InputController(id);
+			return theController2;
+		}
 	}
 
 	// Fields to manage buttons
@@ -86,7 +92,7 @@ public class InputController {
 	public float getHorizontalL() {
 		return horizontalL;
 	}
-	
+
 	/**
 	 * Returns the amount of vertical movement from left stick.
 	 *
@@ -118,19 +124,19 @@ public class InputController {
 	public float getVerticalR() {
 		return verticalR;
 	}
-	
+
 	public boolean getStickScheme(){
 		return stickScheme;
 	}
-	
+
 	public boolean getTriggerScheme(){
 		return triggerScheme;
 	}
-	
+
 	public void swapTriggerScheme(){
 		triggerScheme = !triggerScheme;
 	}
-	
+
 	public void swapStickScheme(){
 		stickScheme = !stickScheme;
 	}
@@ -237,7 +243,7 @@ public class InputController {
 	public boolean didSelect() {
 		return selectPressed && !selectPrevious;
 	}
-	
+
 	/**
 	 * Returns true if the player wants to go back in menu.
 	 *
@@ -246,7 +252,7 @@ public class InputController {
 	public boolean didBack() {
 		return backPressed && !backPrevious;
 	}
-	
+
 	/**
 	 * Returns true if the player wants to go toggle the debug mode.
 	 *
@@ -255,16 +261,16 @@ public class InputController {
 	public boolean didDebug() {
 		return debugPressed && !debugPrevious;
 	}
-	
+
 	/**
 	 * Creates a new input controller
-	 * 
+	 *
 	 * The input controller attempts to connect to the X-Box controller at device 0,
 	 * if it exists.  Otherwise, it falls back to the keyboard control.
 	 */
-	private InputController() {
+	private InputController(int id) {
 		// If we have a game-pad for id, then use it.
-		xbox = new XBox360Controller(0);
+		xbox = new XBox360Controller(id);
 		triggerScheme = false; //TODO read in values from file
 		stickScheme = false;
 	}
@@ -318,7 +324,7 @@ public class InputController {
 		animationPressed = xbox.getY();
 
 		leftArmPressed = triggerScheme ? xbox.getLeftTrigger() > 0.5 : xbox.getLB();
-		rightArmPressed = triggerScheme ? 
+		rightArmPressed = triggerScheme ?
 				(xbox.getRightTrigger() < -0.5 && xbox.getRightTrigger() != -1.0f) : xbox.getRB();
 		leftLegPressed = triggerScheme ? xbox.getLB() : xbox.getLeftTrigger() > 0.5;
 		rightLegPressed = triggerScheme ? xbox.getRB() :
@@ -346,7 +352,7 @@ public class InputController {
 		debugPressed = (secondary && debugPressed) || (Gdx.input.isKeyPressed(Input.Keys.D));
 		selectPressed  = (secondary && selectPressed) || (Gdx.input.isKeyPressed(Input.Keys.ENTER));
 		backPressed = (secondary && backPressed) || (Gdx.input.isKeyPressed(Input.Keys.B));
-		
+
 		leftArmPressed = (secondary && leftArmPressed) || (Gdx.input.isKeyPressed(Input.Keys.Q));
 		rightArmPressed = (secondary && rightArmPressed) || (Gdx.input.isKeyPressed(Input.Keys.W));
 		leftLegPressed = (secondary && leftLegPressed) || (Gdx.input.isKeyPressed(Input.Keys.A));
