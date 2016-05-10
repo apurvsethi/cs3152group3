@@ -161,6 +161,27 @@ public class GameEngine extends Game implements ScreenListener {
 			raceMode.victorious();
 
 		}
+		else if (exitCode == EXIT_GAME_RESTART_RACE_LEVEL) {
+			controllers[RACE_SCREEN].reset();
+			setScreen(controllers[RACE_SCREEN]);
+		}
+		else if (exitCode == EXIT_RACE_DIED) {
+			RaceMode game = (RaceMode) controllers[RACE_SCREEN];
+			System.out.println("HERE");
+			game.dead();
+		}
+		else if (exitCode == EXIT_GAME_RESTART_RACE_LEVEL) {
+			controllers[RACE_SCREEN].reset();
+			setScreen(controllers[RACE_SCREEN]);
+		}
+		else if (exitCode == EXIT_GAME_NEXT_RACE_LEVEL) {
+			RaceMode g = (RaceMode) controllers[RACE_SCREEN];
+			//MenuMode menuMode = (MenuMode) controllers[MENU_SCREEN];
+			g.nextLevel();
+			g.reset();
+			//menuMode.unlockLevel(gameMode.getCurrLevel());
+			setScreen(controllers[RACE_SCREEN]);
+		}
 
 	}
 

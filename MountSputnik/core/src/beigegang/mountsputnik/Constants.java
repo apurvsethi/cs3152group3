@@ -25,6 +25,9 @@ public final class Constants {
 	public static final int EXIT_VICTORY = 10;
 	public static final int EXIT_RACE = 11;
 	public static final int EXIT_VICTORY_RACE = 12;
+	public static final int EXIT_GAME_RESTART_RACE_LEVEL = 13;
+	public static final int EXIT_RACE_DIED = 14;
+	public static final int EXIT_GAME_NEXT_RACE_LEVEL = 15;
 
 	/**Level codes*/
 	public static final int NUM_LEVELS = 7;

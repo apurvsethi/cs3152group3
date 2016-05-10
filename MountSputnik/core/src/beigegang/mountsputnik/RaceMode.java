@@ -347,7 +347,7 @@ public class RaceMode extends ModeController {
     // ************************************END CONTENT LOADING*********************************************** //
 
     public void changeLevel(int level){
-        listener.exitScreen(this, EXIT_GAME_NEXT_LEVEL);
+        listener.exitScreen(this, EXIT_GAME_NEXT_RACE_LEVEL);
     }
     /** private class for obstacleWarnings
      * contains center of the warning, maxHeight of the obstacle, the obstacle itself, and the zone
@@ -981,7 +981,7 @@ public class RaceMode extends ModeController {
                     System.out.println("here3" + e);
                 }
             }
-            victoryMode.update(dt, listener);
+            victoryMode.update(dt, listener,true);
         }
         else {
             doingAnimation = input.watchAnimation();
@@ -1091,7 +1091,6 @@ public class RaceMode extends ModeController {
                 }
             }
             checkHasCompleted(character);
-            System.out.println(complete);
             if (complete) {
                 listener.exitScreen(this, EXIT_VICTORY_RACE);
             }
@@ -1539,6 +1538,10 @@ public class RaceMode extends ModeController {
         canvas.draw(progressBackgroundTexture, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
        //P2 draw
         canvas.draw(UI, Color.WHITE, canvas.getWidth() * 3/ 4, y, canvas.getWidth() / 4, canvas.getHeight());
+
+        vector = character2.parts.get(HEAD).getPosition();
+        a = (vector.y - cposYAtTime0)/(maxHandhold - cposYAtTime0);
+
         if (timestep%60 == 0 && character2.getEnergy() != 0)
             progressLevel = Math.min(6,Math.max(0,Math.round(a * 6 - .1f)));
         if (progressLevel > 0) {
@@ -1586,7 +1589,7 @@ public class RaceMode extends ModeController {
 
         //draw flashing for bar.
         if (f<= 30){
-            lowEnergySprite.setBounds(canvas.getWidth() * 3 / 4, y, canvas.getWidth()/4, canvas.getHeight());
+            lowEnergySprite.setBounds(canvas.getWidth() * 3 / 4, 0, canvas.getWidth()/4, canvas.getHeight());
 
             lowEnergySprite.setAlpha(.5f + Math.min((30-f)/f,.5f));
             batch.begin();

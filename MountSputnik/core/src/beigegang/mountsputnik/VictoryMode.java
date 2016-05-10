@@ -27,6 +27,7 @@ public class VictoryMode extends ModeController {
     private static TextureRegion[] menuOptions = new TextureRegion[MENU_OPTION_FILES.length];
 
     private static int exitCodes[] ={EXIT_GAME_NEXT_LEVEL,EXIT_GAME_RESTART_LEVEL,EXIT_MENU,EXIT_QUIT};
+    private static int exitCodes2[] ={EXIT_GAME_NEXT_RACE_LEVEL,EXIT_GAME_RESTART_RACE_LEVEL,EXIT_MENU,EXIT_QUIT};
 
     private AssetManager assetManager;
 
@@ -94,6 +95,23 @@ public class VictoryMode extends ModeController {
         if (input.didSelect()){
             SoundController.get(SoundController.SELECT_SOUND).play();
             listener.exitScreen(this, exitCodes[currSelection]);
+        }
+
+    }
+    public void update(float dt, ScreenListener listener,boolean race) {
+        // TODO Auto-generated method stub
+        InputController input = InputController.getInstance(0);
+
+        if (changeCooldown > 0) changeCooldown --;
+
+        if (changeCooldown == 0 && Math.abs(input.getVerticalL()) > 0.5) {
+            SoundController.get(SoundController.SCROLL_SOUND).play();
+            currSelection = (currSelection + (input.getVerticalL() > 0.5 ? -1 : (input.getVerticalL() < -0.5 ? 1 : 0))+ menuOptions.length) % menuOptions.length;
+            changeCooldown = MENU_CHANGE_COOLDOWN;
+        }
+        if (input.didSelect()){
+            SoundController.get(SoundController.SELECT_SOUND).play();
+            listener.exitScreen(this, exitCodes2[currSelection]);
         }
 
     }
