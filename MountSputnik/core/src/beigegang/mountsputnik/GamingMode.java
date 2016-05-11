@@ -937,12 +937,9 @@ public class GamingMode extends ModeController {
 
             movementController.moveCharacter(inx,iny,rinx,riny,nextToPress,justReleased);
 
-            if (nextToPress.size > 0) {
-                for (int i : nextToPress) {
-                    ((ExtremityModel) (character.parts.get(i))).ungrip();
+            if (nextToPress.size > 0)
+                for (int i : nextToPress)
                     ungrip(((ExtremityModel) (character.parts.get(i))));
-                }
-            }
             //bounding velocities
             boundBodyVelocities(character);
             if (timestep == 0) {
@@ -1342,10 +1339,7 @@ public class GamingMode extends ModeController {
 
         HandholdModel closest = hs.get(ind);
         if (closest !=null){
-            Vector2 closestSnapPoint = closest.snapPoints.first();
-
-            c.parts.get(limb).setPosition(closestSnapPoint);
-            ((ExtremityModel) c.parts.get(limb)).grip();
+            c.parts.get(limb).setPosition(closest.snapPoints.first(), c.parts.get(limb).getAngle());
             grip(((ExtremityModel) c.parts.get(limb)), closest);
         }
 
