@@ -369,6 +369,7 @@ public class GamingMode extends ModeController {
         ObstacleZone oz;
         boolean countTicks = true;
         float opacity = 0f;
+        float ticksPassed = 0f;
         public warningsClass(float center, float maxHeightToDisplay,ObstacleModel ob, ObstacleZone oe){
             this.center = center;
             this.maxHeight = Math.min (maxLevelHeight,maxHeightToDisplay);
@@ -589,7 +590,7 @@ public class GamingMode extends ModeController {
         while(currentHeight < remainingHeight){
             //TODO: account for difficulty
             int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
-//            blockNumber = 14;
+            blockNumber = 11;
             JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
             String blockDiff = levelPiece.getString("difficulty");
             while((used.contains(blockNumber, true)||
@@ -1176,7 +1177,9 @@ public class GamingMode extends ModeController {
                 obstacle.setY(oz.getObstY());
                 if(levelName.equals("space")) {
                     obstacle.setVY((float) (Math.random()*-10));
+//                    obstacle.setVY((float) (-5));
                     obstacle.setVX((float) (Math.random()*4-2));
+//                    obstacle.setVX((float) 0);
                     oz.setObstVY(obstacle.getVY());
                 }
 
@@ -1224,7 +1227,7 @@ public class GamingMode extends ModeController {
         if (oz.canSpawnObstacle() && oz.getObstacle() != null) {
             float timeFromCharacter = (oz.getObstY() - character1.parts.get(CHEST).getY())/-oz.getObstVY();
 
-            System.out.println(oz.getObstY() + " " + character1.parts.get(CHEST).getY() + " " + -oz.getObstVY() + " " + timeFromCharacter);
+//            System.out.println("HERE " + oz.getObstY() + " " + character1.parts.get(CHEST).getY() + " " + -oz.getObstVY() + " " + timeFromCharacter);
             oz.getObstacle().activatePhysics(world);
             oz.getObstacle().setBodyType(BodyDef.BodyType.DynamicBody);
             oz.getObstacle().geometry.setUserData(obstacle);
@@ -1242,28 +1245,35 @@ public class GamingMode extends ModeController {
 
         queuedObstacleWarnings.add(new warningsClass(
                 oz.getObstX() + oz.getObstacle().width/2f,oz.getBounds().y,oz.getObstacle(),oz));
-        seeIfTimeToSpawnWarning();
+//        seeIfTimeToSpawnWarning();
     //		obstacleWarnings.add(new warningsClass(
     //				oz.getObstX() + oz.getObstacle().width/2f,oz.getBounds().y,oz.getObstacle(),oz));
 
     }
-
+    protected float timeFromTopOnceSpawned(float screenTop, float obstY){
+        return (float) Math.sqrt(2f * (obstY - screenTop)/-gravity.y)*60;
+    }
     protected void seeIfTimeToSpawnWarning() {
-//        System.out.println(queuedObstacleWarnings.size);
         for (warningsClass wc:queuedObstacleWarnings){
+            wc.ticksPassed += 1;
             float timeFromCharacter = 0;
+            float topOfScreen = character1.parts.get(CHEST).getY() + canvas.getHeight()/2/scale.y;
+//            if (currLevel == LEVEL_SPACE) {
+            float vy = -wc.o.getVY();
+            if (currLevel == LEVEL_SPACE) timeFromCharacter = (wc.o.getY() - topOfScreen) / vy * 60;
+            else timeFromCharacter = timeFromTopOnceSpawned(topOfScreen,wc.o.getY());
+            boolean ct = (wc.countTicks && wc.oz.getSpawnFrequency() - wc.ticksPassed + timeFromCharacter <TIME_TO_WARN) || (!wc.countTicks && timeFromCharacter < TIME_TO_WARN);
+//            boolean ct =  (timeFromCharacter <TIME_TO_WARN) || (timeFromCharacter < TIME_TO_WARN);
+//            if ((currLevel != LEVEL_SPACE && wc.oz.getSpawnFrequency() - wc.ticksPassed < TIME_TO_WARN) || (currLevel == LEVEL_SPACE && ct)){
+            if (ct){
 
-            if (currLevel == LEVEL_SPACE) {
-                float vy = wc.o.getVY();
-                timeFromCharacter = (vy - character1.parts.get(CHEST).getY()) / vy * 60;
-//                System.out.println(wc.oz.getSpawnFrequency() - wc.oz.ticksSinceLastSpawn + " " + timeFromCharacter);
-            }
-            boolean ct = (wc.countTicks && wc.oz.getSpawnFrequency() - wc.oz.ticksSinceLastSpawn + timeFromCharacter <TIME_TO_WARN) || (timeFromCharacter < TIME_TO_WARN);
-            if ((currLevel != LEVEL_SPACE && wc.oz.getSpawnFrequency() - wc.oz.ticksSinceLastSpawn<TIME_TO_WARN) || (currLevel == LEVEL_SPACE && ct)){
                 obstacleWarnings.add(wc);
                 queuedObstacleWarnings.removeValue(wc,false);
+
             }
-            if (wc.oz.getSpawnFrequency() - wc.oz.ticksSinceLastSpawn <1) wc.countTicks = false;
+            if (wc.countTicks && wc.oz.getSpawnFrequency() < wc.ticksPassed) {
+                wc.countTicks = false;
+            }
         }
     }
     // ************************************END OBSTACLES*********************************************** //
