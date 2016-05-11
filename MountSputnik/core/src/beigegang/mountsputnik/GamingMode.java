@@ -367,6 +367,7 @@ public class GamingMode extends ModeController {
         float maxHeight;
         ObstacleModel o;
         ObstacleZone oz;
+        boolean countTicks = true;
         float opacity = 0f;
         public warningsClass(float center, float maxHeightToDisplay,ObstacleModel ob, ObstacleZone oe){
             this.center = center;
@@ -588,7 +589,7 @@ public class GamingMode extends ModeController {
         while(currentHeight < remainingHeight){
             //TODO: account for difficulty
             int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
-//            blockNumber = 3;
+//            blockNumber = 14;
             JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
             String blockDiff = levelPiece.getString("difficulty");
             while((used.contains(blockNumber, true)||
@@ -948,20 +949,21 @@ public class GamingMode extends ModeController {
             boundBodyVelocities(character);
             if (timestep == 0) {
                 glowingHandholds = glowHandholds(character);
-                glowingHandholds1 = glowingHandholds;
-                glowingHandholds2 = glowingHandholds;
+//                glowingHandholds1 = glowingHandholds;
+//                glowingHandholds2 = glowingHandholds;
             }else{
-                glowingHandholds1 = glowingHandholds;
+//                glowingHandholds1 = glowingHandholds;
 
                 glowingHandholds = glowHandholds(character);
 
-                for (int i = 0; i < glowingHandholds2.size;i++){
-                    glowingHandholds2.set(i,glowingHandholds.get(i));
-                    if (glowingHandholds.get(i) == null) glowingHandholds2.set(i, glowingHandholds1.get(i));
-                }
+//                for (int i = 0; i < glowingHandholds2.size;i++){
+//                    glowingHandholds2.set(i,glowingHandholds.get(i));
+////                    if (glowingHandholds.get(i) == null) glowingHandholds2.set(i, glowingHandholds1.get(i));
+//                }
             }
 
-            snapLimbsToHandholds(glowingHandholds2,character,justReleased);
+            snapLimbsToHandholds(glowingHandholds,character,justReleased);
+//            snapLimbsToHandholds(glowingHandholds2,character,justReleased);
 
             cameraWork();
 
@@ -1223,9 +1225,9 @@ public class GamingMode extends ModeController {
 
     protected void spawnObstacle(ObstacleZone oz) {
         if (oz.canSpawnObstacle() && oz.getObstacle() != null) {
-            float timeFromCharacter = (oz.getObstY() - character1.parts.get(CHEST).getY())/-oz.getObstVY() * 60;
+            float timeFromCharacter = (oz.getObstY() - character1.parts.get(CHEST).getY())/-oz.getObstVY();
 
-//            System.out.println(oz.getObstY() + " " + -oz.getObstVY() + " " + timeFromCharacter);
+            System.out.println(oz.getObstY() + " " + character1.parts.get(CHEST).getY() + " " + -oz.getObstVY() + " " + timeFromCharacter);
             oz.getObstacle().activatePhysics(world);
             oz.getObstacle().setBodyType(BodyDef.BodyType.DynamicBody);
             oz.getObstacle().geometry.setUserData(obstacle);
@@ -1253,15 +1255,18 @@ public class GamingMode extends ModeController {
 //        System.out.println(queuedObstacleWarnings.size);
         for (warningsClass wc:queuedObstacleWarnings){
             float timeFromCharacter = 0;
-            float vy = wc.oz.getObstacle().getVY();
-            if (currLevel == LEVEL_SPACE)
-                timeFromCharacter = (vy - character1.parts.get(CHEST).getY())/vy*60;
-//            System.out.println(wc.oz.getSpawnFrequency() - wc.oz.ticksSinceLastSpawn + " " + timeFromCharacter);
-            boolean t = currLevel == LEVEL_SPACE && wc.oz.getSpawnFrequency() - wc.oz.ticksSinceLastSpawn + timeFromCharacter <TIME_TO_WARN;
-            if ((currLevel != LEVEL_SPACE && wc.oz.getSpawnFrequency() - wc.oz.ticksSinceLastSpawn<TIME_TO_WARN) || (currLevel == LEVEL_SPACE && t)){
+
+            if (currLevel == LEVEL_SPACE) {
+                float vy = wc.o.getVY();
+                timeFromCharacter = (vy - character1.parts.get(CHEST).getY()) / vy * 60;
+//                System.out.println(wc.oz.getSpawnFrequency() - wc.oz.ticksSinceLastSpawn + " " + timeFromCharacter);
+            }
+            boolean ct = (wc.countTicks && wc.oz.getSpawnFrequency() - wc.oz.ticksSinceLastSpawn + timeFromCharacter <TIME_TO_WARN) || (timeFromCharacter < TIME_TO_WARN);
+            if ((currLevel != LEVEL_SPACE && wc.oz.getSpawnFrequency() - wc.oz.ticksSinceLastSpawn<TIME_TO_WARN) || (currLevel == LEVEL_SPACE && ct)){
                 obstacleWarnings.add(wc);
                 queuedObstacleWarnings.removeValue(wc,false);
             }
+            if (wc.oz.getSpawnFrequency() - wc.oz.ticksSinceLastSpawn <1) wc.countTicks = false;
         }
     }
     // ************************************END OBSTACLES*********************************************** //
@@ -1351,7 +1356,7 @@ public class GamingMode extends ModeController {
         HandholdModel closest = hs.get(ind);
         if (closest !=null){
             Vector2 closestSnapPoint = closest.snapPoints.first();
-
+            
             c.parts.get(limb).setPosition(closestSnapPoint);
             ((ExtremityModel) c.parts.get(limb)).grip();
             grip(((ExtremityModel) c.parts.get(limb)), closest);
