@@ -121,6 +121,7 @@ public class GameMode extends GamingMode {
 
 
 	public void populateLevelAtLastCheckpoint() {
+		moved = false;
 		readLevelStats();
 		int counter = 0;
 		used.clear();

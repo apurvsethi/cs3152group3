@@ -160,6 +160,8 @@ public class GamingMode extends ModeController {
     protected float oxygen;
     /** which energy bar to display, 1-10 */
     protected int energyLevel;
+    /** whether the player has moved yet */;
+    protected boolean moved;
 
     /** AssetManager for loading textures for Handholds*/
     protected AssetManager assetManager;
@@ -466,6 +468,7 @@ public class GamingMode extends ModeController {
 
     public GamingMode(int i) {
         super(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_GRAVITY);
+        moved = false;
         this.id = i;
         pauseMode = new PauseMode();
         victoryMode = new VictoryMode();
@@ -504,6 +507,8 @@ public class GamingMode extends ModeController {
     @Override
     public void reset() {
 //        if (id == GAME_MODE && timestep != 0)		writeJsonToFile();
+
+        moved = false;
         resetAllButCheckpoints();
         checkpointLevelBlocks.clear();
         checkpointLevelJsons.clear();
@@ -584,6 +589,7 @@ public class GamingMode extends ModeController {
     //	 *
      */
     public void populateLevel() {
+        moved = false;
         readLevelStats();
         used.clear();
         maxHandhold = remainingHeight;
@@ -914,6 +920,7 @@ public class GamingMode extends ModeController {
                 iny = input.getVerticalL();
                 rinx = input.getHorizontalR();
                 riny = input.getVerticalR();
+                if(Math.abs(inx) > .5  || Math.abs(iny) > .5  || Math.abs(rinx) > .5  || Math.abs(riny) > .5 ) moved = true;
                 nextToPress = input.getOrderPressed();
                 justReleased.clear();
                 if (input.releasedLeftArm()) justReleased.add(HAND_LEFT);
@@ -1019,8 +1026,9 @@ public class GamingMode extends ModeController {
             vector = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
             character.updateEnergy(oxygen, 1, vector.len(), true);
 
-            if (risingObstacle != null) {
-                risingObstacle.setHeight(risingObstacle.getHeight() + risingObstacle.getSpeed());
+            if (risingObstacle != null && moved) {
+                float progressPercentage = (character.parts.get(CHEST).getPosition().y)/(maxHandhold - cposYAtTime0);
+				risingObstacle.setHeight(risingObstacle.getHeight() + risingObstacle.getSpeed()*(progressPercentage+.5f));
                 for (PartModel p : character.parts) {
                     if (risingObstacle.getHeight() >= p.getPosition().y) {
                         character.setEnergy(0);
