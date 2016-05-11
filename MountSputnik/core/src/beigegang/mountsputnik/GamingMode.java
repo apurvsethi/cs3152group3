@@ -1018,6 +1018,7 @@ public class GamingMode extends ModeController {
             // TODO: Update energy quantity (fill in these values)
             vector = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
             character.updateEnergy(oxygen, 1, vector.len(), true);
+            character.decrementStun();
 
             if (risingObstacle != null && moved) {
                 float progressPercentage = (character.parts.get(CHEST).getPosition().y)/(maxHandhold - cposYAtTime0);

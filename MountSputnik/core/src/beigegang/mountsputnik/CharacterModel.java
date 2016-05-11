@@ -21,6 +21,8 @@ public class CharacterModel {
 	private FilmStrip[] partTextures;
 	/** Character energy */
 	private float energy;
+	/** while the character is stunned from obstacle collision, he does not regain energy*/
+	private int stun;
 	private RevoluteJointDef revoluteJointDef = new RevoluteJointDef();
 	private WeldJointDef weldJointDef = new WeldJointDef();
 
@@ -41,6 +43,31 @@ public class CharacterModel {
 	public void setEnergy(float energy){
 		this.energy = energy;
 	}
+	
+	/** returns the amount of frames remaining for which the character is stunned */
+	public int getStun(){
+		return stun;
+	}
+	
+	/** sets the stun; stun does not stack
+	 * @param s the desired stun time (in frames)
+	 */
+	public void setStun(int s){
+		stun = stun > s ? stun : s;
+	}
+	
+	/** sets the stun; stun does not stack
+	 * @param s the desired stun time (in seconds)
+	 */
+	public void setStun(float s){
+		int frames = (int)(s*60);
+		stun  = stun > frames ? stun : frames;
+	}
+	
+	/** decrements the player's remaining stun frames to zero*/
+	public void decrementStun(){
+		stun = stun == 0 ? 0 : stun-1;
+	}
 
 	/** Initializes the character, with all of their body parts and joints
 	 *
@@ -52,7 +79,7 @@ public class CharacterModel {
 	private void init(World world, float initialPositionX, float initialPositionY,
 					  Vector2 drawPositionScale) {
 		makeParts(initialPositionX, initialPositionY, drawPositionScale);
-
+		stun = 0;
 		for (PartModel part : parts) {
 			part.activatePhysics(world);
 			part.geometry.setUserData(part);
@@ -376,6 +403,7 @@ public class CharacterModel {
 			default:
 				break;
 		}
+		if(stun > 0) gain = 0;
 		float dEdt = (gain - loss)/60;
 		float newEnergy = getEnergy() < 0 ? 0 : getEnergy() > 100 ? 100 : getEnergy() + dEdt;
 		setEnergy(newEnergy);
