@@ -599,14 +599,12 @@ public class GamingMode extends ModeController {
         while(currentHeight < remainingHeight){
             //TODO: account for difficulty
             int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
-            blockNumber = 6;
             JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
             String blockDiff = levelPiece.getString("difficulty");
             while((used.contains(blockNumber, true)||
                     getDifficultyProb(levelDiff, blockDiff, currentHeight, remainingHeight) > Math.random())
                     &&!levelName.equals("tutorial")){
                 blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
-//                blockNumber = 11;
 
                 levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
                 blockDiff = levelPiece.getString("difficulty");
