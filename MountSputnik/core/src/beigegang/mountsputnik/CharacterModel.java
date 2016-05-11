@@ -347,8 +347,7 @@ public class CharacterModel {
 	 * @param rotationGain Whether or not rotation affects gain (would be false if in space or places with low gravity)
 	 * @param exertion Current force being exerted by character
 	 */
-	public void updateEnergy(float gainModifier, float lossModifier, float exertion, boolean rotationGain){
-		if(gainModifier == 0) return;
+	public void updateEnergy(float gainModifier, float lossModifier, float exertion, boolean rotationGain, boolean zeroG){
 		int b = rotationGain ? 1 : 0;
 		float angle = parts.get(CHEST).getAngle();
 		float chesty = parts.get(CHEST).getPosition().y;
@@ -404,6 +403,7 @@ public class CharacterModel {
 				break;
 		}
 		if(stun > 0) gain = 0;
+		if(zeroG) loss = 0;
 		float dEdt = (gain - loss)/60;
 		float newEnergy = getEnergy() < 0 ? 0 : getEnergy() > 100 ? 100 : getEnergy() + dEdt;
 		setEnergy(newEnergy);

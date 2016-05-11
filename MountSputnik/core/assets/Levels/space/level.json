@@ -4,7 +4,7 @@
 	"uniqueBlocks": 3,
 	"generalFillerSize": 0,
 	"fillerBlocks": 0,
-    "oxygen": 0,
+    "oxygen": 0.1,
     "gravity": 0,
     "background": "", 
     "handholdTextures" : 2, //The number of different handhold textures available

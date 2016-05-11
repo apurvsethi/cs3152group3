@@ -899,7 +899,6 @@ public class GamingMode extends ModeController {
 
                     writtenToFile = true;
                 } catch (Exception e) {
-                    System.out.println("here3" + e);
                 }
             }
 
@@ -1017,7 +1016,7 @@ public class GamingMode extends ModeController {
 
             // TODO: Update energy quantity (fill in these values)
             vector = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
-            character.updateEnergy(oxygen, 1, vector.len(), true);
+            character.updateEnergy(oxygen, 1, vector.len(), gravity.y != 0, gravity.y == 0);
             character.decrementStun();
 
             if (risingObstacle != null && moved) {
