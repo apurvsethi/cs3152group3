@@ -40,6 +40,7 @@ public class GamingMode extends ModeController {
     /** leeway for grabbing green holds */
     Array<HandholdModel> glowingHandholds = new Array<>();
     Array<HandholdModel> glowingHandholds1 = new Array<>();
+    Array<HandholdModel> glowingHandholds2 = new Array<>();
     /**
      * Track asset loading from all instances and subclasses
      */
@@ -63,7 +64,7 @@ public class GamingMode extends ModeController {
      */
     protected static final String LEVEL_NAMES[] = {"tutorial", "canyon", "waterfall", "volcano", "mountain", "sky", "space"}; //TODO: change second canyon to waterfall
     protected static final String LAVA_FILE = "assets/lava.png";
-    protected static final String UI_FILE = "assets/HUD4timeless.png";
+    protected static final String UI_FILE = "assets/HUD4timelessNoBackground.png";
     protected static final String[] LEVEL_LABEL_FILES = {"assets/Tutorial.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Skycloud.png", "assets/Canyon.png"};
     protected static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
     protected static final String GLOW_FILE = "assets/glow.png";
@@ -948,12 +949,19 @@ public class GamingMode extends ModeController {
             if (timestep == 0) {
                 glowingHandholds = glowHandholds(character);
                 glowingHandholds1 = glowingHandholds;
+                glowingHandholds2 = glowingHandholds;
             }else{
                 glowingHandholds1 = glowingHandholds;
+
                 glowingHandholds = glowHandholds(character);
+
+                for (int i = 0; i < glowingHandholds2.size;i++){
+                    glowingHandholds2.set(i,glowingHandholds.get(i));
+                    if (glowingHandholds.get(i) == null) glowingHandholds2.set(i, glowingHandholds1.get(i));
+                }
             }
 
-            snapLimbsToHandholds(glowingHandholds,character,justReleased);
+            snapLimbsToHandholds(glowingHandholds2,character,justReleased);
 
             cameraWork();
 
