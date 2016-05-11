@@ -41,7 +41,9 @@ public class GamingMode extends ModeController {
     Array<HandholdModel> glowingHandholds = new Array<>();
     Array<HandholdModel> glowingHandholds1 = new Array<>();
     Array<HandholdModel> glowingHandholds2 = new Array<>();
-    /**
+    Array<HandholdModel> glowingHandholds3 = new Array<>();
+    Array<HandholdModel> glowingHandholds4 = new Array<>();
+    Array<HandholdModel> glowingHandholds5 = new Array<>();    /**
      * Track asset loading from all instances and subclasses
      */
     protected AssetState assetState = AssetState.EMPTY;
@@ -945,24 +947,44 @@ public class GamingMode extends ModeController {
                     ungrip(((ExtremityModel) (character.parts.get(i))));
             //bounding velocities
             boundBodyVelocities(character);
-            if (timestep == 0) {
-                glowingHandholds = glowHandholds(character);
-                glowingHandholds1 = glowingHandholds;
-                glowingHandholds2 = glowingHandholds;
-            }else{
-                glowingHandholds1 = glowingHandholds;
+            if (controller == CONTROLLER_1) {
+                if (timestep == 0) {
+                    glowingHandholds = glowHandholds(character);
+                    glowingHandholds1 = glowingHandholds;
+                    glowingHandholds2 = glowingHandholds;
+                } else {
+                    glowingHandholds1 = glowingHandholds;
 
-                glowingHandholds = glowHandholds(character);
+                    glowingHandholds = glowHandholds(character);
 
-                for (int i = 0; i < glowingHandholds2.size;i++){
-                    glowingHandholds2.set(i,glowingHandholds.get(i));
-                    if (glowingHandholds.get(i) == null) glowingHandholds2.set(i, glowingHandholds1.get(i));
+                    for (int i = 0; i < glowingHandholds2.size; i++) {
+                        glowingHandholds2.set(i, glowingHandholds.get(i));
+                        if (glowingHandholds.get(i) == null) glowingHandholds2.set(i, glowingHandholds1.get(i));
+                    }
                 }
+
+                //            snapLimbsToHandholds(glowingHandholds,character,justReleased);
+                snapLimbsToHandholds(glowingHandholds2, character, justReleased);
             }
+            else{
+                if (timestep == 0) {
+                    glowingHandholds3 = glowHandholds(character);
+                    glowingHandholds4 = glowingHandholds3;
+                    glowingHandholds5 = glowingHandholds3;
+                } else {
+                    glowingHandholds4 = glowingHandholds3;
 
-//            snapLimbsToHandholds(glowingHandholds,character,justReleased);
-            snapLimbsToHandholds(glowingHandholds2,character,justReleased);
+                    glowingHandholds3 = glowHandholds(character);
 
+                    for (int i = 0; i < glowingHandholds3.size; i++) {
+                        glowingHandholds5.set(i, glowingHandholds4.get(i));
+                        if (glowingHandholds3.get(i) == null) glowingHandholds5.set(i, glowingHandholds4.get(i));
+                    }
+                }
+
+                //            snapLimbsToHandholds(glowingHandholds,character,justReleased);
+                snapLimbsToHandholds(glowingHandholds5, character, justReleased);
+            }
             cameraWork();
 
             dealWithSlipperyAndCrumblyHandholds(character);
