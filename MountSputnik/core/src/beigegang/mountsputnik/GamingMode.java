@@ -939,31 +939,28 @@ public class GamingMode extends ModeController {
 
             movementController.moveCharacter(inx,iny,rinx,riny,nextToPress,justReleased);
 
-            if (nextToPress.size > 0) {
-                for (int i : nextToPress) {
-                    ((ExtremityModel) (character.parts.get(i))).ungrip();
+            if (nextToPress.size > 0)
+                for (int i : nextToPress)
                     ungrip(((ExtremityModel) (character.parts.get(i))));
-                }
-            }
             //bounding velocities
             boundBodyVelocities(character);
             if (timestep == 0) {
                 glowingHandholds = glowHandholds(character);
-//                glowingHandholds1 = glowingHandholds;
-//                glowingHandholds2 = glowingHandholds;
+                glowingHandholds1 = glowingHandholds;
+                glowingHandholds2 = glowingHandholds;
             }else{
-//                glowingHandholds1 = glowingHandholds;
+                glowingHandholds1 = glowingHandholds;
 
                 glowingHandholds = glowHandholds(character);
 
-//                for (int i = 0; i < glowingHandholds2.size;i++){
-//                    glowingHandholds2.set(i,glowingHandholds.get(i));
-////                    if (glowingHandholds.get(i) == null) glowingHandholds2.set(i, glowingHandholds1.get(i));
-//                }
+                for (int i = 0; i < glowingHandholds2.size;i++){
+                    glowingHandholds2.set(i,glowingHandholds.get(i));
+                    if (glowingHandholds.get(i) == null) glowingHandholds2.set(i, glowingHandholds1.get(i));
+                }
             }
 
-            snapLimbsToHandholds(glowingHandholds,character,justReleased);
-//            snapLimbsToHandholds(glowingHandholds2,character,justReleased);
+//            snapLimbsToHandholds(glowingHandholds,character,justReleased);
+            snapLimbsToHandholds(glowingHandholds2,character,justReleased);
 
             cameraWork();
 
@@ -1356,9 +1353,10 @@ public class GamingMode extends ModeController {
         HandholdModel closest = hs.get(ind);
         if (closest !=null){
             Vector2 closestSnapPoint = closest.snapPoints.first();
-            
-            c.parts.get(limb).setPosition(closestSnapPoint);
+//            c.parts.get(limb).setPosition(closestSnapPoint);
             ((ExtremityModel) c.parts.get(limb)).grip();
+            c.parts.get(limb).setPosition(closest.snapPoints.first(), c.parts.get(limb).getAngle());
+
             grip(((ExtremityModel) c.parts.get(limb)), closest);
         }
 
