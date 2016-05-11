@@ -20,12 +20,14 @@ public class GameMode extends GamingMode {
 	public GameMode() {
 		super(GAME_MODE);
 	}
+	@Override
 	public void makeJsonForAnimation(){
 		try{
 
 			animationToFile = new FileWriter(("tutorialAnimations/animationsW.json"));
 		}catch(Exception e){System.out.println("OHNO" + e );}
 	}
+	@Override
 	public void writeNextStepJsonForAnimation(float lx, float ly, float rx, float ry, Array<Integer> pressed){
 		String e = "";
 		for (counterInt = 0; counterInt <pressed.size; counterInt++){
@@ -46,6 +48,7 @@ public class GameMode extends GamingMode {
 		fullJson += ",";
 		animationTimestep ++;
 	}
+	@Override
 	public void writeJsonToFile(){
 		fullJson += "}";
 		if (!writtenToFile){
@@ -58,7 +61,7 @@ public class GameMode extends GamingMode {
 		}
 	}
 
-
+	@Override
 	public void setAnimationReader(){
 		writtenToFile = true;
 		jsonReader = new JsonReader();
@@ -66,6 +69,7 @@ public class GameMode extends GamingMode {
 		JsonAssetManager.getInstance().loadDirectory(levelFormat);
 		JsonAssetManager.getInstance().allocateDirectory();
 	}
+	@Override
 	public void getAnimationInformation(){
 		if (animationFormat == null) setAnimationReader();
 		//0 will be animationTimestep in the future.

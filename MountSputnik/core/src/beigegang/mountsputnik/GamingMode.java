@@ -479,74 +479,20 @@ public class GamingMode extends ModeController {
 
     }
     public void makeJsonForAnimation(){
-        try{
 
-            animationToFile = new FileWriter(("tutorialAnimations/animationsW.json"));
-        }catch(Exception e){System.out.println("OHNO" + e );}
     }
     public void writeNextStepJsonForAnimation(float lx, float ly, float rx, float ry, Array<Integer> pressed){
-        String e = "";
-        for (counterInt = 0; counterInt <pressed.size; counterInt++){
-            e = e + " " + pressed.get(counterInt) + ",";
-        }
-        String s = "\"" + animationTimestep + "\":[" + lx + "," + ly + "," + rx + "," + ry + ",[" + e + "],";
-        input1 = InputController.getInstance(CONTROLLER_1);
-        String released = "[";
-        released += (input1.releasedLeftArm()) ? String.valueOf(HAND_LEFT) + ", " :"";
-        released += (input1.releasedRightArm()) ? String.valueOf(HAND_RIGHT) + ", ":"";
-        released += (input1.releasedLeftLeg()) ? String.valueOf(FOOT_LEFT) + ", ":"";;
-        released += (input1.releasedRightLeg()) ? String.valueOf(FOOT_RIGHT) + ", ":"";;
 
-        released += "]]";
-
-        fullJson += s;
-        fullJson += released;
-        fullJson += ",";
-        animationTimestep ++;
     }
     public void writeJsonToFile(){
-        fullJson += "}";
-        if (!writtenToFile){
-            try{
-                animationToFile.write(fullJson);
 
-            }catch(Exception e){System.out.println("here" + e); }
-            try{animationToFile.flush();
-            }catch(Exception e){System.out.println("two" + e);}
-        }
     }
 
 
     public void setAnimationReader(){
-        writtenToFile = true;
-        jsonReader = new JsonReader();
-        animationFormat = jsonReader.parse(Gdx.files.internal("tutorialAnimations/animationsW.json"));
-        JsonAssetManager.getInstance().loadDirectory(levelFormat);
-        JsonAssetManager.getInstance().allocateDirectory();
+
     }
     public void getAnimationInformation(){
-        if (animationFormat == null) setAnimationReader();
-        //0 will be animationTimestep in the future.
-        JsonValue timestepInfo = animationFormat.get(animationTimestep);
-        animationLX = timestepInfo.get(0).asFloat();
-        animationLY = timestepInfo.get(1).asFloat();
-        animationRX = timestepInfo.get(2).asFloat();
-        animationRY = timestepInfo.get(3).asFloat();
-
-        animationNextToPress.clear();
-        animationJustReleased.clear();
-
-        ints = timestepInfo.get(4).asIntArray();
-        for (counterInt = 0;counterInt<ints.length; counterInt++){
-            animationNextToPress.add(ints[counterInt]);
-        }
-
-        ints = timestepInfo.get(5).asIntArray();
-        for (counterInt = 0;counterInt<ints.length; counterInt++){
-            animationJustReleased.add(ints[counterInt]);
-        }
-
-        animationTimestep++;
 
     }
 
@@ -924,13 +870,11 @@ public class GamingMode extends ModeController {
             character = character1;
             movementController = movementController1;
             input = InputController.getInstance(CONTROLLER_1);
-
         }
         else {
             character = character2;
             movementController = movementController2;
             input = InputController.getInstance(CONTROLLER_2);
-
 
         }
         if (isPaused) pauseMode.update(dt, listener);
@@ -974,7 +918,7 @@ public class GamingMode extends ModeController {
 
             }
             //don't uncomment createAnimation unless you know what you are doing!!
-    //		createAnimation();
+//    		createAnimation();
     //
             if (id == GAME_MODE && checkIfReachedCheckpoint(character)) {
                 lastReachedCheckpoint++;
