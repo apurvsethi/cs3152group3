@@ -1020,7 +1020,8 @@ public class GamingMode extends ModeController {
             character.updateEnergy(oxygen, 1, vector.len(), true);
 
             if (risingObstacle != null && moved) {
-                risingObstacle.setHeight(risingObstacle.getHeight() + risingObstacle.getSpeed());
+                float progressPercentage = (character.parts.get(CHEST).getPosition().y)/(maxHandhold - cposYAtTime0);
+				risingObstacle.setHeight(risingObstacle.getHeight() + risingObstacle.getSpeed()*(progressPercentage+.5f));
                 for (PartModel p : character.parts) {
                     if (risingObstacle.getHeight() >= p.getPosition().y) {
                         character.setEnergy(0);
