@@ -987,8 +987,8 @@ public class GameMode extends ModeController {
 			if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
 
 			movementController.moveCharacter(inx,iny,rinx,riny,nextToPress,justReleased);
-			if (nextToPress.size > 0)
-				oldMovementController.findAndApplyForces(nextToPress.get(0),iny,inx);
+//			if (nextToPress.size > 0)
+//				oldMovementController.findAndApplyForces(nextToPress.get(0),iny,inx);
 
 			if (nextToPress.size > 0) {
 				for (int i : nextToPress) {

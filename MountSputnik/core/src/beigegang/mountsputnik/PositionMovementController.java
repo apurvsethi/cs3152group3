@@ -20,6 +20,7 @@ public class PositionMovementController {
     private static final float GP_THRESHOLD  = 0.20f;
 
     private CharacterModel character;
+    private Vector2 originalCache;
     private Vector2 posCache;
     private Vector2 torsoCache;
     private Vector2 crossCache;
@@ -33,6 +34,7 @@ public class PositionMovementController {
 
     public PositionMovementController(CharacterModel character, Vector2 scale) {
         this.character = character;
+        originalCache = new Vector2();
         posCache = new Vector2();
         torsoCache = new Vector2();
         crossCache = new Vector2();
@@ -75,13 +77,14 @@ public class PositionMovementController {
         RevoluteJoint rootJoint = (RevoluteJoint) character.getInnerJoint(root);
         RevoluteJoint midJoint = (RevoluteJoint) character.getJoint(root, mid);
 
-        posCache.set(extremityPart.getPosition());
+        originalCache.set(extremityPart.getPosition());
         crossCache.set(horizontal, vertical);
-        if (crossCache.len2() > GP_THRESHOLD) {
+        if (crossCache.len2() > GP_THRESHOLD && inLimits(rootJoint, midJoint)) {
             momentum += GP_ACCELERATE;
             momentum = Math.min(momentum, GP_MAX_SPEED);
             crossCache.scl(momentum);
             crossCache.scl(1 / scale.x, 1 / scale.y);
+            posCache.set(originalCache);
             posCache.add(crossCache);
 
             adjustToRadius(rootJoint, isArm);
@@ -90,6 +93,13 @@ public class PositionMovementController {
         else momentum = 0;
 
         adjustTowardsLimits(rootJoint, midJoint, isArm, isLeft);
+    }
+
+    private boolean inLimits(RevoluteJoint rootJoint, RevoluteJoint midJoint) {
+        return !(rootJoint.getJointAngle() < rootJoint.getLowerLimit() - Math.toRadians(10)
+                || rootJoint.getJointAngle() > rootJoint.getUpperLimit() + Math.toRadians(10)
+                || midJoint.getJointAngle() < midJoint.getLowerLimit() - Math.toRadians(10)
+                || midJoint.getJointAngle() > midJoint.getUpperLimit() + Math.toRadians(10));
     }
 
     private void adjustToRadius(RevoluteJoint rootJoint, boolean isArm) {
@@ -110,10 +120,12 @@ public class PositionMovementController {
         moveTowardLimits(rootJoint);
         moveTowardLimits(midJoint);
         if (midJoint.getMotorSpeed() != 0 && rootJoint.getMotorSpeed() == 0) {
-            float motorSpeed = ((isArm && isLeft) || (!isArm && !isLeft)) ? -20f : 20f;
-            if ((isArm && isLeft) || (!isArm && !isLeft))
-                rootJoint.setMotorSpeed(motorSpeed);
-            else rootJoint.setMotorSpeed(motorSpeed);
+            float motorSpeed = ((isArm && isLeft) || (!isArm && !isLeft)) ? -5f : 5f;
+            if ((isArm && posCache.y - originalCache.y > 0)
+                    || (!isArm && isLeft && posCache.x - originalCache.x > 0)
+                    || (!isArm && !isLeft && posCache.x - originalCache.x < 0))
+                motorSpeed = -motorSpeed;
+            rootJoint.setMotorSpeed(motorSpeed);
         }
     }
 
@@ -155,6 +167,7 @@ public class PositionMovementController {
 
     public void dispose() {
         character = null;
+        originalCache = null;
         posCache = null;
         torsoCache = null;
         crossCache = null;
