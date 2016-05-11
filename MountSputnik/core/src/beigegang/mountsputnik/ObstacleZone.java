@@ -1,11 +1,10 @@
 package beigegang.mountsputnik;
 
-import static beigegang.mountsputnik.Constants.*;
-
 import beigegang.util.FilmStrip;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
+
+import static beigegang.mountsputnik.Constants.SCREEN_HEIGHT;
 
 /**
  * A class to contain information about obstacle spawning zones
@@ -27,10 +26,13 @@ public class ObstacleZone {
 	private boolean releasedOnce = false;
 	private float obstX;
 	private float obstY;
+	private float obstVY;
 	public float getObstX(){ return obstX;}
 	public float getObstY(){ return obstY;}
+	public float getObstVY(){ return obstVY;}
 	public void setObstX(float x){ obstX = x;}
 	public void setObstY(float y){ obstY = y;}
+	public void setObstVY(float y){ obstVY = y;}
 
 	//make sure an obstacle is released from this zone at least once!
 	public void releasedAnObstacle(){

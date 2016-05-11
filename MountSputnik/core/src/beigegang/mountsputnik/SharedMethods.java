@@ -8,13 +8,158 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import static beigegang.mountsputnik.Constants.*;
-import static beigegang.mountsputnik.Constants.FOOT_LEFT;
-import static beigegang.mountsputnik.Constants.FOOT_RIGHT;
 
 /**
  * Created by jacobcooper on 5/10/16.
  */
-public class DrawingMethods {
+public class SharedMethods {
+    /*public void updateHelper(){
+        if (isPaused) pauseMode.update(dt, listener);
+        else if (isDead) deadMode.update(dt, listener);
+        else if (isVictorious){
+            if (!writtenToFile) {
+                try {
+                    makeJsonForAnimation();
+
+                    writeJsonToFile();
+
+                    writtenToFile = true;
+                } catch (Exception e) {
+                    System.out.println("here3" + e);
+                }
+            }
+            victoryMode.update(dt, listener,true);
+        }
+        else {
+            doingAnimation = input.watchAnimation() && currLevel == LEVEL_TUTORIAL;
+            if (doingAnimation) {
+                getAnimationInformation();
+                inx = animationLX;
+                iny = animationLY;
+                rinx = animationRX;
+                riny = animationRY;
+                nextToPress = animationNextToPress;
+                justReleased = animationJustReleased;
+            } else {
+                inx = input.getHorizontalL();
+                iny = input.getVerticalL();
+                rinx = input.getHorizontalR();
+                riny = input.getVerticalR();
+                nextToPress = input.getOrderPressed();
+                justReleased.clear();
+                if (input.releasedLeftArm()) justReleased.add(HAND_LEFT);
+                if (input.releasedRightArm()) justReleased.add(HAND_RIGHT);
+                if (input.releasedLeftLeg()) justReleased.add(FOOT_LEFT);
+                if (input.releasedRightLeg()) justReleased.add(FOOT_RIGHT);
+
+            }
+            //don't uncomment createAnimation unless you know what you are doing!!
+    //		createAnimation();
+    //
+            if (checkIfReachedCheckpoint(character)) {
+                lastReachedCheckpoint++;
+            }
+            if (checkIfDied(character)) {
+                listener.exitScreen(this, EXIT_DIED);
+
+            }
+    //		upsideDown = character.parts.get(HEAD).getPosition().y - character.parts.get(CHEST).getPosition().y <= 0;
+
+
+            if (input.didSelect()) {
+                if (id == 0) tutorialToggle1 = !tutorialToggle1;
+                else tutorialToggle2 = !tutorialToggle2;
+            }
+
+            if (input.didMenu()) listener.exitScreen(this, EXIT_PAUSE);
+
+            movementController.moveCharacter(inx,iny,rinx,riny,nextToPress,justReleased);
+    //            if (nextToPress.size > 0)
+    //                oldMovementController.findAndApplyForces(nextToPress.get(0),iny,inx);
+
+            if (nextToPress.size > 0) {
+                for (int i : nextToPress) {
+                    ((ExtremityModel) (character.parts.get(i))).ungrip();
+                    ungrip(((ExtremityModel) (character.parts.get(i))));
+                }
+            }
+            //bounding velocities
+            boundBodyVelocities(character);
+            HandholdModel[] glowingHandholds = glowHandholds(character);
+
+            snapLimbsToHandholds(glowingHandholds,character,justReleased);
+
+            cameraWork();
+
+            dealWithSlipperyAndCrumblyHandholds(character);
+
+            spawnObstacles();
+
+            for (GameObject g : objects) {
+
+                if (g instanceof ObstacleModel &&
+                        ((g.getBody().getPosition().y < (canvas.getCamera().position.y - canvas.getWidth()) / scale.y &&
+                                g.getBody().getType() != BodyDef.BodyType.StaticBody) || ((ObstacleModel)g).broken)) {
+                    objects.remove(g);
+                }
+                if (g instanceof HandholdModel && ((HandholdModel) (g)).getStartPoint() != null) {
+                    HandholdModel h = (HandholdModel) g;
+                    h.updateSnapPoints();
+                    if (withinBounds(h.getBody().getPosition(), h.getEndPoint()) ||
+                            withinBounds(h.getBody().getPosition(), h.getStartPoint())) {
+                        h.getBody().setLinearVelocity(h.getBody().getLinearVelocity().x * -1, h.getBody().getLinearVelocity().y * -1);
+                    }
+                }
+            }
+
+            // TODO: Update energy quantity (fill in these values)
+            vector = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
+            character.updateEnergy(oxygen, 1, vector.len(), true);
+
+            if (risingObstacle != null) {
+                risingObstacle.setHeight(risingObstacle.getHeight() + risingObstacle.getSpeed());
+                for (PartModel p : character.parts) {
+                    if (risingObstacle.getHeight() >= p.getPosition().y) {
+                        character.setEnergy(0);
+                        failed = true;
+                    }
+                }
+                float yToSet = Math.min(canvas.getCamera().position.y/character.parts.get(CHEST).drawPositionScale.y, character.parts.get(CHEST).getPosition().y);
+                if(risingObstacle.getHeight() < yToSet - DEFAULT_HEIGHT/2 -1){
+                    risingObstacle.setHeight(yToSet - DEFAULT_HEIGHT/2 -1);
+                }
+            }
+
+            if (character.getEnergy() <= 0) {
+                failed = true;
+                for (int e : EXTREMITIES) {
+                    ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
+                    ungrip(extremity);
+                    extremity.ungrip();
+                    extremity.body.setType(BodyDef.BodyType.DynamicBody);
+                    extremity.setTexture(partTextures[e].getTexture());
+                }
+            }
+            checkHasCompleted(character);
+            if (complete) {
+                listener.exitScreen(this, EXIT_VICTORY_RACE);
+            }
+            if (checkpointTimestep == 0) cposYAtTime0 = character.parts.get(HEAD).getY();
+
+        }
+    }*/
+
+
+
+
+
+
+
+
+
+
+
+
     public static void drawBackgrounds(GameCanvas canvas, TextureRegion ground, TextureRegion background, TextureRegion midground, TextureRegion tile, TextureRegion edge){
         float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
         float tileY = y - (y % (canvas.getWidth() / 4));
@@ -96,7 +241,7 @@ public class DrawingMethods {
         return flashing2;
     }
 
-    public static void drawObstacleWarnings(GameCanvas canvas, Array<GameMode.warningsClass> obstacleWarnings,Sprite warningSprite,SpriteBatch batch,Vector2 scale,float y) {
+    public static void drawObstacleWarnings(GameCanvas canvas, Array<GamingMode.warningsClass> obstacleWarnings,Sprite warningSprite,SpriteBatch batch,Vector2 scale,float y) {
         for (GameMode.warningsClass wc : obstacleWarnings) {
             //hack to allow warning to move with obstacle for space!
             wc.center = wc.o.getX() + wc.o.width/2;
@@ -108,8 +253,8 @@ public class DrawingMethods {
             batch.end();
         }
     }
-    public static void drawObstacleWarnings(GameCanvas canvas, Array<RaceMode.warningsClass> obstacleWarnings,Sprite warningSprite,SpriteBatch batch,Vector2 scale,float y,float nothing) {
-        for (RaceMode.warningsClass wc : obstacleWarnings) {
+    public static void drawObstacleWarnings(GameCanvas canvas, Array<GamingMode.warningsClass> obstacleWarnings,Sprite warningSprite,SpriteBatch batch,Vector2 scale,float y,float nothing) {
+        for (GamingMode.warningsClass wc : obstacleWarnings) {
             //hack to allow warning to move with obstacle for space!
             wc.center = wc.o.getX() + wc.o.width/2;
             warningSprite.setBounds(wc.center * scale.x -  1.5f * scale.x, y/scale.y + canvas.getHeight()*9f/10f, 3f * scale.x , canvas.getHeight()/10f);

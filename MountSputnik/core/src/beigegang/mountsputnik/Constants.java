@@ -4,7 +4,10 @@ public final class Constants {
 	/** Screen pixel width and height */
 	public static final int SCREEN_WIDTH = 1920;
 	public static final int SCREEN_HEIGHT = 1080;
-
+	public static final int GAME_MODE = -1;
+	public static final int RACE_MODE = 1;
+	public static final int CONTROLLER_1 = 0;
+	public static final int CONTROLLER_2 = 1;
 	/** Placement of each screen within controllers of GameEngine */
 	public static final int LOADING_SCREEN = 0;
 	public static final int MENU_SCREEN = 1;

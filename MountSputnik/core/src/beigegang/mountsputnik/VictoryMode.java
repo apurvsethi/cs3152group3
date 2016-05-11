@@ -1,11 +1,11 @@
 package beigegang.mountsputnik;
 
-import beigegang.util.PooledList;
 import beigegang.util.ScreenListener;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+
 import static beigegang.mountsputnik.Constants.*;
 
 public class VictoryMode extends ModeController {
@@ -111,7 +111,11 @@ public class VictoryMode extends ModeController {
         }
         if (input.didSelect()){
             SoundController.get(SoundController.SELECT_SOUND).play();
-            listener.exitScreen(this, exitCodes2[currSelection]);
+            if (race)
+                listener.exitScreen(this, exitCodes2[currSelection]);
+            else
+                listener.exitScreen(this, exitCodes[currSelection]);
+
         }
 
     }
