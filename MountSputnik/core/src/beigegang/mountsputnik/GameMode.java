@@ -106,9 +106,12 @@ public class GameMode extends GamingMode {
 	}
 
 	public void restartLastCheckpoint(){
+		int b = lastReachedCheckpoint;
 		System.out.println("here");
 		resetAllButCheckpoints();
+		lastReachedCheckpoint = b;
 		populateLevelAtLastCheckpoint();
+
 
 	}
 
@@ -140,7 +143,7 @@ public class GameMode extends GamingMode {
 			counter++;
 		}
 		System.out.println(levelBlocks);
-		character1 = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale);
+		character1 = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, Math.max(DEFAULT_HEIGHT / 2, checkpoints.get(lastReachedCheckpoint)), scale);
 		makeHandholdsToGripAtStart(character1);
 		addCharacterToGame(character1);
 		movementController1 = new PositionMovementController(character1, scale);

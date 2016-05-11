@@ -674,7 +674,6 @@ public class GamingMode extends ModeController {
         else {
             character1 = new CharacterModel(partTextures, world, DEFAULT_WIDTH * 1 / 3, DEFAULT_HEIGHT / 2, scale);
             character2 = new CharacterModel(partTextures, world, DEFAULT_WIDTH * 2 / 3, DEFAULT_HEIGHT / 2, scale);
-            System.out.println("HERE");
         }
         //arms
         if (id == GAME_MODE)
@@ -924,7 +923,6 @@ public class GamingMode extends ModeController {
         if (id == GAME_MODE || controller == CONTROLLER_1){
             character = character1;
             movementController = movementController1;
-            System.out.println(movementController1);
             input = InputController.getInstance(CONTROLLER_1);
 
         }
