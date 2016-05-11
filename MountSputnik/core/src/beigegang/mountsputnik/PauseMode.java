@@ -17,15 +17,18 @@ public class PauseMode extends ModeController {
 
 	private static final String FOREGROUND_FILE = "Menu/PauseMenu/Foreground.png";
 	private static final String MENU_OPTION_FILES[] = {"Menu/PauseMenu/Resume.png","Menu/PauseMenu/RestartLastCheckpoint.png", "Menu/PauseMenu/Restart.png","Menu/PauseMenu/Menu.png","Menu/PauseMenu/Quit.png"};
-
+	private static final String MENU_OPTION_FILES2[] = {"Menu/PauseMenu/Resume.png", "Menu/PauseMenu/Restart.png","Menu/PauseMenu/Menu.png","Menu/PauseMenu/Quit.png"};
+	private static boolean race = false;
 	/**
 	 * Texture asset for files used, parts, etc.
 	 */
 	private static TextureRegion background;
 	private static TextureRegion foreground;
 	private static TextureRegion[] menuOptions = new TextureRegion[MENU_OPTION_FILES.length];
+	private static TextureRegion[] menuOptions2 = new TextureRegion[MENU_OPTION_FILES2.length];
 
 	private static int exitCodes[] ={EXIT_GAME_RESUME_LEVEL,EXIT_GAME_RESTART_LAST_CHECKPOINT,EXIT_GAME_RESTART_LEVEL,EXIT_MENU,EXIT_QUIT};
+	private static int exitCodes2[] ={EXIT_GAME_RESUME_RACE_LEVEL,EXIT_GAME_RESTART_RACE_LEVEL,EXIT_MENU,EXIT_QUIT};
 
 	private AssetManager assetManager;
 
@@ -43,6 +46,10 @@ public class PauseMode extends ModeController {
 		manager.load(FOREGROUND_FILE, Texture.class);
 		assets.add(FOREGROUND_FILE);
 		for (String MENU_OPTION_FILE : MENU_OPTION_FILES) {
+			manager.load(MENU_OPTION_FILE, Texture.class);
+			assets.add(MENU_OPTION_FILE);
+		}
+		for (String MENU_OPTION_FILE : MENU_OPTION_FILES2) {
 			manager.load(MENU_OPTION_FILE, Texture.class);
 			assets.add(MENU_OPTION_FILE);
 		}
@@ -65,6 +72,9 @@ public class PauseMode extends ModeController {
 		for (int i = 0; i < MENU_OPTION_FILES.length; i++) {
 			menuOptions[i] = createTexture(manager, MENU_OPTION_FILES[i], false);
 		}
+		for (int i = 0; i < MENU_OPTION_FILES2.length; i++) {
+			menuOptions2[i] = createTexture(manager, MENU_OPTION_FILES2[i], false);
+		}
 		assetState = AssetState.COMPLETE;
 	}
 
@@ -78,7 +88,8 @@ public class PauseMode extends ModeController {
 	@Override
 	public void update(float dt){};
 
-	public void update(float dt, ScreenListener listener) {
+	public void update(float dt, ScreenListener listener,boolean r) {
+		race = r;
 		// TODO Auto-generated method stub
 		InputController input = InputController.getInstance(0);
 
@@ -86,12 +97,16 @@ public class PauseMode extends ModeController {
 
 		if (changeCooldown == 0 && Math.abs(input.getVerticalL()) > 0.5) {
 			SoundController.get(SoundController.SCROLL_SOUND).play();
-			currSelection = (currSelection + (input.getVerticalL() > 0.5 ? -1 : (input.getVerticalL() < -0.5 ? 1 : 0))+ menuOptions.length) % menuOptions.length;
+			if (race) currSelection = (currSelection + (input.getVerticalL() > 0.5 ? -1 : (input.getVerticalL() < -0.5 ? 1 : 0))+ menuOptions2.length) % menuOptions2.length;
+			else currSelection = (currSelection + (input.getVerticalL() > 0.5 ? -1 : (input.getVerticalL() < -0.5 ? 1 : 0))+ menuOptions.length) % menuOptions.length;
 			changeCooldown = MENU_CHANGE_COOLDOWN;
 		}
 		if (input.didSelect()){
 			SoundController.get(SoundController.SELECT_SOUND).play();
-			listener.exitScreen(this, exitCodes[currSelection]);
+			if (race)
+				listener.exitScreen(this, exitCodes2[currSelection]);
+			else
+				listener.exitScreen(this, exitCodes[currSelection]);
 		}
 
 	}
@@ -116,15 +131,29 @@ public class PauseMode extends ModeController {
 		canvas.end();
 		canvas.begin();
 		float drawY = canvas.getHeight() * 5f/11f + (MENU_ITEM_HEIGHT * menuOptions.length / 2) + y;
-		for (int i = 0; i < menuOptions.length; i++){
-			if (i == currSelection){
-				canvas.draw(menuOptions[i], Color.TEAL, menuOptions[i].getRegionWidth() / 2,
-						menuOptions[i].getRegionHeight()/ 2, (canvas.getWidth() / 2), drawY, 0, 0.75f, 0.75f);
-			} else {
-				canvas.draw(menuOptions[i], Color.WHITE,  menuOptions[i].getRegionWidth() / 2,
-						menuOptions[i].getRegionHeight()/ 2,(canvas.getWidth() / 2), drawY, 0, 0.75f, 0.75f);
+		if (!race) {
+			for (int i = 0; i < menuOptions.length; i++) {
+
+				if (i == currSelection) {
+					canvas.draw(menuOptions[i], Color.TEAL, menuOptions[i].getRegionWidth() / 2,
+							menuOptions[i].getRegionHeight() / 2, (canvas.getWidth() / 2), drawY, 0, 0.75f, 0.75f);
+				} else {
+					canvas.draw(menuOptions[i], Color.WHITE, menuOptions[i].getRegionWidth() / 2,
+							menuOptions[i].getRegionHeight() / 2, (canvas.getWidth() / 2), drawY, 0, 0.75f, 0.75f);
+				}
+				drawY -= MENU_ITEM_HEIGHT;
 			}
-			drawY -= MENU_ITEM_HEIGHT;
+		}else{
+			for (int i = 0; i < menuOptions2.length; i++) {
+				if (i == currSelection){
+					canvas.draw(menuOptions2[i], Color.TEAL, menuOptions2[i].getRegionWidth() / 2,
+							menuOptions2[i].getRegionHeight()/ 2, (canvas.getWidth() / 2), drawY, 0, 0.75f, 0.75f);
+				} else {
+					canvas.draw(menuOptions2[i], Color.WHITE,  menuOptions2[i].getRegionWidth() / 2,
+							menuOptions2[i].getRegionHeight()/ 2,(canvas.getWidth() / 2), drawY, 0, 0.75f, 0.75f);
+				}
+				drawY -= MENU_ITEM_HEIGHT;
+			}
 		}
 
 		//draw menu objects
