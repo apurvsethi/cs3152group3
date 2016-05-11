@@ -94,7 +94,7 @@ public class GameMode extends GamingMode {
 
 	@Override
 	public void reset() {
-		if (timestep != 0)		writeJsonToFile();
+//		if (timestep != 0)		writeJsonToFile();
 		resetAllButCheckpoints();
 		checkpointLevelBlocks.clear();
 		checkpointLevelJsons.clear();
@@ -104,7 +104,9 @@ public class GameMode extends GamingMode {
 
 
 	}
+
 	public void restartLastCheckpoint(){
+		System.out.println("here");
 		resetAllButCheckpoints();
 		populateLevelAtLastCheckpoint();
 
@@ -138,6 +140,11 @@ public class GameMode extends GamingMode {
 			counter++;
 		}
 		System.out.println(levelBlocks);
+		character1 = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale);
+		makeHandholdsToGripAtStart(character1);
+		addCharacterToGame(character1);
+		movementController1 = new PositionMovementController(character1, scale);
+
 
 	}
 

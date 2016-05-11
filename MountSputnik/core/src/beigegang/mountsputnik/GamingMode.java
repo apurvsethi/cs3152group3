@@ -924,6 +924,7 @@ public class GamingMode extends ModeController {
         if (id == GAME_MODE || controller == CONTROLLER_1){
             character = character1;
             movementController = movementController1;
+            System.out.println(movementController1);
             input = InputController.getInstance(CONTROLLER_1);
 
         }
