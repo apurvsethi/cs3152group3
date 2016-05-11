@@ -1,11 +1,6 @@
 package beigegang.mountsputnik;
 
 import beigegang.util.ScreenListener;
-import static beigegang.mountsputnik.Constants.*;
-
-import java.io.FileWriter;
-import java.io.IOException;
-
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -16,6 +11,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
+
+import static beigegang.mountsputnik.Constants.*;
 
 public class GameEngine extends Game implements ScreenListener {
 	/** AssetManager to load game assets (textures, sounds, etc.) */
@@ -181,6 +178,14 @@ public class GameEngine extends Game implements ScreenListener {
 			g.reset();
 			//menuMode.unlockLevel(gameMode.getCurrLevel());
 			setScreen(controllers[RACE_SCREEN]);
+		}
+		else if (exitCode == EXIT_GAME_RESUME_RACE_LEVEL) {
+			RaceMode race = (RaceMode) controllers[RACE_SCREEN];
+			race.resume();
+		}
+		else if (exitCode == EXIT_RACE_PAUSE) {
+			RaceMode race = (RaceMode) controllers[RACE_SCREEN];
+			race.pause();
 		}
 
 	}
