@@ -1055,13 +1055,9 @@ public class GamingMode extends ModeController {
 
             if (character.getEnergy() <= 0) {
                 failed = true;
-                for (int e : EXTREMITIES) {
-                    ExtremityModel extremity = (ExtremityModel) character.parts.get(e);
-                    ungrip(extremity);
-                    extremity.ungrip();
-                    extremity.body.setType(BodyDef.BodyType.DynamicBody);
-                    extremity.setTexture(partTextures[e].getTexture());
-                }
+                for (int e : EXTREMITIES)
+                    ungrip((ExtremityModel) character.parts.get(e));
+
             }
             checkHasCompleted(character);
             if (complete) {

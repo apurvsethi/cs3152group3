@@ -117,16 +117,16 @@ public class GameMode extends GamingMode {
 		used.clear();
 		maxHandhold = remainingHeight;
 		maxLevelHeight = remainingHeight;
-		while(counter < checkpointLevelBlocks.size){
+		while (counter < checkpointLevelBlocks.size) {
 			//TODO: account for difficulty
 			int blockNumber = checkpointLevelBlocks.get(counter);
 			//			blockNumber = 11;
 			used.add(blockNumber);
-			levelBlocks.add("Levels/"+levelName+"/block"+blockNumber+".json");
-			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
+			levelBlocks.add("Levels/" + levelName + "/block" + blockNumber + ".json");
+			JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/" + levelName + "/block" + blockNumber + ".json"));
 			addChunk(levelPiece, currentHeight, levelName);
 			currentHeight += levelPiece.getFloat("size");
-			if(!levelName.equals("volcano")) checkpoints.add(currentHeight);
+			if (!levelName.equals("volcano")) checkpoints.add(currentHeight);
 			//filler stuff not currently used.
 			//			for(counterInt = 0; counterInt < filler; counterInt++){
 			//				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
@@ -135,20 +135,11 @@ public class GameMode extends GamingMode {
 			//				addChunk(levelPiece, currentHeight, levelName);
 			//				currentHeight += levelPiece.getInt("size");
 			//			}
-			counter ++;
+			counter++;
 		}
 		System.out.println(levelBlocks);
 
-
-
-		character1 = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, Math.max(DEFAULT_HEIGHT/2, checkpoints.get(lastReachedCheckpoint)), scale);
-		addCharacterToGame(character1);
-
-		movementController1 = new PositionMovementController(character1, scale);
-		makeHandholdsToGripAtStart(character1);
-
 	}
-
 
 
 	@Override
