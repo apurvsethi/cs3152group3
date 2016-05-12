@@ -1070,7 +1070,13 @@ public class GamingMode extends ModeController {
 
 
     protected boolean checkIfDied(CharacterModel c) {
-        return c.parts.get(HEAD).getY() < 0 || (currLevel == LEVEL_SPACE && c.getEnergy() == 0);
+    	boolean onscreen = false;
+    	for(PartModel p : c.parts){
+    		if(p.getPosition().y > 0 && p.getPosition().x < DEFAULT_WIDTH && p.getPosition().x > 0) {
+    			onscreen = true;
+    		}
+    	}
+        return !onscreen || (currLevel == LEVEL_SPACE && c.getEnergy() == 0);
 
     }
 
