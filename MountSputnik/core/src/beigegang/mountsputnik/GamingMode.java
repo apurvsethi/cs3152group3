@@ -66,6 +66,8 @@ public class GamingMode extends ModeController {
      */
     protected static final String LEVEL_NAMES[] = {"tutorial", "canyon", "waterfall", "volcano", "mountain", "sky", "space"}; //TODO: change second canyon to waterfall
     protected static final String LAVA_FILE = "assets/lava.png";
+    protected static final String LAVA_GLOW_FILE = "assets/lavaGlow.png";
+    protected static final String LAVA_CONT_FILE = "assets/lavaCont.png";
     protected static final String UI_FILE = "assets/HUD4timelessNoBackground.png";
     protected static final String[] LEVEL_LABEL_FILES = {"assets/Tutorial.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Skycloud.png", "assets/Canyon.png"};
     protected static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
@@ -123,6 +125,8 @@ public class GamingMode extends ModeController {
     protected static TextureRegion edge;
     protected static TextureRegion ground;
     protected static TextureRegion lavaTexture;
+    protected static TextureRegion lavaGlowTexture; 
+    protected static TextureRegion lavaContTexture;
     protected static TextureRegion glowTexture;
     protected static TextureRegion staticObstacle;
     protected static FilmStrip fallingObstacle;
@@ -236,6 +240,10 @@ public class GamingMode extends ModeController {
         assets.add(LOGO_FILE);
         manager.load(LAVA_FILE, Texture.class);
         assets.add(LAVA_FILE);
+        manager.load(LAVA_GLOW_FILE, Texture.class);
+        assets.add(LAVA_GLOW_FILE);
+        manager.load(LAVA_CONT_FILE, Texture.class);
+        assets.add(LAVA_CONT_FILE);
         manager.load(GLOW_FILE, Texture.class);
         assets.add(GLOW_FILE);
 
@@ -301,6 +309,8 @@ public class GamingMode extends ModeController {
         edge = createTexture(manager, "assets/"+levelName+"/SurfaceEdge.png", false);
         ground = createTexture(manager, "assets/"+levelName+"/LevelStart.png", false);
         lavaTexture = createTexture(manager, LAVA_FILE, false);
+        lavaGlowTexture = createTexture(manager, LAVA_GLOW_FILE, false);
+        lavaContTexture = createTexture(manager, LAVA_CONT_FILE, false);
         glowTexture = createTexture(manager, GLOW_FILE, false);
         staticObstacle = createTexture(manager, "assets/"+levelName+"/StaticObstacle.png", false);
         fallingObstacle = createFilmStrip(manager, "assets/"+levelName+"/Rockbust_Animation.png", 1, 5, 5);
@@ -1552,8 +1562,12 @@ public class GamingMode extends ModeController {
 
         if (risingObstacle != null) {
             float lavaOrigin = risingObstacle.getHeight() * scale.y -
-                    canvas.getHeight() + 50;
+                    canvas.getHeight();
+            canvas.draw(lavaGlowTexture, Color.WHITE, canvas.getWidth() / 4, lavaOrigin+canvas.getHeight(), canvas.getWidth() * 3 / 4, canvas.getHeight());
             canvas.draw(risingObstacle.getTexture(), Color.WHITE, canvas.getWidth() / 4, lavaOrigin, canvas.getWidth() * 3 / 4, canvas.getHeight());
+            while((lavaOrigin-=canvas.getHeight())>0){
+            	canvas.draw(lavaContTexture, Color.WHITE, canvas.getWidth() / 4, lavaOrigin, canvas.getWidth() * 3 / 4, canvas.getHeight());
+            }
         }
         canvas.end();
         //draw the obstacle warnings.
