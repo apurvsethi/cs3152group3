@@ -241,30 +241,6 @@ public class SharedMethods {
         return flashing2;
     }
 
-    public static void drawObstacleWarnings(GameCanvas canvas, Array<GamingMode.warningsClass> obstacleWarnings,Sprite warningSprite,SpriteBatch batch,Vector2 scale,float y) {
-        for (GameMode.warningsClass wc : obstacleWarnings) {
-            //hack to allow warning to move with obstacle for space!
-            wc.center = wc.o.getX() + wc.o.width/2;
-            warningSprite.setBounds(wc.center * scale.x -  1.5f * scale.x, y/scale.y + canvas.getHeight()*9f/10f, 3f * scale.x , canvas.getHeight()/10f);
-            warningSprite.setAlpha(Math.min(1,(wc.opacity)/(Math.min(TIME_TO_WARN,wc.oz.getSpawnFrequency()))));
-            wc.opacity ++;
-            batch.begin();
-            warningSprite.draw(batch);
-            batch.end();
-        }
-    }
-    public static void drawObstacleWarnings(GameCanvas canvas, Array<GamingMode.warningsClass> obstacleWarnings,Sprite warningSprite,SpriteBatch batch,Vector2 scale,float y,float nothing) {
-        for (GamingMode.warningsClass wc : obstacleWarnings) {
-            //hack to allow warning to move with obstacle for space!
-            wc.center = wc.o.getX() + wc.o.width/2;
-            warningSprite.setBounds(wc.center * scale.x -  1.5f * scale.x, y/scale.y + canvas.getHeight()*9f/10f, 3f * scale.x , canvas.getHeight()/10f);
-            warningSprite.setAlpha(Math.min(1,(wc.opacity)/(Math.min(TIME_TO_WARN,wc.oz.getSpawnFrequency()))));
-            wc.opacity ++;
-            batch.begin();
-            warningSprite.draw(batch);
-            batch.end();
-        }
-    }
     public static void drawToggles(GameCanvas canvas, CharacterModel c,InputController in,TextureRegion[] tutorialTextures, Vector2 scale){
         TextureRegion t;
 

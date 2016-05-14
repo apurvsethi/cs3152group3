@@ -94,6 +94,8 @@ public class GamingMode extends ModeController {
             "Ragdoll/controls/360_LT_selected.png",
             "Ragdoll/controls/360_RT_selected.png"
     };
+    protected static final String HANDHOLD_WARNING = "assets/HandholdGauge.png";
+    protected static final String OBSTACLE_WARNING = "assets/Obstacle Warning.png";
     protected static final String TUTORIAL_OVERLAY_TEXTURE = "assets/tutorial/TutorialOverlay.png";
     protected Random rand = new Random();
     protected float cposYAtTime0 = 0;
@@ -130,6 +132,8 @@ public class GamingMode extends ModeController {
     protected static TextureRegion glowTexture;
     protected static TextureRegion staticObstacle;
     protected static FilmStrip fallingObstacle;
+    protected static FilmStrip handholdWarning;
+    protected static FilmStrip obstacleWarning;
     protected static FilmStrip[] partTextures = new FilmStrip[PART_TEXTURES.length];
     protected static TextureRegion[] shadowTextures = new TextureRegion[SHADOW_TEXTURES.length];
     protected static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length];
@@ -141,8 +145,6 @@ public class GamingMode extends ModeController {
     protected static String BLACKOUT = "assets/blackout.png";
     protected static String FATIGUE_BAR = "Energy/Fatigue Gauge.png";
     protected static TextureRegion fatigueTexture;
-    protected static String WARNING_TEXTURE = "assets/Obstacle Warning.png";
-    protected static TextureRegion warningTexture;
     protected static String PROGRESS_BACKGROUND= "assets/Progress Bar.png";
     protected static TextureRegion progressBackgroundTexture;
     protected static String LOW_ENERGY_HALO= "assets/redhalo.png";
@@ -150,7 +152,6 @@ public class GamingMode extends ModeController {
     protected static String PROGRESS_BAR= "Progress Chalk Bar.png";
     protected static TextureRegion progressBarTexture;
     protected Sprite progressSprite = new Sprite(new Texture(PROGRESS_BAR));
-    protected Sprite warningSprite = new Sprite(new Texture(WARNING_TEXTURE));
     protected Sprite lowEnergySprite = new Sprite(new Texture(LOW_ENERGY_HALO));
     protected Sprite UISprite = new Sprite(new Texture(UI_FILE));
     protected static SpriteBatch batch = new SpriteBatch();
@@ -274,14 +275,16 @@ public class GamingMode extends ModeController {
         assets.add(PROGRESS_BACKGROUND);
         manager.load(PROGRESS_BAR,Texture.class);
         assets.add(PROGRESS_BAR);
-        manager.load(WARNING_TEXTURE,Texture.class);
-        assets.add(WARNING_TEXTURE);
         manager.load(LOW_ENERGY_HALO,Texture.class);
         assets.add(LOW_ENERGY_HALO);
         manager.load(TUTORIAL_OVERLAY_TEXTURE, Texture.class);
         assets.add(TUTORIAL_OVERLAY_TEXTURE);
         manager.load(RUSSIAN_FLAG_FILE, Texture.class);
         assets.add(RUSSIAN_FLAG_FILE);
+        manager.load(HANDHOLD_WARNING, Texture.class);
+        assets.add(HANDHOLD_WARNING);
+        manager.load(OBSTACLE_WARNING, Texture.class);
+        assets.add(OBSTACLE_WARNING);
     }
 
     /**
@@ -351,6 +354,8 @@ public class GamingMode extends ModeController {
         lowEnergyHalo = createTexture(manager,LOW_ENERGY_HALO,false);
         tutorialOverlay = createTexture(manager, TUTORIAL_OVERLAY_TEXTURE, false);
         RUSSIAN_FLAG = createTexture(manager, RUSSIAN_FLAG_FILE, false);
+        handholdWarning = createFilmStrip(manager, HANDHOLD_WARNING, 1, 13, 13);
+        obstacleWarning = createFilmStrip(manager, OBSTACLE_WARNING, 1, 1, 1);
         assetState = AssetState.COMPLETE;
 
     }
@@ -370,31 +375,11 @@ public class GamingMode extends ModeController {
     public void changeLevel(int level){
         listener.exitScreen(this, EXIT_GAME_NEXT_RACE_LEVEL);
     }
-    /** protected class for obstacleWarnings
-     * contains center of the warning, maxHeight of the obstacle, the obstacle itself, and the zone
-     * to which the obstacle belongs
-     * opacity used for displaying it only (warning fades in as obstacle spawns)
-     * @author Jacob
-     * */
-    public static class warningsClass{
-        float center;
-        float maxHeight;
-        ObstacleModel o;
-        ObstacleZone oz;
-        boolean countTicks = true;
-        float opacity = 0f;
-        float ticksPassed = 0f;
-        public warningsClass(float center, float maxHeightToDisplay,ObstacleModel ob, ObstacleZone oe){
-            this.center = center;
-            this.maxHeight = Math.min (maxLevelHeight,maxHeightToDisplay);
-            oz = oe;
-            o = ob;
-
-        }
-    }
 
     protected PositionMovementController movementController1;
     protected PositionMovementController movementController2;
+
+    protected WarningController warningController;
 
     protected ObstacleZone obstacleZone;
     /** only for lava so far */
@@ -402,12 +387,8 @@ public class GamingMode extends ModeController {
     protected ObstacleModel obstacle;
     /** obstacles that have been initialized but not introduced into the world yet*/
     protected Array<ObstacleZone> queuedObstacles = new Array<ObstacleZone>();
-    /** obstacleWarnings only appear within TIME_TO_WARN timesteps. Warnings not shown wait here */
-    protected Array<warningsClass> queuedObstacleWarnings = new Array<warningsClass>();
     /** all obstacle zones in level */
     protected Array<ObstacleZone> obstacles = new Array<ObstacleZone>();
-    /** Current obstacle warnings to display */
-    protected Array<warningsClass> obstacleWarnings = new Array<warningsClass>();
     /**
      * Whether we have completed this level
      */
@@ -548,6 +529,10 @@ public class GamingMode extends ModeController {
             movementController1.dispose();
             movementController1 = null;
         }
+        if (warningController != null) {
+            warningController.dispose();
+            warningController = null;
+        }
 
         for (GameObject obj : objects) {
             obj.deactivatePhysics(world);
@@ -555,8 +540,6 @@ public class GamingMode extends ModeController {
         risingObstacle = null;
         objects.clear();
         obstacles.clear();
-        obstacleWarnings.clear();
-        queuedObstacleWarnings.clear();
         addQueue.clear();
         world.dispose();
         timestep = 0;
@@ -643,6 +626,8 @@ public class GamingMode extends ModeController {
             character1 = new CharacterModel(partTextures, world, DEFAULT_WIDTH * 1 / 3, DEFAULT_HEIGHT / 2, scale);
             character2 = new CharacterModel(partTextures, world, DEFAULT_WIDTH * 2 / 3, DEFAULT_HEIGHT / 2, scale);
         }
+        warningController = new WarningController(scale, handholdWarning, obstacleWarning);
+
         //arms
         if (id == GAME_MODE)
             checkpoints.insert(0,character1.parts.get(CHEST).getY());
@@ -1067,6 +1052,7 @@ public class GamingMode extends ModeController {
             }
             if (checkpointTimestep == 0) cposYAtTime0 = character.parts.get(HEAD).getY();
 
+            warningController.update(canvas.getCamera().position.y + canvas.getHeight()/2, gravity.y);
         }
 
     }
@@ -1189,6 +1175,7 @@ public class GamingMode extends ModeController {
             setJointMotor(jointD,0,10);
             Joint j = world.createJoint(jointD);
             e.setJoint(j);
+            warningController.addHandholdWarning(h);
         }
         e.grip();
     }
@@ -1239,7 +1226,7 @@ public class GamingMode extends ModeController {
 
                 oz.setObstacle(obstacle);
                 queuedObstacles.add(oz);
-                makeObstacleWarning(oz);
+                warningController.addObstacleWarning(oz, maxLevelHeight);
             }
 
             if ((cpos >= oz.getMinSpawnHeight() || oz.isTriggered()) && (viewHeight < oz.getBounds().y)){
@@ -1251,37 +1238,11 @@ public class GamingMode extends ModeController {
                 oz.ticksSinceLastSpawn = 0;
                 oz.setTriggered(false);
             }
-
-
-    //
-        }
-        seeIfTimeToSpawnWarning();
-        destroyObstacleWarnings();
-    }
-
-    protected void destroyObstacleWarnings() {
-        float viewHeight = (canvas.getCamera().position.y + canvas.getHeight()/2) / scale.y;
-
-        for (warningsClass w:obstacleWarnings){
-
-            if ( (viewHeight >= w.maxHeight || viewHeight >= w.o.getY())){
-                obstacleWarnings.removeValue(w,false);
-            }
-        }
-        for (ObstacleZone qo : queuedObstacles){
-            if (qo.getObstacle() == null || viewHeight > qo.getObstacle().getY()){
-                queuedObstacles.removeValue(qo,false);
-                qo.ticksSinceLastSpawn = 0;
-            }
-
         }
     }
 
     protected void spawnObstacle(ObstacleZone oz) {
         if (oz.canSpawnObstacle() && oz.getObstacle() != null) {
-            float timeFromCharacter = (oz.getObstY() - character1.parts.get(CHEST).getY())/-oz.getObstVY();
-
-//            System.out.println("HERE " + oz.getObstY() + " " + character1.parts.get(CHEST).getY() + " " + -oz.getObstVY() + " " + timeFromCharacter);
             oz.getObstacle().activatePhysics(world);
             oz.getObstacle().setBodyType(BodyDef.BodyType.DynamicBody);
             oz.getObstacle().geometry.setUserData(obstacle);
@@ -1289,45 +1250,6 @@ public class GamingMode extends ModeController {
             queuedObstacles.removeValue(oz, false);
             oz.setObstacle(null);
             oz.resetSpawnTimer();
-
-
-            }
-
-    }
-
-    protected void makeObstacleWarning(ObstacleZone oz) {
-
-        queuedObstacleWarnings.add(new warningsClass(
-                oz.getObstX() + oz.getObstacle().width/2f,oz.getBounds().y,oz.getObstacle(),oz));
-//        seeIfTimeToSpawnWarning();
-    //		obstacleWarnings.add(new warningsClass(
-    //				oz.getObstX() + oz.getObstacle().width/2f,oz.getBounds().y,oz.getObstacle(),oz));
-
-    }
-    protected float timeFromTopOnceSpawned(float screenTop, float obstY){
-        return (float) Math.sqrt(2f * (obstY - screenTop)/-gravity.y)*60;
-    }
-    protected void seeIfTimeToSpawnWarning() {
-        for (warningsClass wc:queuedObstacleWarnings){
-            wc.ticksPassed += 1;
-            float timeFromCharacter = 0;
-            float topOfScreen = character1.parts.get(CHEST).getY() + canvas.getHeight()/2/scale.y;
-//            if (currLevel == LEVEL_SPACE) {
-            float vy = -wc.o.getVY();
-            if (currLevel == LEVEL_SPACE) timeFromCharacter = (wc.o.getY() - topOfScreen) / vy * 60;
-            else timeFromCharacter = timeFromTopOnceSpawned(topOfScreen,wc.o.getY());
-            boolean ct = (wc.countTicks && wc.oz.getSpawnFrequency() - wc.ticksPassed + timeFromCharacter <TIME_TO_WARN) || (!wc.countTicks && timeFromCharacter < TIME_TO_WARN);
-//            boolean ct =  (timeFromCharacter <TIME_TO_WARN) || (timeFromCharacter < TIME_TO_WARN);
-//            if ((currLevel != LEVEL_SPACE && wc.oz.getSpawnFrequency() - wc.ticksPassed < TIME_TO_WARN) || (currLevel == LEVEL_SPACE && ct)){
-            if (ct){
-
-                obstacleWarnings.add(wc);
-                queuedObstacleWarnings.removeValue(wc,false);
-
-            }
-            if (wc.countTicks && wc.oz.getSpawnFrequency() < wc.ticksPassed) {
-                wc.countTicks = false;
-            }
         }
     }
     // ************************************END OBSTACLES*********************************************** //
@@ -1570,11 +1492,10 @@ public class GamingMode extends ModeController {
             }
         }
         canvas.end();
-        //draw the obstacle warnings.
-        //hacky code in drawingMethods. will be resolved when obstacleWarnings class created by Apurv
-        SharedMethods.drawObstacleWarnings( canvas, obstacleWarnings, warningSprite, batch, scale, y,-1);
 
-
+        canvas.begin();
+        if (warningController != null) warningController.draw(canvas);
+        canvas.end();
 
         if (debug) {
             canvas.beginDebug();

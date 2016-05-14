@@ -112,6 +112,15 @@ public class HandholdModel extends GameObject{
 	public void setCrumbling(){
 		isCrumbling = true;
 	}
+
+	/**
+	 * Returns whether this handhold is gripped
+	 *
+	 * @return whether this handhold is gripped
+	 */
+	public boolean getGripped() {
+		return isGlowing;
+	}
 	
 	/**
 	 * Adds a snap point to the handhold

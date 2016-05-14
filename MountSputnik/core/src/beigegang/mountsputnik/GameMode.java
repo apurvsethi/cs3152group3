@@ -152,8 +152,7 @@ public class GameMode extends GamingMode {
 		makeHandholdsToGripAtStart(character1);
 		addCharacterToGame(character1);
 		movementController1 = new PositionMovementController(character1, scale);
-
-
+		warningController = new WarningController(scale, handholdWarning, obstacleWarning);
 	}
 
 
