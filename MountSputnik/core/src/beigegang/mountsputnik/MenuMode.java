@@ -4,11 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
-import com.badlogic.gdx.utils.JsonWriter;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
 import static beigegang.mountsputnik.Constants.*;
 
@@ -19,42 +19,39 @@ public class MenuMode extends ModeController {
 	/**
 	 * Track asset loading from all instances and subclasses
 	 */
-	protected AssetState assetState = AssetState.EMPTY;
+	private AssetState assetState = AssetState.EMPTY;
 
 	private int currView = MAIN_MENU;
-	//TODO: read in from file so these don't reset each time
-	JsonReader jsonReader = new JsonReader(); 
-	JsonValue saveGame = (jsonReader.parse(Gdx.files.internal("savegame.json"))).get("levels");
+	private JsonReader jsonReader = new JsonReader();
+	private JsonValue saveGame = (jsonReader.parse(Gdx.files.internal("savegame.json"))).get("levels");
 	private boolean levelSelectAllowed [] = {true, saveGame.getBoolean("canyon"), saveGame.getBoolean("waterfall"), saveGame.getBoolean("mountain"), saveGame.getBoolean("volcano"), saveGame.getBoolean("sky"), saveGame.getBoolean("space")};
-	
+
+	private static final String GEOMETRIC_FONT_FILE = "Fonts/geometric.ttf";
+	private static BitmapFont geometricFontNormal;
+	private static BitmapFont geometricFontSelected;
+
 	private static final String BACKGROUND_FILE = "Menu/StartMenu/Background.png";
-	private static final String MENU_OPTION_FILES[] = {"Menu/StartMenu/Start.png","Menu/StartMenu/Levels.png","Menu/StartMenu/Settings.png","Menu/StartMenu/Quit.png","Menu/StartMenu/Start.png"};
+	private static final String TEXTBOX_FILE = "Menu/Text Box.png";
 	private static final String LEVEL_SELECT_OPTION_FILES[] = {"Menu/StartMenu/LevelSelect/Tutorial.png","Menu/StartMenu/LevelSelect/Canyon.png","Menu/StartMenu/LevelSelect/Waterfall.png",
 			"Menu/StartMenu/LevelSelect/Volcano.png","Menu/StartMenu/LevelSelect/Snowy.png","Menu/StartMenu/LevelSelect/Sky.png","Menu/StartMenu/LevelSelect/Space.png"};
 	private static final String LEVEL_LOCKED_FILE = "Menu/StartMenu/LevelSelect/Locked.png";
 	private static final String MENU_BACK_FILE = "Menu/StartMenu/Menu.png";
-	private static final String CLASSIC_FILE = "Menu/StartMenu/classic.png";
-	private static final String SWAPPED_FILE = "Menu/StartMenu/swapped.png";
-	private static final String TRIGGER_SCHEME_FILE = "Menu/StartMenu/trigger_scheme.png";
-	private static final String STICK_SCHEME_FILE = "Menu/StartMenu/stick_scheme.png";
 			
 	/**
 	 * Texture asset for files used, parts, etc.
 	 */
 	private static TextureRegion background;
-	private static TextureRegion[] menuOptions = new TextureRegion[MENU_OPTION_FILES.length];
+	private static TextureRegion textbox;
 	private static TextureRegion[] levelSelectOptions = new TextureRegion[LEVEL_SELECT_OPTION_FILES.length];
 	private static TextureRegion menuBack;
 	private static TextureRegion levelLocked;
-	private static TextureRegion classic;
-	private static TextureRegion swapped;
-	private static TextureRegion triggerScheme;
-	private static TextureRegion stickScheme;
-	private static TextureRegion[] settingsOptions = {triggerScheme, stickScheme, menuBack};
-	private static int exitCodes[] ={EXIT_GAME_RESTART_LEVEL, EXIT_LEVEL_SELECT, EXIT_SETTINGS, EXIT_QUIT,EXIT_RACE};
-	private static int levelSelectCodes[] = {LEVEL_TUTORIAL, LEVEL_CANYON, LEVEL_WATERFALL, LEVEL_VOLCANO, LEVEL_SNOWY_MOUNTAIN, LEVEL_SKY, LEVEL_SPACE};
-	private static int backCode = EXIT_MENU;
 
+	private static String[] menuOptions = {"Start", "Race Mode", "Level Select", "Settings", "Quit"};
+	private static int exitCodes[] = {EXIT_GAME_RESTART_LEVEL, EXIT_RACE, EXIT_LEVEL_SELECT, EXIT_SETTINGS, EXIT_QUIT};
+	private static int levelSelectCodes[] = {LEVEL_TUTORIAL, LEVEL_CANYON, LEVEL_WATERFALL, LEVEL_VOLCANO, LEVEL_SNOWY_MOUNTAIN, LEVEL_SKY, LEVEL_SPACE};
+	private static String[] settingsOptions = {"Trigger Scheme", "Stick Scheme", "Menu"};
+	private static String[] currentSchemes = {"Classic", "Classic"};
+	private static int backCode = EXIT_MENU;
 
 	private AssetManager assetManager;
 
@@ -64,35 +61,40 @@ public class MenuMode extends ModeController {
 	public void preLoadContent(AssetManager manager) {
 		assetManager = manager;
 		if (assetState != AssetState.EMPTY) return;
-
 		assetState = AssetState.LOADING;
+
+		FreetypeFontLoader.FreeTypeFontLoaderParameter geometricNormal = new
+				FreetypeFontLoader.FreeTypeFontLoaderParameter();
+		geometricNormal.fontFileName = GEOMETRIC_FONT_FILE;
+		geometricNormal.fontParameters.size = (int)(45 * Gdx.graphics.getDensity());
+		geometricNormal.fontParameters.color = Color.BROWN;
+		assetManager.load("Normal" + GEOMETRIC_FONT_FILE, BitmapFont.class, geometricNormal);
+		assets.add("Normal" + GEOMETRIC_FONT_FILE);
+		FreetypeFontLoader.FreeTypeFontLoaderParameter geometricSelected = new
+				FreetypeFontLoader.FreeTypeFontLoaderParameter();
+		geometricSelected.fontFileName = GEOMETRIC_FONT_FILE;
+		geometricSelected.fontParameters.size = (int)(52 * Gdx.graphics.getDensity());
+		geometricSelected.fontParameters.color = Color.FIREBRICK;
+		assetManager.load("Selected" + GEOMETRIC_FONT_FILE, BitmapFont.class, geometricSelected);
+		assets.add("Selected" + GEOMETRIC_FONT_FILE);
+
 		manager.load(BACKGROUND_FILE, Texture.class);
 		assets.add(BACKGROUND_FILE);
+		manager.load(TEXTBOX_FILE, Texture.class);
+		assets.add(TEXTBOX_FILE);
 		manager.load(MENU_BACK_FILE, Texture.class);
 		assets.add(MENU_BACK_FILE);
 		manager.load(LEVEL_LOCKED_FILE, Texture.class);
 		assets.add(LEVEL_LOCKED_FILE);
-		for (String MENU_OPTION_FILE : MENU_OPTION_FILES) {
-			manager.load(MENU_OPTION_FILE, Texture.class);
-			assets.add(MENU_OPTION_FILE);
-		}
 		for (String LEVEL_SELECT_OPTION_FILE : LEVEL_SELECT_OPTION_FILES) {
 			manager.load(LEVEL_SELECT_OPTION_FILE, Texture.class);
 			assets.add(LEVEL_SELECT_OPTION_FILE);
 		}
-		manager.load(CLASSIC_FILE, Texture.class);
-		assets.add(CLASSIC_FILE);
-		manager.load(SWAPPED_FILE, Texture.class);
-		assets.add(SWAPPED_FILE);
-		manager.load(TRIGGER_SCHEME_FILE, Texture.class);
-		assets.add(TRIGGER_SCHEME_FILE);
-		manager.load(STICK_SCHEME_FILE, Texture.class);
-		assets.add(STICK_SCHEME_FILE);
 	}
 
 	/**
 	 * Loads the assets for this controller.
-	 * <p/>
+	 *
 	 * Opted for nonstatic loaders, but still want the assets themselves to be
 	 * static. So AssetState determines the current loading state, only load if
 	 * assets are not already loaded.
@@ -110,19 +112,15 @@ public class MenuMode extends ModeController {
 		levelSelectAllowed[LEVEL_SKY] = saveGame.getBoolean("sky"); 
 		levelSelectAllowed[LEVEL_SPACE] = saveGame.getBoolean("space");
 		
-		
 		if (assetState != AssetState.LOADING) return;
 
+		geometricFontNormal = manager.get("Normal" + GEOMETRIC_FONT_FILE, BitmapFont.class);
+		geometricFontSelected = manager.get("Selected" + GEOMETRIC_FONT_FILE, BitmapFont.class);
+
 		background = createTexture(manager, BACKGROUND_FILE, false);
+		textbox = createTexture(manager, TEXTBOX_FILE, false);
 		menuBack = createTexture(manager, MENU_BACK_FILE, false);
-		classic = createTexture(manager, CLASSIC_FILE, false);
-		swapped = createTexture(manager, SWAPPED_FILE, false);
-		triggerScheme = createTexture(manager, TRIGGER_SCHEME_FILE, false);
-		stickScheme = createTexture(manager, STICK_SCHEME_FILE, false);
 		levelLocked = createTexture(manager, LEVEL_LOCKED_FILE, false);
-		for (int i = 0; i < MENU_OPTION_FILES.length; i++) {
-			menuOptions[i] = createTexture(manager, MENU_OPTION_FILES[i], false);
-		}
 		for (int i = 0; i < LEVEL_SELECT_OPTION_FILES.length; i++) {
 			levelSelectOptions[i] = createTexture(manager, LEVEL_SELECT_OPTION_FILES[i], false);
 		}
@@ -131,21 +129,17 @@ public class MenuMode extends ModeController {
 
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
 		currSelection = 0;
 		currView = MAIN_MENU;
 	}
 
 	@Override
 	public void update(float dt) {
-		// TODO Auto-generated method stub
-
 		if (changeCooldown > 0) changeCooldown --;
 
 		InputController input = InputController.getInstance(0);
 
 		if (changeCooldown == 0 &&
-
 				((Math.abs(input.getVerticalL()) > 0.5 && !input.getStickScheme()) || 
 				 (Math.abs(input.getVerticalR()) > 0.5 && input.getStickScheme()))) {
 			SoundController.get(SoundController.SCROLL_SOUND).play();
@@ -175,21 +169,23 @@ public class MenuMode extends ModeController {
 			}
 		}
 		else if (input.didSelect() && currView == SETTINGS){
-			if(currSelection == 0){
-					input.swapTriggerScheme();
-					SoundController.get(SoundController.SELECT_SOUND).play();
-				}
-			else if(currSelection == 1){
-				input.swapStickScheme();
+			if (currSelection == 0) {
+				input.swapTriggerScheme();
+				currentSchemes[0] = input.getTriggerScheme() ? "Swapped" : "Classic";
 				SoundController.get(SoundController.SELECT_SOUND).play();
 			}
-			else{
+			else if (currSelection == 1) {
+				input.swapStickScheme();
+				currentSchemes[1] = input.getStickScheme() ? "Swapped" : "Classic";
+				SoundController.get(SoundController.SELECT_SOUND).play();
+			}
+			else {
 				SoundController.get(SoundController.DECLINE_SOUND).play();
 				listener.exitScreen(this, backCode);
 			}
-		} else if (input.didSelect()){
+		}
+		else if (input.didSelect()) {
 			SoundController.get(SoundController.SELECT_SOUND).play();
-//			if (currSelection == 4)
 			listener.exitScreen(this, exitCodes[currSelection]);
 		}
 
@@ -198,6 +194,7 @@ public class MenuMode extends ModeController {
 	public void draw() {
 		canvas.clear();
 
+		float bottomOfScreen = canvas.getCamera().position.y - canvas.getHeight() / 2;
 		float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
 
 		canvas.begin();
@@ -240,49 +237,38 @@ public class MenuMode extends ModeController {
 						menuBack.getRegionHeight() / 2, (canvas.getWidth() / 2), drawY, 0, 0.75f, 0.75f);
 			}
 
-		} else if (currView == SETTINGS) {
-			drawY = SETTINGS_DRAW_LOCATION * canvas.getHeight() + y;
-			InputController input = InputController.getInstance(0);
-			//draw settings
-			TextureRegion currentTriggerScheme = input.getTriggerScheme() ? swapped : classic;
-			TextureRegion currentStickScheme = input.getStickScheme() ? swapped : classic;
-			
-			canvas.draw(triggerScheme, currSelection == 0 ? Color.TEAL : Color.WHITE, 
-					triggerScheme.getRegionWidth() / 2, triggerScheme.getRegionHeight() / 2, 
-					(canvas.getWidth() / 2) - classic.getRegionWidth(), drawY, 0, 0.75f, 0.75f);
-			canvas.draw(currentTriggerScheme, currSelection == 0 ? Color.TEAL : Color.WHITE, 
-					currentTriggerScheme.getRegionWidth() / 2, currentTriggerScheme.getRegionHeight() / 2, 
-					(canvas.getWidth() / 2) + classic.getRegionWidth(), drawY, 0, 0.75f, 0.75f);
-			
-			drawY -= MENU_ITEM_HEIGHT;
-			
-			canvas.draw(stickScheme, currSelection == 1 ? Color.TEAL : Color.WHITE, 
-					stickScheme.getRegionWidth() / 2, stickScheme.getRegionHeight() / 2, 
-					(canvas.getWidth() / 2) - classic.getRegionWidth(), drawY, 0, 0.75f, 0.75f);
-			canvas.draw(currentStickScheme, currSelection == 1 ? Color.TEAL : Color.WHITE, 
-					currentStickScheme.getRegionWidth() / 2, currentStickScheme.getRegionHeight() / 2, 
-					(canvas.getWidth() / 2) + classic.getRegionWidth(), drawY, 0, 0.75f, 0.75f);
-			
-			drawY -= MENU_ITEM_HEIGHT;
-			
-			canvas.draw(menuBack, currSelection == 2 ? Color.TEAL : Color.WHITE, menuBack.getRegionWidth() / 2,
-					menuBack.getRegionHeight() / 2, (canvas.getWidth() / 2), drawY, 0, 0.75f, 0.75f);
+		}
+		else if (currView == SETTINGS) {
+			canvas.draw(textbox, Color.WHITE, canvas.getWidth() * 0.2f, bottomOfScreen + canvas.getHeight() * 0.07f,
+					canvas.getWidth() * 0.6f, canvas.getHeight() * 0.32f);
 
-		} else {
-			drawY = START_MENU_DRAW_LOCATION * canvas.getHeight() + y;
+			float drawXName = -canvas.getWidth() * 0.12f;
+			float drawXScheme = canvas.getWidth() * 0.15f;
+			BitmapFont font = currSelection == 0 ? geometricFontSelected : geometricFontNormal;
+			drawY = bottomOfScreen - canvas.getHeight() * 0.211f;
+
+			for (int i = 0; i < currentSchemes.length; i++) {
+				canvas.drawTextCentered(settingsOptions[i], font, drawXName, drawY);
+				canvas.drawTextCentered(currentSchemes[i], font, drawXScheme, drawY);
+				drawY -= canvas.getHeight() * 0.055;
+				font = currSelection == i + 1 ? geometricFontSelected : geometricFontNormal;
+			}
+
+			canvas.drawTextCentered(settingsOptions[settingsOptions.length - 1], font, drawY);
+		}
+		else {
+			canvas.draw(textbox, Color.WHITE, canvas.getWidth() * 0.25f, bottomOfScreen - canvas.getHeight() * 0.04f,
+					canvas.getWidth() * 0.5f, canvas.getHeight() * 0.5f);
+
+			drawY = bottomOfScreen - canvas.getHeight() * 0.1725f;
+
 			for (int i = 0; i < menuOptions.length; i++) {
-				if (i == currSelection) {
-					canvas.draw(menuOptions[i], Color.TEAL, menuOptions[i].getRegionWidth() / 2,
-							menuOptions[i].getRegionHeight() / 2, (canvas.getWidth() / 2), drawY, 0, 0.75f, 0.75f);
-				} else {
-					canvas.draw(menuOptions[i], Color.WHITE, menuOptions[i].getRegionWidth() / 2,
-							menuOptions[i].getRegionHeight() / 2, (canvas.getWidth() / 2), drawY, 0, 0.75f, 0.75f);
-				}
-				drawY -= MENU_ITEM_HEIGHT;
+				if (i == currSelection) canvas.drawTextCentered(menuOptions[i], geometricFontSelected, drawY);
+				else canvas.drawTextCentered(menuOptions[i], geometricFontNormal, drawY);
+				drawY -= canvas.getHeight() * 0.055f;
 			}
 		}
 		canvas.end();
-
 	}
 
 	public void changeView(int view){
@@ -303,8 +289,7 @@ public class MenuMode extends ModeController {
 			FileWriter jsonWriter = new FileWriter(("savegame.json")); 
 			jsonWriter.write(json); 
 			jsonWriter.flush();
-			} catch (Exception e) {}
-		
+		} catch (Exception e) {}
 	}
 
 	@Override
