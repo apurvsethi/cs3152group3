@@ -304,7 +304,7 @@ public class GamingMode extends ModeController {
         deadMode.loadContent(manager);
         victoryMode.loadContent(manager);
 
-        background = createTexture(manager, "assets/"+levelName+"/background.png", false);
+        background = createTexture(manager, "assets/"+levelName+"/Background.png", false);
         midground = createTexture(manager, "assets/"+levelName+"/Midground.png", false);
         tile = createTexture(manager, "assets/"+levelName+"/Surface.png", false);
         UI = createTexture(manager, UI_FILE, false);
