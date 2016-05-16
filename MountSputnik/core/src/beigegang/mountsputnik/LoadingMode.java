@@ -137,7 +137,6 @@ public class LoadingMode extends ModeController {
 	 * @param canvas The drawing context
 	 */	
 	private void drawProgress(GameCanvas canvas) {
-		System.out.println(progress);
 		canvas.draw(statusBkgLeft,   Color.WHITE, centerX-width/2, centerY, resScale*PROGRESS_CAP, resScale*PROGRESS_HEIGHT);
 		canvas.draw(statusBkgRight,  Color.WHITE, centerX+width/2-resScale*PROGRESS_CAP, centerY, resScale*PROGRESS_CAP, resScale*PROGRESS_HEIGHT);
 		canvas.draw(statusBkgMiddle, Color.WHITE, centerX-width/2+resScale*PROGRESS_CAP, centerY, width-2*resScale*PROGRESS_CAP, resScale*PROGRESS_HEIGHT);
