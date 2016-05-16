@@ -10,15 +10,12 @@ import static beigegang.mountsputnik.Constants.*;
 public class LoadingMode extends ModeController {
 	// Textures necessary to support the loading screen 
 	private static final String BACKGROUND_FILE = "Menu/StartMenu/Background.png";
-	private static final String PROGRESS_FILE = "progressbar.png";
-	private static final String PLAY_BTN_FILE = "play.png";
+	private static final String PROGRESS_FILE = "Menu/progressbar.png";
 
 	/** Background texture for start-up */
 	private Texture background;
 	/** Texture atlas to support a progress bar */
 	private Texture statusBar;
-	/** Play button to display when done */
-	private Texture playButton;
 	
 	// statusBar is a "texture atlas." Break it up into parts.
 	/** Left cap to the status background (grey region) */
@@ -50,8 +47,6 @@ public class LoadingMode extends ModeController {
 	private static int PROGRESS_CAP    = 15;
 	/** Width of the middle portion in texture atlas */
 	private static int PROGRESS_MIDDLE = 200;
-	/** Amount to resScale the play button */
-	private static float BUTTON_resScale  = 0.75f;
 	
 	/** AssetManager to load assets, check on progress for other screens */
 	private AssetManager manager;
@@ -62,8 +57,6 @@ public class LoadingMode extends ModeController {
 	private int centerY;
 	/** The x-coordinate of the center of the progress bar */
 	private int centerX;
-	/** The height of the canvas window (necessary since sprite origin != screen origin) */
-	private int heightY;
 	/** Scaling factor for when the student changes the resolution. */
 	private float resScale;
 	
@@ -72,19 +65,22 @@ public class LoadingMode extends ModeController {
 	/** Progress made towards loading */
 	private float progress;
 	
-	public LoadingMode(AssetManager manager) {
-		this(manager, DEFAULT_BUDGET);
+	public LoadingMode(GameCanvas canvas, AssetManager manager) {
+		this(canvas, manager, DEFAULT_BUDGET);
 	}
 	
-	public LoadingMode(AssetManager manager, int budget) {
+	public LoadingMode(GameCanvas canvas, AssetManager manager, int budget) {
 		super();
+		this.canvas = canvas;
 		this.manager = manager;
 		this.budget = budget;
 		progress = 0f;
+
+		// Compute the dimensions from the canvas
+		resize(canvas.getWidth(),canvas.getHeight());
 		
 		manager.load(BACKGROUND_FILE, Texture.class);
 		manager.load(PROGRESS_FILE, Texture.class);
-		manager.load(PLAY_BTN_FILE, Texture.class);
 		manager.finishLoading();
 		
 		background = manager.get(BACKGROUND_FILE, Texture.class);
@@ -102,28 +98,13 @@ public class LoadingMode extends ModeController {
 	}
 
 	@Override
-	public void reset() {
-		// TODO Auto-generated method stub
-
-	}
+	public void reset() {}
 
 	@Override
 	public void update(float dt) {
-		InputController input = InputController.getInstance(0);
-		input.readInput();
-
-		if (playButton != null) {
-			listener.exitScreen(this, EXIT_MENU);
-		}
-		
-		if (playButton == null) {
-			manager.update(budget);
-			progress = manager.getProgress();
-			if (progress >= 1.0f) {
-				progress = 1.0f;
-				playButton = manager.get(PLAY_BTN_FILE, Texture.class);
-			}
-		}
+		manager.update(budget);
+		progress = manager.getProgress();
+		if (progress >= 1.0f) listener.exitScreen(this, EXIT_MENU);
 	}
 	
 	@Override
@@ -142,12 +123,7 @@ public class LoadingMode extends ModeController {
 	public void draw() {
 		canvas.begin();
 		canvas.draw(background, 0, 0);
-		if (playButton == null) {
-			drawProgress(canvas);
-		} else {
-			canvas.draw(playButton, Color.WHITE, playButton.getWidth()/2, playButton.getHeight()/2, 
-						centerX, centerY, 0, BUTTON_resScale*resScale, BUTTON_resScale*resScale);
-		}
+		drawProgress(canvas);
 		canvas.end();
 	}
 	
@@ -160,14 +136,15 @@ public class LoadingMode extends ModeController {
 	 *
 	 * @param canvas The drawing context
 	 */	
-	private void drawProgress(GameCanvas canvas) {	
+	private void drawProgress(GameCanvas canvas) {
+		System.out.println(progress);
 		canvas.draw(statusBkgLeft,   Color.WHITE, centerX-width/2, centerY, resScale*PROGRESS_CAP, resScale*PROGRESS_HEIGHT);
 		canvas.draw(statusBkgRight,  Color.WHITE, centerX+width/2-resScale*PROGRESS_CAP, centerY, resScale*PROGRESS_CAP, resScale*PROGRESS_HEIGHT);
 		canvas.draw(statusBkgMiddle, Color.WHITE, centerX-width/2+resScale*PROGRESS_CAP, centerY, width-2*resScale*PROGRESS_CAP, resScale*PROGRESS_HEIGHT);
 
 		canvas.draw(statusFrgLeft,   Color.WHITE, centerX-width/2, centerY, resScale*PROGRESS_CAP, resScale*PROGRESS_HEIGHT);
 		if (progress > 0) {
-			float span = progress*(width-2*resScale*PROGRESS_CAP)/2.0f;
+			float span = progress*(width-2*resScale*PROGRESS_CAP);
 			canvas.draw(statusFrgRight,  Color.WHITE, centerX-width/2+resScale*PROGRESS_CAP+span, centerY, resScale*PROGRESS_CAP, resScale*PROGRESS_HEIGHT);
 			canvas.draw(statusFrgMiddle, Color.WHITE, centerX-width/2+resScale*PROGRESS_CAP, centerY, span, resScale*PROGRESS_HEIGHT);
 		} else {
@@ -191,16 +168,17 @@ public class LoadingMode extends ModeController {
 		 statusBar.dispose();
 		 background = null;
 		 statusBar  = null;
-		 if (playButton != null) {
-			 playButton.dispose();
-			 playButton = null;
-		 }
 	}
 
 	@Override
 	public void resize(int width, int height) {
-		// TODO Auto-generated method stub
+		// Compute the drawing scale
+		float sx = ((float)width)/STANDARD_WIDTH;
+		float sy = ((float)height)/STANDARD_HEIGHT;
+		resScale = (sx < sy ? sx : sy);
 
+		this.width = (int)(BAR_WIDTH_RATIO*width);
+		centerY = (int)(BAR_HEIGHT_RATIO*height);
+		centerX = width / 2;
 	}
-
 }
