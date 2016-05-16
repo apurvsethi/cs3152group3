@@ -201,8 +201,8 @@ public class GamingMode extends ModeController {
         victoryMode.preLoadContent(manager);
 
         for(String name : LEVEL_NAMES){
-            manager.load("assets/"+name+"/background.png", Texture.class);
-            assets.add("assets/"+name+"/background.png");
+            manager.load("assets/"+name+"/Background.png", Texture.class);
+            assets.add("assets/"+name+"/Background.png");
             manager.load("assets/"+name+"/Midground.png", Texture.class);
             assets.add("assets/"+name+"/Midground.png");
             manager.load("assets/"+name+"/Surface.png", Texture.class);
