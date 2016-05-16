@@ -37,7 +37,7 @@ public class GameEngine extends Game implements ScreenListener {
 	public void create() {
 		canvas = new GameCanvas();
 		controllers = new ModeController[4];
-		controllers[LOADING_SCREEN] = new LoadingMode(manager);
+		controllers[LOADING_SCREEN] = new LoadingMode(canvas, manager);
 		controllers[MENU_SCREEN] = new MenuMode();
 		controllers[GAME_SCREEN] = new GameMode();
 		controllers[RACE_SCREEN] = new RaceMode();
