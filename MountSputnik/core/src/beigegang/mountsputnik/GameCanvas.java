@@ -24,8 +24,6 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.*;
 import com.badlogic.gdx.physics.box2d.*;
 
-import static beigegang.mountsputnik.Constants.*;
-
 /**
  * Primary view class for the game, abstracting the basic graphics calls.
  * 
@@ -985,6 +983,26 @@ public class GameCanvas {
 		float y = (getHeight() + layout.height) / 2.0f;
 		font.draw(spriteBatch, layout, x, y+offset);
     }
+
+	/**
+	 * Draws text centered on the screen.
+	 *
+	 * @param text The string to draw
+	 * @param font The font to use
+	 * @param xOffset The x-value offset from the center of the screen.
+	 * @param yOffset The y-value offset from the center of the screen.
+	 */
+	public void drawTextCentered(String text, BitmapFont font, float xOffset, float yOffset) {
+		if (active != DrawPass.STANDARD) {
+			Gdx.app.error("GameCanvas", "Cannot draw without active begin()", new IllegalStateException());
+			return;
+		}
+
+		GlyphLayout layout = new GlyphLayout(font,text);
+		float x = (getWidth()  - layout.width) / 2.0f;
+		float y = (getHeight() + layout.height) / 2.0f;
+		font.draw(spriteBatch, layout, x+xOffset, y+yOffset);
+	}
     
 	/**
 	 * Start the debug drawing sequence.
