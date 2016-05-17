@@ -30,6 +30,15 @@ public class ObstacleWarning extends WarningModel {
     private Color color;
 
     /**
+     * Set the xVelocity that this warning should move at
+     *
+     * @param xVelocity x-velocity that this warning should move at
+     */
+    public void setVX(float xVelocity) {
+        this.xVelocity = xVelocity / 60;
+    }
+
+    /**
      * @return maximum height that warning can be at
      */
     public float getMaxHeight() {
@@ -64,16 +73,14 @@ public class ObstacleWarning extends WarningModel {
      * @param position position of the warning in box2d coordinates
      * @param dimensions size scale for texture drawing
      * @param drawPositionScale position scale for box2d units to screen units
-     * @param xVelocity x velocity of the obstacle, specifically for space
      * @param maxHeight maximum height that the warning can reach
      * @param spawnFrequency spawn frequency of obstacle zone connected
      */
     public ObstacleWarning(FilmStrip filmStrip, Vector2 position,
                            Vector2 dimensions, Vector2 drawPositionScale,
-                           float xVelocity, float maxHeight,
-                           float spawnFrequency) {
+                           float maxHeight, float spawnFrequency) {
         this(filmStrip, position, dimensions.x, dimensions.y,
-                drawPositionScale, xVelocity, maxHeight, spawnFrequency);
+                drawPositionScale, maxHeight, spawnFrequency);
     }
 
     /**
@@ -84,19 +91,18 @@ public class ObstacleWarning extends WarningModel {
      * @param xDimension x dimension of size scale for texture drawing
      * @param yDimension y dimension of size scale for texture drawing
      * @param drawPositionScale position scale for box2d units to screen units
-     * @param xVelocity x velocity of the obstacle, specifically for space
      * @param maxHeight maximum height that the warning can reach
      * @param spawnFrequency spawn frequency of obstacle zone connected
      */
     public ObstacleWarning(FilmStrip filmStrip, Vector2 position,
                            float xDimension, float yDimension,
-                           Vector2 drawPositionScale, float xVelocity,
-                           float maxHeight, float spawnFrequency) {
+                           Vector2 drawPositionScale, float maxHeight,
+                           float spawnFrequency) {
         super(filmStrip, xDimension, yDimension, drawPositionScale);
         setPosition(position);
         opacity = 0f;
         timesteps = 0f;
-        this.xVelocity = xVelocity / 60;
+        xVelocity = 0f;
         this.maxHeight = maxHeight;
         this.spawnFrequency = spawnFrequency;
         this.color = new Color(Color.WHITE);

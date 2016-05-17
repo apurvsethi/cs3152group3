@@ -105,7 +105,6 @@ public class WarningController {
 
         ObstacleWarning obstacleWarning = new ObstacleWarning(obstacleStrip,
                 positionCache, 0.5f, 0.5f, scale,
-                obstacleZone.getObstacle().getVX(),
                 Math.min(maxLevelHeight, obstacleZone.getBounds().y),
                 obstacleZone.getSpawnFrequency());
         TotalObstacle totalObstacle = new TotalObstacle(obstacleZone,
@@ -134,14 +133,17 @@ public class WarningController {
         for (ObjectMap.Entry<ObstacleWarning, TotalObstacle> entry
                 : obstacleWarnings) {
             float timeFromScreen = getTimeFromScreen(topOfScreen, gravity,
-                    entry.value.obstacleZone);
+                    entry.value.obstacle);
 
             if (!entry.key.getSpawned() &&
                     (entry.value.obstacleZone.getSpawnFrequency() -
                     entry.key.getTimesteps() + timeFromScreen < TIME_TO_WARN
                     || (entry.value.obstacleZone.getSpawnFrequency() <
-                    entry.key.getTimesteps() && timeFromScreen < TIME_TO_WARN)))
+                    entry.key.getTimesteps() && timeFromScreen < TIME_TO_WARN))) {
                 entry.key.setSpawned();
+                entry.key.setX(entry.value.obstacle.getX());
+                entry.key.setVX(entry.value.obstacle.getVX());
+            }
             else if (!entry.key.getSpawned() &&
                     (entry.value.obstacle == null
                     || topOfScreen > entry.value.obstacle.getY())) {
@@ -164,14 +166,14 @@ public class WarningController {
      *
      * @param topOfScreen top of current screen in box2d units
      * @param gravity gravity in current level
-     * @param obstacleZone obstacle zone that contains obstacle
+     * @param obstacle obstacle that is falling
      * @return time of obstacle from reaching top of screen
      */
     private float getTimeFromScreen(float topOfScreen, float gravity,
-                                    ObstacleZone obstacleZone) {
-        if (obstacleZone.getObstVY() < 0) return 60 * (obstacleZone.getObstY()
-                - topOfScreen) / obstacleZone.getObstVY();
-        else return 60 * (float)Math.sqrt((2 * (obstacleZone.getObstY()
+                                    ObstacleModel obstacle) {
+        if (gravity == 0) return 60 * (obstacle.getY()
+                - topOfScreen) / -obstacle.getVY();
+        else return 60 * (float)Math.sqrt((2 * (obstacle.getY()
                 - topOfScreen)) / -gravity);
     }
 
