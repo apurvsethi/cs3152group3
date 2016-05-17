@@ -119,6 +119,7 @@ public class GamingMode extends ModeController {
      */
     protected static TextureRegion background;
     protected static TextureRegion midground;
+    protected static TextureRegion foreground; 
     protected static TextureRegion tile;
     protected static TextureRegion UI;
     protected static TextureRegion CANYON;
@@ -205,6 +206,8 @@ public class GamingMode extends ModeController {
             assets.add("assets/"+name+"/Background.png");
             manager.load("assets/"+name+"/Midground.png", Texture.class);
             assets.add("assets/"+name+"/Midground.png");
+            manager.load("assets/"+name+"/Foreground.png", Texture.class);
+            assets.add("assets/"+name+"/Foreground.png");
             manager.load("assets/"+name+"/Surface.png", Texture.class);
             assets.add("assets/"+name+"/Surface.png");
             manager.load("assets/"+name+"/SurfaceEdge.png", Texture.class);
@@ -306,6 +309,7 @@ public class GamingMode extends ModeController {
 
         background = createTexture(manager, "assets/"+levelName+"/Background.png", false);
         midground = createTexture(manager, "assets/"+levelName+"/Midground.png", false);
+        foreground = createTexture(manager, "assets/"+levelName+"/Foreground.png", false); 
         tile = createTexture(manager, "assets/"+levelName+"/Surface.png", false);
         UI = createTexture(manager, UI_FILE, false);
         LOGO = createTexture(manager, LOGO_FILE, false);
@@ -1407,19 +1411,19 @@ public class GamingMode extends ModeController {
         vector = character1.parts.get(HEAD).getPosition();
         float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
         float tileY = y - (y % (canvas.getWidth() / 4));
-        SharedMethods.drawBackgrounds(canvas,ground,background,midground,tile,edge);
+        SharedMethods.drawBackgrounds(canvas,ground,background,midground,foreground,tile,edge);
 
 
         float a = (vector.y - cposYAtTime0)/(maxHandhold - cposYAtTime0);
         if (timestep%60 == 0 && character1.getEnergy() != 0)
             progressLevel = Math.min(6,Math.max(0,Math.round(a * 6 - .1f)));
 
-        canvas.draw(levelLabels[currLevel], Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
+        canvas.draw(levelLabels[currLevel], Color.WHITE, 0, y, canvas.getWidth() / 5, canvas.getHeight());
         canvas.end();
         //draws the UIs no bars or wood dials around them tho
         SharedMethods.drawUI(canvas,0,UISprite,batch);
         if (id == RACE_MODE)
-            SharedMethods.drawUI(canvas,canvas.getWidth()*3/4,UISprite,batch);
+            SharedMethods.drawUI(canvas,canvas.getWidth()*4/5,UISprite,batch);
 
         canvas.begin();
         SharedMethods.drawProgress(canvas,progressTextures,progressBackgroundTexture,progressLevel,0,y );
@@ -1485,10 +1489,10 @@ public class GamingMode extends ModeController {
         if (risingObstacle != null) {
             float lavaOrigin = risingObstacle.getHeight() * scale.y -
                     canvas.getHeight();
-            canvas.draw(lavaGlowTexture, Color.WHITE, canvas.getWidth() / 4, lavaOrigin+canvas.getHeight(), canvas.getWidth() * 3 / 4, canvas.getHeight());
-            canvas.draw(risingObstacle.getTexture(), Color.WHITE, canvas.getWidth() / 4, lavaOrigin, canvas.getWidth() * 3 / 4, canvas.getHeight());
+            canvas.draw(lavaGlowTexture, Color.WHITE, canvas.getWidth() * 0.17f, lavaOrigin+canvas.getHeight(), canvas.getWidth() * 0.66f, canvas.getHeight());
+            canvas.draw(risingObstacle.getTexture(), Color.WHITE, canvas.getWidth() * 0.17f, lavaOrigin, canvas.getWidth() * 0.66f, canvas.getHeight());
             while((lavaOrigin-=canvas.getHeight())>0){
-            	canvas.draw(lavaContTexture, Color.WHITE, canvas.getWidth() / 4, lavaOrigin, canvas.getWidth() * 3 / 4, canvas.getHeight());
+            	canvas.draw(lavaContTexture, Color.WHITE, canvas.getWidth() * 0.17f, lavaOrigin, canvas.getWidth() * 0.66f, canvas.getHeight());
             }
         }
         canvas.end();

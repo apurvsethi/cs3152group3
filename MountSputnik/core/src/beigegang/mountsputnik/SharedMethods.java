@@ -160,30 +160,32 @@ public class SharedMethods {
 
 
 
-    public static void drawBackgrounds(GameCanvas canvas, TextureRegion ground, TextureRegion background, TextureRegion midground, TextureRegion tile, TextureRegion edge){
+    public static void drawBackgrounds(GameCanvas canvas, TextureRegion ground, TextureRegion background, TextureRegion midground, TextureRegion foreground, TextureRegion tile, TextureRegion edge){
         float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
         float tileY = y - (y % (canvas.getWidth() / 4));
-        canvas.draw(background, Color.WHITE, canvas.getWidth() * 3 / 4, y, canvas.getWidth() / 4, canvas.getHeight());
-        background.flip(true,false);
-        canvas.draw(background, Color.WHITE, 0, y, canvas.getWidth() / 4, canvas.getHeight());
-        background.flip(true,false);
+        canvas.draw(background, Color.WHITE, 0, y, canvas.getWidth(), canvas.getHeight());
 
-        canvas.draw(midground, Color.WHITE, canvas.getWidth() * 3 / 4, y * MIDGROUND_SCROLL, canvas.getWidth() / 4, canvas.getHeight());
+        canvas.draw(midground, Color.WHITE, canvas.getWidth() * 4 / 5, y * MIDGROUND_SCROLL, canvas.getWidth() / 5, canvas.getHeight());
         midground.flip(true,false);
-        canvas.draw(midground, Color.WHITE, 0, y * MIDGROUND_SCROLL, canvas.getWidth() / 4, canvas.getHeight());
+        canvas.draw(midground, Color.WHITE, 0, y * MIDGROUND_SCROLL, canvas.getWidth() / 5, canvas.getHeight());
         midground.flip(true,false);
+        
+        canvas.draw(foreground, Color.WHITE, canvas.getWidth() * 4 / 5, y * FOREGROUND_SCROLL, canvas.getWidth() / 5, foreground.getTexture().getHeight());
+        foreground.flip(true,false);
+        canvas.draw(foreground, Color.WHITE, 0, y * FOREGROUND_SCROLL, canvas.getWidth() / 5, foreground.getTexture().getHeight());
+        foreground.flip(true,false);
 
         for (int counterInt = 0; counterInt < 5; counterInt++) {
-            canvas.draw(tile, Color.WHITE, canvas.getWidth() / 4, tileY, canvas.getWidth() / 4, canvas.getWidth() / 4);
-            canvas.draw(tile, Color.WHITE, canvas.getWidth() / 2, tileY, canvas.getWidth() / 4, canvas.getWidth() / 4);
-            canvas.draw(edge, Color.WHITE, canvas.getWidth() * 3 / 4, tileY, canvas.getWidth() / 16, canvas.getHeight());
+            canvas.draw(tile, Color.WHITE, canvas.getWidth() / 5, tileY, 3*canvas.getWidth() / 10, canvas.getWidth() / 4);
+            canvas.draw(tile, Color.WHITE, (canvas.getWidth()-1) / 2, tileY, 3*canvas.getWidth() / 10, canvas.getWidth() / 4);
+            canvas.draw(edge, Color.WHITE, (canvas.getWidth()-1) * 4 / 5, tileY, canvas.getWidth() / 16, canvas.getHeight());
             edge.flip(true,false);
-            canvas.draw(edge, Color.WHITE, canvas.getWidth() / 4 - canvas.getWidth() / 16, tileY, canvas.getWidth() / 16, canvas.getHeight());
+            canvas.draw(edge, Color.WHITE, canvas.getWidth() / 5 - canvas.getWidth() / 16, tileY, canvas.getWidth() / 16, canvas.getHeight());
             edge.flip(true,false);
 
             tileY += canvas.getWidth() / 4;
         }
-        canvas.draw(ground, Color.WHITE, canvas.getWidth() / 4, 0, canvas.getWidth() / 2, canvas.getHeight() / 8);
+        canvas.draw(ground, Color.WHITE, canvas.getWidth() / 5, 0, 3*canvas.getWidth() / 5, canvas.getHeight() / 8);
 
     }
 
@@ -194,7 +196,7 @@ public class SharedMethods {
     }
 
     public static void drawUI(GameCanvas canvas, float xStart, Sprite UISprite, SpriteBatch batch) {
-        UISprite.setBounds(xStart, 0, canvas.getWidth() / 4, canvas.getHeight());
+        UISprite.setBounds(xStart, 0, canvas.getWidth() / 5, canvas.getHeight());
         UISprite.setAlpha(.7f); //value can be changed.
         batch.begin();
         UISprite.draw(batch);
@@ -204,9 +206,9 @@ public class SharedMethods {
 
     public static void drawProgress(GameCanvas canvas, TextureRegion[] progressTextures, TextureRegion progressBackgroundTexture,int progressLevel, float xStart,float yStart) {
         if (progressLevel > 0) {
-            canvas.draw(progressTextures[progressLevel-1], Color.WHITE, xStart, yStart, canvas.getWidth() / 4, canvas.getHeight());
+            canvas.draw(progressTextures[progressLevel-1], Color.WHITE, xStart, yStart, canvas.getWidth() / 5, canvas.getHeight());
         }
-        canvas.draw(progressBackgroundTexture, Color.WHITE, xStart, yStart, canvas.getWidth() / 4, canvas.getHeight());
+        canvas.draw(progressBackgroundTexture, Color.WHITE, xStart, yStart, canvas.getWidth() / 5, canvas.getHeight());
 
     }
 
@@ -215,7 +217,7 @@ public class SharedMethods {
         float f = character.getEnergy();
 
         if (f<= 30){
-            lowEnergySprite.setBounds(x,0,canvas.getWidth()/4,canvas.getHeight());
+            lowEnergySprite.setBounds(x,0,canvas.getWidth()/5,canvas.getHeight());
             lowEnergySprite.setAlpha(.5f + Math.min((30-f)/f,.5f));
             batch.begin();
             lowEnergySprite.draw(batch);
@@ -224,20 +226,20 @@ public class SharedMethods {
             flashing2 --;
             canvas.begin();
             if (flashing2<f/4){
-                canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.BLACK, x, y, canvas.getWidth() / 4, canvas.getHeight());
+                canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.BLACK, x, y, canvas.getWidth() / 5, canvas.getHeight());
 
                 if (flashing2<=0)
                     flashing2 = Math.round(f/2);
             }else {
-                canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, x, y, canvas.getWidth() / 4, canvas.getHeight());
+                canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, x, y, canvas.getWidth() / 5, canvas.getHeight());
 
             }
         }else{
             canvas.begin();
-            canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, x, y, canvas.getWidth() / 4, canvas.getHeight());
+            canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, x, y, canvas.getWidth() / 5, canvas.getHeight());
         }
 
-        canvas.draw(fatigueTexture, Color.WHITE, x, y, canvas.getWidth() / 4, canvas.getHeight());
+        canvas.draw(fatigueTexture, Color.WHITE, x, y, canvas.getWidth() / 5, canvas.getHeight());
         return flashing2;
     }
 

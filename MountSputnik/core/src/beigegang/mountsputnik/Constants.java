@@ -76,7 +76,8 @@ public final class Constants {
 	public static final int MENU_CHANGE_COOLDOWN = 12;
 
 	/** Scrolling speeds for parallax. Higher floats scroll SLOWER*/
-	public static final float MIDGROUND_SCROLL = 0.75f;
+	public static final float MIDGROUND_SCROLL = 0.90f;
+	public static final float FOREGROUND_SCROLL = 0.05f; 
 
 	/** The number of handholds on the given level. TODO: remove. For testing purposes only */
 	public static final int HANDHOLD_NUMBER = 5;
