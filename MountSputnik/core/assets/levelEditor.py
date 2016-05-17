@@ -1,6 +1,6 @@
 #must include the level:    cayon/block10.json
 #							mountain/block3.json
-LEVEL_TO_LOAD = "volcano/block5.json"
+LEVEL_TO_LOAD = "sky/block10.json"
 
 '''
 Repeat Texture on Resize
@@ -358,7 +358,7 @@ class StaticObstacle(object):
 
        
 
-blockWidth = 16
+blockWidth = 19
 handhold_width = 1
 fallingObstacleWidth = 2
 scaling = 32
@@ -593,7 +593,7 @@ class LinePlayground(FloatLayout):
                 # 'gripTexture': self.directory[7:] + 'handholdgrabbed.png', 
                 'width': handhold_width * hold.scale /3.0, 
                 'height': handhold_width * hold.scale /3.0, 
-                'positionX': 8.5 + (hold.pos[0])/scaling, 
+                'positionX': 7.0 + (hold.pos[0])/scaling, 
                 'positionY': (hold.pos[1])/scaling, 
                 "friction": 1, 
                 "restitution": 1, 
@@ -610,16 +610,16 @@ class LinePlayground(FloatLayout):
                     # 'gripTexture': self.directory[7:] + 'handholdgrabbed.png', 
                     'width': handhold_width * hold.scale /3.0, 
                     'height': handhold_width * hold.scale /3.0, 
-                    'positionX': 8.5 + (hold.pos[0])/scaling, 
+                    'positionX': 7.0 + (hold.pos[0])/scaling, 
                     'positionY': (hold.pos[1])/scaling, 
                     "friction": 1, 
                     "restitution": 1, 
                     "crumble": hold.crumbling,
                     "slip": hold.slipping,
                     "movement": {
-                        'startX': 8.5 + (hold.pos[0])/scaling, 
+                        'startX': 7.0 + (hold.pos[0])/scaling, 
                         'startY': (hold.pos[1])/scaling, 
-                        'endX': 8.5 + (endHold.pos[0])/scaling, 
+                        'endX': 7.0 + (endHold.pos[0])/scaling, 
                         'endY': (endHold.pos[1])/scaling, 
                         'speed': hold.speed
                     }
@@ -627,7 +627,7 @@ class LinePlayground(FloatLayout):
         for i in range(len(staticObstacles)): 
             obstacle = staticObstacles[i]
             level['static']['obstacle'+str(i)] = {
-                'x': 8.5 + obstacle.pos[0]/scaling, 
+                'x': 7.0 + obstacle.pos[0]/scaling, 
                 'y': obstacle.pos[1]/scaling, 
                 'size': obstacle.scale/3.0    
             }
@@ -635,7 +635,7 @@ class LinePlayground(FloatLayout):
         for i in range(len(fallingObstacles)): 
             obstacle = fallingObstacles[i]
             level['obstacles']['obstacle'+str(i)] = {
-                'originX': 8.5 + obstacle.pos[0]/scaling, 
+                'originX': 7.0 + obstacle.pos[0]/scaling, 
                 'originY': (obstacle.pos[1]/scaling) + 18, 
                 'width': obstacle.width/3.0, 
                 'height': obstacle.height/3.0, 
@@ -671,9 +671,9 @@ class LinePlayground(FloatLayout):
     			else: 
     				slip = 0
     			speed = hold['movement']['speed']
-    			startX = (hold['movement']['startX']-8.5)*scaling
+    			startX = (hold['movement']['startX']-7.0)*scaling
     			startY = hold['movement']['startY']*scaling
-    			endX = (hold['movement']['endX']-8.5)*scaling
+    			endX = (hold['movement']['endX']-7.0)*scaling
     			endY = hold['movement']['endY']*scaling
     			movingHandholds.append(MovingHandhold(startX,startY,scale,crumble,slip,speed))
     			movingHandholds.append(MovingHandhold(endX,endY,scale,crumble,slip,speed))
@@ -687,7 +687,7 @@ class LinePlayground(FloatLayout):
     				slip = hold['slip']
     			else: 
     				slip = 0
-    			startX = (hold['positionX']-8.5)*scaling
+    			startX = (hold['positionX']-7.0)*scaling
     			startY = hold['positionY']*scaling
     			handholds.append(Handhold(startX, startY, scale, crumble, slip))
     	if not 'static' in level: 
@@ -695,7 +695,7 @@ class LinePlayground(FloatLayout):
     	else: 
 	    	for s in level['static']: 
 	    	    static = level['static'][s]
-	    	    x = (static['x']-8.5)*scaling
+	    	    x = (static['x']-7.0)*scaling
 	    	    y = static['y']*scaling
 	    	    size = static['size']*3.0
 	    	    staticObstacles.append(StaticObstacle(x,y,size))
@@ -704,7 +704,7 @@ class LinePlayground(FloatLayout):
 	   	else: 
 		    for o in level['obstacles']:
 	    		obstacle = level['obstacles'][o]
-	    		originX = (obstacle['originX']-8.5)*scaling
+	    		originX = (obstacle['originX']-7.0)*scaling
 	    		originY = obstacle['originY']*scaling - 18
 	    		width = obstacle['width']*3
 	    		height = obstacle['height']*3
