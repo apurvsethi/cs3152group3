@@ -26,9 +26,9 @@ public class MenuMode extends ModeController {
 	private JsonValue saveGame = (jsonReader.parse(Gdx.files.internal("savegame.json"))).get("levels");
 	private boolean levelSelectAllowed [] = {true, saveGame.getBoolean("canyon"), saveGame.getBoolean("waterfall"), saveGame.getBoolean("mountain"), saveGame.getBoolean("volcano"), saveGame.getBoolean("sky"), saveGame.getBoolean("space")};
 
-	private static final String GEOMETRIC_FONT_FILE = "Fonts/geometric.ttf";
-	private static BitmapFont geometricFontNormal;
-	private static BitmapFont geometricFontSelected;
+	private static final String FONT_FILE = "Fonts/mastodon.ttf";
+	private static BitmapFont fontNormal;
+	private static BitmapFont fontSelected;
 
 	private static final String BACKGROUND_FILE = "Menu/StartMenu/Background.png";
 	private static final String TEXTBOX_FILE = "Menu/Text Box.png";
@@ -63,20 +63,20 @@ public class MenuMode extends ModeController {
 		if (assetState != AssetState.EMPTY) return;
 		assetState = AssetState.LOADING;
 
-		FreetypeFontLoader.FreeTypeFontLoaderParameter geometricNormal = new
+		FreetypeFontLoader.FreeTypeFontLoaderParameter normal = new
 				FreetypeFontLoader.FreeTypeFontLoaderParameter();
-		geometricNormal.fontFileName = GEOMETRIC_FONT_FILE;
-		geometricNormal.fontParameters.size = (int)(45 * Gdx.graphics.getDensity());
-		geometricNormal.fontParameters.color = Color.BROWN;
-		assetManager.load("Normal" + GEOMETRIC_FONT_FILE, BitmapFont.class, geometricNormal);
-		assets.add("Normal" + GEOMETRIC_FONT_FILE);
-		FreetypeFontLoader.FreeTypeFontLoaderParameter geometricSelected = new
+		normal.fontFileName = FONT_FILE;
+		normal.fontParameters.size = (int)(45 * Gdx.graphics.getDensity());
+		normal.fontParameters.color = Color.BROWN;
+		assetManager.load("Normal" + FONT_FILE, BitmapFont.class, normal);
+		assets.add("Normal" + FONT_FILE);
+		FreetypeFontLoader.FreeTypeFontLoaderParameter selected = new
 				FreetypeFontLoader.FreeTypeFontLoaderParameter();
-		geometricSelected.fontFileName = GEOMETRIC_FONT_FILE;
-		geometricSelected.fontParameters.size = (int)(52 * Gdx.graphics.getDensity());
-		geometricSelected.fontParameters.color = Color.FIREBRICK;
-		assetManager.load("Selected" + GEOMETRIC_FONT_FILE, BitmapFont.class, geometricSelected);
-		assets.add("Selected" + GEOMETRIC_FONT_FILE);
+		selected.fontFileName = FONT_FILE;
+		selected.fontParameters.size = (int)(52 * Gdx.graphics.getDensity());
+		selected.fontParameters.color = Color.FIREBRICK;
+		assetManager.load("Selected" + FONT_FILE, BitmapFont.class, selected);
+		assets.add("Selected" + FONT_FILE);
 
 		manager.load(BACKGROUND_FILE, Texture.class);
 		assets.add(BACKGROUND_FILE);
@@ -114,8 +114,8 @@ public class MenuMode extends ModeController {
 		
 		if (assetState != AssetState.LOADING) return;
 
-		geometricFontNormal = manager.get("Normal" + GEOMETRIC_FONT_FILE, BitmapFont.class);
-		geometricFontSelected = manager.get("Selected" + GEOMETRIC_FONT_FILE, BitmapFont.class);
+		fontNormal = manager.get("Normal" + FONT_FILE, BitmapFont.class);
+		fontSelected = manager.get("Selected" + FONT_FILE, BitmapFont.class);
 
 		background = createTexture(manager, BACKGROUND_FILE, false);
 		textbox = createTexture(manager, TEXTBOX_FILE, false);
@@ -244,14 +244,14 @@ public class MenuMode extends ModeController {
 
 			float drawXName = -canvas.getWidth() * 0.12f;
 			float drawXScheme = canvas.getWidth() * 0.15f;
-			BitmapFont font = currSelection == 0 ? geometricFontSelected : geometricFontNormal;
+			BitmapFont font = currSelection == 0 ? fontSelected : fontNormal;
 			drawY = bottomOfScreen - canvas.getHeight() * 0.211f;
 
 			for (int i = 0; i < currentSchemes.length; i++) {
 				canvas.drawTextCentered(settingsOptions[i], font, drawXName, drawY);
 				canvas.drawTextCentered(currentSchemes[i], font, drawXScheme, drawY);
 				drawY -= canvas.getHeight() * 0.055;
-				font = currSelection == i + 1 ? geometricFontSelected : geometricFontNormal;
+				font = currSelection == i + 1 ? fontSelected : fontNormal;
 			}
 
 			canvas.drawTextCentered(settingsOptions[settingsOptions.length - 1], font, drawY);
@@ -260,11 +260,11 @@ public class MenuMode extends ModeController {
 			canvas.draw(textbox, Color.WHITE, canvas.getWidth() * 0.25f, bottomOfScreen - canvas.getHeight() * 0.04f,
 					canvas.getWidth() * 0.5f, canvas.getHeight() * 0.5f);
 
-			drawY = bottomOfScreen - canvas.getHeight() * 0.1725f;
+			drawY = bottomOfScreen - canvas.getHeight() * 0.18f;
 
 			for (int i = 0; i < menuOptions.length; i++) {
-				if (i == currSelection) canvas.drawTextCentered(menuOptions[i], geometricFontSelected, drawY);
-				else canvas.drawTextCentered(menuOptions[i], geometricFontNormal, drawY);
+				if (i == currSelection) canvas.drawTextCentered(menuOptions[i], fontSelected, drawY);
+				else canvas.drawTextCentered(menuOptions[i], fontNormal, drawY);
 				drawY -= canvas.getHeight() * 0.055f;
 			}
 		}

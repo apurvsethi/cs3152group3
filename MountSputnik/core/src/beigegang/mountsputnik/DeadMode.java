@@ -18,9 +18,11 @@ public class DeadMode extends ModeController {
      */
     protected AssetState assetState = AssetState.EMPTY;
 
-    private static final String GEOMETRIC_FONT_FILE = "Fonts/geometric.ttf";
-    private static BitmapFont geometricFontNormal;
-    private static BitmapFont geometricFontSelected;
+    private static final String TITLE_FONT_FILE = "Fonts/kremlin.ttf";
+    private static final String FONT_FILE = "Fonts/mastodon.ttf";
+    private static BitmapFont titleFont;
+    private static BitmapFont fontNormal;
+    private static BitmapFont fontSelected;
 
     private static final String OVERLAY_FILE = "Menu/Overlay.jpg";
     private static final String TEXTBOX_FILE = "Menu/Text Box.png";
@@ -47,20 +49,27 @@ public class DeadMode extends ModeController {
 
         assetState = AssetState.LOADING;
 
-        FreetypeFontLoader.FreeTypeFontLoaderParameter geometricNormal = new
+        FreetypeFontLoader.FreeTypeFontLoaderParameter title = new
                 FreetypeFontLoader.FreeTypeFontLoaderParameter();
-        geometricNormal.fontFileName = GEOMETRIC_FONT_FILE;
-        geometricNormal.fontParameters.size = (int)(45 * Gdx.graphics.getDensity());
-        geometricNormal.fontParameters.color = Color.BROWN;
-        assetManager.load("Normal" + GEOMETRIC_FONT_FILE, BitmapFont.class, geometricNormal);
-        assets.add("Normal" + GEOMETRIC_FONT_FILE);
-        FreetypeFontLoader.FreeTypeFontLoaderParameter geometricSelected = new
+        title.fontFileName = TITLE_FONT_FILE;
+        title.fontParameters.size = (int)(60 * Gdx.graphics.getDensity());
+        title.fontParameters.color = Color.BROWN;
+        assetManager.load(TITLE_FONT_FILE, BitmapFont.class, title);
+        assets.add(TITLE_FONT_FILE);
+        FreetypeFontLoader.FreeTypeFontLoaderParameter normal = new
                 FreetypeFontLoader.FreeTypeFontLoaderParameter();
-        geometricSelected.fontFileName = GEOMETRIC_FONT_FILE;
-        geometricSelected.fontParameters.size = (int)(52 * Gdx.graphics.getDensity());
-        geometricSelected.fontParameters.color = Color.FIREBRICK;
-        assetManager.load("Selected" + GEOMETRIC_FONT_FILE, BitmapFont.class, geometricSelected);
-        assets.add("Selected" + GEOMETRIC_FONT_FILE);
+        normal.fontFileName = FONT_FILE;
+        normal.fontParameters.size = (int)(45 * Gdx.graphics.getDensity());
+        normal.fontParameters.color = Color.BROWN;
+        assetManager.load("Normal" + FONT_FILE, BitmapFont.class, normal);
+        assets.add("Normal" + FONT_FILE);
+        FreetypeFontLoader.FreeTypeFontLoaderParameter selected = new
+                FreetypeFontLoader.FreeTypeFontLoaderParameter();
+        selected.fontFileName = FONT_FILE;
+        selected.fontParameters.size = (int)(52 * Gdx.graphics.getDensity());
+        selected.fontParameters.color = Color.FIREBRICK;
+        assetManager.load("Selected" + FONT_FILE, BitmapFont.class, selected);
+        assets.add("Selected" + FONT_FILE);
 
         manager.load(TEXTBOX_FILE, Texture.class);
         assets.add(TEXTBOX_FILE);
@@ -80,8 +89,9 @@ public class DeadMode extends ModeController {
     public void loadContent(AssetManager manager) {
         if (assetState != AssetState.LOADING) return;
 
-        geometricFontNormal = manager.get("Normal" + GEOMETRIC_FONT_FILE, BitmapFont.class);
-        geometricFontSelected = manager.get("Selected" + GEOMETRIC_FONT_FILE, BitmapFont.class);
+        titleFont = manager.get(TITLE_FONT_FILE, BitmapFont.class);
+        fontNormal = manager.get("Normal" + FONT_FILE, BitmapFont.class);
+        fontSelected = manager.get("Selected" + FONT_FILE, BitmapFont.class);
 
         overlay = createTexture(manager, OVERLAY_FILE, false);
         textbox = createTexture(manager, TEXTBOX_FILE, false);
@@ -124,13 +134,13 @@ public class DeadMode extends ModeController {
         canvas.draw(textbox, Color.WHITE, (canvas.getWidth() - textboxWidth) / 2,
                 bottomOfScreen + (canvas.getHeight() - textboxHeight) / 2,
                 textboxWidth, textboxHeight);
-        float drawY = bottomOfScreen + canvas.getHeight() * 0.116f;
-        canvas.drawTextCentered("YOU DIED!", geometricFontNormal, drawY);
+        float drawY = bottomOfScreen + canvas.getHeight() * 0.125f;
+        canvas.drawTextCentered("YOU DIED!", titleFont, drawY);
         BitmapFont font;
-        drawY -= canvas.getHeight() * 0.066f;
+        drawY -= canvas.getHeight() * 0.08f;
 
         for (int i = 0; i < menuOptions.length; i++) {
-            font = currSelection == i ? geometricFontSelected : geometricFontNormal;
+            font = currSelection == i ? fontSelected : fontNormal;
             canvas.drawTextCentered(menuOptions[i], font, drawY);
             drawY -= canvas.getHeight() * 0.055;
         }
