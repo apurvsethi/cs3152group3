@@ -1482,9 +1482,7 @@ public class GamingMode extends ModeController {
         canvas.end();
 
         canvas.begin();
-        if (complete) {
-            canvas.drawText("YOU WIN", font, canvas.getWidth() / 2, canvas.getCamera().position.y);
-        }
+       
 
         if (risingObstacle != null) {
             float lavaOrigin = risingObstacle.getHeight() * scale.y -

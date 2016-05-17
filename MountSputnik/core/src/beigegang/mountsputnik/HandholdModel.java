@@ -182,7 +182,7 @@ public class HandholdModel extends GameObject{
 	public void draw(GameCanvas canvas) {
 
 		//TODO: remove this if check once all level blocks only contain handholds within the playable area
-		if (getX() * drawPositionScale.x > canvas.getWidth() / 4 && getX() * drawPositionScale.x < canvas.getWidth() * 3 / 4) {
+		if (getX() * drawPositionScale.x > canvas.getWidth() / 5 && getX() * drawPositionScale.x < canvas.getWidth() * 4 / 5) {
 			if (isGlowing){
 				canvas.draw(glowTexture, Color.WHITE, origin.x, origin.y, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
 						getAngle(), drawSizeScale.x, drawSizeScale.y);
