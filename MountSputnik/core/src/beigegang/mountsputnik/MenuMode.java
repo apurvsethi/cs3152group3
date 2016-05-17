@@ -32,22 +32,25 @@ public class MenuMode extends ModeController {
 
 	private static final String BACKGROUND_FILE = "Menu/StartMenu/Background.png";
 	private static final String TEXTBOX_FILE = "Menu/Text Box.png";
-	private static final String LEVEL_SELECT_OPTION_FILES[] = {"Menu/StartMenu/LevelSelect/Tutorial.png","Menu/StartMenu/LevelSelect/Canyon.png","Menu/StartMenu/LevelSelect/Waterfall.png",
-			"Menu/StartMenu/LevelSelect/Volcano.png","Menu/StartMenu/LevelSelect/Snowy.png","Menu/StartMenu/LevelSelect/Sky.png","Menu/StartMenu/LevelSelect/Space.png"};
 	private static final String LEVEL_LOCKED_FILE = "Menu/StartMenu/LevelSelect/Locked.png";
-	private static final String MENU_BACK_FILE = "Menu/StartMenu/Menu.png";
-			
+	protected static final String LEVEL_NAMES[] = {"tutorial", "canyon", "waterfall", "volcano", "mountain", "sky", "space"};
+
 	/**
 	 * Texture asset for files used, parts, etc.
 	 */
 	private static TextureRegion background;
 	private static TextureRegion textbox;
-	private static TextureRegion[] levelSelectOptions = new TextureRegion[LEVEL_SELECT_OPTION_FILES.length];
-	private static TextureRegion menuBack;
 	private static TextureRegion levelLocked;
+	private static TextureRegion[] levelSelectGrounds = new TextureRegion[LEVEL_NAMES.length];
+	private static TextureRegion[] levelSelectBackgrounds = new TextureRegion[LEVEL_NAMES.length];
+	private static TextureRegion[] levelSelectMidgrounds = new TextureRegion[LEVEL_NAMES.length];
+	private static TextureRegion[] levelSelectForegrounds = new TextureRegion[LEVEL_NAMES.length];
+	private static TextureRegion[] levelSelectSurfaces = new TextureRegion[LEVEL_NAMES.length];
+	private static TextureRegion[] levelSelectEdges = new TextureRegion[LEVEL_NAMES.length];
 
 	private static String[] menuOptions = {"Start", "Race Mode", "Level Select", "Settings", "Quit"};
 	private static int exitCodes[] = {EXIT_GAME_RESTART_LEVEL, EXIT_RACE, EXIT_LEVEL_SELECT, EXIT_SETTINGS, EXIT_QUIT};
+	private static String[][] levelSelectOptions = {{"Tutorial", "Snowy Mountain"}, {"Canyon", "Sky"}, {"Waterfall", "Space"}, {"Volcano", "Menu"}};
 	private static int levelSelectCodes[] = {LEVEL_TUTORIAL, LEVEL_CANYON, LEVEL_WATERFALL, LEVEL_VOLCANO, LEVEL_SNOWY_MOUNTAIN, LEVEL_SKY, LEVEL_SPACE};
 	private static String[] settingsOptions = {"Trigger Scheme", "Stick Scheme", "Menu"};
 	private static String[] currentSchemes = {"Classic", "Classic"};
@@ -78,18 +81,25 @@ public class MenuMode extends ModeController {
 		assetManager.load("Selected" + FONT_FILE, BitmapFont.class, selected);
 		assets.add("Selected" + FONT_FILE);
 
-		manager.load(BACKGROUND_FILE, Texture.class);
-		assets.add(BACKGROUND_FILE);
+		for(String name : LEVEL_NAMES){
+			manager.load("assets/"+name+"/LevelStart.png", Texture.class);
+			assets.add("assets/"+name+"/LevelStart.png");
+			manager.load("assets/"+name+"/Background.png", Texture.class);
+			assets.add("assets/"+name+"/Background.png");
+			manager.load("assets/"+name+"/Midground.png", Texture.class);
+			assets.add("assets/"+name+"/Midground.png");
+			manager.load("assets/"+name+"/Foreground.png", Texture.class);
+			assets.add("assets/"+name+"/Foreground.png");
+			manager.load("assets/"+name+"/Surface.png", Texture.class);
+			assets.add("assets/"+name+"/Surface.png");
+			manager.load("assets/"+name+"/SurfaceEdge.png", Texture.class);
+			assets.add("assets/"+name+"/SurfaceEdge.png");
+		}
+
 		manager.load(TEXTBOX_FILE, Texture.class);
 		assets.add(TEXTBOX_FILE);
-		manager.load(MENU_BACK_FILE, Texture.class);
-		assets.add(MENU_BACK_FILE);
 		manager.load(LEVEL_LOCKED_FILE, Texture.class);
 		assets.add(LEVEL_LOCKED_FILE);
-		for (String LEVEL_SELECT_OPTION_FILE : LEVEL_SELECT_OPTION_FILES) {
-			manager.load(LEVEL_SELECT_OPTION_FILE, Texture.class);
-			assets.add(LEVEL_SELECT_OPTION_FILE);
-		}
 	}
 
 	/**
@@ -119,10 +129,14 @@ public class MenuMode extends ModeController {
 
 		background = createTexture(manager, BACKGROUND_FILE, false);
 		textbox = createTexture(manager, TEXTBOX_FILE, false);
-		menuBack = createTexture(manager, MENU_BACK_FILE, false);
 		levelLocked = createTexture(manager, LEVEL_LOCKED_FILE, false);
-		for (int i = 0; i < LEVEL_SELECT_OPTION_FILES.length; i++) {
-			levelSelectOptions[i] = createTexture(manager, LEVEL_SELECT_OPTION_FILES[i], false);
+		for (int i = 0; i < LEVEL_NAMES.length; i++) {
+			levelSelectGrounds[i] = createTexture(manager, "assets/" + LEVEL_NAMES[i] + "/LevelStart.png", false);
+			levelSelectBackgrounds[i] = createTexture(manager, "assets/" + LEVEL_NAMES[i] + "/Background.png", false);
+			levelSelectMidgrounds[i] = createTexture(manager, "assets/" + LEVEL_NAMES[i] + "/Midground.png", false);
+			levelSelectForegrounds[i] = createTexture(manager, "assets/" + LEVEL_NAMES[i] + "/Foreground.png", false);
+			levelSelectSurfaces[i] = createTexture(manager, "assets/" + LEVEL_NAMES[i] + "/Surface.png", false);
+			levelSelectEdges[i] = createTexture(manager, "assets/" + LEVEL_NAMES[i] + "/SurfaceEdge.png", false);
 		}
 		assetState = AssetState.COMPLETE;
 	}
@@ -139,24 +153,38 @@ public class MenuMode extends ModeController {
 
 		InputController input = InputController.getInstance(0);
 
-		if (changeCooldown == 0 &&
-				((Math.abs(input.getVerticalL()) > 0.5 && !input.getStickScheme()) || 
-				 (Math.abs(input.getVerticalR()) > 0.5 && input.getStickScheme()))) {
+		if (changeCooldown == 0 && (currView == SETTINGS || currView == MAIN_MENU) &&
+				Math.abs(input.getVerticalL()) > 0.5) {
 			SoundController.get(SoundController.SCROLL_SOUND).play();
-			int selectionLength = currView == MAIN_MENU? menuOptions.length : 
-				(currView == LEVEL_SELECT ? levelSelectOptions.length + 1 : 1);
-			if (currView == SETTINGS){
-				selectionLength = settingsOptions.length; 
+
+			currSelection += input.getVerticalL() > 0.5 ? -1 : 1;
+			currSelection = currView == SETTINGS ? (currSelection +
+					settingsOptions.length) % settingsOptions.length :
+					(currSelection + menuOptions.length) % menuOptions.length;
+
+			changeCooldown = MENU_CHANGE_COOLDOWN;
+		}
+		else if (changeCooldown == 0 && currView == LEVEL_SELECT &&
+				(Math.abs(input.getVerticalL()) > 0.5 || Math.abs(input.getHorizontalL()) > 0.5)) {
+			SoundController.get(SoundController.SCROLL_SOUND).play();
+
+			int length = levelSelectOptions.length * levelSelectOptions[0].length;
+			if (Math.abs(input.getVerticalL()) > 0.5) {
+				int oldSelection = currSelection;
+				currSelection += input.getVerticalL() > 0.5 ? -1 : 1;
+				if (oldSelection / levelSelectOptions.length != ((currSelection + length) % length) / levelSelectOptions.length)
+					currSelection += levelSelectOptions.length;
 			}
-			currSelection = (currSelection + (input.getVerticalL() > 0.5 ? -1 : (input.getVerticalL() < -0.5 ? 1 : 0))+ selectionLength) % selectionLength;
-			if(input.getStickScheme())
-				currSelection = (currSelection + (input.getVerticalR() > 0.5 ? -1 : (input.getVerticalR() < -0.5 ? 1 : 0))+ selectionLength) % selectionLength;
+			if (Math.abs(input.getHorizontalL()) > 0.5)
+				currSelection += input.getHorizontalL() > 0.5 ? levelSelectOptions.length : -levelSelectOptions.length;
+			currSelection = (currSelection + length) % length;
+
 			changeCooldown = MENU_CHANGE_COOLDOWN;
 		}
 
 		if (input.didSelect() && currView == LEVEL_SELECT){
 			//play sound
-			if (currSelection >= levelSelectOptions.length){
+			if (currSelection == levelSelectCodes.length){
 				SoundController.get(SoundController.DECLINE_SOUND).play();
 				listener.exitScreen(this, backCode);
 			}
@@ -164,9 +192,7 @@ public class MenuMode extends ModeController {
 				SoundController.get(SoundController.SELECT_SOUND).play();
 				((GameEngine) listener).exitLevelSelect(this, levelSelectCodes[currSelection]);
 			}
-			else {
-				SoundController.get(SoundController.DECLINE_SOUND).play();
-			}
+			else SoundController.get(SoundController.DECLINE_SOUND).play();
 		}
 		else if (input.didSelect() && currView == SETTINGS){
 			if (currSelection == 0) {
@@ -195,48 +221,37 @@ public class MenuMode extends ModeController {
 		canvas.clear();
 
 		float bottomOfScreen = canvas.getCamera().position.y - canvas.getHeight() / 2;
-		float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
 
 		canvas.begin();
-		canvas.draw(background, Color.WHITE, 0, y,canvas.getWidth(),canvas.getHeight());
+		if (currView == SETTINGS || currView == MAIN_MENU || currSelection == LEVEL_NAMES.length)
+			canvas.draw(background, Color.WHITE, 0, bottomOfScreen, canvas.getWidth(), canvas.getHeight());
+		else SharedMethods.drawBackgrounds(canvas, levelSelectGrounds[currSelection], levelSelectBackgrounds[currSelection],
+				levelSelectMidgrounds[currSelection], levelSelectForegrounds[currSelection], levelSelectSurfaces[currSelection],
+				levelSelectEdges[currSelection]);
 		canvas.end();
 
 		canvas.begin();
-		float drawY;
+		float drawY = bottomOfScreen;
 
 		if (currView == LEVEL_SELECT) {
-			drawY = LEVEL_SELECT_DRAW_LOCATION * canvas.getHeight() + y;
-			int j = 0;
-			for (int i = 0; i < LEVEL_SELECT_ROWS; i++){
-				int columns = levelSelectOptions.length / LEVEL_SELECT_ROWS + (levelSelectOptions.length % LEVEL_SELECT_ROWS <= i? 1 : 0);
-				int drawX = - (columns / 2) * (levelSelectOptions[0].getRegionWidth() + LEVEL_SELECT_SPACING)
-						 + (columns % 2 == 1 ? 0 : levelSelectOptions[0].getRegionWidth() / 2 + LEVEL_SELECT_SPACING / 2);
-				for (int k = 0; k < columns; k++){
-					if (currSelection == j){
-						canvas.draw(levelSelectOptions[j], Color.TEAL, levelSelectOptions[j].getRegionWidth() / 2,
-								levelSelectOptions[j].getRegionHeight() / 2, (canvas.getWidth() / 2) + drawX, drawY, 0, 0.75f, 0.75f);
-					}else {
-						canvas.draw(levelSelectOptions[j], Color.WHITE, levelSelectOptions[j].getRegionWidth() / 2,
-								levelSelectOptions[j].getRegionHeight() / 2, (canvas.getWidth() / 2) + drawX, drawY, 0, 0.75f, 0.75f);
-					}
-					if (!levelSelectAllowed[j]){
-						canvas.draw(levelLocked, Color.WHITE, levelLocked.getRegionWidth() / 2,
-								levelLocked.getRegionHeight() / 2, (canvas.getWidth() / 2) + drawX, drawY, 0, 0.75f, 0.75f);
-					}
-					drawX += levelSelectOptions[j].getRegionWidth() + LEVEL_SELECT_SPACING;
-					j++;
+			float textboxWidth = canvas.getWidth() * 0.75f;
+			float textboxHeight = canvas.getHeight() * 1.45f;
+			canvas.draw(textbox, Color.WHITE, (canvas.getWidth() - textboxWidth) / 2,
+					bottomOfScreen + (canvas.getHeight() - textboxHeight) / 2 - canvas.getHeight() * 0.01f,
+					textboxWidth, textboxHeight);
+
+			float drawX = -canvas.getWidth() * 0.15f;
+			BitmapFont font;
+			drawY += canvas.getHeight() * 0.27f;
+
+			for (int i = 0; i < levelSelectOptions.length; i++) {
+				for (int j = 0; j < levelSelectOptions[i].length; j++) {
+					font = (currSelection == i + levelSelectOptions.length * j) ? fontSelected : fontNormal;
+					canvas.drawTextCentered(levelSelectOptions[i][j], font, drawX, drawY);
+					drawX *= -1;
 				}
-				drawY -= levelSelectOptions[0].getRegionHeight() + LEVEL_SELECT_SPACING;
+				drawY -= canvas.getHeight() * 0.18;
 			}
-
-			if (currSelection == NUM_LEVELS) {
-				canvas.draw(menuBack, Color.TEAL, menuBack.getRegionWidth() / 2,
-						menuBack.getRegionHeight() / 2, (canvas.getWidth() / 2), drawY, 0, 0.75f, 0.75f);
-			} else {
-				canvas.draw(menuBack, Color.WHITE, menuBack.getRegionWidth() / 2,
-						menuBack.getRegionHeight() / 2, (canvas.getWidth() / 2), drawY, 0, 0.75f, 0.75f);
-			}
-
 		}
 		else if (currView == SETTINGS) {
 			canvas.draw(textbox, Color.WHITE, canvas.getWidth() * 0.2f, bottomOfScreen + canvas.getHeight() * 0.07f,
@@ -245,7 +260,7 @@ public class MenuMode extends ModeController {
 			float drawXName = -canvas.getWidth() * 0.12f;
 			float drawXScheme = canvas.getWidth() * 0.15f;
 			BitmapFont font = currSelection == 0 ? fontSelected : fontNormal;
-			drawY = bottomOfScreen - canvas.getHeight() * 0.211f;
+			drawY -= canvas.getHeight() * 0.211f;
 
 			for (int i = 0; i < currentSchemes.length; i++) {
 				canvas.drawTextCentered(settingsOptions[i], font, drawXName, drawY);
@@ -253,14 +268,13 @@ public class MenuMode extends ModeController {
 				drawY -= canvas.getHeight() * 0.055;
 				font = currSelection == i + 1 ? fontSelected : fontNormal;
 			}
-
 			canvas.drawTextCentered(settingsOptions[settingsOptions.length - 1], font, drawY);
 		}
 		else {
 			canvas.draw(textbox, Color.WHITE, canvas.getWidth() * 0.25f, bottomOfScreen - canvas.getHeight() * 0.04f,
 					canvas.getWidth() * 0.5f, canvas.getHeight() * 0.5f);
 
-			drawY = bottomOfScreen - canvas.getHeight() * 0.18f;
+			drawY -= canvas.getHeight() * 0.18f;
 
 			for (int i = 0; i < menuOptions.length; i++) {
 				if (i == currSelection) canvas.drawTextCentered(menuOptions[i], fontSelected, drawY);
