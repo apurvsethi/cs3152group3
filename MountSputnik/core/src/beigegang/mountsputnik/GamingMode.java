@@ -65,9 +65,9 @@ public class GamingMode extends ModeController {
      * Strings for files used, string[] for parts, etc.
      */
     protected static final String LEVEL_NAMES[] = {"tutorial", "canyon", "waterfall", "volcano", "mountain", "sky", "space"}; //TODO: change second canyon to waterfall
-    protected static final String LAVA_FILE = "assets/lava.png";
-    protected static final String LAVA_GLOW_FILE = "assets/lavaGlow.png";
-    protected static final String LAVA_CONT_FILE = "assets/lavaCont.png";
+    protected static final String LAVA_FILE = "assets/volcano/Lava.png";
+    protected static final String LAVA_GLOW_FILE = "assets/volcano/LavaGlow.png";
+    protected static final String LAVA_CONT_FILE = "assets/volcano/LavaCont.png";
     protected static final String UI_FILE = "assets/HUD4timelessNoBackground.png";
     protected static final String[] LEVEL_LABEL_FILES = {"assets/Tutorial.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Skycloud.png", "assets/Canyon.png"};
     protected static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
