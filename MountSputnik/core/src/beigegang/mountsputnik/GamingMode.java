@@ -169,8 +169,6 @@ public class GamingMode extends ModeController {
     /** whether the player has moved yet */;
     protected boolean moved;
 
-    /** AssetManager for loading textures for Handholds*/
-    protected AssetManager assetManager;
     public static float maxLevelHeight;
 
     protected PauseMode pauseMode;
@@ -184,7 +182,7 @@ public class GamingMode extends ModeController {
 
     /**
      * Preloads the assets for this controller.
-     * <p/>
+     *
      * Opted for nonstatic loaders, but still want the assets themselves to be
      * static. So AssetState determines the current loading state, only load if
      * assets are not already loaded.
@@ -201,98 +199,54 @@ public class GamingMode extends ModeController {
         deadMode.preLoadContent(manager);
         victoryMode.preLoadContent(manager);
 
-        for(String name : LEVEL_NAMES){
-            manager.load("assets/"+name+"/Background.png", Texture.class);
-            assets.add("assets/"+name+"/Background.png");
-            manager.load("assets/"+name+"/Midground.png", Texture.class);
-            assets.add("assets/"+name+"/Midground.png");
-            manager.load("assets/"+name+"/Foreground.png", Texture.class);
-            assets.add("assets/"+name+"/Foreground.png");
-            manager.load("assets/"+name+"/Surface.png", Texture.class);
-            assets.add("assets/"+name+"/Surface.png");
-            manager.load("assets/"+name+"/SurfaceEdge.png", Texture.class);
-            assets.add("assets/"+name+"/SurfaceEdge.png");
-            manager.load("assets/"+name+"/LevelStart.png", Texture.class);
-            assets.add("assets/"+name+"/LevelStart.png");
-            manager.load("assets/"+name+"/StaticObstacle.png", Texture.class);
-            assets.add("assets/"+name+"/StaticObstacle.png");
-            manager.load("assets/"+name+"/Rockbust_Animation.png", Texture.class);
-            assets.add("assets/"+name+"/Rockbust_Animation.png");
-
-
-        }
-        for (String name:LEVEL_LABEL_FILES){
-            manager.load(name,Texture.class);
-            assets.add(name);
+        for (String name : LEVEL_NAMES) {
+            loadAddTexture("assets/"+name+"/Background.png");
+            loadAddTexture("assets/"+name+"/Midground.png");
+            loadAddTexture("assets/"+name+"/Foreground.png");
+            loadAddTexture("assets/"+name+"/Surface.png");
+            loadAddTexture("assets/"+name+"/SurfaceEdge.png");
+            loadAddTexture("assets/"+name+"/LevelStart.png");
+            loadAddTexture("assets/"+name+"/StaticObstacle.png");
+            loadAddTexture("assets/"+name+"/Rockbust_Animation.png");
         }
         for (counterInt = 0; counterInt<ENERGY_TEXTURES.length; counterInt++){
             String name = "Energy/e" + counterInt + ".png";
-            manager.load(name, Texture.class);
-            assets.add(name);
+            loadAddTexture(name);
             ENERGY_TEXTURES[counterInt] = name;
         }
         for (counterInt = 1; counterInt<=PROGRESS_TEXTURES.length; counterInt++){
             String name = "Progress/p" + counterInt + ".png";
-            manager.load(name, Texture.class);
-            assets.add(name);
+            loadAddTexture(name);
             PROGRESS_TEXTURES[counterInt-1] = name;
         }
-        manager.load(UI_FILE, Texture.class);
-        assets.add(UI_FILE);
+        for (Entry<String, Integer> entry : NUM_HANDHOLDS.entrySet())
+            for (counterInt = 1; counterInt <= entry.getValue(); counterInt++)
+                loadAddTexture("assets/"+entry.getKey()+"/Handhold"+counterInt+".png");
+        for (String name : LEVEL_LABEL_FILES) loadAddTexture(name);
+        for (String PART_TEXTURE : PART_TEXTURES) loadAddTexture(PART_TEXTURE);
+        for (String SHADOW_TEXTURE: SHADOW_TEXTURES) loadAddTexture(SHADOW_TEXTURE);
+        for (String TUTORIAL_TEXTURE : TUTORIAL_TEXTURES) loadAddTexture(TUTORIAL_TEXTURE);
 
-        manager.load(LOGO_FILE, Texture.class);
-        assets.add(LOGO_FILE);
-        manager.load(LAVA_FILE, Texture.class);
-        assets.add(LAVA_FILE);
-        manager.load(LAVA_GLOW_FILE, Texture.class);
-        assets.add(LAVA_GLOW_FILE);
-        manager.load(LAVA_CONT_FILE, Texture.class);
-        assets.add(LAVA_CONT_FILE);
-        manager.load(GLOW_FILE, Texture.class);
-        assets.add(GLOW_FILE);
-
-        for (Entry<String, Integer> entry : NUM_HANDHOLDS.entrySet()){
-            for(counterInt = 1; counterInt <= entry.getValue(); counterInt++){
-                manager.load("assets/"+entry.getKey()+"/Handhold"+counterInt+".png",Texture.class);
-                assets.add("assets/"+entry.getKey()+"/Handhold"+counterInt+".png");
-            }
-        }
-        for (String PART_TEXTURE : PART_TEXTURES) {
-            manager.load(PART_TEXTURE, Texture.class);
-            assets.add(PART_TEXTURE);
-        }
-        for(String SHADOW_TEXTURE: SHADOW_TEXTURES){
-            manager.load(SHADOW_TEXTURE, Texture.class);
-            assets.add(SHADOW_TEXTURE);
-        }
-
-        for(String TUTORIAL_TEXTURE : TUTORIAL_TEXTURES){
-            manager.load(TUTORIAL_TEXTURE, Texture.class);
-            assets.add(TUTORIAL_TEXTURE);
-        }
-        manager.load(BLACKOUT,Texture.class);
-        assets.add(BLACKOUT);
-        manager.load(FATIGUE_BAR,Texture.class);
-        assets.add(FATIGUE_BAR);
-        manager.load(PROGRESS_BACKGROUND,Texture.class);
-        assets.add(PROGRESS_BACKGROUND);
-        manager.load(PROGRESS_BAR,Texture.class);
-        assets.add(PROGRESS_BAR);
-        manager.load(LOW_ENERGY_HALO,Texture.class);
-        assets.add(LOW_ENERGY_HALO);
-        manager.load(TUTORIAL_OVERLAY_TEXTURE, Texture.class);
-        assets.add(TUTORIAL_OVERLAY_TEXTURE);
-        manager.load(RUSSIAN_FLAG_FILE, Texture.class);
-        assets.add(RUSSIAN_FLAG_FILE);
-        manager.load(HANDHOLD_WARNING, Texture.class);
-        assets.add(HANDHOLD_WARNING);
-        manager.load(OBSTACLE_WARNING, Texture.class);
-        assets.add(OBSTACLE_WARNING);
+        loadAddTexture(UI_FILE);
+        loadAddTexture(LOGO_FILE);
+        loadAddTexture(LAVA_FILE);
+        loadAddTexture(LAVA_GLOW_FILE);
+        loadAddTexture(LAVA_CONT_FILE);
+        loadAddTexture(GLOW_FILE);
+        loadAddTexture(BLACKOUT);
+        loadAddTexture(FATIGUE_BAR);
+        loadAddTexture(PROGRESS_BACKGROUND);
+        loadAddTexture(PROGRESS_BAR);
+        loadAddTexture(LOW_ENERGY_HALO);
+        loadAddTexture(TUTORIAL_OVERLAY_TEXTURE);
+        loadAddTexture(RUSSIAN_FLAG_FILE);
+        loadAddTexture(HANDHOLD_WARNING);
+        loadAddTexture(OBSTACLE_WARNING);
     }
 
     /**
      * Loads the assets for this controller.
-     * <p/>
+     *
      * Opted for nonstatic loaders, but still want the assets themselves to be
      * static. So AssetState determines the current loading state, only load if
      * assets are not already loaded.
@@ -324,7 +278,6 @@ public class GamingMode extends ModeController {
 
         for (counterInt = 0;  counterInt < LEVEL_LABEL_FILES.length; counterInt++){
             levelLabels[counterInt] = createTexture(manager, LEVEL_LABEL_FILES[counterInt], false);
-
         }
 
         for (counterInt = 0; counterInt < PART_TEXTURES.length; counterInt++) {
@@ -371,6 +324,7 @@ public class GamingMode extends ModeController {
      * from the asset manager. If no assets are loaded, this method does nothing.
      */
     public void unloadContent() {
+        super.unloadContent(assetManager);
         JsonAssetManager.getInstance().unloadDirectory();
         JsonAssetManager.clearInstance();
     }

@@ -133,23 +133,22 @@ public class GameEngine extends Game implements ScreenListener {
 			game.resume();
 		} else if (exitCode == EXIT_LEVEL_SELECT){
 			MenuMode menu = (MenuMode) controllers[MENU_SCREEN];
-			menu.changeView(LEVEL_SELECT);
+			menu.changeView(LEVEL_SELECT, false);
 			setScreen(controllers[MENU_SCREEN]);
 		} else if (exitCode == EXIT_SETTINGS){
 			MenuMode menu = (MenuMode) controllers[MENU_SCREEN];
-			menu.changeView(SETTINGS);
+			menu.changeView(SETTINGS, false);
 			setScreen(controllers[MENU_SCREEN]);
-		}
-		else if (exitCode == EXIT_QUIT) {
+		} else if (exitCode == EXIT_QUIT) {
 			// We quit the main application
 			Gdx.app.exit();
-		}else if (exitCode == EXIT_GAME_RESTART_LAST_CHECKPOINT){
+		} else if (exitCode == EXIT_GAME_RESTART_LAST_CHECKPOINT){
 			((GameMode) controllers[GAME_SCREEN]).restartLastCheckpoint();
 			setScreen(controllers[GAME_SCREEN]);
-		}else if (exitCode == EXIT_RACE){
-			(controllers[RACE_SCREEN]).reset();
-			setScreen(controllers[RACE_SCREEN]);
-
+		} else if (exitCode == EXIT_RACE_LEVEL_SELECT) {
+			MenuMode menu = (MenuMode) controllers[MENU_SCREEN];
+			menu.changeView(LEVEL_SELECT, true);
+			setScreen(controllers[MENU_SCREEN]);
 		}
 		else if (exitCode == EXIT_VICTORY_RACE){
 			RaceMode raceMode = (RaceMode) controllers[RACE_SCREEN];
@@ -164,12 +163,7 @@ public class GameEngine extends Game implements ScreenListener {
 		}
 		else if (exitCode == EXIT_RACE_DIED) {
 			RaceMode game = (RaceMode) controllers[RACE_SCREEN];
-			System.out.println("HERE");
 			game.dead();
-		}
-		else if (exitCode == EXIT_GAME_RESTART_RACE_LEVEL) {
-			controllers[RACE_SCREEN].reset();
-			setScreen(controllers[RACE_SCREEN]);
 		}
 		else if (exitCode == EXIT_GAME_NEXT_RACE_LEVEL) {
 			RaceMode g = (RaceMode) controllers[RACE_SCREEN];
@@ -190,9 +184,16 @@ public class GameEngine extends Game implements ScreenListener {
 
 	}
 
-	public void exitLevelSelect(Screen screen, int level){
-		GameMode gameMode = (GameMode) controllers[GAME_SCREEN];
-		gameMode.setLevel(level);
-		exitScreen(screen, EXIT_GAME_RESTART_LEVEL);
+	public void exitLevelSelect(Screen screen, int level, boolean race) {
+		if (race) {
+			RaceMode raceMode = (RaceMode) controllers[RACE_SCREEN];
+			raceMode.setLevel(level);
+			exitScreen(screen, EXIT_GAME_RESTART_RACE_LEVEL);
+		}
+		else {
+			GameMode gameMode = (GameMode) controllers[GAME_SCREEN];
+			gameMode.setLevel(level);
+			exitScreen(screen, EXIT_GAME_RESTART_LEVEL);
+		}
 	}
 }

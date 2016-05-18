@@ -1,11 +1,8 @@
 package beigegang.mountsputnik;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import static beigegang.mountsputnik.Constants.*;
@@ -36,8 +33,6 @@ public class DeadMode extends ModeController {
     private static String[] menuOptions = {"Restart Last Checkpoint", "Restart Level", "Menu", "Quit"};
     private static int exitCodes[] ={EXIT_GAME_RESTART_LAST_CHECKPOINT,EXIT_GAME_RESTART_LEVEL,EXIT_MENU,EXIT_QUIT};
     private static Color overlayColor = new Color(Color.WHITE);
-
-    private AssetManager assetManager;
 
 
     private int currSelection = 0;
