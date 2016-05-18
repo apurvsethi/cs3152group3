@@ -336,7 +336,6 @@ public class MenuMode extends ModeController {
 				                  ", \"sky\":" + levelSelectAllowed[LEVEL_SKY] + 
 				                  ", \"space\":" + levelSelectAllowed[LEVEL_SPACE] + 
 				                  ", \"waterfall\":" + levelSelectAllowed[LEVEL_WATERFALL] + "}}"; 
-//		System.out.println(levelSelectAllowed.toString());
 		try {
 			FileWriter jsonWriter = new FileWriter(("savegame.json")); 
 			jsonWriter.write(json); 

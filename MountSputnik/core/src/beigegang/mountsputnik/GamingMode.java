@@ -548,7 +548,6 @@ public class GamingMode extends ModeController {
         maxLevelHeight = remainingHeight;
         String levelDiff = levelFormat.getString("difficulty");
         while(currentHeight < remainingHeight){
-            //TODO: account for difficulty
             int blockNumber = ((int) (Math.random() * diffBlocks)) + 1;
             JsonValue levelPiece = jsonReader.parse(Gdx.files.internal("Levels/"+levelName+"/block"+blockNumber+".json"));
             String blockDiff = levelPiece.getString("difficulty");
@@ -566,14 +565,6 @@ public class GamingMode extends ModeController {
             addChunk(levelPiece, currentHeight, levelName);
             currentHeight += levelPiece.getFloat("size");
             if(!levelName.equals("volcano")) checkpoints.add(currentHeight);
-            //filler stuff not currently used.
-    //			for(counterInt = 0; counterInt < filler; counterInt++){
-    //				blockNumber = ((int) (Math.random() * fillerSize)) + 1;
-    //				levelPiece = jsonReader.parse(Gdx.files.internal("Levels/general/block"+blockNumber+".json"));
-    //				levelBlocks.add("Levels/general/block"+blockNumber+".json");
-    //				addChunk(levelPiece, currentHeight, levelName);
-    //				currentHeight += levelPiece.getInt("size");
-    //			}
         }
 
         checkpointLevelBlocks.addAll(used);
@@ -1109,7 +1100,7 @@ public class GamingMode extends ModeController {
     protected boolean withinBounds(Vector2 position, Vector2 target) {
         float xError = Math.abs(position.x - target.x);
         float yError = Math.abs(position.y - target.y);
-        return xError < .01f && yError < .01f;
+        return xError < .1f && yError < .1f;
     }
 
 
