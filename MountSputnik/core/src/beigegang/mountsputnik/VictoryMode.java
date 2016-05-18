@@ -1,9 +1,7 @@
 package beigegang.mountsputnik;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
@@ -38,8 +36,6 @@ public class VictoryMode extends ModeController {
     private static int exitCodes2[] ={EXIT_GAME_NEXT_RACE_LEVEL,EXIT_GAME_RESTART_RACE_LEVEL,EXIT_MENU,EXIT_QUIT};
     private static Color overlayColor = new Color(Color.WHITE);
 
-    private AssetManager assetManager;
-
 
     private int currSelection = 0;
     private int changeCooldown = 0;
@@ -50,13 +46,8 @@ public class VictoryMode extends ModeController {
 
         assetState = AssetState.LOADING;
 
-        FreetypeFontLoader.FreeTypeFontLoaderParameter title = new
-                FreetypeFontLoader.FreeTypeFontLoaderParameter();
-        title.fontFileName = TITLE_FONT_FILE;
-        title.fontParameters.size = (int)(60 * Gdx.graphics.getDensity());
-        title.fontParameters.color = Color.BROWN;
-        assetManager.load("Normal" + TITLE_FONT_FILE, BitmapFont.class, title);
-        assets.add("Normal" + TITLE_FONT_FILE);
+        FreetypeFontLoader.FreeTypeFontLoaderParameter title = makeFont(TITLE_FONT_FILE, 60, Color.BROWN);
+        loadAddFont("Normal" + TITLE_FONT_FILE, title);
     }
 
     /**

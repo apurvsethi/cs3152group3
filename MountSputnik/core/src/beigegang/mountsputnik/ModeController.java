@@ -21,10 +21,14 @@ import beigegang.util.PooledList;
 import beigegang.util.ScreenListener;
 import static beigegang.mountsputnik.Constants.*;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
@@ -56,7 +60,9 @@ public abstract class ModeController implements Screen {
 	protected AssetState worldAssetState = AssetState.EMPTY;
 	/** Track all loaded assets (for unloading purposes) */
 	protected Array<String> assets;	
-	
+	/** Asset manager used to load all assets */
+	protected AssetManager assetManager;
+
 	/**
 	 * Preloads the assets for this controller.
 	 *
@@ -68,6 +74,48 @@ public abstract class ModeController implements Screen {
 	 */
 	public void preLoadContent(AssetManager manager) {
 		// Load shared assets as necessary
+	}
+
+	/**
+	 * Make a free type font loader parameter with the given file name, size,
+	 * and color
+	 *
+	 * @param fontFile name of font file name
+	 * @param size dp size, scaled by screen to ensure it's the same on all
+	 * @param color color of the font when drawn
+	 *
+	 * @return free type font loader parameter with the given parameters
+	 */
+	protected FreetypeFontLoader.FreeTypeFontLoaderParameter makeFont(String fontFile, int size, Color color) {
+		FreetypeFontLoader.FreeTypeFontLoaderParameter font = new
+				FreetypeFontLoader.FreeTypeFontLoaderParameter();
+		font.fontFileName = fontFile;
+		font.fontParameters.size = (int)(size * Gdx.graphics.getDensity());
+		font.fontParameters.color = color;
+		return font;
+	}
+
+	/**
+	 * Load the font with the asset manager, add to list of assets.
+	 * Precondition: assetManager must be set
+	 *
+	 * @param name filename being added
+	 * @param font font parameters
+     */
+	protected void loadAddFont(String name, FreetypeFontLoader.FreeTypeFontLoaderParameter font) {
+		assetManager.load(name, BitmapFont.class, font);
+		assets.add(name);
+	}
+
+	/**
+	 * Load the texture with the asset manager, add to list of assets
+	 * Precondition: assetManager must be set
+	 *
+	 * @param name filename being added
+     */
+	protected void loadAddTexture(String name) {
+		assetManager.load(name, Texture.class);
+		assets.add(name);
 	}
 	
 	/**

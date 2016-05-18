@@ -3,7 +3,6 @@ package beigegang.mountsputnik;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
@@ -66,7 +65,6 @@ public class MenuMode extends ModeController {
 	private static String[] currentSchemes = {"Classic", "Classic"};
 	private static int backCode = EXIT_MENU;
 
-	private AssetManager assetManager;
 
 	private int currSelection = 0;
 	private int changeCooldown = 0;
@@ -76,48 +74,20 @@ public class MenuMode extends ModeController {
 		if (assetState != AssetState.EMPTY) return;
 		assetState = AssetState.LOADING;
 
-		FreetypeFontLoader.FreeTypeFontLoaderParameter title = new
-				FreetypeFontLoader.FreeTypeFontLoaderParameter();
-		title.fontFileName = TITLE_FONT_FILE;
-		title.fontParameters.size = (int)(70 * Gdx.graphics.getDensity());
-		title.fontParameters.color = Color.BROWN;
-		assetManager.load("LevelSelect" + TITLE_FONT_FILE, BitmapFont.class, title);
-		assets.add("LevelSelect" + TITLE_FONT_FILE);
-		FreetypeFontLoader.FreeTypeFontLoaderParameter normal = new
-				FreetypeFontLoader.FreeTypeFontLoaderParameter();
-		normal.fontFileName = FONT_FILE;
-		normal.fontParameters.size = (int)(45 * Gdx.graphics.getDensity());
-		normal.fontParameters.color = Color.BROWN;
-		assetManager.load("Normal" + FONT_FILE, BitmapFont.class, normal);
-		assets.add("Normal" + FONT_FILE);
-		FreetypeFontLoader.FreeTypeFontLoaderParameter levelSelectNormal = new
-				FreetypeFontLoader.FreeTypeFontLoaderParameter();
-		levelSelectNormal.fontFileName = FONT_FILE;
-		levelSelectNormal.fontParameters.size = (int)(55 * Gdx.graphics.getDensity());
-		levelSelectNormal.fontParameters.color = Color.BROWN;
-		assetManager.load("LargeNormal" + FONT_FILE, BitmapFont.class, levelSelectNormal);
-		assets.add("LargeNormal" + FONT_FILE);
-		FreetypeFontLoader.FreeTypeFontLoaderParameter selected = new
-				FreetypeFontLoader.FreeTypeFontLoaderParameter();
-		selected.fontFileName = FONT_FILE;
-		selected.fontParameters.size = (int)(52 * Gdx.graphics.getDensity());
-		selected.fontParameters.color = Color.FIREBRICK;
-		assetManager.load("Selected" + FONT_FILE, BitmapFont.class, selected);
-		assets.add("Selected" + FONT_FILE);
-		FreetypeFontLoader.FreeTypeFontLoaderParameter levelSelectSelected = new
-				FreetypeFontLoader.FreeTypeFontLoaderParameter();
-		levelSelectSelected.fontFileName = FONT_FILE;
-		levelSelectSelected.fontParameters.size = (int)(63 * Gdx.graphics.getDensity());
-		levelSelectSelected.fontParameters.color = Color.FIREBRICK;
-		assetManager.load("LargeSelected" + FONT_FILE, BitmapFont.class, levelSelectSelected);
-		assets.add("LargeSelected" + FONT_FILE);
+		FreetypeFontLoader.FreeTypeFontLoaderParameter title = makeFont(TITLE_FONT_FILE, 70, Color.BROWN);
+		loadAddFont("LevelSelect" + TITLE_FONT_FILE, title);
+		FreetypeFontLoader.FreeTypeFontLoaderParameter normal = makeFont(FONT_FILE, 45, Color.BROWN);
+		loadAddFont("Normal" + FONT_FILE, normal);
+		FreetypeFontLoader.FreeTypeFontLoaderParameter levelSelectNormal = makeFont(FONT_FILE, 55, Color.BROWN);
+		loadAddFont("LargeNormal" + FONT_FILE, levelSelectNormal);
+		FreetypeFontLoader.FreeTypeFontLoaderParameter selected = makeFont(FONT_FILE, 52, Color.FIREBRICK);
+		loadAddFont("Selected" + FONT_FILE, selected);
+		FreetypeFontLoader.FreeTypeFontLoaderParameter levelSelectSelected = makeFont(FONT_FILE, 63, Color.FIREBRICK);
+		loadAddFont("LargeSelected" + FONT_FILE, levelSelectSelected);
 
-		manager.load(BARE_BACKGROUND_FILE, Texture.class);
-		assets.add(BARE_BACKGROUND_FILE);
-		manager.load(TEXTBOX_FILE, Texture.class);
-		assets.add(TEXTBOX_FILE);
-		manager.load(LEVEL_LOCKED_FILE, Texture.class);
-		assets.add(LEVEL_LOCKED_FILE);
+		loadAddTexture(BARE_BACKGROUND_FILE);
+		loadAddTexture(TEXTBOX_FILE);
+		loadAddTexture(LEVEL_LOCKED_FILE);
 	}
 
 	/**
