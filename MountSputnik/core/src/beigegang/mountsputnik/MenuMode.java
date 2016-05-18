@@ -169,14 +169,15 @@ public class MenuMode extends ModeController {
 			SoundController.get(SoundController.SCROLL_SOUND).play();
 
 			int length = levelSelectOptions.length * levelSelectOptions[0].length;
-			if (Math.abs(input.getVerticalL()) > 0.5) {
-				int oldSelection = currSelection;
+			if (Math.abs(input.getVerticalL()) > 0.5)
 				currSelection += input.getVerticalL() > 0.5 ? -1 : 1;
-				if (oldSelection / levelSelectOptions.length != ((currSelection + length) % length) / levelSelectOptions.length)
-					currSelection += levelSelectOptions.length;
-			}
-			if (Math.abs(input.getHorizontalL()) > 0.5)
+			if (Math.abs(input.getHorizontalL()) > 0.5) {
 				currSelection += input.getHorizontalL() > 0.5 ? levelSelectOptions.length : -levelSelectOptions.length;
+				if (currSelection >= length && currSelection < length + levelSelectOptions.length - 1) currSelection++;
+				else if (currSelection >= length) currSelection -= (levelSelectOptions.length - 1);
+				else if (currSelection < 0 && currSelection > -levelSelectOptions.length) currSelection--;
+				else if (currSelection < 0) currSelection += (levelSelectOptions.length - 1);
+			}
 			currSelection = (currSelection + length) % length;
 
 			changeCooldown = MENU_CHANGE_COOLDOWN;
