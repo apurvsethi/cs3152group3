@@ -57,8 +57,8 @@ public class MenuMode extends ModeController {
 	private static TextureRegion[] levelSelectSurfaces = new TextureRegion[LEVEL_NAMES.length];
 	private static TextureRegion[] levelSelectEdges = new TextureRegion[LEVEL_NAMES.length];
 
-	private static String[] menuOptions = {"Start", "Race Mode", "Level Select", "Settings", "Quit"};
-	private static int exitCodes[] = {EXIT_GAME_RESTART_LEVEL, EXIT_RACE, EXIT_LEVEL_SELECT, EXIT_SETTINGS, EXIT_QUIT};
+	private static String[] menuOptions = {"Start", "Race Mode", "Settings", "Quit"};
+	private static int exitCodes[] = {EXIT_LEVEL_SELECT, EXIT_RACE_LEVEL_SELECT, EXIT_SETTINGS, EXIT_QUIT};
 	private static String[][] levelSelectOptions = {{"Tutorial", "Canyon"}, {"Waterfall", "Volcano"}, {"Snowy Mountain", "Sky"}, {"Space", "Menu"}};
 	private static int levelSelectCodes[] = {LEVEL_TUTORIAL, LEVEL_WATERFALL, LEVEL_SNOWY_MOUNTAIN, LEVEL_SPACE, LEVEL_CANYON, LEVEL_VOLCANO, LEVEL_SKY};
 	private static String[] settingsOptions = {"Trigger Scheme", "Stick Scheme", "Menu"};
@@ -68,6 +68,7 @@ public class MenuMode extends ModeController {
 
 	private int currSelection = 0;
 	private int changeCooldown = 0;
+	private boolean race;
 
 	public void preLoadContent(AssetManager manager) {
 		assetManager = manager;
@@ -175,6 +176,7 @@ public class MenuMode extends ModeController {
 			currSelection = (currSelection + length) % length;
 
 			changeCooldown = MENU_CHANGE_COOLDOWN;
+			if (race) changeCooldown *= 2;
 		}
 
 		if (input.didSelect() && currView == LEVEL_SELECT){
@@ -185,7 +187,7 @@ public class MenuMode extends ModeController {
 			}
 			else if (levelSelectAllowed[currSelection]) {
 				SoundController.get(SoundController.SELECT_SOUND).play();
-				((GameEngine) listener).exitLevelSelect(this, levelSelectCodes[currSelection]);
+				((GameEngine) listener).exitLevelSelect(this, levelSelectCodes[currSelection], race);
 			}
 			else SoundController.get(SoundController.DECLINE_SOUND).play();
 		}
@@ -273,10 +275,10 @@ public class MenuMode extends ModeController {
 			canvas.drawTextCentered(settingsOptions[settingsOptions.length - 1], font, drawY);
 		}
 		else {
-			canvas.draw(textbox, Color.WHITE, canvas.getWidth() * 0.25f, bottomOfScreen - canvas.getHeight() * 0.04f,
-					canvas.getWidth() * 0.5f, canvas.getHeight() * 0.5f);
+			canvas.draw(textbox, Color.WHITE, canvas.getWidth() * 0.3f, bottomOfScreen + canvas.getHeight() * 0.01f,
+					canvas.getWidth() * 0.4f, canvas.getHeight() * 0.4f);
 
-			drawY -= canvas.getHeight() * 0.18f;
+			drawY -= canvas.getHeight() * 0.205f;
 
 			for (int i = 0; i < menuOptions.length; i++) {
 				if (i == currSelection) canvas.drawTextCentered(menuOptions[i], fontSelected, drawY);
@@ -320,9 +322,10 @@ public class MenuMode extends ModeController {
 		canvas.draw(lavaTexture.getTexture(), Color.WHITE, -canvas.getWidth() * 0.01f, bottomOfScreen - canvas.getHeight() * 0.95f, canvas.getWidth() * 1.1f, canvas.getHeight());
 	}
 
-	public void changeView(int view){
+	public void changeView(int view, boolean race) {
 		currSelection = 0;
 		currView = view;
+		this.race = race;
 	}
 
 	public void unlockLevel(int level){
