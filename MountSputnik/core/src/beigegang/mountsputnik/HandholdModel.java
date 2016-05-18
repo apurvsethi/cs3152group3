@@ -133,18 +133,33 @@ public class HandholdModel extends GameObject{
 	
 	/**
 	 * Constructs HandholdModel
-	 *  @param t Normal texture for handhold
+	 * @param t Normal texture for handhold
 	 * @param x The x position of the model
 	 * @param y The y position of the model
 	 * @param dimensions the dimensions of the handhold in box2d coordinates
 	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
 	 */
 	public HandholdModel(Texture t, Texture gt, float x, float y, Vector2 dimensions, Vector2 drawPositionScale){
-		super(t, dimensions, drawPositionScale);
+		this(t, gt, x, y, dimensions.x, dimensions.y, drawPositionScale);
+	}
+
+	/**
+	 * Constructs HandholdModel
+	 * @param t Normal texture for handhold
+	 * @param gt glow texture
+	 * @param x The x position of the model
+	 * @param y The y position of the model
+	 * @param xDimension the x-dimensions of the handhold in box2d coordinates
+	 * @param yDimension the y-dimensions of the handhold in box2d coordinates
+	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
+	 */
+	public HandholdModel(Texture t, Texture gt, float x, float y, float xDimension,
+						 float yDimension, Vector2 drawPositionScale){
+		super(t, xDimension, yDimension, drawPositionScale);
 		setX(x);
 		setY(y);
 
-		glowTexture = gt; 
+		glowTexture = gt;
 		isCrumbling = false;
 		velocity = 0;
 		snapPoints = new Array<Vector2>();

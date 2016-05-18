@@ -25,7 +25,7 @@ public class GameMode extends GamingMode {
 		try{
 
 			animationToFile = new FileWriter(("tutorialAnimations/animationsW.json"));
-		}catch(Exception e){System.out.println("OHNO" + e );}
+		}catch(Exception e){}
 	}
 	@Override
 	public void writeNextStepJsonForAnimation(float lx, float ly, float rx, float ry, Array<Integer> pressed){
@@ -55,9 +55,9 @@ public class GameMode extends GamingMode {
 			try{
 				animationToFile.write(fullJson);
 
-			}catch(Exception e){System.out.println("here" + e); }
+			}catch(Exception e){ }
 			try{animationToFile.flush();
-			}catch(Exception e){System.out.println("two" + e);}
+			}catch(Exception e){}
 		}
 	}
 
@@ -111,7 +111,6 @@ public class GameMode extends GamingMode {
 
 	public void restartLastCheckpoint(){
 		int b = lastReachedCheckpoint;
-		System.out.println("here");
 		resetAllButCheckpoints();
 		lastReachedCheckpoint = b;
 		populateLevelAtLastCheckpoint();

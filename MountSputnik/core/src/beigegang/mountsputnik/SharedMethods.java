@@ -25,7 +25,6 @@ public class SharedMethods {
 
                     writtenToFile = true;
                 } catch (Exception e) {
-                    System.out.println("here3" + e);
                 }
             }
             victoryMode.update(dt, listener,true);
