@@ -50,23 +50,6 @@ public class PauseMode extends ModeController {
 
 		assetState = AssetState.LOADING;
 
-		FreetypeFontLoader.FreeTypeFontLoaderParameter normal = new
-				FreetypeFontLoader.FreeTypeFontLoaderParameter();
-		normal.fontFileName = FONT_FILE;
-		normal.fontParameters.size = (int)(45 * Gdx.graphics.getDensity());
-		normal.fontParameters.color = Color.BROWN;
-		assetManager.load("Normal" + FONT_FILE, BitmapFont.class, normal);
-		assets.add("Normal" + FONT_FILE);
-		FreetypeFontLoader.FreeTypeFontLoaderParameter selected = new
-				FreetypeFontLoader.FreeTypeFontLoaderParameter();
-		selected.fontFileName = FONT_FILE;
-		selected.fontParameters.size = (int)(52 * Gdx.graphics.getDensity());
-		selected.fontParameters.color = Color.FIREBRICK;
-		assetManager.load("Selected" + FONT_FILE, BitmapFont.class, selected);
-		assets.add("Selected" + FONT_FILE);
-
-		manager.load(TEXTBOX_FILE, Texture.class);
-		assets.add(TEXTBOX_FILE);
 		manager.load(OVERLAY_FILE, Texture.class);
 		assets.add(OVERLAY_FILE);
 	}

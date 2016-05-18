@@ -48,33 +48,6 @@ public class DeadMode extends ModeController {
         if (assetState != AssetState.EMPTY) return;
 
         assetState = AssetState.LOADING;
-
-        FreetypeFontLoader.FreeTypeFontLoaderParameter title = new
-                FreetypeFontLoader.FreeTypeFontLoaderParameter();
-        title.fontFileName = TITLE_FONT_FILE;
-        title.fontParameters.size = (int)(60 * Gdx.graphics.getDensity());
-        title.fontParameters.color = Color.BROWN;
-        assetManager.load(TITLE_FONT_FILE, BitmapFont.class, title);
-        assets.add(TITLE_FONT_FILE);
-        FreetypeFontLoader.FreeTypeFontLoaderParameter normal = new
-                FreetypeFontLoader.FreeTypeFontLoaderParameter();
-        normal.fontFileName = FONT_FILE;
-        normal.fontParameters.size = (int)(45 * Gdx.graphics.getDensity());
-        normal.fontParameters.color = Color.BROWN;
-        assetManager.load("Normal" + FONT_FILE, BitmapFont.class, normal);
-        assets.add("Normal" + FONT_FILE);
-        FreetypeFontLoader.FreeTypeFontLoaderParameter selected = new
-                FreetypeFontLoader.FreeTypeFontLoaderParameter();
-        selected.fontFileName = FONT_FILE;
-        selected.fontParameters.size = (int)(52 * Gdx.graphics.getDensity());
-        selected.fontParameters.color = Color.FIREBRICK;
-        assetManager.load("Selected" + FONT_FILE, BitmapFont.class, selected);
-        assets.add("Selected" + FONT_FILE);
-
-        manager.load(TEXTBOX_FILE, Texture.class);
-        assets.add(TEXTBOX_FILE);
-        manager.load(OVERLAY_FILE, Texture.class);
-        assets.add(OVERLAY_FILE);
     }
 
     /**
@@ -89,7 +62,7 @@ public class DeadMode extends ModeController {
     public void loadContent(AssetManager manager) {
         if (assetState != AssetState.LOADING) return;
 
-        titleFont = manager.get(TITLE_FONT_FILE, BitmapFont.class);
+        titleFont = manager.get("Normal" + TITLE_FONT_FILE, BitmapFont.class);
         fontNormal = manager.get("Normal" + FONT_FILE, BitmapFont.class);
         fontSelected = manager.get("Selected" + FONT_FILE, BitmapFont.class);
 

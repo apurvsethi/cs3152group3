@@ -112,21 +112,6 @@ public class MenuMode extends ModeController {
 		assetManager.load("LargeSelected" + FONT_FILE, BitmapFont.class, levelSelectSelected);
 		assets.add("LargeSelected" + FONT_FILE);
 
-		for(String name : LEVEL_NAMES){
-			manager.load("assets/"+name+"/LevelStart.png", Texture.class);
-			assets.add("assets/"+name+"/LevelStart.png");
-			manager.load("assets/"+name+"/Background.png", Texture.class);
-			assets.add("assets/"+name+"/Background.png");
-			manager.load("assets/"+name+"/Midground.png", Texture.class);
-			assets.add("assets/"+name+"/Midground.png");
-			manager.load("assets/"+name+"/Foreground.png", Texture.class);
-			assets.add("assets/"+name+"/Foreground.png");
-			manager.load("assets/"+name+"/Surface.png", Texture.class);
-			assets.add("assets/"+name+"/Surface.png");
-			manager.load("assets/"+name+"/SurfaceEdge.png", Texture.class);
-			assets.add("assets/"+name+"/SurfaceEdge.png");
-		}
-
 		manager.load(BARE_BACKGROUND_FILE, Texture.class);
 		assets.add(BARE_BACKGROUND_FILE);
 		manager.load(TEXTBOX_FILE, Texture.class);
