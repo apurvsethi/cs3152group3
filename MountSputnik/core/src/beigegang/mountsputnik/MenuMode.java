@@ -179,7 +179,11 @@ public class MenuMode extends ModeController {
 			if (race) changeCooldown *= 2;
 		}
 
-		if (input.didSelect() && currView == LEVEL_SELECT){
+		if (input.didBack() && (currView == LEVEL_SELECT || currView == SETTINGS)) {
+			SoundController.get(SoundController.DECLINE_SOUND).play();
+			listener.exitScreen(this, backCode);
+		}
+		else if (input.didSelect() && currView == LEVEL_SELECT){
 			//play sound
 			if (currSelection == levelSelectCodes.length){
 				SoundController.get(SoundController.DECLINE_SOUND).play();
