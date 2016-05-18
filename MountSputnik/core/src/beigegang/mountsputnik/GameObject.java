@@ -246,6 +246,22 @@ public abstract class GameObject {
 	}
 
 	/**
+	 * Sets the linear velocity for this physics body
+	 *
+	 * This method does not keep a reference to the parameter.
+	 *
+	 * @param xValue  the x linear velocity for this physics body
+	 * @param yValue  the y linear velocity for this physics body
+	 */
+	public void setLinearVelocity(float xValue, float yValue) {
+		if (body != null) {
+			body.setLinearVelocity(xValue, yValue);
+		} else {
+			bDef.linearVelocity.set(xValue, yValue);
+		}
+	}
+
+	/**
 	 * Returns the x-velocity for this physics body
 	 *
 	 * @return the x-velocity for this physics body

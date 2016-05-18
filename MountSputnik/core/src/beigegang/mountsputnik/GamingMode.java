@@ -668,48 +668,22 @@ public class GamingMode extends ModeController {
     }
 
     protected void makeHandholdsToGripAtStart(CharacterModel c) {
-        handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),glowTexture.getTexture(),
-                c.parts.get(HAND_LEFT).getPosition().x, c.parts.get(HAND_LEFT).getPosition().y,
-                new Vector2(.3f, .3f), scale);
-        handhold.fixtureDef.filter.maskBits = 0;
-        handhold.activatePhysics(world);
-        handhold.geometry.setUserData(handhold);
-        handhold.geometry.setRestitution(1);
-        handhold.geometry.setFriction(1);
-        handhold.setBodyType(BodyDef.BodyType.StaticBody);
-        objects.add(handhold);
+        makeAddBasicHandhold(c, HAND_LEFT);
+        makeAddBasicHandhold(c, HAND_RIGHT);
+        makeAddBasicHandhold(c, FOOT_LEFT);
+        makeAddBasicHandhold(c, FOOT_RIGHT);
+    }
 
-        handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),glowTexture.getTexture(),
-                c.parts.get(HAND_RIGHT).getPosition().x, c.parts.get(HAND_RIGHT).getPosition().y,
-                new Vector2(.3f, .3f), scale);
+    private void makeAddBasicHandhold(CharacterModel c, int part) {
+        handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
+                glowTexture.getTexture(), c.parts.get(part).getPosition().x,
+                c.parts.get(part).getPosition().y, 0.3f, 0.3f, scale);
         handhold.fixtureDef.filter.maskBits = 0;
         handhold.activatePhysics(world);
         handhold.geometry.setUserData(handhold);
         handhold.geometry.setRestitution(1);
         handhold.geometry.setFriction(1);
-        handhold.setBodyType(BodyDef.BodyType.StaticBody);
-        objects.add(handhold);
-
-        handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),glowTexture.getTexture(),
-                c.parts.get(FOOT_LEFT).getPosition().x, c.parts.get(FOOT_LEFT).getPosition().y,
-                new Vector2(.3f, .3f), scale);
-        handhold.fixtureDef.filter.maskBits = 0;
-        handhold.activatePhysics(world);
-        handhold.geometry.setUserData(handhold);
-        handhold.geometry.setRestitution(1);
-        handhold.geometry.setFriction(1);
-        handhold.setBodyType(BodyDef.BodyType.StaticBody);
-        objects.add(handhold);
-
-        handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(), glowTexture.getTexture(),
-                c.parts.get(FOOT_RIGHT).getPosition().x, c.parts.get(FOOT_RIGHT).getPosition().y,
-                new Vector2(.3f, .3f), scale);
-        handhold.fixtureDef.filter.maskBits = 0;
-        handhold.activatePhysics(world);
-        handhold.geometry.setUserData(handhold);
-        handhold.geometry.setRestitution(1);
-        handhold.geometry.setFriction(1);
-        handhold.setBodyType(BodyDef.BodyType.StaticBody);
+        handhold.setBodyType(BodyType.StaticBody);
         objects.add(handhold);
     }
 
@@ -729,7 +703,7 @@ public class GamingMode extends ModeController {
         while(handholdDesc != null){
             handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(), glowTexture.getTexture(),
                     handholdDesc.getFloat("positionX"), handholdDesc.getFloat("positionY")+currentHeight,
-                    new Vector2(handholdDesc.getFloat("width"), handholdDesc.getFloat("height")), scale);
+                    handholdDesc.getFloat("width"), handholdDesc.getFloat("height"), scale);
             handhold.fixtureDef.filter.maskBits = 0;
             handhold.activatePhysics(world);
             handhold.geometry.setUserData(handhold);
@@ -744,7 +718,7 @@ public class GamingMode extends ModeController {
                         tx = handhold.getEndPoint().x - handhold.getStartPoint().x,
                         ty = handhold.getEndPoint().y - handhold.getStartPoint().y,
                         dist = (float) Math.sqrt(tx*tx+ty*ty);
-                handhold.setLinearVelocity(new Vector2((tx/dist)*speed, (ty/dist)*speed));
+                handhold.setLinearVelocity((tx/dist)*speed, (ty/dist)*speed);
                 handhold.setVelocity(speed);
                 handhold.setPosition((handhold.getStartPoint().x+handhold.getEndPoint().x)/2,
                         (handhold.getStartPoint().y+handhold.getEndPoint().y)/2);
