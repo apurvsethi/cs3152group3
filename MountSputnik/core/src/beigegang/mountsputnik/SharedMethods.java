@@ -163,7 +163,7 @@ public class SharedMethods {
     public static void drawBackgrounds(GameCanvas canvas, TextureRegion ground, TextureRegion background, TextureRegion midground, TextureRegion foreground, TextureRegion tile, TextureRegion edge, int levelName){
         float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
         float h; 
-        if (levelName == LEVEL_VOLCANO) 
+        if (levelName == LEVEL_VOLCANO || levelName == LEVEL_TUTORIAL) 
         	h = midground.getTexture().getHeight(); 
         	else h = canvas.getHeight(); 
         float tileY = y - (y % (canvas.getWidth() / 4));
@@ -182,9 +182,9 @@ public class SharedMethods {
         for (int counterInt = 0; counterInt < 5; counterInt++) {
             canvas.draw(tile, Color.WHITE, canvas.getWidth() / 5, tileY, 3*canvas.getWidth() / 10, canvas.getWidth() / 4);
             canvas.draw(tile, Color.WHITE, (canvas.getWidth()-1) / 2, tileY, 3*canvas.getWidth() / 10, canvas.getWidth() / 4);
-            canvas.draw(edge, Color.WHITE, (canvas.getWidth()-1) * 4 / 5, tileY, canvas.getWidth() / 16, canvas.getHeight());
+            canvas.draw(edge, Color.WHITE, (canvas.getWidth()-1) * 4 / 5, tileY + canvas.getHeight()/8, canvas.getWidth() / 16, canvas.getWidth()/4);
             edge.flip(true,false);
-            canvas.draw(edge, Color.WHITE, canvas.getWidth() / 5 - canvas.getWidth() / 16, tileY, canvas.getWidth() / 16, canvas.getHeight());
+            canvas.draw(edge, Color.WHITE, canvas.getWidth() / 5 - canvas.getWidth() / 16, tileY + canvas.getHeight()/8, canvas.getWidth() / 16, canvas.getWidth()/4);
             edge.flip(true,false);
 
             tileY += canvas.getWidth() / 4;
