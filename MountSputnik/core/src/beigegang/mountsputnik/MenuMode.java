@@ -59,7 +59,7 @@ public class MenuMode extends ModeController {
 
 	private static String[] menuOptions = {"Start", "Race Mode", "Settings", "Quit"};
 	private static int exitCodes[] = {EXIT_LEVEL_SELECT, EXIT_RACE_LEVEL_SELECT, EXIT_SETTINGS, EXIT_QUIT};
-	private static String[][] levelSelectOptions = {{"Tutorial", "Canyon"}, {"Waterfall", "Volcano"}, {"Snowy Mountain", "Sky"}, {"Space", "Menu"}};
+	private static String[][] levelSelectOptions = {{"1. Tutorial", "2. Canyon"}, {"3. Waterfall", "4. Volcano"}, {"5. Snowy Mountain", "6. Sky"}, {"7. Space", "Menu"}};
 	private static int levelSelectCodes[] = {LEVEL_TUTORIAL, LEVEL_WATERFALL, LEVEL_SNOWY_MOUNTAIN, LEVEL_SPACE, LEVEL_CANYON, LEVEL_VOLCANO, LEVEL_SKY};
 	private static String[] settingsOptions = {"Trigger Scheme", "Stick Scheme", "Menu"};
 	private static String[] currentSchemes = {"Classic", "Classic"};
@@ -179,7 +179,11 @@ public class MenuMode extends ModeController {
 			if (race) changeCooldown *= 2;
 		}
 
-		if (input.didSelect() && currView == LEVEL_SELECT){
+		if (input.didBack() && (currView == LEVEL_SELECT || currView == SETTINGS)) {
+			SoundController.get(SoundController.DECLINE_SOUND).play();
+			listener.exitScreen(this, backCode);
+		}
+		else if (input.didSelect() && currView == LEVEL_SELECT){
 			//play sound
 			if (currSelection == levelSelectCodes.length){
 				SoundController.get(SoundController.DECLINE_SOUND).play();
@@ -239,7 +243,7 @@ public class MenuMode extends ModeController {
 					bottomOfScreen + (canvas.getHeight() - textboxHeight) / 2 - canvas.getHeight() * 0.01f,
 					textboxWidth, textboxHeight);
 
-			float drawX = -canvas.getWidth() * 0.15f;
+			float drawX = -canvas.getWidth() * 0.135f;
 			BitmapFont font;
 			drawY += canvas.getHeight() * 0.31f;
 
