@@ -791,6 +791,7 @@ public class GamingMode extends ModeController {
                 obstacle = new ObstacleModel(staticObstacle.getTexture(), staticDesc.getFloat("size"), scale);
                 obstacle.setX(staticDesc.getFloat("x"));
                 obstacle.setY(staticDesc.getFloat("y")+currentHeight);
+                if (levelName == "sky") obstacle.setSkyFixtures();
 
                 obstacle.setBodyType(BodyType.StaticBody);
                 obstacle.activatePhysics(world);
