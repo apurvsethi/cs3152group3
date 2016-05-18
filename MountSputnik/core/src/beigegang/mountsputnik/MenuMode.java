@@ -24,23 +24,33 @@ public class MenuMode extends ModeController {
 	private int currView = MAIN_MENU;
 	private JsonReader jsonReader = new JsonReader();
 	private JsonValue saveGame = (jsonReader.parse(Gdx.files.internal("savegame.json"))).get("levels");
-	private boolean levelSelectAllowed [] = {true, saveGame.getBoolean("canyon"), saveGame.getBoolean("waterfall"), saveGame.getBoolean("mountain"), saveGame.getBoolean("volcano"), saveGame.getBoolean("sky"), saveGame.getBoolean("space")};
+	private boolean levelSelectAllowed [] = {true, saveGame.getBoolean("waterfall"), saveGame.getBoolean("mountain"), saveGame.getBoolean("space"), saveGame.getBoolean("canyon"), saveGame.getBoolean("volcano"), saveGame.getBoolean("sky")};
 
+	private static final String TITLE_FONT_FILE = "Fonts/kremlin.ttf";
 	private static final String FONT_FILE = "Fonts/mastodon.ttf";
+	private static BitmapFont titleFont;
 	private static BitmapFont fontNormal;
+	private static BitmapFont levelSelectFontNormal;
 	private static BitmapFont fontSelected;
+	private static BitmapFont levelSelectFontSelected;
 
 	private static final String BACKGROUND_FILE = "Menu/StartMenu/Background.png";
+	private static final String BARE_BACKGROUND_FILE = "Menu/StartMenu/LevelSelect/BareBackground.png";
 	private static final String TEXTBOX_FILE = "Menu/Text Box.png";
 	private static final String LEVEL_LOCKED_FILE = "Menu/StartMenu/LevelSelect/Locked.png";
-	protected static final String LEVEL_NAMES[] = {"tutorial", "canyon", "waterfall", "volcano", "mountain", "sky", "space"};
+	protected static final String LAVA_FILE = "assets/volcano/Lava.png";
+	protected static final String LAVA_GLOW_FILE = "assets/volcano/LavaGlow.png";
+	protected static final String LEVEL_NAMES[] = {"tutorial", "waterfall", "mountain", "space", "canyon", "volcano", "sky"};
 
 	/**
 	 * Texture asset for files used, parts, etc.
 	 */
 	private static TextureRegion background;
+	private static TextureRegion bareBackground;
 	private static TextureRegion textbox;
 	private static TextureRegion levelLocked;
+	protected static TextureRegion lavaTexture;
+	protected static TextureRegion lavaGlowTexture;
 	private static TextureRegion[] levelSelectGrounds = new TextureRegion[LEVEL_NAMES.length];
 	private static TextureRegion[] levelSelectBackgrounds = new TextureRegion[LEVEL_NAMES.length];
 	private static TextureRegion[] levelSelectMidgrounds = new TextureRegion[LEVEL_NAMES.length];
@@ -50,8 +60,8 @@ public class MenuMode extends ModeController {
 
 	private static String[] menuOptions = {"Start", "Race Mode", "Level Select", "Settings", "Quit"};
 	private static int exitCodes[] = {EXIT_GAME_RESTART_LEVEL, EXIT_RACE, EXIT_LEVEL_SELECT, EXIT_SETTINGS, EXIT_QUIT};
-	private static String[][] levelSelectOptions = {{"Tutorial", "Snowy Mountain"}, {"Canyon", "Sky"}, {"Waterfall", "Space"}, {"Volcano", "Menu"}};
-	private static int levelSelectCodes[] = {LEVEL_TUTORIAL, LEVEL_CANYON, LEVEL_WATERFALL, LEVEL_VOLCANO, LEVEL_SNOWY_MOUNTAIN, LEVEL_SKY, LEVEL_SPACE};
+	private static String[][] levelSelectOptions = {{"Tutorial", "Canyon"}, {"Waterfall", "Volcano"}, {"Snowy Mountain", "Sky"}, {"Space", "Menu"}};
+	private static int levelSelectCodes[] = {LEVEL_TUTORIAL, LEVEL_WATERFALL, LEVEL_SNOWY_MOUNTAIN, LEVEL_SPACE, LEVEL_CANYON, LEVEL_VOLCANO, LEVEL_SKY};
 	private static String[] settingsOptions = {"Trigger Scheme", "Stick Scheme", "Menu"};
 	private static String[] currentSchemes = {"Classic", "Classic"};
 	private static int backCode = EXIT_MENU;
@@ -66,6 +76,13 @@ public class MenuMode extends ModeController {
 		if (assetState != AssetState.EMPTY) return;
 		assetState = AssetState.LOADING;
 
+		FreetypeFontLoader.FreeTypeFontLoaderParameter title = new
+				FreetypeFontLoader.FreeTypeFontLoaderParameter();
+		title.fontFileName = TITLE_FONT_FILE;
+		title.fontParameters.size = (int)(70 * Gdx.graphics.getDensity());
+		title.fontParameters.color = Color.BROWN;
+		assetManager.load("LevelSelect" + TITLE_FONT_FILE, BitmapFont.class, title);
+		assets.add("LevelSelect" + TITLE_FONT_FILE);
 		FreetypeFontLoader.FreeTypeFontLoaderParameter normal = new
 				FreetypeFontLoader.FreeTypeFontLoaderParameter();
 		normal.fontFileName = FONT_FILE;
@@ -73,6 +90,13 @@ public class MenuMode extends ModeController {
 		normal.fontParameters.color = Color.BROWN;
 		assetManager.load("Normal" + FONT_FILE, BitmapFont.class, normal);
 		assets.add("Normal" + FONT_FILE);
+		FreetypeFontLoader.FreeTypeFontLoaderParameter levelSelectNormal = new
+				FreetypeFontLoader.FreeTypeFontLoaderParameter();
+		levelSelectNormal.fontFileName = FONT_FILE;
+		levelSelectNormal.fontParameters.size = (int)(55 * Gdx.graphics.getDensity());
+		levelSelectNormal.fontParameters.color = Color.BROWN;
+		assetManager.load("LargeNormal" + FONT_FILE, BitmapFont.class, levelSelectNormal);
+		assets.add("LargeNormal" + FONT_FILE);
 		FreetypeFontLoader.FreeTypeFontLoaderParameter selected = new
 				FreetypeFontLoader.FreeTypeFontLoaderParameter();
 		selected.fontFileName = FONT_FILE;
@@ -80,6 +104,13 @@ public class MenuMode extends ModeController {
 		selected.fontParameters.color = Color.FIREBRICK;
 		assetManager.load("Selected" + FONT_FILE, BitmapFont.class, selected);
 		assets.add("Selected" + FONT_FILE);
+		FreetypeFontLoader.FreeTypeFontLoaderParameter levelSelectSelected = new
+				FreetypeFontLoader.FreeTypeFontLoaderParameter();
+		levelSelectSelected.fontFileName = FONT_FILE;
+		levelSelectSelected.fontParameters.size = (int)(63 * Gdx.graphics.getDensity());
+		levelSelectSelected.fontParameters.color = Color.FIREBRICK;
+		assetManager.load("LargeSelected" + FONT_FILE, BitmapFont.class, levelSelectSelected);
+		assets.add("LargeSelected" + FONT_FILE);
 
 		for(String name : LEVEL_NAMES){
 			manager.load("assets/"+name+"/LevelStart.png", Texture.class);
@@ -96,6 +127,8 @@ public class MenuMode extends ModeController {
 			assets.add("assets/"+name+"/SurfaceEdge.png");
 		}
 
+		manager.load(BARE_BACKGROUND_FILE, Texture.class);
+		assets.add(BARE_BACKGROUND_FILE);
 		manager.load(TEXTBOX_FILE, Texture.class);
 		assets.add(TEXTBOX_FILE);
 		manager.load(LEVEL_LOCKED_FILE, Texture.class);
@@ -124,12 +157,18 @@ public class MenuMode extends ModeController {
 		
 		if (assetState != AssetState.LOADING) return;
 
+		titleFont = manager.get("LevelSelect" + TITLE_FONT_FILE, BitmapFont.class);
 		fontNormal = manager.get("Normal" + FONT_FILE, BitmapFont.class);
+		levelSelectFontNormal = manager.get("LargeNormal" + FONT_FILE, BitmapFont.class);
 		fontSelected = manager.get("Selected" + FONT_FILE, BitmapFont.class);
+		levelSelectFontSelected = manager.get("LargeSelected" + FONT_FILE, BitmapFont.class);
 
 		background = createTexture(manager, BACKGROUND_FILE, false);
+		bareBackground = createTexture(manager, BARE_BACKGROUND_FILE, false);
 		textbox = createTexture(manager, TEXTBOX_FILE, false);
 		levelLocked = createTexture(manager, LEVEL_LOCKED_FILE, false);
+		lavaTexture = createTexture(manager, LAVA_FILE, false);
+		lavaGlowTexture = createTexture(manager, LAVA_GLOW_FILE, false);
 		for (int i = 0; i < LEVEL_NAMES.length; i++) {
 			levelSelectGrounds[i] = createTexture(manager, "assets/" + LEVEL_NAMES[i] + "/LevelStart.png", false);
 			levelSelectBackgrounds[i] = createTexture(manager, "assets/" + LEVEL_NAMES[i] + "/Background.png", false);
@@ -224,11 +263,13 @@ public class MenuMode extends ModeController {
 		float bottomOfScreen = canvas.getCamera().position.y - canvas.getHeight() / 2;
 
 		canvas.begin();
-		if (currView == SETTINGS || currView == MAIN_MENU || currSelection == LEVEL_NAMES.length)
+		if (currView == SETTINGS || currView == MAIN_MENU)
 			canvas.draw(background, Color.WHITE, 0, bottomOfScreen, canvas.getWidth(), canvas.getHeight());
-		else SharedMethods.drawBackgrounds(canvas, levelSelectGrounds[currSelection], levelSelectBackgrounds[currSelection],
-				levelSelectMidgrounds[currSelection], levelSelectForegrounds[currSelection], levelSelectSurfaces[currSelection],
-				levelSelectEdges[currSelection]);
+		else if (currSelection == LEVEL_NAMES.length)
+			canvas.draw(bareBackground, Color.WHITE, 0, bottomOfScreen, canvas.getWidth(), canvas.getHeight());
+		else drawBackgrounds(levelSelectGrounds[currSelection], levelSelectBackgrounds[currSelection],
+				levelSelectMidgrounds[currSelection], levelSelectForegrounds[currSelection],
+				levelSelectSurfaces[currSelection], levelSelectEdges[currSelection]);
 		canvas.end();
 
 		canvas.begin();
@@ -243,16 +284,21 @@ public class MenuMode extends ModeController {
 
 			float drawX = -canvas.getWidth() * 0.15f;
 			BitmapFont font;
-			drawY += canvas.getHeight() * 0.27f;
+			drawY += canvas.getHeight() * 0.31f;
 
+			canvas.drawTextCentered("Level Select", titleFont, drawY);
+			drawY -= canvas.getHeight() * 0.16;
 			for (int i = 0; i < levelSelectOptions.length; i++) {
 				for (int j = 0; j < levelSelectOptions[i].length; j++) {
-					font = (currSelection == i + levelSelectOptions.length * j) ? fontSelected : fontNormal;
+					font = (currSelection == i + levelSelectOptions.length * j) ? levelSelectFontSelected : levelSelectFontNormal;
 					canvas.drawTextCentered(levelSelectOptions[i][j], font, drawX, drawY);
 					drawX *= -1;
 				}
-				drawY -= canvas.getHeight() * 0.18;
+				drawY -= canvas.getHeight() * 0.15;
 			}
+
+			if (currSelection < LEVEL_NAMES.length && LEVEL_NAMES[currSelection].equals("volcano"))
+				drawLava(bottomOfScreen);
 		}
 		else if (currView == SETTINGS) {
 			canvas.draw(textbox, Color.WHITE, canvas.getWidth() * 0.2f, bottomOfScreen + canvas.getHeight() * 0.07f,
@@ -284,6 +330,39 @@ public class MenuMode extends ModeController {
 			}
 		}
 		canvas.end();
+	}
+
+	private void drawBackgrounds(TextureRegion ground, TextureRegion background, TextureRegion midground, TextureRegion foreground, TextureRegion tile, TextureRegion edge){
+		float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
+		float tileY = y - (y % (canvas.getWidth() / 4));
+		canvas.draw(background, Color.WHITE, 0, y, canvas.getWidth(), canvas.getHeight());
+
+		canvas.draw(midground, Color.WHITE, canvas.getWidth() * 4 / 5, y * MIDGROUND_SCROLL, canvas.getWidth() / 5, canvas.getHeight());
+		midground.flip(true,false);
+		canvas.draw(midground, Color.WHITE, 0, y * MIDGROUND_SCROLL, canvas.getWidth() / 5, canvas.getHeight());
+		midground.flip(true,false);
+
+		canvas.draw(foreground, Color.WHITE, canvas.getWidth() * 4 / 5, y - canvas.getHeight() * 0.9f, canvas.getWidth() / 5, foreground.getTexture().getHeight());
+		foreground.flip(true,false);
+		canvas.draw(foreground, Color.WHITE, 0, y - canvas.getHeight() * 0.45f, canvas.getWidth() / 5, foreground.getTexture().getHeight());
+		foreground.flip(true,false);
+
+		for (int counterInt = 0; counterInt < 5; counterInt++) {
+			canvas.draw(tile, Color.WHITE, canvas.getWidth() / 5, tileY, 3*canvas.getWidth() / 10, canvas.getWidth() / 4);
+			canvas.draw(tile, Color.WHITE, (canvas.getWidth()-1) / 2, tileY, 3*canvas.getWidth() / 10, canvas.getWidth() / 4);
+			canvas.draw(edge, Color.WHITE, (canvas.getWidth()-1) * 4 / 5, tileY, canvas.getWidth() / 16, canvas.getHeight());
+			edge.flip(true,false);
+			canvas.draw(edge, Color.WHITE, canvas.getWidth() / 5 - canvas.getWidth() / 16, tileY, canvas.getWidth() / 16, canvas.getHeight());
+			edge.flip(true,false);
+
+			tileY += canvas.getWidth() / 4;
+		}
+		canvas.draw(ground, Color.WHITE, canvas.getWidth() / 5, 0, 3*canvas.getWidth() / 5, canvas.getHeight() / 8);
+	}
+
+	private void drawLava(float bottomOfScreen) {
+		canvas.draw(lavaGlowTexture, Color.WHITE, 0, bottomOfScreen - canvas.getHeight() * 0.01f, canvas.getWidth(), canvas.getHeight() * 0.3f);
+		canvas.draw(lavaTexture.getTexture(), Color.WHITE, -canvas.getWidth() * 0.01f, bottomOfScreen - canvas.getHeight() * 0.95f, canvas.getWidth() * 1.1f, canvas.getHeight());
 	}
 
 	public void changeView(int view){
