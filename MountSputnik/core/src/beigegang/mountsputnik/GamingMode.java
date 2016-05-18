@@ -79,6 +79,10 @@ public class GamingMode extends ModeController {
             "Ragdoll/HandLeft.png", "Ragdoll/HandRight.png", "Ragdoll/ThighLeft.png",
             "Ragdoll/ThighRight.png", "Ragdoll/CalfLeft.png", "Ragdoll/CalfRight.png", "Ragdoll/FeetShoeLeft.png",
             "Ragdoll/FeetShoeRight.png"};
+    protected static final String AMERICA_PART_TEXTURES[] = {"Ragdoll/murica/Torso.png","Ragdoll/murica/Head.png",
+    		"Ragdoll/murica/Hips.png","Ragdoll/ArmLeft.png", "Ragdoll/ArmRight.png", "Ragdoll/ForearmLeft.png", "Ragdoll/ForearmRight.png",
+            "Ragdoll/HandLeft.png", "Ragdoll/HandRight.png","Ragdoll/murica/ThighLeft.png","Ragdoll/murica/ThighRight.png", 
+            "Ragdoll/CalfLeft.png", "Ragdoll/CalfRight.png", "Ragdoll/FeetShoeLeft.png","Ragdoll/FeetShoeRight.png" }; 
     protected static final String SHADOW_TEXTURES[] = {"Ragdoll/shadow/Torso.png", "Ragdoll/shadow/Head.png", "Ragdoll/shadow/Hips.png",
             "Ragdoll/shadow/ArmLeft.png", "Ragdoll/shadow/ArmRight.png", "Ragdoll/shadow/ForearmLeft.png", "Ragdoll/shadow/ForearmRight.png",
             "Ragdoll/shadow/HandLeftGripped.png", "Ragdoll/shadow/HandRightGripped.png", "Ragdoll/shadow/ThighLeft.png",
@@ -136,6 +140,7 @@ public class GamingMode extends ModeController {
     protected static FilmStrip handholdWarning;
     protected static FilmStrip obstacleWarning;
     protected static FilmStrip[] partTextures = new FilmStrip[PART_TEXTURES.length];
+    protected static FilmStrip[] americaPartTextures = new FilmStrip[AMERICA_PART_TEXTURES.length]; 
     protected static TextureRegion[] shadowTextures = new TextureRegion[SHADOW_TEXTURES.length];
     protected static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length];
     protected static TextureRegion[] handholdTextures;
@@ -224,6 +229,7 @@ public class GamingMode extends ModeController {
                 loadAddTexture("assets/"+entry.getKey()+"/Handhold"+counterInt+".png");
         for (String name : LEVEL_LABEL_FILES) loadAddTexture(name);
         for (String PART_TEXTURE : PART_TEXTURES) loadAddTexture(PART_TEXTURE);
+        for (String PART_TEXTURE: AMERICA_PART_TEXTURES) loadAddTexture(PART_TEXTURE); 
         for (String SHADOW_TEXTURE: SHADOW_TEXTURES) loadAddTexture(SHADOW_TEXTURE);
         for (String TUTORIAL_TEXTURE : TUTORIAL_TEXTURES) loadAddTexture(TUTORIAL_TEXTURE);
 
@@ -282,6 +288,11 @@ public class GamingMode extends ModeController {
 
         for (counterInt = 0; counterInt < PART_TEXTURES.length; counterInt++) {
             partTextures[counterInt] = createFilmStrip(manager, PART_TEXTURES[counterInt], 1,
+                    BODY_PART_ANIMATION_FRAMES[counterInt], BODY_PART_ANIMATION_FRAMES[counterInt]);
+        }
+        
+        for (counterInt = 0; counterInt < AMERICA_PART_TEXTURES.length; counterInt++) {
+            americaPartTextures[counterInt] = createFilmStrip(manager, AMERICA_PART_TEXTURES[counterInt], 1,
                     BODY_PART_ANIMATION_FRAMES[counterInt], BODY_PART_ANIMATION_FRAMES[counterInt]);
         }
 
@@ -573,7 +584,7 @@ public class GamingMode extends ModeController {
             character1 = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, scale);
         else {
             character1 = new CharacterModel(partTextures, world, DEFAULT_WIDTH * 1 / 3, DEFAULT_HEIGHT / 2, scale);
-            character2 = new CharacterModel(partTextures, world, DEFAULT_WIDTH * 2 / 3, DEFAULT_HEIGHT / 2, scale);
+            character2 = new CharacterModel(americaPartTextures, world, DEFAULT_WIDTH * 2 / 3, DEFAULT_HEIGHT / 2, scale);
         }
         warningController = new WarningController(scale, handholdWarning, obstacleWarning);
 
@@ -590,6 +601,7 @@ public class GamingMode extends ModeController {
         movementController1 = new PositionMovementController(character1, scale);
         if (id == RACE_MODE)
             movementController2 = new PositionMovementController(character2, scale);
+        canvas.setCameraPosition(canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
 
     }
     /**
@@ -1358,12 +1370,12 @@ public class GamingMode extends ModeController {
 //            canvas.begin();
             if (timestep % 60 == 0 && character2.getEnergy() != 0)
                 progressLevel = Math.min(6, Math.max(0, Math.round(a * 6 - .1f)));
-            SharedMethods.drawProgress(canvas, progressTextures, progressBackgroundTexture, progressLevel, canvas.getWidth()*3/4, y);
+            SharedMethods.drawProgress(canvas, progressTextures, progressBackgroundTexture, progressLevel, canvas.getWidth()*4/5, y);
             //end p2 draw
             //p1 draw
             canvas.end();
             energyLevel = Math.abs((int) Math.ceil(character2.getEnergy() / 10f));
-            flashing2 = SharedMethods.drawEnergy(canvas, character2, energyTextures, fatigueTexture, lowEnergySprite, batch, energyLevel, canvas.getWidth() * 3 / 4, y, flashing2);
+            flashing2 = SharedMethods.drawEnergy(canvas, character2, energyTextures, fatigueTexture, lowEnergySprite, batch, energyLevel, canvas.getWidth() * 4 / 5, y, flashing2);
         }
         //end p1 draw
         //p2 draw

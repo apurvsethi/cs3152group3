@@ -37,7 +37,9 @@ public class PartModel extends GameObject{
 	}
 	
 	public void drawShadow(TextureRegion shadowTexture, GameCanvas canvas){
-		canvas.draw(shadowTexture, Color.WHITE, origin.x, origin.y,
+		Color c = new Color(Color.WHITE);
+		c.a = 0.7f;  
+		canvas.draw(shadowTexture, c, origin.x, origin.y,
 				(getX()+SHADOW_X_OFFSET) * drawPositionScale.x, (getY()+SHADOW_Y_OFFSET) * drawPositionScale.y,
 				getAngle(), drawSizeScale.x / SCREEN_WIDTH * canvas.getWidth(),
 				drawSizeScale.y / SCREEN_HEIGHT * canvas.getHeight());

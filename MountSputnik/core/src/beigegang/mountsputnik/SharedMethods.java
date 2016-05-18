@@ -181,7 +181,7 @@ public class SharedMethods {
         for (int counterInt = 0; counterInt < 5; counterInt++) {
             canvas.draw(tile, Color.WHITE, canvas.getWidth() / 5, tileY, 3*canvas.getWidth() / 10, canvas.getWidth() / 4);
             canvas.draw(tile, Color.WHITE, (canvas.getWidth()-1) / 2, tileY, 3*canvas.getWidth() / 10, canvas.getWidth() / 4);
-            canvas.draw(edge, Color.WHITE, (canvas.getWidth()-1) * 4 / 5, tileY + canvas.getHeight()/8, canvas.getWidth() / 16, canvas.getWidth()/4);
+            canvas.draw(edge, Color.WHITE, (canvas.getWidth()-2) * 4 / 5, tileY + canvas.getHeight()/8, canvas.getWidth() / 16, canvas.getWidth()/4);
             edge.flip(true,false);
             canvas.draw(edge, Color.WHITE, canvas.getWidth() / 5 - canvas.getWidth() / 16, tileY + canvas.getHeight()/8, canvas.getWidth() / 16, canvas.getWidth()/4);
             edge.flip(true,false);
