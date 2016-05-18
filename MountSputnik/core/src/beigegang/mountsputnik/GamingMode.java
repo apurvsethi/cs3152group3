@@ -8,9 +8,8 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -64,6 +63,8 @@ public class GamingMode extends ModeController {
     /**
      * Strings for files used, string[] for parts, etc.
      */
+    protected static final String KREMLIN_FILE = "Fonts/kremlin.ttf";
+    protected static final String MASTODON_FILE = "Fonts/mastodon.ttf";
     protected static final String LEVEL_NAMES[] = {"tutorial", "canyon", "waterfall", "volcano", "mountain", "sky", "space"}; //TODO: change second canyon to waterfall
     protected static final String LAVA_FILE = "assets/volcano/Lava.png";
     protected static final String LAVA_GLOW_FILE = "assets/volcano/LavaGlow.png";
@@ -124,6 +125,8 @@ public class GamingMode extends ModeController {
     protected static TextureRegion UI;
     protected static TextureRegion CANYON;
     protected static TextureRegion LOGO;
+    protected static BitmapFont mastodon;
+    protected static BitmapFont kremlin;
     protected static TextureRegion RUSSIAN_FLAG;
     protected static TextureRegion edge;
     protected static TextureRegion ground;
@@ -152,10 +155,9 @@ public class GamingMode extends ModeController {
     protected static TextureRegion lowEnergyHalo;
     protected static String PROGRESS_BAR= "Progress Chalk Bar.png";
     protected static TextureRegion progressBarTexture;
-    protected Sprite progressSprite = new Sprite(new Texture(PROGRESS_BAR));
-    protected Sprite lowEnergySprite = new Sprite(new Texture(LOW_ENERGY_HALO));
-    protected Sprite UISprite = new Sprite(new Texture(UI_FILE));
-    protected static SpriteBatch batch = new SpriteBatch();
+    protected Texture progressSprite = new Texture(PROGRESS_BAR);
+    protected Texture lowEnergySprite = new Texture(LOW_ENERGY_HALO);
+    protected Texture UISprite = new Texture(UI_FILE);
     protected static int progressLevel = 0;
     /** The reader to process JSON files */
     protected JsonReader jsonReader;
@@ -226,7 +228,12 @@ public class GamingMode extends ModeController {
         for (String PART_TEXTURE : PART_TEXTURES) loadAddTexture(PART_TEXTURE);
         for (String SHADOW_TEXTURE: SHADOW_TEXTURES) loadAddTexture(SHADOW_TEXTURE);
         for (String TUTORIAL_TEXTURE : TUTORIAL_TEXTURES) loadAddTexture(TUTORIAL_TEXTURE);
-
+        
+        FreetypeFontLoader.FreeTypeFontLoaderParameter k = makeFont(KREMLIN_FILE, 55, Color.ORANGE);
+		loadAddFont("Game" + KREMLIN_FILE, k);
+		FreetypeFontLoader.FreeTypeFontLoaderParameter m = makeFont(MASTODON_FILE, 55, Color.ORANGE);
+		loadAddFont("Game" + MASTODON_FILE, m);
+    
         loadAddTexture(UI_FILE);
         loadAddTexture(LOGO_FILE);
         loadAddTexture(LAVA_FILE);
@@ -275,6 +282,8 @@ public class GamingMode extends ModeController {
         glowTexture = createTexture(manager, GLOW_FILE, false);
         staticObstacle = createTexture(manager, "assets/"+levelName+"/StaticObstacle.png", false);
         fallingObstacle = createFilmStrip(manager, "assets/"+levelName+"/Rockbust_Animation.png", 1, 5, 5);
+        kremlin = manager.get("Game" + KREMLIN_FILE, BitmapFont.class);
+        mastodon = manager.get("Game" + MASTODON_FILE, BitmapFont.class);
 
         for (counterInt = 0;  counterInt < LEVEL_LABEL_FILES.length; counterInt++){
             levelLabels[counterInt] = createTexture(manager, LEVEL_LABEL_FILES[counterInt], false);
@@ -502,7 +511,6 @@ public class GamingMode extends ModeController {
         world.dispose();
         timestep = 0;
         animationTimestep = 0;
-        progressSprite.setBounds(0,0,canvas.getWidth()/4,canvas.getHeight());
         queuedObstacles.clear();
     }
 
@@ -1327,10 +1335,8 @@ public class GamingMode extends ModeController {
     public void draw() {
         canvas.clear();
         canvas.begin();
-    //		Vector2 v = character1.parts.get(CHEST).getPosition();
         vector = character1.parts.get(HEAD).getPosition();
         float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
-        float tileY = y - (y % (canvas.getWidth() / 4));
         SharedMethods.drawBackgrounds(canvas,ground,background,midground,foreground,tile,edge,currLevel);
 
 
@@ -1339,18 +1345,29 @@ public class GamingMode extends ModeController {
             progressLevel = Math.min(6,Math.max(0,Math.round(a * 6 - .1f)));
 
         canvas.draw(levelLabels[currLevel], Color.WHITE, 0, y, canvas.getWidth() / 5, canvas.getHeight());
-        canvas.end();
-        //draws the UIs no bars or wood dials around them tho
-        SharedMethods.drawUI(canvas,0,UISprite,batch);
-        if (id == RACE_MODE)
-            SharedMethods.drawUI(canvas,canvas.getWidth()*4/5,UISprite,batch);
+        
+        float textX = 140*canvas.getWidth()/SCREEN_WIDTH;
+        float textY = y+canvas.getHeight()/2+480*canvas.getHeight()/SCREEN_HEIGHT;
+        float timeX = 117*canvas.getWidth()/SCREEN_WIDTH;;
+        float timeY = textY - 40*canvas.getHeight()/SCREEN_HEIGHT;
+        int seconds = timestep/60;
+        String minuteString = (seconds/60 >= 10) ? seconds/60 + "" : ("0"+seconds/60);
+        String secondString = (seconds%60 >= 10) ? seconds%60 + "" : ("0"+seconds%60);
+        String time = minuteString+":"+secondString;
+        SharedMethods.drawUI(canvas,0,UISprite,.7f);
+        canvas.drawText("Time", mastodon, textX, textY);
+        canvas.drawText(time, kremlin, timeX, timeY);
+        if (id == RACE_MODE){
+            SharedMethods.drawUI(canvas,canvas.getWidth()*4/5,UISprite,.7f);
+        	canvas.drawText("Time", mastodon, canvas.getWidth()-textX-105*canvas.getWidth()/SCREEN_WIDTH, textY);
+            canvas.drawText(time, kremlin, canvas.getWidth()-timeX-149*canvas.getWidth()/SCREEN_WIDTH, timeY);
+        }
 
-        canvas.begin();
         SharedMethods.drawProgress(canvas,progressTextures,progressBackgroundTexture,progressLevel,0,y );
         energyLevel = Math.abs((int) Math.ceil(character1.getEnergy() / 10f));
         canvas.end();
 
-        flashing1 = SharedMethods.drawEnergy(canvas, character1, energyTextures, fatigueTexture, lowEnergySprite, batch, energyLevel, 0, y, flashing1);
+        flashing1 = SharedMethods.drawEnergy(canvas, character1, energyTextures, fatigueTexture, lowEnergySprite, energyLevel, 0, y, flashing1);
         //P2 draw
         if (id == RACE_MODE) {
             vector = character2.parts.get(HEAD).getPosition();
@@ -1363,7 +1380,7 @@ public class GamingMode extends ModeController {
             //p1 draw
             canvas.end();
             energyLevel = Math.abs((int) Math.ceil(character2.getEnergy() / 10f));
-            flashing2 = SharedMethods.drawEnergy(canvas, character2, energyTextures, fatigueTexture, lowEnergySprite, batch, energyLevel, canvas.getWidth() * 3 / 4, y, flashing2);
+            flashing2 = SharedMethods.drawEnergy(canvas, character2, energyTextures, fatigueTexture, lowEnergySprite, energyLevel, canvas.getWidth() * 3 / 4, y, flashing2);
         }
         //end p1 draw
         //p2 draw
@@ -1381,7 +1398,7 @@ public class GamingMode extends ModeController {
         canvas.end();
 
         canvas.begin();
-        if(currLevel != LEVEL_SKY){
+        if(currLevel != LEVEL_SKY && currLevel != LEVEL_SPACE){
             for (int i = 0; i < character1.parts.size; i++){
                 character1.parts.get(i).drawShadow(shadowTextures[i], canvas);
             }
