@@ -160,14 +160,18 @@ public class SharedMethods {
 
 
 
-    public static void drawBackgrounds(GameCanvas canvas, TextureRegion ground, TextureRegion background, TextureRegion midground, TextureRegion foreground, TextureRegion tile, TextureRegion edge){
+    public static void drawBackgrounds(GameCanvas canvas, TextureRegion ground, TextureRegion background, TextureRegion midground, TextureRegion foreground, TextureRegion tile, TextureRegion edge, int levelName){
         float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
+        float h; 
+        if (levelName == LEVEL_VOLCANO) 
+        	h = midground.getTexture().getHeight(); 
+        	else h = canvas.getHeight(); 
         float tileY = y - (y % (canvas.getWidth() / 4));
         canvas.draw(background, Color.WHITE, 0, y, canvas.getWidth(), canvas.getHeight());
 
-        canvas.draw(midground, Color.WHITE, canvas.getWidth() * 4 / 5, y * MIDGROUND_SCROLL, canvas.getWidth() / 5, canvas.getHeight());
+        canvas.draw(midground, Color.WHITE, canvas.getWidth() * 4 / 5, y * MIDGROUND_SCROLL, canvas.getWidth() / 5, h);
         midground.flip(true,false);
-        canvas.draw(midground, Color.WHITE, 0, y * MIDGROUND_SCROLL, canvas.getWidth() / 5, canvas.getHeight());
+        canvas.draw(midground, Color.WHITE, 0, y * MIDGROUND_SCROLL, canvas.getWidth() / 5, h);
         midground.flip(true,false);
         
         canvas.draw(foreground, Color.WHITE, canvas.getWidth() * 4 / 5, y * FOREGROUND_SCROLL, canvas.getWidth() / 5, foreground.getTexture().getHeight());

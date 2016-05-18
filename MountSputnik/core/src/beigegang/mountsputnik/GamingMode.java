@@ -1365,7 +1365,7 @@ public class GamingMode extends ModeController {
         vector = character1.parts.get(HEAD).getPosition();
         float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
         float tileY = y - (y % (canvas.getWidth() / 4));
-        SharedMethods.drawBackgrounds(canvas,ground,background,midground,foreground,tile,edge);
+        SharedMethods.drawBackgrounds(canvas,ground,background,midground,foreground,tile,edge,currLevel);
 
 
         float a = (vector.y - cposYAtTime0)/(maxHandhold - cposYAtTime0);

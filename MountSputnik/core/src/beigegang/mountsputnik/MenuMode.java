@@ -292,9 +292,9 @@ public class MenuMode extends ModeController {
 		float tileY = y - (y % (canvas.getWidth() / 4));
 		canvas.draw(background, Color.WHITE, 0, y, canvas.getWidth(), canvas.getHeight());
 
-		canvas.draw(midground, Color.WHITE, canvas.getWidth() * 4 / 5, y * MIDGROUND_SCROLL, canvas.getWidth() / 5, canvas.getHeight());
+		canvas.draw(midground, Color.WHITE, canvas.getWidth() * 4 / 5, y, canvas.getWidth() / 5, canvas.getHeight());
 		midground.flip(true,false);
-		canvas.draw(midground, Color.WHITE, 0, y * MIDGROUND_SCROLL, canvas.getWidth() / 5, canvas.getHeight());
+		canvas.draw(midground, Color.WHITE, 0, y, canvas.getWidth() / 5, canvas.getHeight());
 		midground.flip(true,false);
 
 		canvas.draw(foreground, Color.WHITE, canvas.getWidth() * 4 / 5, y - canvas.getHeight() * 0.9f, canvas.getWidth() / 5, foreground.getTexture().getHeight());
