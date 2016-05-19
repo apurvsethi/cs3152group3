@@ -724,7 +724,12 @@ public class GamingMode extends ModeController {
 
         Random rand = new Random();
         while(handholdDesc != null){
-            int snapper = handholdDesc.getFloat("slip") == 0 && handholdDesc.getFloat("crumble") == 0 ? 0 :(handholdDesc.getFloat("slip") == 0?1:2);
+            int snapper = 0;
+            try {
+                snapper = handholdDesc.getFloat("slip") == 0 && handholdDesc.getFloat("crumble") == 0 ? 0 : (handholdDesc.getFloat("slip") == 0 ? 1 : 2);
+            }catch(Exception e){
+                //THERES NO FREAKING SLIP OR CRUMBLE FOR THE HANDHOLDS!!
+            }
             handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(), glowTexture.getTexture(), snapper,
                     handholdDesc.getFloat("positionX"), handholdDesc.getFloat("positionY")+currentHeight,
                     handholdDesc.getFloat("width"), handholdDesc.getFloat("height"), scale);
