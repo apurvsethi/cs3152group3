@@ -1347,8 +1347,8 @@ public class GamingMode extends ModeController {
         energyLevel = Math.abs((int) Math.ceil(character1.getEnergy() / 10f));
         flashing1 = SharedMethods.drawEnergy(canvas, character1, energyTextures, lowEnergyHalo, energyLevel, 0, 0, flashing1);
         canvas.draw(gauges, Color.WHITE, 0, 0, canvas.getWidth()*1/5, canvas.getHeight());
-        canvas.drawTextCentered("Progress", mastodonS, -845, canvas.getHeight() * 0.29f);
-        canvas.drawTextCentered("Stamina", mastodonS,-685 , canvas.getHeight() * 0.29f);
+        canvas.drawTextCentered("Progress", mastodonS, -845*canvas.getWidth()/SCREEN_WIDTH, canvas.getHeight() * 0.29f);
+        canvas.drawTextCentered("Stamina", mastodonS,-685*canvas.getWidth()/SCREEN_WIDTH , canvas.getHeight() * 0.29f);
         canvas.drawTextCentered(levelName, mastodon, hudMidX, -canvas.getHeight() * 0.375f);
         if (id == RACE_MODE) {
             vector = character2.parts.get(HEAD).getPosition();
@@ -1359,8 +1359,8 @@ public class GamingMode extends ModeController {
             energyLevel = Math.abs((int) Math.ceil(character2.getEnergy() / 10f));
             flashing2 = SharedMethods.drawEnergy(canvas, character2, energyTextures, lowEnergyHalo, energyLevel, canvas.getWidth() * 4 / 5, 0, flashing2);
             canvas.draw(gauges, Color.WHITE, canvas.getWidth()*4/5, 0, canvas.getWidth()*1/5, canvas.getHeight());
-            canvas.drawTextCentered("Stamina", mastodonS, 840, canvas.getHeight() * 0.29f);
-            canvas.drawTextCentered("Progress", mastodonS, 680 , canvas.getHeight() * 0.29f);
+            canvas.drawTextCentered("Stamina", mastodonS, 840*canvas.getWidth()/SCREEN_WIDTH, canvas.getHeight() * 0.29f);
+            canvas.drawTextCentered("Progress", mastodonS, 680*canvas.getWidth()/SCREEN_WIDTH , canvas.getHeight() * 0.29f);
             canvas.drawTextCentered(levelName, mastodon, -hudMidX, -canvas.getHeight() * 0.375f);
         }
         canvas.endHUD();

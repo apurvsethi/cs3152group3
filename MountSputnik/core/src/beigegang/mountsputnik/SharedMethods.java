@@ -57,7 +57,7 @@ public class SharedMethods {
     public static void drawProgress(GameCanvas canvas, TextureRegion progress ,int progressLevel, float xStart,float yStart) {
     	int a = canvas.getHeight()/4;
     	int yOffset = a - a*progressLevel/20;
-        canvas.draw(progress, Color.WHITE, 0, yOffset, progress.getRegionWidth(), canvas.getHeight()*progressLevel/20);
+        canvas.draw(progress, Color.WHITE, 0, yOffset, canvas.getWidth()/5, canvas.getHeight()*progressLevel/20);
     }
 
     public static int drawEnergy(GameCanvas canvas, CharacterModel character,TextureRegion[] energyTextures, TextureRegion lowEnergySprite, int energyLevel, int x, float y,int flashing2) {
