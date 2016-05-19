@@ -813,177 +813,157 @@ public class GamingMode extends ModeController {
             input = InputController.getInstance(CONTROLLER_2);
 
         }
-        if (isPaused) pauseMode.update(dt, listener,id==RACE_MODE);
-        else if (isDead) deadMode.update(dt, listener);
-        else if (isVictorious){
-            if (id == GAME_MODE && !writtenToFile) {
-                try {
-                    makeJsonForAnimation();
+        doingAnimation = input.watchAnimation() && currLevel == LEVEL_TUTORIAL && id == GAME_MODE;
+        if (doingAnimation) {
+            getAnimationInformation();
+            inx = animationLX;
+            iny = animationLY;
+            rinx = animationRX;
+            riny = animationRY;
+            nextToPress = animationNextToPress;
+            justReleased = animationJustReleased;
+        } else {
+            inx = input.getHorizontalL();
+            iny = input.getVerticalL();
+            rinx = input.getHorizontalR();
+            riny = input.getVerticalR();
+            if(Math.abs(inx) > .5  || Math.abs(iny) > .5  || Math.abs(rinx) > .5  || Math.abs(riny) > .5 ) moved = true;
+            nextToPress = input.getOrderPressed();
+            justReleased.clear();
+            if (input.releasedLeftArm()) justReleased.add(HAND_LEFT);
+            if (input.releasedRightArm()) justReleased.add(HAND_RIGHT);
+            if (input.releasedLeftLeg()) justReleased.add(FOOT_LEFT);
+            if (input.releasedRightLeg()) justReleased.add(FOOT_RIGHT);
 
-                    writeJsonToFile();
-
-                    writtenToFile = true;
-                } catch (Exception e) {
-                }
-            }
-
-            victoryMode.update(dt, listener,id!=GAME_MODE);
         }
-        else {
-            doingAnimation = input.watchAnimation() && currLevel == LEVEL_TUTORIAL && id == GAME_MODE;
-            if (doingAnimation) {
-                getAnimationInformation();
-                inx = animationLX;
-                iny = animationLY;
-                rinx = animationRX;
-                riny = animationRY;
-                nextToPress = animationNextToPress;
-                justReleased = animationJustReleased;
-            } else {
-                inx = input.getHorizontalL();
-                iny = input.getVerticalL();
-                rinx = input.getHorizontalR();
-                riny = input.getVerticalR();
-                if(Math.abs(inx) > .5  || Math.abs(iny) > .5  || Math.abs(rinx) > .5  || Math.abs(riny) > .5 ) moved = true;
-                nextToPress = input.getOrderPressed();
-                justReleased.clear();
-                if (input.releasedLeftArm()) justReleased.add(HAND_LEFT);
-                if (input.releasedRightArm()) justReleased.add(HAND_RIGHT);
-                if (input.releasedLeftLeg()) justReleased.add(FOOT_LEFT);
-                if (input.releasedRightLeg()) justReleased.add(FOOT_RIGHT);
-
-            }
-            //don't uncomment createAnimation unless you know what you are doing!!
+        //don't uncomment createAnimation unless you know what you are doing!!
 //    		createAnimation();
-    //
-            if (id == GAME_MODE && checkIfReachedCheckpoint(character)) {
-                lastReachedCheckpoint++;
-            }
-            if (checkIfDied(character)) {
-                listener.exitScreen(this, EXIT_DIED);
+//
+        if (id == GAME_MODE && checkIfReachedCheckpoint(character)) {
+            lastReachedCheckpoint++;
+        }
+        if (checkIfDied(character)) {
+            listener.exitScreen(this, EXIT_DIED);
 
-            }
-
-            if (input.didSelect()) {
-                if (id == GAME_MODE || controller == CONTROLLER_1) tutorialToggle1 = !tutorialToggle1;
-                else tutorialToggle2 = !tutorialToggle2;
-            }
-
-            if (input.didMenu()){
-                if (id == GAME_MODE){
-                    listener.exitScreen(this, EXIT_PAUSE);
-                }else{
-                    listener.exitScreen(this, EXIT_RACE_PAUSE);
-
-                }
-            }
-
-            movementController.moveCharacter(inx,iny,rinx,riny,nextToPress,justReleased);
-
-            if (nextToPress.size > 0)
-                for (int i : nextToPress)
-                    ungrip(((ExtremityModel) (character.parts.get(i))));
-            //bounding velocities
-            boundBodyVelocities(character);
-            if (controller == CONTROLLER_1) {
-                if (timestep == 0) {
-                    glowingHandholds = glowHandholds(character);
-                    glowingHandholds1 = glowingHandholds;
-                    glowingHandholds2 = glowingHandholds;
-                } else {
-                    glowingHandholds1 = glowingHandholds;
-
-                    glowingHandholds = glowHandholds(character);
-
-                    for (int i = 0; i < glowingHandholds2.size; i++) {
-                        glowingHandholds2.set(i, glowingHandholds.get(i));
-                        if (glowingHandholds.get(i) == null) glowingHandholds2.set(i, glowingHandholds1.get(i));
-                    }
-                }
-
-                //            snapLimbsToHandholds(glowingHandholds,character,justReleased);
-                snapLimbsToHandholds(glowingHandholds2, character, justReleased);
-            }
-            else{
-                if (timestep == 0) {
-                    glowingHandholds3 = glowHandholds(character);
-                    glowingHandholds4 = glowingHandholds3;
-                    glowingHandholds5 = glowingHandholds3;
-                } else {
-                    glowingHandholds4 = glowingHandholds3;
-
-                    glowingHandholds3 = glowHandholds(character);
-
-                    for (int i = 0; i < glowingHandholds3.size; i++) {
-                        glowingHandholds5.set(i, glowingHandholds4.get(i));
-                        if (glowingHandholds3.get(i) == null) glowingHandholds5.set(i, glowingHandholds4.get(i));
-                    }
-                }
-
-                //            snapLimbsToHandholds(glowingHandholds,character,justReleased);
-                snapLimbsToHandholds(glowingHandholds5, character, justReleased);
-            }
-            cameraWork();
-
-            dealWithSlipperyAndCrumblyHandholds(character);
-
-            spawnObstacles();
-
-            for (GameObject g : objects) {
-
-                if (g instanceof ObstacleModel &&
-                        ((g.getBody().getPosition().y < (canvas.getCamera().position.y - canvas.getWidth()) / scale.y &&
-                                g.getBody().getType() != BodyDef.BodyType.StaticBody) || ((ObstacleModel)g).broken)) {
-                    objects.remove(g);
-                }
-                if (g instanceof HandholdModel && ((HandholdModel) (g)).getStartPoint() != null) {
-                    HandholdModel h = (HandholdModel) g;
-                    h.updateSnapPoints();
-                    if (withinBounds(h.getBody().getPosition(), h.getEndPoint()) ||
-                            withinBounds(h.getBody().getPosition(), h.getStartPoint())) {
-                        h.getBody().setLinearVelocity(h.getBody().getLinearVelocity().x * -1, h.getBody().getLinearVelocity().y * -1);
-                    }
-                }
-            }
-            vector = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
-            character.updateEnergy(oxygen, 1, vector.len(), gravity.y != 0, gravity.y == 0);
-            character.decrementStun();
-
-            if (risingObstacle != null && moved) {
-                float progressPercentage = (character.parts.get(CHEST).getPosition().y)/(maxHandhold - cposYAtTime0);
-				risingObstacle.setHeight(risingObstacle.getHeight() + risingObstacle.getSpeed()*(progressPercentage+.5f));
-                for (PartModel p : character.parts) {
-                    if (risingObstacle.getHeight() >= p.getPosition().y) {
-                        character.setEnergy(0);
-                        failed = true;
-                    }
-                }
-                float yToSet = Math.min(canvas.getCamera().position.y/character.parts.get(CHEST).drawPositionScale.y, character.parts.get(CHEST).getPosition().y);
-                if(risingObstacle.getHeight() < yToSet - DEFAULT_HEIGHT/2 -1){
-                    risingObstacle.setHeight(yToSet - DEFAULT_HEIGHT/2 -1);
-                }
-            }
-
-            if (character.getEnergy() <= 0) {
-                failed = true;
-                for (int e : EXTREMITIES)
-                    ungrip((ExtremityModel) character.parts.get(e));
-
-            }
-            checkHasCompleted(character);
-            if (complete) {
-                if (id == RACE_MODE)
-                    listener.exitScreen(this, EXIT_VICTORY_RACE);
-                else listener.exitScreen(this, EXIT_VICTORY);
-
-            }
-            if (checkpointTimestep == 0) cposYAtTime0 = character.parts.get(HEAD).getY();
-
-            warningController.update(canvas.getCamera().position.y + canvas.getHeight()/2, gravity.y);
         }
 
-    }
+        if (input.didSelect()) {
+            if (id == GAME_MODE || controller == CONTROLLER_1) tutorialToggle1 = !tutorialToggle1;
+            else tutorialToggle2 = !tutorialToggle2;
+        }
 
+        if (input.didMenu()){
+            if (id == GAME_MODE){
+                listener.exitScreen(this, EXIT_PAUSE);
+            }else{
+                listener.exitScreen(this, EXIT_RACE_PAUSE);
+
+            }
+        }
+
+        movementController.moveCharacter(inx,iny,rinx,riny,nextToPress,justReleased);
+
+        if (nextToPress.size > 0)
+            for (int i : nextToPress)
+                ungrip(((ExtremityModel) (character.parts.get(i))));
+        //bounding velocities
+        boundBodyVelocities(character);
+        if (controller == CONTROLLER_1) {
+            if (timestep == 0) {
+                glowingHandholds = glowHandholds(character);
+                glowingHandholds1 = glowingHandholds;
+                glowingHandholds2 = glowingHandholds;
+            } else {
+                glowingHandholds1 = glowingHandholds;
+
+                glowingHandholds = glowHandholds(character);
+
+                for (int i = 0; i < glowingHandholds2.size; i++) {
+                    glowingHandholds2.set(i, glowingHandholds.get(i));
+                    if (glowingHandholds.get(i) == null) glowingHandholds2.set(i, glowingHandholds1.get(i));
+                }
+            }
+
+            //            snapLimbsToHandholds(glowingHandholds,character,justReleased);
+            snapLimbsToHandholds(glowingHandholds2, character, justReleased);
+        }
+        else{
+            if (timestep == 0) {
+                glowingHandholds3 = glowHandholds(character);
+                glowingHandholds4 = glowingHandholds3;
+                glowingHandholds5 = glowingHandholds3;
+            } else {
+                glowingHandholds4 = glowingHandholds3;
+
+                glowingHandholds3 = glowHandholds(character);
+
+                for (int i = 0; i < glowingHandholds3.size; i++) {
+                    glowingHandholds5.set(i, glowingHandholds4.get(i));
+                    if (glowingHandholds3.get(i) == null) glowingHandholds5.set(i, glowingHandholds4.get(i));
+                }
+            }
+
+            //            snapLimbsToHandholds(glowingHandholds,character,justReleased);
+            snapLimbsToHandholds(glowingHandholds5, character, justReleased);
+        }
+        cameraWork();
+
+        dealWithSlipperyAndCrumblyHandholds(character);
+
+        spawnObstacles();
+
+        for (GameObject g : objects) {
+
+            if (g instanceof ObstacleModel &&
+                    ((g.getBody().getPosition().y < (canvas.getCamera().position.y - canvas.getWidth()) / scale.y &&
+                            g.getBody().getType() != BodyDef.BodyType.StaticBody) || ((ObstacleModel)g).broken)) {
+                objects.remove(g);
+            }
+            if (g instanceof HandholdModel && ((HandholdModel) (g)).getStartPoint() != null) {
+                HandholdModel h = (HandholdModel) g;
+                h.updateSnapPoints();
+                if (withinBounds(h.getBody().getPosition(), h.getEndPoint()) ||
+                        withinBounds(h.getBody().getPosition(), h.getStartPoint())) {
+                    h.getBody().setLinearVelocity(h.getBody().getLinearVelocity().x * -1, h.getBody().getLinearVelocity().y * -1);
+                }
+            }
+        }
+        vector = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
+        character.updateEnergy(oxygen, 1, vector.len(), gravity.y != 0, gravity.y == 0);
+        character.decrementStun();
+
+        if (risingObstacle != null && moved) {
+            float progressPercentage = (character.parts.get(CHEST).getPosition().y)/(maxHandhold - cposYAtTime0);
+			risingObstacle.setHeight(risingObstacle.getHeight() + risingObstacle.getSpeed()*(progressPercentage+.5f));
+            for (PartModel p : character.parts) {
+                if (risingObstacle.getHeight() >= p.getPosition().y) {
+                    character.setEnergy(0);
+                    failed = true;
+                }
+            }
+            float yToSet = Math.min(canvas.getCamera().position.y/character.parts.get(CHEST).drawPositionScale.y, character.parts.get(CHEST).getPosition().y);
+            if(risingObstacle.getHeight() < yToSet - DEFAULT_HEIGHT/2 -1){
+                risingObstacle.setHeight(yToSet - DEFAULT_HEIGHT/2 -1);
+            }
+        }
+
+        if (character.getEnergy() <= 0) {
+            failed = true;
+            for (int e : EXTREMITIES)
+                ungrip((ExtremityModel) character.parts.get(e));
+
+        }
+        checkHasCompleted(character);
+        if (complete) {
+            if (id == RACE_MODE)
+                listener.exitScreen(this, EXIT_VICTORY_RACE);
+            else listener.exitScreen(this, EXIT_VICTORY);
+
+        }
+        if (checkpointTimestep == 0) cposYAtTime0 = character.parts.get(HEAD).getY();
+
+        warningController.update(canvas.getCamera().position.y + canvas.getHeight()/2, gravity.y);
+    }
 
 
     protected void createAnimation() {
@@ -1439,6 +1419,43 @@ public class GamingMode extends ModeController {
             currLevel += 1;
         }
     }
+    
+	/**
+	 * Called when the Screen should render itself.
+	 *
+	 * We defer to the other methods update() and draw().  However, it is VERY important
+	 * that we only quit AFTER a draw.
+	 *
+	 * @param delta Number of seconds since last animation frame
+	 */
+	public void render(float delta) {
+		if (active) {
+			if (preUpdate(delta)) {
+				if(isDead)
+					deadMode.update(delta, listener );
+				else if(isVictorious){
+					 if (id == GAME_MODE && !writtenToFile) {
+			                try {
+			                    makeJsonForAnimation();
+
+			                    writeJsonToFile();
+
+			                    writtenToFile = true;
+			                } catch (Exception e) {
+			                }
+			            }
+					victoryMode.update(delta, listener,id!=GAME_MODE);
+				}
+				else if(isPaused)
+					pauseMode.update(delta,  listener,id==RACE_MODE);
+				else{
+					this.update(delta);
+					postUpdate(delta);
+				}
+			}
+			draw();
+		}
+	}
 
     public int getCurrLevel(){
         return currLevel;
