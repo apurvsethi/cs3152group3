@@ -53,9 +53,9 @@ public class SharedMethods {
         }
     }
 
-    public static void drawUI(GameCanvas canvas, float xStart, Texture UISprite, float alpha) {
+    public static void drawUI(GameCanvas canvas, float xStart, TextureRegion UISprite, float alpha) {
     	Color t = new Color(Color.WHITE.r, Color.WHITE.g, Color.WHITE.b, alpha);
-        canvas.draw(UISprite, t, xStart, canvas.getCamera().position.y-canvas.getHeight()/2, canvas.getWidth()/5, canvas.getHeight());
+        canvas.draw(UISprite, t, xStart, 0, canvas.getWidth()/5, canvas.getHeight());
     }
 
     public static void drawProgress(GameCanvas canvas, TextureRegion[] progressTextures, TextureRegion progressBackgroundTexture,int progressLevel, float xStart,float yStart) {
@@ -66,16 +66,15 @@ public class SharedMethods {
 
     }
 
-    public static int drawEnergy(GameCanvas canvas, CharacterModel character,TextureRegion[] energyTextures, TextureRegion fatigueTexture, Texture lowEnergySprite, int energyLevel, int x, float y,int flashing2) {
+    public static int drawEnergy(GameCanvas canvas, CharacterModel character,TextureRegion[] energyTextures, TextureRegion fatigueTexture, TextureRegion lowEnergySprite, int energyLevel, int x, float y,int flashing2) {
         //draw flashing for bar.
         float f = character.getEnergy();
 
         if (f<= 30){
 
             flashing2 --;
-            canvas.begin();
 
-            canvas.draw(lowEnergySprite, Color.WHITE, x, canvas.getCamera().position.y-canvas.getHeight()/2, canvas.getWidth()/5, canvas.getHeight());
+            canvas.draw(lowEnergySprite, Color.WHITE, x, 0, canvas.getWidth()/5, canvas.getHeight());
             if (flashing2<f/4){
                 canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.BLACK, x, y, canvas.getWidth() / 5, canvas.getHeight());
 
@@ -86,7 +85,6 @@ public class SharedMethods {
 
             }
         }else{
-            canvas.begin();
             canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, x, y, canvas.getWidth() / 5, canvas.getHeight());
         }
 
