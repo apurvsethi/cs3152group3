@@ -24,9 +24,13 @@ public class HandholdModel extends GameObject{
     protected Array<Vector2> snapPoints;
 	/** says if the handhold is being gripped */
 	private boolean isGlowing = false;
-	/** The texture the handhold will have when not glowing */ 
+	/** says if the handhold is snapped to */
+	private boolean isSnapped = false;
+	/** The texture the handhold will have when not glowing */
 	protected Texture texture;
-	protected Texture glowTexture; 
+	protected Texture glowTexture;
+	/** 0 is normal, 1 is crumbly, 2 is slippery */
+	protected int type;
 	protected Vector2 glowOrigin;
 
 	private Vector2 startPoint, endPoint;
@@ -140,27 +144,29 @@ public class HandholdModel extends GameObject{
 	 * @param dimensions the dimensions of the handhold in box2d coordinates
 	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
 	 */
-	public HandholdModel(Texture t, Texture gt, float x, float y, Vector2 dimensions, Vector2 drawPositionScale){
-		this(t, gt, x, y, dimensions.x, dimensions.y, drawPositionScale);
+	public HandholdModel(Texture t, Texture gt, int ht, float x, float y, Vector2 dimensions, Vector2 drawPositionScale){
+		this(t, gt, ht, x, y, dimensions.x, dimensions.y, drawPositionScale);
 	}
 
 	/**
 	 * Constructs HandholdModel
 	 * @param t Normal texture for handhold
 	 * @param gt glow texture
+	 * @param ht type of handhold
 	 * @param x The x position of the model
 	 * @param y The y position of the model
 	 * @param xDimension the x-dimensions of the handhold in box2d coordinates
 	 * @param yDimension the y-dimensions of the handhold in box2d coordinates
 	 * @param drawPositionScale the scaling between box2d coordinates and world coordinates
 	 */
-	public HandholdModel(Texture t, Texture gt, float x, float y, float xDimension,
+	public HandholdModel(Texture t, Texture gt, int ht, float x, float y, float xDimension,
 						 float yDimension, Vector2 drawPositionScale){
 		super(t, xDimension, yDimension, drawPositionScale);
 		setX(x);
 		setY(y);
 
 		glowTexture = gt;
+		type = ht;
 		glowOrigin = new Vector2(glowTexture.getWidth() / 2, glowTexture.getHeight() / 2);
 		isCrumbling = false;
 		velocity = 0;
@@ -194,15 +200,32 @@ public class HandholdModel extends GameObject{
 	public void glow() {
 		isGlowing = true;
 	}
+	public void desnap() {
+		isSnapped = false;
+	}
+	public void snap() {
+		isSnapped = true;
+	}
 
 	@Override
 	public void draw(GameCanvas canvas) {
 
 		//TODO: remove this if check once all level blocks only contain handholds within the playable area
 		if (getX() * drawPositionScale.x > canvas.getWidth() / 5 && getX() * drawPositionScale.x < canvas.getWidth() * 4 / 5) {
-			if (isGlowing){
-				canvas.draw(glowTexture, Color.WHITE, glowOrigin.x, glowOrigin.y, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
+			if (isGlowing && !isSnapped){
+				canvas.draw(glowTexture, Color.YELLOW, glowOrigin.x, glowOrigin.y, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
 						getAngle(), drawSizeScale.x, drawSizeScale.y);
+			}else if (isSnapped){
+				if (type == 0)
+					canvas.draw(glowTexture, Color.LIME, glowOrigin.x, glowOrigin.y, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
+							getAngle(), drawSizeScale.x, drawSizeScale.y);
+				else if (type == 1)
+					canvas.draw(glowTexture, Color.ORANGE, glowOrigin.x, glowOrigin.y, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
+							getAngle(), drawSizeScale.x, drawSizeScale.y);
+				else {
+					canvas.draw(glowTexture, Color.SKY, glowOrigin.x, glowOrigin.y, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
+							getAngle(), drawSizeScale.x, drawSizeScale.y);
+				}
 			}
 				canvas.draw(animator, Color.WHITE, origin.x, origin.y,
 						getX() * drawPositionScale.x, getY() * drawPositionScale.y,
