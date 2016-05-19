@@ -992,7 +992,7 @@ public class GamingMode extends ModeController {
             //            snapLimbsToHandholds(glowingHandholds,character,justReleased);
             snapLimbsToHandholds(glowingHandholds5, character, justReleased);
         }
-        if( id == GAME_MODE)
+        if( id == GAME_MODE && currLevel == LEVEL_TUTORIAL)
         	advanceTutorial(); 
         
         cameraWork();
@@ -1505,7 +1505,7 @@ public class GamingMode extends ModeController {
             }
         }
         
-        if (id == GAME_MODE){
+        if (id == GAME_MODE && currLevel == LEVEL_TUTORIAL){
 	        Vector2 characterPos = character1.parts.get(currentTutorialStep.getInt("e")).getPosition(); 
 	        canvas.draw(tutorialRing, Color.WHITE, characterPos.x*scale.x - 25, characterPos.y * scale.y - 25,50,50);
 	        canvas.draw(tutorialRing, Color.WHITE, currentTutorialStep.getFloat("x") * scale.x - 25, currentTutorialStep.getFloat("y") * scale.y - 25, 50,50);
