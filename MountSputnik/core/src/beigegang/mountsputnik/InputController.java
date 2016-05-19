@@ -281,6 +281,43 @@ public class InputController {
 	public boolean didDebug() {
 		return debugPressed && !debugPrevious;
 	}
+	
+	public void filterInput(int e){
+		switch(e){
+			case HAND_RIGHT:	
+				orderPressed.removeValue(HAND_LEFT, true); 
+				orderPressed.removeValue(FOOT_LEFT, true); 
+				orderPressed.removeValue(FOOT_RIGHT, true); 
+				justReleased.removeValue(HAND_LEFT, true); 
+				justReleased.removeValue(FOOT_LEFT, true); 
+				justReleased.removeValue(FOOT_RIGHT, true); 
+				break; 
+			case HAND_LEFT: 
+				orderPressed.removeValue(HAND_RIGHT, true); 
+				orderPressed.removeValue(FOOT_LEFT, true); 
+				orderPressed.removeValue(FOOT_RIGHT, true); 
+				justReleased.removeValue(HAND_RIGHT, true); 
+				justReleased.removeValue(FOOT_LEFT, true); 
+				justReleased.removeValue(FOOT_RIGHT, true); 
+				break; 
+			case FOOT_LEFT: 
+				orderPressed.removeValue(HAND_LEFT, true); 
+				orderPressed.removeValue(HAND_RIGHT, true); 
+				orderPressed.removeValue(FOOT_RIGHT, true); 
+				justReleased.removeValue(HAND_LEFT, true); 
+				justReleased.removeValue(HAND_RIGHT, true); 
+				justReleased.removeValue(FOOT_RIGHT, true); 
+				break; 
+			case FOOT_RIGHT:
+				orderPressed.removeValue(HAND_LEFT, true); 
+				orderPressed.removeValue(FOOT_LEFT, true); 
+				orderPressed.removeValue(HAND_RIGHT, true); 
+				justReleased.removeValue(HAND_LEFT, true); 
+				justReleased.removeValue(FOOT_LEFT, true); 
+				justReleased.removeValue(HAND_RIGHT, true); 
+				break; 
+		}
+	}
 
 	/**
 	 * Creates a new input controller
