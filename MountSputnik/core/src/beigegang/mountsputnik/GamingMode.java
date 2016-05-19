@@ -101,6 +101,7 @@ public class GamingMode extends ModeController {
     protected static final String HANDHOLD_WARNING = "assets/HandholdGauge.png";
     protected static final String OBSTACLE_WARNING = "assets/Obstacle Warning.png";
     protected static final String TUTORIAL_OVERLAY_TEXTURE = "assets/tutorial/TutorialOverlay.png";
+    protected static final String TUTORIAL_RING = "assets/tutorial/YellowRing.png"; 
     protected Random rand = new Random();
     protected float cposYAtTime0 = 0;
 
@@ -146,6 +147,7 @@ public class GamingMode extends ModeController {
     protected static TextureRegion[] handholdTextures;
     protected static TextureRegion[] levelLabels = new TextureRegion[LEVEL_LABEL_FILES.length];
     protected static TextureRegion tutorialOverlay;
+    protected static TextureRegion tutorialRing; 
 
     protected static TextureRegion blackoutTexture;
     protected static String BLACKOUT = "assets/blackout.png";
@@ -245,6 +247,7 @@ public class GamingMode extends ModeController {
         loadAddTexture(PROGRESS_BAR);
         loadAddTexture(LOW_ENERGY_HALO);
         loadAddTexture(TUTORIAL_OVERLAY_TEXTURE);
+        loadAddTexture(TUTORIAL_RING); 
         loadAddTexture(RUSSIAN_FLAG_FILE);
         loadAddTexture(HANDHOLD_WARNING);
         loadAddTexture(OBSTACLE_WARNING);
@@ -321,6 +324,7 @@ public class GamingMode extends ModeController {
         progressBarTexture = createTexture(manager,PROGRESS_BAR,false);
         lowEnergyHalo = createTexture(manager,LOW_ENERGY_HALO,false);
         tutorialOverlay = createTexture(manager, TUTORIAL_OVERLAY_TEXTURE, false);
+        tutorialRing = createTexture(manager, TUTORIAL_RING, false); 
         RUSSIAN_FLAG = createTexture(manager, RUSSIAN_FLAG_FILE, false);
         handholdWarning = createFilmStrip(manager, HANDHOLD_WARNING, 1, 13, 13);
         obstacleWarning = createFilmStrip(manager, OBSTACLE_WARNING, 1, 1, 1);
@@ -413,8 +417,14 @@ public class GamingMode extends ModeController {
     /** A boolean indicating the toggle of the tutorial view, where limbs have their corresponding buttons shown*/
     protected boolean tutorialToggle1 = false;
     protected boolean tutorialToggle2 = false;
+    
+    protected String positionListWrite = "{"; 
+    protected JsonValue tutorialGuide; 
+    protected JsonValue currentTutorialStep; 
+    protected int currentStep = 0; 
+    
     /** level-related values*/
-    protected Array<Float> checkpoints = new Array();
+    protected Array<Float> checkpoints = new Array<Float>();
     protected Vector2 gravity;
     float remainingHeight = 0f;
     float currentHeight = 0f;
@@ -602,7 +612,13 @@ public class GamingMode extends ModeController {
         if (id == RACE_MODE)
             movementController2 = new PositionMovementController(character2, scale);
         canvas.setCameraPosition(canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
-
+        if(currLevel == LEVEL_TUTORIAL && id == GAME_MODE){
+	        //To make tutorial: currentStep = 0; 
+	        jsonReader = new JsonReader();
+	        tutorialGuide = jsonReader.parse(Gdx.files.internal("Levels/tutorial/tutorialGuide.json"));
+	        currentTutorialStep = tutorialGuide.get(currentStep); 
+        }
+        
     }
     /**
      * Calculates a number for use by the level generator to prioritize difficulty based on height,
@@ -930,6 +946,9 @@ public class GamingMode extends ModeController {
                 //            snapLimbsToHandholds(glowingHandholds,character,justReleased);
                 snapLimbsToHandholds(glowingHandholds5, character, justReleased);
             }
+            if( id == GAME_MODE)
+            	advanceTutorial(); 
+            
             cameraWork();
 
             dealWithSlipperyAndCrumblyHandholds(character);
@@ -981,6 +1000,8 @@ public class GamingMode extends ModeController {
             }
             checkHasCompleted(character);
             if (complete) {
+            	positionListWrite += "}"; 
+            	System.out.println(positionListWrite);
                 if (id == RACE_MODE)
                     listener.exitScreen(this, EXIT_VICTORY_RACE);
                 else listener.exitScreen(this, EXIT_VICTORY);
@@ -1114,6 +1135,12 @@ public class GamingMode extends ModeController {
             warningController.addHandholdWarning(h);
         }
         e.grip();
+        //This is code to make a tutorialGuide. Will delete when we have settled on one
+//        positionListWrite += "\"" + currentStep + "\" : {"; 
+//        positionListWrite += "\"x\": " + h.getPosition().x + ","; 
+//        positionListWrite += "\"y\": " + h.getPosition().y + ",";
+//        positionListWrite += "\"e\": " + character1.parts.indexOf(e, true) + "},"; 
+//        currentStep++; 
     }
     protected void setJointMotor(RevoluteJointDef jd, float motorSpeed, float maxTorque) {
         jd.enableMotor = true;
@@ -1298,8 +1325,18 @@ public class GamingMode extends ModeController {
     protected boolean isGripping(int part,CharacterModel c) {
         return ((ExtremityModel)(c.parts.get(part))).isGripped();
     }
-
-
+    
+    protected void advanceTutorial(){
+    	ExtremityModel e = (ExtremityModel) character1.parts.get(currentTutorialStep.getInt("e")); 
+    	float x = currentTutorialStep.getFloat("x"); 
+    	float y = currentTutorialStep.getFloat("y"); 
+    	Vector2 h = new Vector2(x,y); 
+    	if(e.isGripped() && ((HandholdModel) e.getJoint().getBodyB().getFixtureList().get(0).getUserData()).getPosition().equals(h)){
+            currentStep++; 
+            currentTutorialStep = tutorialGuide.get(currentStep); 
+        }
+    }
+    
     protected void checkHasCompleted(CharacterModel c){
         float viewHeight = canvas.getHeight()*4f/5f / scale.y;
 
@@ -1424,6 +1461,12 @@ public class GamingMode extends ModeController {
             while((lavaOrigin-=canvas.getHeight())>0){
             	canvas.draw(lavaContTexture, Color.WHITE, canvas.getWidth() * 0.17f, lavaOrigin, canvas.getWidth() * 0.66f, canvas.getHeight());
             }
+        }
+        
+        if (id == GAME_MODE){
+	        Vector2 characterPos = character1.parts.get(currentTutorialStep.getInt("e")).getPosition(); 
+	        canvas.draw(tutorialRing, Color.WHITE, characterPos.x*scale.x - 25, characterPos.y * scale.y - 25,50,50);
+	        canvas.draw(tutorialRing, Color.WHITE, currentTutorialStep.getFloat("x") * scale.x - 25, currentTutorialStep.getFloat("y") * scale.y - 25, 50,50);
         }
         canvas.end();
 
