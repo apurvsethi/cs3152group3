@@ -1,12 +1,8 @@
 package beigegang.mountsputnik;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 
 import static beigegang.mountsputnik.Constants.*;
 
@@ -58,15 +54,13 @@ public class SharedMethods {
         canvas.draw(UISprite, t, xStart, 0, canvas.getWidth()/5, canvas.getHeight());
     }
 
-    public static void drawProgress(GameCanvas canvas, TextureRegion[] progressTextures, TextureRegion progressBackgroundTexture,int progressLevel, float xStart,float yStart) {
-        if (progressLevel > 0) {
-            canvas.draw(progressTextures[progressLevel-1], Color.WHITE, xStart, yStart, canvas.getWidth() / 5, canvas.getHeight());
-        }
-        canvas.draw(progressBackgroundTexture, Color.WHITE, xStart, yStart, canvas.getWidth() / 5, canvas.getHeight());
-
+    public static void drawProgress(GameCanvas canvas, TextureRegion progress ,int progressLevel, float xStart,float yStart) {
+    	int a = canvas.getHeight()/4;
+    	int yOffset = a - a*progressLevel/20;
+        canvas.draw(progress, Color.WHITE, 0, yOffset, progress.getRegionWidth(), canvas.getHeight()*progressLevel/20);
     }
 
-    public static int drawEnergy(GameCanvas canvas, CharacterModel character,TextureRegion[] energyTextures, TextureRegion fatigueTexture, TextureRegion lowEnergySprite, int energyLevel, int x, float y,int flashing2) {
+    public static int drawEnergy(GameCanvas canvas, CharacterModel character,TextureRegion[] energyTextures, TextureRegion lowEnergySprite, int energyLevel, int x, float y,int flashing2) {
         //draw flashing for bar.
         float f = character.getEnergy();
 
@@ -88,7 +82,6 @@ public class SharedMethods {
             canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, x, y, canvas.getWidth() / 5, canvas.getHeight());
         }
 
-        canvas.draw(fatigueTexture, Color.WHITE, x, y, canvas.getWidth() / 5, canvas.getHeight());
         return flashing2;
     }
 
