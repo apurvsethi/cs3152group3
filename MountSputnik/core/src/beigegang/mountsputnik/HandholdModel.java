@@ -31,6 +31,7 @@ public class HandholdModel extends GameObject{
 	protected Texture glowTexture;
 	/** 0 is normal, 1 is crumbly, 2 is slippery */
 	protected int type;
+	protected Vector2 glowOrigin;
 
 	private Vector2 startPoint, endPoint;
 	
@@ -166,6 +167,7 @@ public class HandholdModel extends GameObject{
 
 		glowTexture = gt;
 		type = ht;
+		glowOrigin = new Vector2(glowTexture.getWidth() / 2, glowTexture.getHeight() / 2);
 		isCrumbling = false;
 		velocity = 0;
 		snapPoints = new Array<Vector2>();

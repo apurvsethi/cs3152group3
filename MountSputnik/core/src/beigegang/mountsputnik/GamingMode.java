@@ -110,6 +110,7 @@ public class GamingMode extends ModeController {
     protected static final String HANDHOLD_WARNING = "assets/HandholdGauge.png";
     protected static final String OBSTACLE_WARNING = "assets/Obstacle Warning.png";
     protected static final String TUTORIAL_OVERLAY_TEXTURE = "assets/tutorial/TutorialOverlay.png";
+    protected static final String TUTORIAL_RING = "assets/tutorial/YellowRing.png"; 
     protected Random rand = new Random();
     protected float cposYAtTime0 = 0;
 
@@ -158,6 +159,7 @@ public class GamingMode extends ModeController {
     protected static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length];
     protected static TextureRegion[] handholdTextures;
     protected static TextureRegion tutorialOverlay;
+    protected static TextureRegion tutorialRing; 
 
     protected static TextureRegion blackoutTexture;
     protected static String BLACKOUT = "assets/blackout.png";
@@ -257,6 +259,7 @@ public class GamingMode extends ModeController {
         loadAddTexture(BLACKOUT);
         loadAddTexture(LOW_ENERGY_HALO);
         loadAddTexture(TUTORIAL_OVERLAY_TEXTURE);
+        loadAddTexture(TUTORIAL_RING); 
         loadAddTexture(RUSSIAN_FLAG_FILE);
         loadAddTexture(HANDHOLD_WARNING);
         loadAddTexture(OBSTACLE_WARNING);
@@ -333,6 +336,7 @@ public class GamingMode extends ModeController {
         gauges = createTexture(manager,GAUGES_FILE,false);
         lowEnergyHalo = createTexture(manager,LOW_ENERGY_HALO,false);
         tutorialOverlay = createTexture(manager, TUTORIAL_OVERLAY_TEXTURE, false);
+        tutorialRing = createTexture(manager, TUTORIAL_RING, false); 
         RUSSIAN_FLAG = createTexture(manager, RUSSIAN_FLAG_FILE, false);
         handholdWarning = createFilmStrip(manager, HANDHOLD_WARNING, 1, 13, 13);
         obstacleWarning = createFilmStrip(manager, OBSTACLE_WARNING, 1, 1, 1);
@@ -425,6 +429,12 @@ public class GamingMode extends ModeController {
     /** A boolean indicating the toggle of the tutorial view, where limbs have their corresponding buttons shown*/
     protected boolean tutorialToggle1 = false;
     protected boolean tutorialToggle2 = false;
+    
+    protected String positionListWrite = "{"; 
+    protected JsonValue tutorialGuide; 
+    protected JsonValue currentTutorialStep; 
+    protected int currentStep = 0; 
+    
     /** level-related values*/
     protected Array<Float> checkpoints = new Array<Float>();
     protected Vector2 gravity;
@@ -613,7 +623,13 @@ public class GamingMode extends ModeController {
         if (id == RACE_MODE)
             movementController2 = new PositionMovementController(character2, scale);
         canvas.setCameraPosition(canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
-
+        if(currLevel == LEVEL_TUTORIAL && id == GAME_MODE){
+	        //To make tutorial: currentStep = 0; 
+	        jsonReader = new JsonReader();
+	        tutorialGuide = jsonReader.parse(Gdx.files.internal("Levels/tutorial/tutorialGuide.json"));
+	        currentTutorialStep = tutorialGuide.get(currentStep); 
+        }
+        
     }
     /**
      * Calculates a number for use by the level generator to prioritize difficulty based on height,
@@ -837,96 +853,97 @@ public class GamingMode extends ModeController {
             input = InputController.getInstance(CONTROLLER_2);
 
         }
-        if (isPaused) pauseMode.update(dt, listener,id==RACE_MODE);
-        else if (isDead) deadMode.update(dt, listener);
-        else if (isVictorious){
-            if (id == GAME_MODE && !writtenToFile) {
-                try {
-                    makeJsonForAnimation();
+        doingAnimation = input.watchAnimation() && currLevel == LEVEL_TUTORIAL && id == GAME_MODE;
+        if (doingAnimation) {
+            getAnimationInformation();
+            inx = animationLX;
+            iny = animationLY;
+            rinx = animationRX;
+            riny = animationRY;
+            nextToPress = animationNextToPress;
+            justReleased = animationJustReleased;
+        } else {
+            inx = input.getHorizontalL();
+            iny = input.getVerticalL();
+            rinx = input.getHorizontalR();
+            riny = input.getVerticalR();
+            if(Math.abs(inx) > .5  || Math.abs(iny) > .5  || Math.abs(rinx) > .5  || Math.abs(riny) > .5 ) moved = true;
+            nextToPress = input.getOrderPressed();
+            justReleased.clear();
+            if (input.releasedLeftArm()) justReleased.add(HAND_LEFT);
+            if (input.releasedRightArm()) justReleased.add(HAND_RIGHT);
+            if (input.releasedLeftLeg()) justReleased.add(FOOT_LEFT);
+            if (input.releasedRightLeg()) justReleased.add(FOOT_RIGHT);
 
-                    writeJsonToFile();
-
-                    writtenToFile = true;
-                } catch (Exception e) {
-                }
-            }
-
-            victoryMode.update(dt, listener,id!=GAME_MODE);
         }
-        else {
-            doingAnimation = input.watchAnimation() && currLevel == LEVEL_TUTORIAL && id == GAME_MODE;
-            if (doingAnimation) {
-                getAnimationInformation();
-                inx = animationLX;
-                iny = animationLY;
-                rinx = animationRX;
-                riny = animationRY;
-                nextToPress = animationNextToPress;
-                justReleased = animationJustReleased;
-            } else {
-                inx = input.getHorizontalL();
-                iny = input.getVerticalL();
-                rinx = input.getHorizontalR();
-                riny = input.getVerticalR();
-                if(Math.abs(inx) > .5  || Math.abs(iny) > .5  || Math.abs(rinx) > .5  || Math.abs(riny) > .5 ) moved = true;
-                nextToPress = input.getOrderPressed();
-                justReleased.clear();
-                if (input.releasedLeftArm()) justReleased.add(HAND_LEFT);
-                if (input.releasedRightArm()) justReleased.add(HAND_RIGHT);
-                if (input.releasedLeftLeg()) justReleased.add(FOOT_LEFT);
-                if (input.releasedRightLeg()) justReleased.add(FOOT_RIGHT);
-
-            }
-            //don't uncomment createAnimation unless you know what you are doing!!
+        //don't uncomment createAnimation unless you know what you are doing!!
 //    		createAnimation();
-    //
-            if (id == GAME_MODE && checkIfReachedCheckpoint(character)) {
-                lastReachedCheckpoint++;
-            }
-            if (checkIfDied(character)) {
-                listener.exitScreen(this, EXIT_DIED);
+//
+        if (id == GAME_MODE && checkIfReachedCheckpoint(character)) {
+            lastReachedCheckpoint++;
+        }
+        if (checkIfDied(character)) {
+            listener.exitScreen(this, EXIT_DIED);
+
+        }
+
+        if (input.didSelect()) {
+            if (id == GAME_MODE || controller == CONTROLLER_1) tutorialToggle1 = !tutorialToggle1;
+            else tutorialToggle2 = !tutorialToggle2;
+        }
+
+        if (input.didMenu()){
+            if (id == GAME_MODE){
+                listener.exitScreen(this, EXIT_PAUSE);
+            }else{
+                listener.exitScreen(this, EXIT_RACE_PAUSE);
 
             }
-
-            if (input.didSelect()) {
-                if (id == GAME_MODE || controller == CONTROLLER_1) tutorialToggle1 = !tutorialToggle1;
-                else tutorialToggle2 = !tutorialToggle2;
-            }
-
-            if (input.didMenu()){
-                if (id == GAME_MODE){
-                    listener.exitScreen(this, EXIT_PAUSE);
-                }else{
-                    listener.exitScreen(this, EXIT_RACE_PAUSE);
-
-                }
-            }
+        }
 
             movementController.moveCharacter(inx,iny,rinx,riny,nextToPress,justReleased);
 
             if (nextToPress.size > 0) {
                 for (int i : nextToPress) {
                     ungrip(((ExtremityModel) (character.parts.get(i))));
+                    int ind = 0;
+
                     switch (i) {
                         case FOOT_LEFT:
-                            if (snappedHandholds.get(0)!=null)
-                                snappedHandholds.get(0).desnap();
-                            snappedHandholds.set(0, null);
+                            ind = 0;
+                            if (snappedHandholds.get(ind)!=null){
+                                HandholdModel h = snappedHandholds.get(ind);
+                                snappedHandholds.set(ind,null);
+                                if (!snappedHandholds.contains(h,false))
+                                    h.desnap();
+                            }
                             break;
                         case FOOT_RIGHT:
-                            if (snappedHandholds.get(1)!=null)
-                                snappedHandholds.get(1).desnap();
-                            snappedHandholds.set(1, null);
+                            ind = 1;
+                            if (snappedHandholds.get(ind)!=null){
+                                HandholdModel h = snappedHandholds.get(ind);
+                                snappedHandholds.set(ind,null);
+                                if (!snappedHandholds.contains(h,false))
+                                    h.desnap();
+                            }
                             break;
                         case HAND_LEFT:
-                            if (snappedHandholds.get(2)!=null)
-                                snappedHandholds.get(2).desnap();
-                            snappedHandholds.set(2, null);
+                            ind = 2;
+                            if (snappedHandholds.get(ind)!=null){
+                                HandholdModel h = snappedHandholds.get(ind);
+                                snappedHandholds.set(ind,null);
+                                if (!snappedHandholds.contains(h,false))
+                                    h.desnap();
+                            }
                             break;
                         case HAND_RIGHT:
-                            if (snappedHandholds.get(3)!=null)
-                                snappedHandholds.get(3).desnap();
-                            snappedHandholds.set(3, null);
+                            ind = 3;
+                            if (snappedHandholds.get(ind)!=null){
+                                HandholdModel h = snappedHandholds.get(ind);
+                                snappedHandholds.set(ind,null);
+                                if (!snappedHandholds.contains(h,false))
+                                    h.desnap();
+                            }
                             break;
                         default:
                             break;
@@ -955,86 +972,89 @@ public class GamingMode extends ModeController {
                 //snapLimbsToHandholds(glowingHandholds,character,justReleased);
                 snapLimbsToHandholds(glowingHandholds2, character, justReleased);
             }
-            else{
-                if (timestep == 0) {
-                    glowingHandholds3 = glowHandholds(character);
-                    glowingHandholds4 = glowingHandholds3;
-                    glowingHandholds5 = glowingHandholds3;
-                } else {
-                    glowingHandholds4 = glowingHandholds3;
 
-                    glowingHandholds3 = glowHandholds(character);
+        else{
+            if (timestep == 0) {
+                glowingHandholds3 = glowHandholds(character);
+                glowingHandholds4 = glowingHandholds3;
+                glowingHandholds5 = glowingHandholds3;
+            } else {
+                glowingHandholds4 = glowingHandholds3;
 
-                    for (int i = 0; i < glowingHandholds3.size; i++) {
-                        glowingHandholds5.set(i, glowingHandholds4.get(i));
-                        if (glowingHandholds3.get(i) == null) glowingHandholds5.set(i, glowingHandholds4.get(i));
-                    }
-                }
+                glowingHandholds3 = glowHandholds(character);
 
-                //            snapLimbsToHandholds(glowingHandholds,character,justReleased);
-                snapLimbsToHandholds(glowingHandholds5, character, justReleased);
-            }
-            cameraWork();
-
-            dealWithSlipperyAndCrumblyHandholds(character);
-
-            spawnObstacles();
-
-            for (GameObject g : objects) {
-
-                if (g instanceof ObstacleModel &&
-                        ((g.getBody().getPosition().y < (canvas.getCamera().position.y - canvas.getWidth()) / scale.y &&
-                                g.getBody().getType() != BodyDef.BodyType.StaticBody) || ((ObstacleModel)g).broken)) {
-                    objects.remove(g);
-                }
-                if (g instanceof HandholdModel && ((HandholdModel) (g)).getStartPoint() != null) {
-                    HandholdModel h = (HandholdModel) g;
-                    h.updateSnapPoints();
-                    if (withinBounds(h.getBody().getPosition(), h.getEndPoint()) ||
-                            withinBounds(h.getBody().getPosition(), h.getStartPoint())) {
-                        h.getBody().setLinearVelocity(h.getBody().getLinearVelocity().x * -1, h.getBody().getLinearVelocity().y * -1);
-                    }
+                for (int i = 0; i < glowingHandholds3.size; i++) {
+                    glowingHandholds5.set(i, glowingHandholds4.get(i));
+                    if (glowingHandholds3.get(i) == null) glowingHandholds5.set(i, glowingHandholds4.get(i));
                 }
             }
-            vector = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
-            character.updateEnergy(oxygen, 1, vector.len(), gravity.y != 0, gravity.y == 0);
-            character.decrementStun();
+           
+            //            snapLimbsToHandholds(glowingHandholds,character,justReleased);
+            snapLimbsToHandholds(glowingHandholds5, character, justReleased);
+        }
+        if( id == GAME_MODE)
+        	advanceTutorial(); 
+        
+        cameraWork();
 
-            if (risingObstacle != null && moved) {
-                float progressPercentage = (character.parts.get(CHEST).getPosition().y)/(maxHandhold - cposYAtTime0);
-				risingObstacle.setHeight(risingObstacle.getHeight() + risingObstacle.getSpeed()*(progressPercentage+.5f));
-                for (PartModel p : character.parts) {
-                    if (risingObstacle.getHeight() >= p.getPosition().y) {
-                        character.setEnergy(0);
-                        failed = true;
-                    }
+        dealWithSlipperyAndCrumblyHandholds(character);
+
+        spawnObstacles();
+
+        for (GameObject g : objects) {
+
+            if (g instanceof ObstacleModel &&
+                    ((g.getBody().getPosition().y < (canvas.getCamera().position.y - canvas.getWidth()) / scale.y &&
+                            g.getBody().getType() != BodyDef.BodyType.StaticBody) || ((ObstacleModel)g).broken)) {
+                objects.remove(g);
+            }
+            if (g instanceof HandholdModel && ((HandholdModel) (g)).getStartPoint() != null) {
+                HandholdModel h = (HandholdModel) g;
+                h.updateSnapPoints();
+                if (withinBounds(h.getBody().getPosition(), h.getEndPoint()) ||
+                        withinBounds(h.getBody().getPosition(), h.getStartPoint())) {
+                    h.getBody().setLinearVelocity(h.getBody().getLinearVelocity().x * -1, h.getBody().getLinearVelocity().y * -1);
                 }
-                float yToSet = Math.min(canvas.getCamera().position.y/character.parts.get(CHEST).drawPositionScale.y, character.parts.get(CHEST).getPosition().y);
-                if(risingObstacle.getHeight() < yToSet - DEFAULT_HEIGHT/2 -1){
-                    risingObstacle.setHeight(yToSet - DEFAULT_HEIGHT/2 -1);
+            }
+        }
+        vector = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
+        character.updateEnergy(oxygen, 1, vector.len(), gravity.y != 0, gravity.y == 0);
+        character.decrementStun();
+
+        if (risingObstacle != null && moved) {
+            float progressPercentage = (character.parts.get(CHEST).getPosition().y)/(maxHandhold - cposYAtTime0);
+			risingObstacle.setHeight(risingObstacle.getHeight() + risingObstacle.getSpeed()*(progressPercentage+.5f));
+            for (PartModel p : character.parts) {
+                if (risingObstacle.getHeight() >= p.getPosition().y) {
+                    character.setEnergy(0);
+                    failed = true;
                 }
             }
-
-            if (character.getEnergy() <= 0) {
-                failed = true;
-                for (int e : EXTREMITIES)
-                    ungrip((ExtremityModel) character.parts.get(e));
-
+            float yToSet = Math.min(canvas.getCamera().position.y/character.parts.get(CHEST).drawPositionScale.y, character.parts.get(CHEST).getPosition().y);
+            if(risingObstacle.getHeight() < yToSet - DEFAULT_HEIGHT/2 -1){
+                risingObstacle.setHeight(yToSet - DEFAULT_HEIGHT/2 -1);
             }
-            checkHasCompleted(character);
-            if (complete) {
-                if (id == RACE_MODE)
-                    listener.exitScreen(this, EXIT_VICTORY_RACE);
-                else listener.exitScreen(this, EXIT_VICTORY);
-
-            }
-            if (checkpointTimestep == 0) cposYAtTime0 = character.parts.get(HEAD).getY();
-
-            warningController.update(canvas.getCamera().position.y + canvas.getHeight()/2, gravity.y);
         }
 
-    }
+        if (character.getEnergy() <= 0) {
+            failed = true;
+            for (int e : EXTREMITIES)
+                ungrip((ExtremityModel) character.parts.get(e));
 
+        }
+        checkHasCompleted(character);
+        if (complete) {
+        	positionListWrite += "}"; 
+        	System.out.println(positionListWrite);
+            if (id == RACE_MODE)
+                listener.exitScreen(this, EXIT_VICTORY_RACE);
+            else listener.exitScreen(this, EXIT_VICTORY);
+
+        }
+        if (checkpointTimestep == 0) cposYAtTime0 = character.parts.get(HEAD).getY();
+
+        warningController.update(canvas.getCamera().position.y + canvas.getHeight()/2, gravity.y);
+    }
 
 
     protected void createAnimation() {
@@ -1156,6 +1176,12 @@ public class GamingMode extends ModeController {
             warningController.addHandholdWarning(h);
         }
         e.grip();
+        //This is code to make a tutorialGuide. Will delete when we have settled on one
+//        positionListWrite += "\"" + currentStep + "\" : {"; 
+//        positionListWrite += "\"x\": " + h.getPosition().x + ","; 
+//        positionListWrite += "\"y\": " + h.getPosition().y + ",";
+//        positionListWrite += "\"e\": " + character1.parts.indexOf(e, true) + "},"; 
+//        currentStep++; 
     }
     protected void setJointMotor(RevoluteJointDef jd, float motorSpeed, float maxTorque) {
         jd.enableMotor = true;
@@ -1348,8 +1374,18 @@ public class GamingMode extends ModeController {
     protected boolean isGripping(int part,CharacterModel c) {
         return ((ExtremityModel)(c.parts.get(part))).isGripped();
     }
-
-
+    
+    protected void advanceTutorial(){
+    	ExtremityModel e = (ExtremityModel) character1.parts.get(currentTutorialStep.getInt("e")); 
+    	float x = currentTutorialStep.getFloat("x"); 
+    	float y = currentTutorialStep.getFloat("y"); 
+    	Vector2 h = new Vector2(x,y); 
+    	if(e.isGripped() && ((HandholdModel) e.getJoint().getBodyB().getFixtureList().get(0).getUserData()).getPosition().equals(h)){
+            currentStep++; 
+            currentTutorialStep = tutorialGuide.get(currentStep); 
+        }
+    }
+    
     protected void checkHasCompleted(CharacterModel c){
         float viewHeight = canvas.getHeight()*4f/5f / scale.y;
 
@@ -1468,6 +1504,12 @@ public class GamingMode extends ModeController {
             	canvas.draw(lavaContTexture, Color.WHITE, canvas.getWidth() * 0.17f, lavaOrigin, canvas.getWidth() * 0.66f, canvas.getHeight());
             }
         }
+        
+        if (id == GAME_MODE){
+	        Vector2 characterPos = character1.parts.get(currentTutorialStep.getInt("e")).getPosition(); 
+	        canvas.draw(tutorialRing, Color.WHITE, characterPos.x*scale.x - 25, characterPos.y * scale.y - 25,50,50);
+	        canvas.draw(tutorialRing, Color.WHITE, currentTutorialStep.getFloat("x") * scale.x - 25, currentTutorialStep.getFloat("y") * scale.y - 25, 50,50);
+        }
         canvas.end();
 
         canvas.begin();
@@ -1498,6 +1540,43 @@ public class GamingMode extends ModeController {
             currLevel += 1;
         }
     }
+    
+	/**
+	 * Called when the Screen should render itself.
+	 *
+	 * We defer to the other methods update() and draw().  However, it is VERY important
+	 * that we only quit AFTER a draw.
+	 *
+	 * @param delta Number of seconds since last animation frame
+	 */
+	public void render(float delta) {
+		if (active) {
+			if (preUpdate(delta)) {
+				if(isDead)
+					deadMode.update(delta, listener );
+				else if(isVictorious){
+					 if (id == GAME_MODE && !writtenToFile) {
+			                try {
+			                    makeJsonForAnimation();
+
+			                    writeJsonToFile();
+
+			                    writtenToFile = true;
+			                } catch (Exception e) {
+			                }
+			            }
+					victoryMode.update(delta, listener,id!=GAME_MODE);
+				}
+				else if(isPaused)
+					pauseMode.update(delta,  listener,id==RACE_MODE);
+				else{
+					this.update(delta);
+					postUpdate(delta);
+				}
+			}
+			draw();
+		}
+	}
 
     public int getCurrLevel(){
         return currLevel;
