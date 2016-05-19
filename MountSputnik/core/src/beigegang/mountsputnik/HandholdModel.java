@@ -213,17 +213,17 @@ public class HandholdModel extends GameObject{
 		//TODO: remove this if check once all level blocks only contain handholds within the playable area
 		if (getX() * drawPositionScale.x > canvas.getWidth() / 5 && getX() * drawPositionScale.x < canvas.getWidth() * 4 / 5) {
 			if (isGlowing && !isSnapped){
-				canvas.draw(glowTexture, Color.YELLOW, origin.x, origin.y, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
+				canvas.draw(glowTexture, Color.YELLOW, glowOrigin.x, glowOrigin.y, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
 						getAngle(), drawSizeScale.x, drawSizeScale.y);
 			}else if (isSnapped){
 				if (type == 0)
-					canvas.draw(glowTexture, Color.LIME, origin.x, origin.y, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
+					canvas.draw(glowTexture, Color.LIME, glowOrigin.x, glowOrigin.y, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
 							getAngle(), drawSizeScale.x, drawSizeScale.y);
 				else if (type == 1)
-					canvas.draw(glowTexture, Color.ORANGE, origin.x, origin.y, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
+					canvas.draw(glowTexture, Color.ORANGE, glowOrigin.x, glowOrigin.y, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
 							getAngle(), drawSizeScale.x, drawSizeScale.y);
 				else {
-					canvas.draw(glowTexture, Color.SKY, origin.x, origin.y, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
+					canvas.draw(glowTexture, Color.SKY, glowOrigin.x, glowOrigin.y, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
 							getAngle(), drawSizeScale.x, drawSizeScale.y);
 				}
 			}
