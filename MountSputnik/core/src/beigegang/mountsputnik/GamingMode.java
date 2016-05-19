@@ -459,6 +459,7 @@ public class GamingMode extends ModeController {
         pauseMode = new PauseMode();
         victoryMode = new VictoryMode();
         deadMode = new DeadMode();
+        vector = new Vector2();
         //create debug font
         font.setColor(Color.RED);
         font.getData().setScale(5);
@@ -911,13 +912,9 @@ public class GamingMode extends ModeController {
 
         movementController.moveCharacter(inx,iny,rinx,riny,nextToPress,justReleased);
 
-        if (nextToPress.size > 0) {
-            for (int i : nextToPress) {
-                ungrip(((ExtremityModel) (character.parts.get(i))),i);
+        for (int i : nextToPress)
+            ungrip(((ExtremityModel) (character.parts.get(i))),i);
 
-
-            }
-        }
         //bounding velocities
         boundBodyVelocities(character);
         if (controller == CONTROLLER_1) {
@@ -984,7 +981,7 @@ public class GamingMode extends ModeController {
                 }
             }
         }
-        vector = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
+        vector.set(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
         character.updateEnergy(oxygen, 1, vector.len(), gravity.y != 0, gravity.y == 0);
         character.decrementStun();
 
@@ -1163,7 +1160,7 @@ public class GamingMode extends ModeController {
 
         }
         e.ungrip();
-        int ind = 0;
+        int ind;
 
         switch (i) {
             case FOOT_LEFT:
@@ -1274,12 +1271,8 @@ public class GamingMode extends ModeController {
      * @author Jacob
      */
     protected Vector2 boundVelocity(Vector2 vect) {
-        if (Math.abs(vect.x) > 1 || Math.abs(vect.y) > 1) {
-        }
-        vect.x = (vect.x>0) ? Math.min(PART_MAX_X_VELOCITY,vect.x) : Math.max(-1 * PART_MAX_X_VELOCITY,vect.x);
-        vect.y = (vect.y>0) ? Math.min(PART_MAX_Y_VELOCITY,vect.y) : Math.max(-1 * PART_MAX_Y_VELOCITY,vect.y);
-
-
+        vect.x = Math.min(PART_MAX_X_VELOCITY, Math.max(-PART_MAX_X_VELOCITY,vect.x));
+        vect.y = Math.min(PART_MAX_Y_VELOCITY, Math.max(-PART_MAX_Y_VELOCITY,vect.y));
         return vect;
     }
 
@@ -1371,8 +1364,8 @@ public class GamingMode extends ModeController {
     }
 
     protected double distanceFrom(int limb, Vector2 snapPoint, CharacterModel c) {
-        vector = new Vector2 (c.parts.get(limb).getPosition().sub(snapPoint));
-        return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+        vector.set(c.parts.get(limb).getPosition().sub(snapPoint));
+        return vector.len();
     }
 
     public PooledList<GameObject> getGameObjects(){
@@ -1388,11 +1381,13 @@ public class GamingMode extends ModeController {
     protected void advanceTutorial(){
     	ExtremityModel e = (ExtremityModel) character1.parts.get(currentTutorialStep.getInt("e")); 
     	float x = currentTutorialStep.getFloat("x"); 
-    	float y = currentTutorialStep.getFloat("y"); 
-    	Vector2 h = new Vector2(x,y); 
-    	if(e.isGripped() && ((HandholdModel) e.getJoint().getBodyB().getFixtureList().get(0).getUserData()).getPosition().equals(h)){
-            currentStep++; 
-            currentTutorialStep = tutorialGuide.get(currentStep); 
+    	float y = currentTutorialStep.getFloat("y");
+    	if(e.isGripped()){
+            HandholdModel handholdModel = (HandholdModel) e.getJoint().getBodyB().getFixtureList().get(0).getUserData();
+            if (handholdModel.getX() == x && handholdModel.getY() == y) {
+                currentStep++;
+                currentTutorialStep = tutorialGuide.get(currentStep);
+            }
         }
     }
 
@@ -1471,7 +1466,7 @@ public class GamingMode extends ModeController {
 
         if (warningController != null) warningController.draw(canvas);
         canvas.end();
-        
+
         drawHUD();
 
         if (debug) {
