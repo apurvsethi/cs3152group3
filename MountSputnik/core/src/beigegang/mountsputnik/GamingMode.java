@@ -42,7 +42,12 @@ public class GamingMode extends ModeController {
     Array<HandholdModel> glowingHandholds2 = new Array<>();
     Array<HandholdModel> glowingHandholds3 = new Array<>();
     Array<HandholdModel> glowingHandholds4 = new Array<>();
-    Array<HandholdModel> glowingHandholds5 = new Array<>();    /**
+    Array<HandholdModel> glowingHandholds5 = new Array<>();
+    /**
+     * left foot, then right foot, then left hand, then right hand
+     */
+    Array<HandholdModel> snappedHandholds = new Array<>(4);
+    /**
      * Track asset loading from all instances and subclasses
      */
     protected AssetState assetState = AssetState.EMPTY;
@@ -72,7 +77,10 @@ public class GamingMode extends ModeController {
     protected static final String LAVA_CONT_FILE = "assets/volcano/LavaCont.png";
     protected static final String UI_FILE = "assets/HUD4Background.png";
     protected static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
-    protected static final String GLOW_FILE = "assets/glow.png";
+    protected static final String GLOW_FILE = "assets/glow2.png";
+//    protected static final String SNAP_FILE = "assets/snap.png";
+//    protected static final String CRUMBLY_FILE = "assets/crumbly.png";
+//    protected static final String SLIPPERY_FILE = "assets/slippery.png";
     protected static final String RUSSIAN_FLAG_FILE = "RussianFlag.png";
     protected static final HashMap<String,Integer> NUM_HANDHOLDS = new HashMap<String,Integer>();
     protected static final String PART_TEXTURES[] = {"Ragdoll/Torso.png", "Ragdoll/Head.png", "Ragdoll/Hips.png",
@@ -102,6 +110,7 @@ public class GamingMode extends ModeController {
     protected static final String HANDHOLD_WARNING = "assets/HandholdGauge.png";
     protected static final String OBSTACLE_WARNING = "assets/Obstacle Warning.png";
     protected static final String TUTORIAL_OVERLAY_TEXTURE = "assets/tutorial/TutorialOverlay.png";
+    protected static final String TUTORIAL_RING = "assets/tutorial/YellowRing.png"; 
     protected Random rand = new Random();
     protected float cposYAtTime0 = 0;
 
@@ -137,6 +146,9 @@ public class GamingMode extends ModeController {
     protected static TextureRegion lavaGlowTexture; 
     protected static TextureRegion lavaContTexture;
     protected static TextureRegion glowTexture;
+    protected static TextureRegion snapTexture;
+    protected static TextureRegion crumblyTexture;
+    protected static TextureRegion slipperyTexture;
     protected static TextureRegion staticObstacle;
     protected static FilmStrip fallingObstacle;
     protected static FilmStrip handholdWarning;
@@ -147,6 +159,7 @@ public class GamingMode extends ModeController {
     protected static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length];
     protected static TextureRegion[] handholdTextures;
     protected static TextureRegion tutorialOverlay;
+    protected static TextureRegion tutorialRing; 
 
     protected static TextureRegion blackoutTexture;
     protected static String BLACKOUT = "assets/blackout.png";
@@ -190,6 +203,10 @@ public class GamingMode extends ModeController {
      * @param manager Reference to global asset manager.
      */
     public void preLoadContent(AssetManager manager) {
+        snappedHandholds.add(null);
+        snappedHandholds.add(null);
+        snappedHandholds.add(null);
+        snappedHandholds.add(null);
         assetManager = manager;
         if (assetState != AssetState.EMPTY) return;
 
@@ -242,6 +259,7 @@ public class GamingMode extends ModeController {
         loadAddTexture(BLACKOUT);
         loadAddTexture(LOW_ENERGY_HALO);
         loadAddTexture(TUTORIAL_OVERLAY_TEXTURE);
+        loadAddTexture(TUTORIAL_RING); 
         loadAddTexture(RUSSIAN_FLAG_FILE);
         loadAddTexture(HANDHOLD_WARNING);
         loadAddTexture(OBSTACLE_WARNING);
@@ -276,6 +294,9 @@ public class GamingMode extends ModeController {
         lavaGlowTexture = createTexture(manager, LAVA_GLOW_FILE, false);
         lavaContTexture = createTexture(manager, LAVA_CONT_FILE, false);
         glowTexture = createTexture(manager, GLOW_FILE, false);
+//        snapTexture = createTexture(manager, SNAP_FILE, false);
+//        crumblyTexture = createTexture(manager, CRUMBLY_FILE, false);
+//        slipperyTexture = createTexture(manager, SLIPPERY_FILE, false);
         staticObstacle = createTexture(manager, "assets/"+levelName+"/StaticObstacle.png", false);
         fallingObstacle = createFilmStrip(manager, "assets/"+levelName+"/Rockbust_Animation.png", 1, 5, 5);
         kremlin = manager.get("Game" + KREMLIN_FILE, BitmapFont.class);
@@ -315,6 +336,7 @@ public class GamingMode extends ModeController {
         gauges = createTexture(manager,GAUGES_FILE,false);
         lowEnergyHalo = createTexture(manager,LOW_ENERGY_HALO,false);
         tutorialOverlay = createTexture(manager, TUTORIAL_OVERLAY_TEXTURE, false);
+        tutorialRing = createTexture(manager, TUTORIAL_RING, false); 
         RUSSIAN_FLAG = createTexture(manager, RUSSIAN_FLAG_FILE, false);
         handholdWarning = createFilmStrip(manager, HANDHOLD_WARNING, 1, 13, 13);
         obstacleWarning = createFilmStrip(manager, OBSTACLE_WARNING, 1, 1, 1);
@@ -407,6 +429,12 @@ public class GamingMode extends ModeController {
     /** A boolean indicating the toggle of the tutorial view, where limbs have their corresponding buttons shown*/
     protected boolean tutorialToggle1 = false;
     protected boolean tutorialToggle2 = false;
+    
+    protected String positionListWrite = "{"; 
+    protected JsonValue tutorialGuide; 
+    protected JsonValue currentTutorialStep; 
+    protected int currentStep = 0; 
+    
     /** level-related values*/
     protected Array<Float> checkpoints = new Array<Float>();
     protected Vector2 gravity;
@@ -595,7 +623,13 @@ public class GamingMode extends ModeController {
         if (id == RACE_MODE)
             movementController2 = new PositionMovementController(character2, scale);
         canvas.setCameraPosition(canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
-
+        if(currLevel == LEVEL_TUTORIAL && id == GAME_MODE){
+	        //To make tutorial: currentStep = 0; 
+	        jsonReader = new JsonReader();
+	        tutorialGuide = jsonReader.parse(Gdx.files.internal("Levels/tutorial/tutorialGuide.json"));
+	        currentTutorialStep = tutorialGuide.get(currentStep); 
+        }
+        
     }
     /**
      * Calculates a number for use by the level generator to prioritize difficulty based on height,
@@ -681,7 +715,7 @@ public class GamingMode extends ModeController {
 
     private void makeAddBasicHandhold(CharacterModel c, int part) {
         handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(),
-                glowTexture.getTexture(), c.parts.get(part).getPosition().x,
+                glowTexture.getTexture(), 0, c.parts.get(part).getPosition().x,
                 c.parts.get(part).getPosition().y, 0.3f, 0.3f, scale);
         handhold.fixtureDef.filter.maskBits = 0;
         handhold.activatePhysics(world);
@@ -706,7 +740,13 @@ public class GamingMode extends ModeController {
 
         Random rand = new Random();
         while(handholdDesc != null){
-            handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(), glowTexture.getTexture(),
+            int snapper = 0;
+            try {
+                snapper = handholdDesc.getFloat("slip") == 0 && handholdDesc.getFloat("crumble") == 0 ? 0 : (handholdDesc.getFloat("slip") == 0 ? 1 : 2);
+            }catch(Exception e){
+                //THERES NO FREAKING SLIP OR CRUMBLE FOR THE HANDHOLDS!!
+            }
+            handhold = new HandholdModel( handholdTextures[rand.nextInt(handholdTextures.length)].getTexture(), glowTexture.getTexture(), snapper,
                     handholdDesc.getFloat("positionX"), handholdDesc.getFloat("positionY")+currentHeight,
                     handholdDesc.getFloat("width"), handholdDesc.getFloat("height"), scale);
             handhold.fixtureDef.filter.maskBits = 0;
@@ -861,32 +901,78 @@ public class GamingMode extends ModeController {
             }
         }
 
-        movementController.moveCharacter(inx,iny,rinx,riny,nextToPress,justReleased);
+            movementController.moveCharacter(inx,iny,rinx,riny,nextToPress,justReleased);
 
-        if (nextToPress.size > 0)
-            for (int i : nextToPress)
-                ungrip(((ExtremityModel) (character.parts.get(i))));
-        //bounding velocities
-        boundBodyVelocities(character);
-        if (controller == CONTROLLER_1) {
-            if (timestep == 0) {
-                glowingHandholds = glowHandholds(character);
-                glowingHandholds1 = glowingHandholds;
-                glowingHandholds2 = glowingHandholds;
-            } else {
-                glowingHandholds1 = glowingHandholds;
+            if (nextToPress.size > 0) {
+                for (int i : nextToPress) {
+                    ungrip(((ExtremityModel) (character.parts.get(i))));
+                    int ind = 0;
 
-                glowingHandholds = glowHandholds(character);
+                    switch (i) {
+                        case FOOT_LEFT:
+                            ind = 0;
+                            if (snappedHandholds.get(ind)!=null){
+                                HandholdModel h = snappedHandholds.get(ind);
+                                snappedHandholds.set(ind,null);
+                                if (!snappedHandholds.contains(h,false))
+                                    h.desnap();
+                            }
+                            break;
+                        case FOOT_RIGHT:
+                            ind = 1;
+                            if (snappedHandholds.get(ind)!=null){
+                                HandholdModel h = snappedHandholds.get(ind);
+                                snappedHandholds.set(ind,null);
+                                if (!snappedHandholds.contains(h,false))
+                                    h.desnap();
+                            }
+                            break;
+                        case HAND_LEFT:
+                            ind = 2;
+                            if (snappedHandholds.get(ind)!=null){
+                                HandholdModel h = snappedHandholds.get(ind);
+                                snappedHandholds.set(ind,null);
+                                if (!snappedHandholds.contains(h,false))
+                                    h.desnap();
+                            }
+                            break;
+                        case HAND_RIGHT:
+                            ind = 3;
+                            if (snappedHandholds.get(ind)!=null){
+                                HandholdModel h = snappedHandholds.get(ind);
+                                snappedHandholds.set(ind,null);
+                                if (!snappedHandholds.contains(h,false))
+                                    h.desnap();
+                            }
+                            break;
+                        default:
+                            break;
+                    }
 
-                for (int i = 0; i < glowingHandholds2.size; i++) {
-                    glowingHandholds2.set(i, glowingHandholds.get(i));
-                    if (glowingHandholds.get(i) == null) glowingHandholds2.set(i, glowingHandholds1.get(i));
                 }
             }
+            //bounding velocities
+            boundBodyVelocities(character);
+            if (controller == CONTROLLER_1) {
+                if (timestep == 0) {
+                    glowingHandholds = glowHandholds(character);
+                    glowingHandholds1 = glowingHandholds;
+                    glowingHandholds2 = glowingHandholds;
+                } else {
+                    glowingHandholds1 = glowingHandholds;
 
-            //            snapLimbsToHandholds(glowingHandholds,character,justReleased);
-            snapLimbsToHandholds(glowingHandholds2, character, justReleased);
-        }
+                    glowingHandholds = glowHandholds(character);
+
+                    for (int i = 0; i < glowingHandholds2.size; i++) {
+                        glowingHandholds2.set(i, glowingHandholds.get(i));
+                        if (glowingHandholds.get(i) == null) glowingHandholds2.set(i, glowingHandholds1.get(i));
+                    }
+                }
+
+                //snapLimbsToHandholds(glowingHandholds,character,justReleased);
+                snapLimbsToHandholds(glowingHandholds2, character, justReleased);
+            }
+
         else{
             if (timestep == 0) {
                 glowingHandholds3 = glowHandholds(character);
@@ -902,10 +988,13 @@ public class GamingMode extends ModeController {
                     if (glowingHandholds3.get(i) == null) glowingHandholds5.set(i, glowingHandholds4.get(i));
                 }
             }
-
+           
             //            snapLimbsToHandholds(glowingHandholds,character,justReleased);
             snapLimbsToHandholds(glowingHandholds5, character, justReleased);
         }
+        if( id == GAME_MODE && currLevel == LEVEL_TUTORIAL)
+        	advanceTutorial(); 
+        
         cameraWork();
 
         dealWithSlipperyAndCrumblyHandholds(character);
@@ -955,6 +1044,8 @@ public class GamingMode extends ModeController {
         }
         checkHasCompleted(character);
         if (complete) {
+        	positionListWrite += "}"; 
+        	System.out.println(positionListWrite);
             if (id == RACE_MODE)
                 listener.exitScreen(this, EXIT_VICTORY_RACE);
             else listener.exitScreen(this, EXIT_VICTORY);
@@ -1085,6 +1176,12 @@ public class GamingMode extends ModeController {
             warningController.addHandholdWarning(h);
         }
         e.grip();
+        //This is code to make a tutorialGuide. Will delete when we have settled on one
+//        positionListWrite += "\"" + currentStep + "\" : {"; 
+//        positionListWrite += "\"x\": " + h.getPosition().x + ","; 
+//        positionListWrite += "\"y\": " + h.getPosition().y + ",";
+//        positionListWrite += "\"e\": " + character1.parts.indexOf(e, true) + "},"; 
+//        currentStep++; 
     }
     protected void setJointMotor(RevoluteJointDef jd, float motorSpeed, float maxTorque) {
         jd.enableMotor = true;
@@ -1251,6 +1348,14 @@ public class GamingMode extends ModeController {
             c.parts.get(limb).setPosition(closest.snapPoints.first(), c.parts.get(limb).getAngle());
 
             grip(((ExtremityModel) c.parts.get(limb)), closest);
+            closest.snap();
+            switch(limb){
+                case FOOT_LEFT: snappedHandholds.set(0,closest); break;
+                case FOOT_RIGHT: snappedHandholds.set(1,closest);break;
+                case HAND_LEFT: snappedHandholds.set(2,closest);break;
+                case HAND_RIGHT: snappedHandholds.set(3,closest);break;
+                default: break;
+            }
         }
 
     }
@@ -1269,8 +1374,18 @@ public class GamingMode extends ModeController {
     protected boolean isGripping(int part,CharacterModel c) {
         return ((ExtremityModel)(c.parts.get(part))).isGripped();
     }
-
-
+    
+    protected void advanceTutorial(){
+    	ExtremityModel e = (ExtremityModel) character1.parts.get(currentTutorialStep.getInt("e")); 
+    	float x = currentTutorialStep.getFloat("x"); 
+    	float y = currentTutorialStep.getFloat("y"); 
+    	Vector2 h = new Vector2(x,y); 
+    	if(e.isGripped() && ((HandholdModel) e.getJoint().getBodyB().getFixtureList().get(0).getUserData()).getPosition().equals(h)){
+            currentStep++; 
+            currentTutorialStep = tutorialGuide.get(currentStep); 
+        }
+    }
+    
     protected void checkHasCompleted(CharacterModel c){
         float viewHeight = canvas.getHeight()*4f/5f / scale.y;
 
@@ -1388,6 +1503,12 @@ public class GamingMode extends ModeController {
             while((lavaOrigin-=canvas.getHeight())>0){
             	canvas.draw(lavaContTexture, Color.WHITE, canvas.getWidth() * 0.17f, lavaOrigin, canvas.getWidth() * 0.66f, canvas.getHeight());
             }
+        }
+        
+        if (id == GAME_MODE && currLevel == LEVEL_TUTORIAL){
+	        Vector2 characterPos = character1.parts.get(currentTutorialStep.getInt("e")).getPosition(); 
+	        canvas.draw(tutorialRing, Color.WHITE, characterPos.x*scale.x - 25, characterPos.y * scale.y - 25,50,50);
+	        canvas.draw(tutorialRing, Color.WHITE, currentTutorialStep.getFloat("x") * scale.x - 25, currentTutorialStep.getFloat("y") * scale.y - 25, 50,50);
         }
         canvas.end();
 
