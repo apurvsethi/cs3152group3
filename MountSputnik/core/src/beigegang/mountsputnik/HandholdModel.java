@@ -124,7 +124,7 @@ public class HandholdModel extends GameObject{
 	 * @return whether this handhold is gripped
 	 */
 	public boolean getGripped() {
-		return isGlowing;
+		return isSnapped;
 	}
 	
 	/**

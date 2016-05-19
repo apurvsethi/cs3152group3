@@ -1130,7 +1130,7 @@ public class GamingMode extends ModeController {
 
 
     /** Grips a handhold by adding a revolute joint between the handhold and the extremity **/
-    public void grip(ExtremityModel e, HandholdModel h){
+    public void grip(ExtremityModel e, HandholdModel h, CharacterModel c){
         if (e.getJoint() == null){
             RevoluteJointDef jointD = new RevoluteJointDef();
             jointD.initialize(e.getBody(), h.getBody(), e.getPosition());
@@ -1141,6 +1141,11 @@ public class GamingMode extends ModeController {
             warningController.addHandholdWarning(h);
         }
         e.grip();
+        if (snappedHandholds.contains(h, true)) {
+            int numbering = snappedHandholds.indexOf(h, true);
+            ExtremityModel other = (ExtremityModel) c.parts.get(EXTREMITIES[numbering]);
+            e.setGripTime(other.getGripTime());
+        }
         //This is code to make a tutorialGuide. Will delete when we have settled on one
 //        positionListWrite += "\"" + currentStep + "\" : {"; 
 //        positionListWrite += "\"x\": " + h.getPosition().x + ","; 
@@ -1350,7 +1355,7 @@ public class GamingMode extends ModeController {
             ((ExtremityModel) c.parts.get(limb)).grip();
             c.parts.get(limb).setPosition(closest.snapPoints.first(), c.parts.get(limb).getAngle());
 
-            grip(((ExtremityModel) c.parts.get(limb)), closest);
+            grip(((ExtremityModel) c.parts.get(limb)), closest, c);
             closest.snap();
             switch(limb){
                 case FOOT_LEFT: snappedHandholds.set(0,closest); break;
