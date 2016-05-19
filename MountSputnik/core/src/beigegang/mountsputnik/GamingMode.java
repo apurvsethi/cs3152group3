@@ -905,49 +905,8 @@ public class GamingMode extends ModeController {
 
         if (nextToPress.size > 0) {
             for (int i : nextToPress) {
-                ungrip(((ExtremityModel) (character.parts.get(i))));
-                int ind = 0;
+                ungrip(((ExtremityModel) (character.parts.get(i))),i);
 
-                switch (i) {
-                    case FOOT_LEFT:
-                        ind = 0;
-                        if (snappedHandholds.get(ind)!=null){
-                            HandholdModel h = snappedHandholds.get(ind);
-                            snappedHandholds.set(ind,null);
-                            if (!snappedHandholds.contains(h,false))
-                                h.desnap();
-                        }
-                        break;
-                    case FOOT_RIGHT:
-                        ind = 1;
-                        if (snappedHandholds.get(ind)!=null){
-                            HandholdModel h = snappedHandholds.get(ind);
-                            snappedHandholds.set(ind,null);
-                            if (!snappedHandholds.contains(h,false))
-                                h.desnap();
-                        }
-                        break;
-                    case HAND_LEFT:
-                        ind = 2;
-                        if (snappedHandholds.get(ind)!=null){
-                            HandholdModel h = snappedHandholds.get(ind);
-                            snappedHandholds.set(ind,null);
-                            if (!snappedHandholds.contains(h,false))
-                                h.desnap();
-                        }
-                        break;
-                    case HAND_RIGHT:
-                        ind = 3;
-                        if (snappedHandholds.get(ind)!=null){
-                            HandholdModel h = snappedHandholds.get(ind);
-                            snappedHandholds.set(ind,null);
-                            if (!snappedHandholds.contains(h,false))
-                                h.desnap();
-                        }
-                        break;
-                    default:
-                        break;
-                }
 
             }
         }
@@ -1039,7 +998,7 @@ public class GamingMode extends ModeController {
         if (character.getEnergy() <= 0) {
             failed = true;
             for (int e : EXTREMITIES)
-                ungrip((ExtremityModel) character.parts.get(e));
+                ungrip((ExtremityModel) character.parts.get(e),e);
 
         }
         checkHasCompleted(character);
@@ -1089,20 +1048,20 @@ public class GamingMode extends ModeController {
             if(extremity.isGripped()){
                 extremity.updateGripTime();
                 if(extremity.getJoint().getBodyB() == null){
-                    ungrip(extremity);
+                    ungrip(extremity,e);
                 }
                 else{
                     HandholdModel h = (HandholdModel) extremity.getJoint().getBodyB().getFixtureList().get(0).getUserData();
                     if((e == HAND_LEFT || e == HAND_RIGHT)
                             && h.getVelocity() != 0 &&
                             c.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > ARM_UNGRIP_LENGTH)
-                        ungrip(extremity);
+                        ungrip(extremity,e);
                     else if((e == FOOT_LEFT || e == FOOT_RIGHT) &&
                             h.getVelocity() != 0 &&
                             c.parts.get(CHEST).getPosition().sub(extremity.getPosition()).len() > LEG_UNGRIP_LENGTH)
-                        ungrip(extremity);
+                        ungrip(extremity,e);
                     if(extremity.getGripTime() > h.getSlip()*60 && h.getSlip() > 0){
-                        ungrip(extremity);
+                        ungrip(extremity,e);
                     }
                     if(extremity.getGripTime() > h.getCrumble()*60 && h.getCrumble() > 0){
                         //TODO add crumble animation
@@ -1140,7 +1099,7 @@ public class GamingMode extends ModeController {
         for(int e : EXTREMITIES){
             ExtremityModel extremity = (ExtremityModel) c.parts.get(e);
             if(extremity.isGripped() && extremity.getJoint().getBodyB().getFixtureList().get(0).getUserData() == h){
-                ungrip(extremity);
+                ungrip(extremity,e);
             }
         }
     }
@@ -1188,13 +1147,55 @@ public class GamingMode extends ModeController {
         jd.motorSpeed = motorSpeed * DEG_TO_RAD;
         jd.maxMotorTorque = maxTorque;
     }
-    public void ungrip(ExtremityModel e){
+    public void ungrip(ExtremityModel e, int i){
         if (e.getJoint() != null){
             world.destroyJoint(e.getJoint());
             e.setJoint(null);
 
         }
         e.ungrip();
+        int ind = 0;
+
+        switch (i) {
+            case FOOT_LEFT:
+                ind = 0;
+                if (snappedHandholds.get(ind)!=null){
+                    HandholdModel h = snappedHandholds.get(ind);
+                    snappedHandholds.set(ind,null);
+                    if (!snappedHandholds.contains(h,false))
+                        h.desnap();
+                }
+                break;
+            case FOOT_RIGHT:
+                ind = 1;
+                if (snappedHandholds.get(ind)!=null){
+                    HandholdModel h = snappedHandholds.get(ind);
+                    snappedHandholds.set(ind,null);
+                    if (!snappedHandholds.contains(h,false))
+                        h.desnap();
+                }
+                break;
+            case HAND_LEFT:
+                ind = 2;
+                if (snappedHandholds.get(ind)!=null){
+                    HandholdModel h = snappedHandholds.get(ind);
+                    snappedHandholds.set(ind,null);
+                    if (!snappedHandholds.contains(h,false))
+                        h.desnap();
+                }
+                break;
+            case HAND_RIGHT:
+                ind = 3;
+                if (snappedHandholds.get(ind)!=null){
+                    HandholdModel h = snappedHandholds.get(ind);
+                    snappedHandholds.set(ind,null);
+                    if (!snappedHandholds.contains(h,false))
+                        h.desnap();
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     // ************************************END MISCELLANEOUS*********************************************** //

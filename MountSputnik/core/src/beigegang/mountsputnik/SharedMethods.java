@@ -63,22 +63,22 @@ public class SharedMethods {
     public static int drawEnergy(GameCanvas canvas, CharacterModel character,TextureRegion[] energyTextures, TextureRegion lowEnergySprite, int energyLevel, int x, float y,int flashing2) {
         //draw flashing for bar.
         float f = character.getEnergy();
-
+        if (f == 0) energyLevel = -1;
         if (f<= 30){
 
             flashing2 --;
 
             canvas.draw(lowEnergySprite, Color.WHITE, x, 0, canvas.getWidth()/5, canvas.getHeight());
-            if (flashing2<f/4){
+            if (flashing2<f/4 && energyLevel > -1){
                 canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.BLACK, x, y, canvas.getWidth() / 5, canvas.getHeight());
 
                 if (flashing2<=0)
                     flashing2 = Math.round(f/2);
-            }else {
+            }else if (energyLevel > -1){
                 canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, x, y, canvas.getWidth() / 5, canvas.getHeight());
 
             }
-        }else{
+        }else if (energyLevel > -1){
             canvas.draw(energyTextures[Math.min(energyLevel,energyTextures.length - 1)], Color.WHITE, x, y, canvas.getWidth() / 5, canvas.getHeight());
         }
 
