@@ -64,7 +64,9 @@ public class GameCanvas {
 
 	
 	/** Drawing context to handle textures AND POLYGONS as sprites */
+	private PolygonSpriteBatch activeBatch;
 	private PolygonSpriteBatch spriteBatch;
+	private PolygonSpriteBatch hudSpriteBatch;
 	
 	/** Rendering context for the debug outlines */
 	private ShapeRenderer debugRender;
@@ -105,7 +107,9 @@ public class GameCanvas {
 	public GameCanvas() {
 		active = DrawPass.INACTIVE;
 		spriteBatch = new PolygonSpriteBatch();
+		hudSpriteBatch = new PolygonSpriteBatch();
 		debugRender = new ShapeRenderer();
+		activeBatch = spriteBatch;
 		
 		// Set the projection matrix (for proper scaling)
 		camera = new OrthographicCamera(getWidth(),getHeight());
@@ -130,6 +134,8 @@ public class GameCanvas {
 		}
 		spriteBatch.dispose();
     	spriteBatch = null;
+		hudSpriteBatch.dispose();
+		hudSpriteBatch = null;
     	local  = null;
     	global = null;
     	vertex = null;
@@ -297,8 +303,9 @@ public class GameCanvas {
 	 * weird scaling issues.
 	 */
 	 public void resize() {
-		// Resizing screws up the spriteBatch projection matrix
-		spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, getWidth(), getHeight());
+		 // Resizing screws up the activeBatch projection matrix
+		 spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, getWidth(), getHeight());
+		 hudSpriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, getWidth(), getHeight());
 	}
 	
 	/**
@@ -416,12 +423,32 @@ public class GameCanvas {
     }
 
 	/**
+	 * Start a hud drawing sequence.
+	 *
+	 * Nothing is flushed to the graphics card until the method endHUD() is called.
+	 */
+	public void beginHUD() {
+		activeBatch = hudSpriteBatch;
+		hudSpriteBatch.begin();
+		active = DrawPass.STANDARD;
+	}
+
+	/**
 	 * Ends a drawing sequence, flushing textures to the graphics card.
 	 */
     public void end() {
     	spriteBatch.end();
     	active = DrawPass.INACTIVE;
     }
+
+	/**
+	 * Ends a drawing sequence, flushing textures to the graphics card.
+	 */
+	public void endHUD() {
+		activeBatch = spriteBatch;
+		hudSpriteBatch.end();
+		active = DrawPass.INACTIVE;
+	}
 
 	/**
 	 * Draws the tinted texture at the given position.
@@ -444,8 +471,8 @@ public class GameCanvas {
 		}
 		
 		// Unlike Lab 1, we can shortcut without a master drawing method
-    	spriteBatch.setColor(Color.WHITE);
-		spriteBatch.draw(image, x,  y);
+    	activeBatch.setColor(Color.WHITE);
+		activeBatch.draw(image, x,  y);
 	}
 	
 	/**
@@ -472,8 +499,8 @@ public class GameCanvas {
 		}
 		
 		// Unlike Lab 1, we can shortcut without a master drawing method
-    	spriteBatch.setColor(tint);
-		spriteBatch.draw(image, x,  y, width, height);
+    	activeBatch.setColor(tint);
+		activeBatch.draw(image, x,  y, width, height);
 	}
 	
 	/**
@@ -596,8 +623,8 @@ public class GameCanvas {
 		}
 		
 		// Unlike Lab 1, we can shortcut without a master drawing method
-    	spriteBatch.setColor(Color.WHITE);
-		spriteBatch.draw(region, x,  y);
+    	activeBatch.setColor(Color.WHITE);
+		activeBatch.draw(region, x,  y);
 	}
 
 	/**
@@ -624,8 +651,8 @@ public class GameCanvas {
 		}
 		
 		// Unlike Lab 1, we can shortcut without a master drawing method
-    	spriteBatch.setColor(tint);
-		spriteBatch.draw(region, x,  y, width, height);
+    	activeBatch.setColor(tint);
+		activeBatch.draw(region, x,  y, width, height);
 	}
 	
 	/**
@@ -654,8 +681,8 @@ public class GameCanvas {
 		}
 		
 		// Unlike Lab 1, we can shortcut without a master drawing method
-    	spriteBatch.setColor(tint);
-		spriteBatch.draw(region, x-ox, y-oy, width, height);
+    	activeBatch.setColor(tint);
+		activeBatch.draw(region, x-ox, y-oy, width, height);
 	}
 
 	/**
@@ -695,8 +722,8 @@ public class GameCanvas {
 		// There is a workaround, but it will break if the bug is fixed.
 		// For now, it is better to set the affine transform directly.
 		computeTransform(ox,oy,x,y,angle,sx,sy);
-		spriteBatch.setColor(tint);
-		spriteBatch.draw(region, region.getRegionWidth(), region.getRegionHeight(), local);
+		activeBatch.setColor(tint);
+		activeBatch.draw(region, region.getRegionWidth(), region.getRegionHeight(), local);
 	}
 	public void draw(TextureRegion region, Color tint, float ox, float oy,
 					 float x, float y, float angle, float sx, float sy,int glow) {
@@ -738,8 +765,8 @@ public class GameCanvas {
 
 		local.set(affine);
 		local.translate(-ox,-oy);				
-		spriteBatch.setColor(tint);
-		spriteBatch.draw(region, region.getRegionWidth(), region.getRegionHeight(), local);
+		activeBatch.setColor(tint);
+		activeBatch.draw(region, region.getRegionWidth(), region.getRegionHeight(), local);
 	}
 
 	/**
@@ -769,8 +796,8 @@ public class GameCanvas {
 		}
 		
 		// Unlike Lab 1, we can shortcut without a master drawing method
-    	spriteBatch.setColor(Color.WHITE);
-		spriteBatch.draw(region, x,  y);
+    	activeBatch.setColor(Color.WHITE);
+		activeBatch.draw(region, x,  y);
 	}
 	
 	/**
@@ -803,8 +830,8 @@ public class GameCanvas {
 		}
 		
 		// Unlike Lab 1, we can shortcut without a master drawing method
-    	spriteBatch.setColor(tint);
-		spriteBatch.draw(region, x,  y, width, height);
+    	activeBatch.setColor(tint);
+		activeBatch.draw(region, x,  y, width, height);
 	}
 	
 	/**
@@ -839,8 +866,8 @@ public class GameCanvas {
 		}
 		
 		// Unlike Lab 1, we can shortcut without a master drawing method
-    	spriteBatch.setColor(tint);
-		spriteBatch.draw(region, x-ox, y-oy, width, height);
+    	activeBatch.setColor(tint);
+		activeBatch.draw(region, x-ox, y-oy, width, height);
 	}
 	
 	/**
@@ -877,8 +904,8 @@ public class GameCanvas {
 		}
 		
 		TextureRegion bounds = region.getRegion();
-		spriteBatch.setColor(tint);
-		spriteBatch.draw(region, x, y, ox, oy, 
+		activeBatch.setColor(tint);
+		activeBatch.draw(region, x, y, ox, oy,
 						 bounds.getRegionWidth(), bounds.getRegionHeight(), 
 						 sx, sy, 180.0f*angle/(float)Math.PI);
 	}
@@ -915,8 +942,8 @@ public class GameCanvas {
 		local.translate(-ox,-oy);
 		computeVertices(local,region.getVertices());
 
-		spriteBatch.setColor(tint);
-		spriteBatch.draw(region, 0, 0);
+		activeBatch.setColor(tint);
+		activeBatch.draw(region, 0, 0);
 		
 		// Invert and restore
 		local.inv();
@@ -931,9 +958,9 @@ public class GameCanvas {
 		}
 		
 		// Only use of spritebatch in game.
-		spriteBatch.begin();
-		spriteBatch.draw(background, 0, 0, width, background.getHeight());
-		spriteBatch.end();
+		activeBatch.begin();
+		activeBatch.draw(background, 0, 0, width, background.getHeight());
+		activeBatch.end();
 	}
 	
 	/**
@@ -962,7 +989,7 @@ public class GameCanvas {
 			return;
 		}
 		GlyphLayout layout = new GlyphLayout(font,text);
-		font.draw(spriteBatch, layout, x, y);
+		font.draw(activeBatch, layout, x, y);
     }
 
     /**
@@ -981,7 +1008,7 @@ public class GameCanvas {
 		GlyphLayout layout = new GlyphLayout(font,text);
 		float x = (getWidth()  - layout.width) / 2.0f;
 		float y = (getHeight() + layout.height) / 2.0f;
-		font.draw(spriteBatch, layout, x, y+offset);
+		font.draw(activeBatch, layout, x, y+offset);
     }
 
 	/**
@@ -1001,7 +1028,7 @@ public class GameCanvas {
 		GlyphLayout layout = new GlyphLayout(font,text);
 		float x = (getWidth()  - layout.width) / 2.0f;
 		float y = (getHeight() + layout.height) / 2.0f;
-		font.draw(spriteBatch, layout, x+xOffset, y+yOffset);
+		font.draw(activeBatch, layout, x+xOffset, y+yOffset);
 	}
     
 	/**

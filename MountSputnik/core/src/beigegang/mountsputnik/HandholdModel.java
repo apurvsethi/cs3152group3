@@ -27,6 +27,7 @@ public class HandholdModel extends GameObject{
 	/** The texture the handhold will have when not glowing */ 
 	protected Texture texture;
 	protected Texture glowTexture; 
+	protected Vector2 glowOrigin;
 
 	private Vector2 startPoint, endPoint;
 	
@@ -160,6 +161,7 @@ public class HandholdModel extends GameObject{
 		setY(y);
 
 		glowTexture = gt;
+		glowOrigin = new Vector2(glowTexture.getWidth() / 2, glowTexture.getHeight() / 2);
 		isCrumbling = false;
 		velocity = 0;
 		snapPoints = new Array<Vector2>();
@@ -199,7 +201,7 @@ public class HandholdModel extends GameObject{
 		//TODO: remove this if check once all level blocks only contain handholds within the playable area
 		if (getX() * drawPositionScale.x > canvas.getWidth() / 5 && getX() * drawPositionScale.x < canvas.getWidth() * 4 / 5) {
 			if (isGlowing){
-				canvas.draw(glowTexture, Color.WHITE, origin.x, origin.y, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
+				canvas.draw(glowTexture, Color.WHITE, glowOrigin.x, glowOrigin.y, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
 						getAngle(), drawSizeScale.x, drawSizeScale.y);
 			}
 				canvas.draw(animator, Color.WHITE, origin.x, origin.y,
