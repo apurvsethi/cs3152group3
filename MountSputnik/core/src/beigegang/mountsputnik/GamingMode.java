@@ -65,12 +65,11 @@ public class GamingMode extends ModeController {
      */
     protected static final String KREMLIN_FILE = "Fonts/kremlin.ttf";
     protected static final String MASTODON_FILE = "Fonts/mastodon.ttf";
-    protected static final String LEVEL_NAMES[] = {"tutorial", "canyon", "waterfall", "volcano", "mountain", "sky", "space"}; //TODO: change second canyon to waterfall
+    protected static final String LEVEL_NAMES[] = {"tutorial", "canyon", "waterfall", "volcano", "mountain", "sky", "space"}; 
     protected static final String LAVA_FILE = "assets/volcano/Lava.png";
     protected static final String LAVA_GLOW_FILE = "assets/volcano/LavaGlow.png";
     protected static final String LAVA_CONT_FILE = "assets/volcano/LavaCont.png";
-    protected static final String UI_FILE = "assets/HUD4timelessNoBackground.png";
-    protected static final String[] LEVEL_LABEL_FILES = {"assets/Tutorial.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Canyon.png", "assets/Skycloud.png", "assets/Canyon.png"};
+    protected static final String UI_FILE = "assets/HUD4Background.png";
     protected static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
     protected static final String GLOW_FILE = "assets/glow.png";
     protected static final String RUSSIAN_FLAG_FILE = "RussianFlag.png";
@@ -147,7 +146,6 @@ public class GamingMode extends ModeController {
     protected static TextureRegion[] shadowTextures = new TextureRegion[SHADOW_TEXTURES.length];
     protected static TextureRegion[] tutorialTextures = new TextureRegion[TUTORIAL_TEXTURES.length];
     protected static TextureRegion[] handholdTextures;
-    protected static TextureRegion[] levelLabels = new TextureRegion[LEVEL_LABEL_FILES.length];
     protected static TextureRegion tutorialOverlay;
 
     protected static TextureRegion blackoutTexture;
@@ -227,7 +225,6 @@ public class GamingMode extends ModeController {
         for (Entry<String, Integer> entry : NUM_HANDHOLDS.entrySet())
             for (counterInt = 1; counterInt <= entry.getValue(); counterInt++)
                 loadAddTexture("assets/"+entry.getKey()+"/Handhold"+counterInt+".png");
-        for (String name : LEVEL_LABEL_FILES) loadAddTexture(name);
         for (String PART_TEXTURE : PART_TEXTURES) loadAddTexture(PART_TEXTURE);
         for (String PART_TEXTURE: AMERICA_PART_TEXTURES) loadAddTexture(PART_TEXTURE); 
         for (String SHADOW_TEXTURE: SHADOW_TEXTURES) loadAddTexture(SHADOW_TEXTURE);
@@ -288,11 +285,7 @@ public class GamingMode extends ModeController {
         fallingObstacle = createFilmStrip(manager, "assets/"+levelName+"/Rockbust_Animation.png", 1, 5, 5);
         kremlin = manager.get("Game" + KREMLIN_FILE, BitmapFont.class);
         mastodon = manager.get("Game" + MASTODON_FILE, BitmapFont.class);
-
-        for (counterInt = 0;  counterInt < LEVEL_LABEL_FILES.length; counterInt++){
-            levelLabels[counterInt] = createTexture(manager, LEVEL_LABEL_FILES[counterInt], false);
-        }
-
+        
         for (counterInt = 0; counterInt < PART_TEXTURES.length; counterInt++) {
             partTextures[counterInt] = createFilmStrip(manager, PART_TEXTURES[counterInt], 1,
                     BODY_PART_ANIMATION_FRAMES[counterInt], BODY_PART_ANIMATION_FRAMES[counterInt]);
@@ -1331,17 +1324,6 @@ public class GamingMode extends ModeController {
                 ||c0.parts.get(HEAD).getPosition().y < 0;
     }
 
-
-    //	a Draw Note: If two parts are crossing each other, and one part is on a handhold, the other part
-    //	should be drawn ON TOP of the hooked part.
-    //TODO needs to be corrected in many cases - its just a matter of drawing anything attached to a handhold
-    //first, then if an arm crosses underneath the chest/head draw it first, same with legs.
-    //    public void draw(){
-    //
-    //        draw(0);
-    //        draw(1);
-    //    }
-
     public void draw() {
         canvas.clear();
         canvas.begin();
@@ -1351,20 +1333,20 @@ public class GamingMode extends ModeController {
 
         canvas.end();
         canvas.beginHUD();
-        float timerX = -canvas.getWidth() * 0.41f;
-        float timerTextY = canvas.getHeight() * 0.42f;
+        float hudMidX = -canvas.getWidth() * 0.4f;
+        float timerTextY = canvas.getHeight() * 0.4f;
         float timerTimeY = timerTextY - canvas.getHeight() * 0.045f;
         int seconds = timestep/60;
         String minuteString = (seconds/60 >= 10) ? seconds/60 + "" : ("0"+seconds/60);
         String secondString = (seconds%60 >= 10) ? seconds%60 + "" : ("0"+seconds%60);
         String time = minuteString+":"+secondString;
         SharedMethods.drawUI(canvas,0, UI,.7f);
-        canvas.drawTextCentered("Time", mastodon, timerX, timerTextY);
-        canvas.drawTextCentered(time, kremlin, timerX, timerTimeY);
+        canvas.drawTextCentered("Time", mastodon, hudMidX, timerTextY);
+        canvas.drawTextCentered(time, kremlin, hudMidX, timerTimeY);
         if (id == RACE_MODE){
             SharedMethods.drawUI(canvas,canvas.getWidth()*4/5, UI,.7f);
-        	canvas.drawTextCentered("Time", mastodon, -timerX, timerTextY);
-            canvas.drawTextCentered(time, kremlin, -timerX, timerTimeY);
+        	canvas.drawTextCentered("Time", mastodon, -hudMidX, timerTextY);
+            canvas.drawTextCentered(time, kremlin, -hudMidX, timerTimeY);
         }
 
         float a = (vector.y - cposYAtTime0)/(maxHandhold - cposYAtTime0);
@@ -1387,6 +1369,8 @@ public class GamingMode extends ModeController {
             energyLevel = Math.abs((int) Math.ceil(character2.getEnergy() / 10f));
             flashing2 = SharedMethods.drawEnergy(canvas, character2, energyTextures, fatigueTexture, lowEnergyHalo, energyLevel, canvas.getWidth() * 4 / 5, 0, flashing2);
         }
+
+        canvas.drawTextCentered(levelName, mastodon, hudMidX, -canvas.getHeight() * 0.42f);
         canvas.endHUD();
         //end p1 draw
         //p2 draw
@@ -1399,7 +1383,6 @@ public class GamingMode extends ModeController {
             canvas.draw(RUSSIAN_FLAG, Color.WHITE, canvas.getWidth()/4,checkpoints.get(counterInt)*scale.y - canvas.getHeight()/2, canvas.getWidth()/2, canvas.getHeight());
             counterInt++;
         }
-
 
         canvas.end();
 
