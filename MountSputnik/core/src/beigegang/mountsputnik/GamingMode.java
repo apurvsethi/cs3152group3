@@ -1427,49 +1427,6 @@ public class GamingMode extends ModeController {
         vector = character1.parts.get(HEAD).getPosition();
         SharedMethods.drawBackgrounds(canvas,ground,background,midground,foreground,tile,edge,currLevel);
 
-        canvas.end();
-        canvas.beginHUD();
-        float hudMidX = -canvas.getWidth() * 0.4f;
-        float timerTextY = canvas.getHeight() * 0.4f;
-        float timerTimeY = timerTextY - canvas.getHeight() * 0.045f;
-        int seconds = timestep/60;
-        String minuteString = (seconds/60 >= 10) ? seconds/60 + "" : ("0"+seconds/60);
-        String secondString = (seconds%60 >= 10) ? seconds%60 + "" : ("0"+seconds%60);
-        String time = minuteString+":"+secondString;
-        SharedMethods.drawUI(canvas,0, UI,.7f);
-        canvas.drawTextCentered("Time", mastodon, hudMidX, timerTextY);
-        canvas.drawTextCentered(time, kremlin, hudMidX, timerTimeY);
-        if (id == RACE_MODE){
-            SharedMethods.drawUI(canvas,canvas.getWidth()*4/5, UI,.7f);
-        	canvas.drawTextCentered("Time", mastodon, -hudMidX, timerTextY);
-            canvas.drawTextCentered(time, kremlin, -hudMidX, timerTimeY);
-        }
-
-        float a = (vector.y - cposYAtTime0)/(maxHandhold - cposYAtTime0);
-        if (timestep%60 == 0 && character1.getEnergy() != 0)
-            progressLevel = (int)(a*20);
-        SharedMethods.drawProgress(canvas,progress,progressLevel,0, 0);
-        energyLevel = Math.abs((int) Math.ceil(character1.getEnergy() / 10f));
-        flashing1 = SharedMethods.drawEnergy(canvas, character1, energyTextures, lowEnergyHalo, energyLevel, 0, 0, flashing1);
-        canvas.draw(gauges, Color.WHITE, 0, 0, canvas.getWidth()*1/5, canvas.getHeight());
-        canvas.drawTextCentered("Progress", mastodonS, -845*canvas.getWidth()/SCREEN_WIDTH, canvas.getHeight() * 0.29f);
-        canvas.drawTextCentered("Stamina", mastodonS,-685*canvas.getWidth()/SCREEN_WIDTH , canvas.getHeight() * 0.29f);
-        canvas.drawTextCentered(levelName, mastodon, hudMidX, -canvas.getHeight() * 0.375f);
-        if (id == RACE_MODE) {
-            vector = character2.parts.get(HEAD).getPosition();
-            a = (vector.y - cposYAtTime0) / (maxHandhold - cposYAtTime0);
-            if (timestep % 60 == 0 && character2.getEnergy() != 0)
-            	progressLevel = (int)(a*20);
-            SharedMethods.drawProgress(canvas, progress, progressLevel, canvas.getWidth()*4/5, 0);
-            energyLevel = Math.abs((int) Math.ceil(character2.getEnergy() / 10f));
-            flashing2 = SharedMethods.drawEnergy(canvas, character2, energyTextures, lowEnergyHalo, energyLevel, canvas.getWidth() * 4 / 5, 0, flashing2);
-            canvas.draw(gauges, Color.WHITE, canvas.getWidth()*4/5, 0, canvas.getWidth()*1/5, canvas.getHeight());
-            canvas.drawTextCentered("Stamina", mastodonS, 840*canvas.getWidth()/SCREEN_WIDTH, canvas.getHeight() * 0.29f);
-            canvas.drawTextCentered("Progress", mastodonS, 680*canvas.getWidth()/SCREEN_WIDTH , canvas.getHeight() * 0.29f);
-            canvas.drawTextCentered(levelName, mastodon, -hudMidX, -canvas.getHeight() * 0.375f);
-        }
-        canvas.endHUD();
-        canvas.begin();
         if (currLevel == LEVEL_TUTORIAL)
             canvas.draw(tutorialOverlay, Color.WHITE, canvas.getWidth()/4, canvas.getHeight()/8, canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
         counterInt = 0;
@@ -1479,9 +1436,6 @@ public class GamingMode extends ModeController {
             counterInt++;
         }
 
-        canvas.end();
-
-        canvas.begin();
         if(currLevel != LEVEL_SKY && currLevel != LEVEL_SPACE){
             for (int i = 0; i < character1.parts.size; i++){
                 character1.parts.get(i).drawShadow(shadowTextures[i], canvas);
@@ -1500,20 +1454,13 @@ public class GamingMode extends ModeController {
         if (id == RACE_MODE && tutorialToggle2)
             SharedMethods.drawToggles(canvas, character2, input2, tutorialTextures,  scale);
 
-
-
-        canvas.end();
-
-        canvas.begin();
-       
-
         if (risingObstacle != null) {
             float lavaOrigin = risingObstacle.getHeight() * scale.y -
                     canvas.getHeight();
-            canvas.draw(lavaGlowTexture, Color.WHITE, canvas.getWidth() * 0.17f, lavaOrigin+canvas.getHeight(), canvas.getWidth() * 0.66f, canvas.getHeight());
-            canvas.draw(risingObstacle.getTexture(), Color.WHITE, canvas.getWidth() * 0.17f, lavaOrigin, canvas.getWidth() * 0.66f, canvas.getHeight());
+            canvas.draw(lavaGlowTexture, Color.WHITE, -canvas.getWidth() * 0.03f, lavaOrigin+canvas.getHeight(), canvas.getWidth() * 1.06f, canvas.getHeight());
+            canvas.draw(risingObstacle.getTexture(), Color.WHITE, -canvas.getWidth() * 0.03f, lavaOrigin, canvas.getWidth() * 1.06f, canvas.getHeight());
             while((lavaOrigin-=canvas.getHeight())>0){
-            	canvas.draw(lavaContTexture, Color.WHITE, canvas.getWidth() * 0.17f, lavaOrigin, canvas.getWidth() * 0.66f, canvas.getHeight());
+            	canvas.draw(lavaContTexture, Color.WHITE, -canvas.getWidth() * 0.03f, lavaOrigin, canvas.getWidth() * 1.06f, canvas.getHeight());
             }
         }
         
@@ -1521,11 +1468,11 @@ public class GamingMode extends ModeController {
 	        Vector2 characterPos = character1.parts.get(currentTutorialStep.getInt("e")).getPosition(); 
 	        canvas.draw(tutorialRing, Color.WHITE, characterPos.x*scale.x - 25, characterPos.y * scale.y - 25,50,50);
 	    }
-        canvas.end();
 
-        canvas.begin();
         if (warningController != null) warningController.draw(canvas);
         canvas.end();
+        
+        drawHUD();
 
         if (debug) {
             canvas.beginDebug();
@@ -1538,6 +1485,50 @@ public class GamingMode extends ModeController {
         if (isPaused) pauseMode.draw(canvas);
         else if (isDead) deadMode.draw(canvas);
         else if (isVictorious) victoryMode.draw(canvas);
+    }
+
+    private void drawHUD() {
+        canvas.beginHUD();
+        float hudMidX = -canvas.getWidth() * 0.4f;
+        float timerTextY = canvas.getHeight() * 0.4f;
+        float timerTimeY = timerTextY - canvas.getHeight() * 0.045f;
+        int seconds = timestep/60;
+        String minuteString = (seconds/60 >= 10) ? seconds/60 + "" : ("0"+seconds/60);
+        String secondString = (seconds%60 >= 10) ? seconds%60 + "" : ("0"+seconds%60);
+        String time = minuteString+":"+secondString;
+        SharedMethods.drawUI(canvas,0, UI,.7f);
+        canvas.drawTextCentered("Time", mastodon, hudMidX, timerTextY);
+        canvas.drawTextCentered(time, kremlin, hudMidX, timerTimeY);
+        if (id == RACE_MODE){
+            SharedMethods.drawUI(canvas,canvas.getWidth()*4/5, UI,.7f);
+            canvas.drawTextCentered("Time", mastodon, -hudMidX, timerTextY);
+            canvas.drawTextCentered(time, kremlin, -hudMidX, timerTimeY);
+        }
+
+        float a = (vector.y - cposYAtTime0)/(maxHandhold - cposYAtTime0);
+        if (timestep%60 == 0 && character1.getEnergy() != 0)
+            progressLevel = (int)(a*20);
+        SharedMethods.drawProgress(canvas,progress,progressLevel,0, 0);
+        energyLevel = Math.abs((int) Math.ceil(character1.getEnergy() / 10f));
+        flashing1 = SharedMethods.drawEnergy(canvas, character1, energyTextures, lowEnergyHalo, energyLevel, 0, 0, flashing1);
+        canvas.draw(gauges, Color.WHITE, 0, 0, canvas.getWidth()*1/5, canvas.getHeight());
+        canvas.drawTextCentered("Progress", mastodonS, -845*canvas.getWidth()/SCREEN_WIDTH, canvas.getHeight() * 0.29f);
+        canvas.drawTextCentered("Stamina", mastodonS,-685*canvas.getWidth()/SCREEN_WIDTH , canvas.getHeight() * 0.29f);
+        canvas.drawTextCentered(levelName, mastodon, hudMidX, -canvas.getHeight() * 0.375f);
+        if (id == RACE_MODE) {
+            vector = character2.parts.get(HEAD).getPosition();
+            a = (vector.y - cposYAtTime0) / (maxHandhold - cposYAtTime0);
+            if (timestep % 60 == 0 && character2.getEnergy() != 0)
+                progressLevel = (int)(a*20);
+            SharedMethods.drawProgress(canvas, progress, progressLevel, canvas.getWidth()*4/5, 0);
+            energyLevel = Math.abs((int) Math.ceil(character2.getEnergy() / 10f));
+            flashing2 = SharedMethods.drawEnergy(canvas, character2, energyTextures, lowEnergyHalo, energyLevel, canvas.getWidth() * 4 / 5, 0, flashing2);
+            canvas.draw(gauges, Color.WHITE, canvas.getWidth()*4/5, 0, canvas.getWidth()*1/5, canvas.getHeight());
+            canvas.drawTextCentered("Stamina", mastodonS, 840*canvas.getWidth()/SCREEN_WIDTH, canvas.getHeight() * 0.29f);
+            canvas.drawTextCentered("Progress", mastodonS, 680*canvas.getWidth()/SCREEN_WIDTH , canvas.getHeight() * 0.29f);
+            canvas.drawTextCentered(levelName, mastodon, -hudMidX, -canvas.getHeight() * 0.375f);
+        }
+        canvas.endHUD();
     }
 
     public void setLevel(int level){
