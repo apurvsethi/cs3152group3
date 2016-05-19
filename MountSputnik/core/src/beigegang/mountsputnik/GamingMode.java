@@ -1492,7 +1492,7 @@ public class GamingMode extends ModeController {
                 }
             }
         }
-        if(id == GAME_MODE) 
+        if(id == GAME_MODE && currLevel == LEVEL_TUTORIAL)
         	canvas.draw(tutorialCircle, Color.WHITE, currentTutorialStep.getFloat("x") * scale.x - 25, currentTutorialStep.getFloat("y") * scale.y - 25, 50,50);
         for (GameObject obj : objects) obj.draw(canvas);
         if (tutorialToggle1)
