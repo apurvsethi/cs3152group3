@@ -901,77 +901,77 @@ public class GamingMode extends ModeController {
             }
         }
 
-            movementController.moveCharacter(inx,iny,rinx,riny,nextToPress,justReleased);
+        movementController.moveCharacter(inx,iny,rinx,riny,nextToPress,justReleased);
 
-            if (nextToPress.size > 0) {
-                for (int i : nextToPress) {
-                    ungrip(((ExtremityModel) (character.parts.get(i))));
-                    int ind = 0;
+        if (nextToPress.size > 0) {
+            for (int i : nextToPress) {
+                ungrip(((ExtremityModel) (character.parts.get(i))));
+                int ind = 0;
 
-                    switch (i) {
-                        case FOOT_LEFT:
-                            ind = 0;
-                            if (snappedHandholds.get(ind)!=null){
-                                HandholdModel h = snappedHandholds.get(ind);
-                                snappedHandholds.set(ind,null);
-                                if (!snappedHandholds.contains(h,false))
-                                    h.desnap();
-                            }
-                            break;
-                        case FOOT_RIGHT:
-                            ind = 1;
-                            if (snappedHandholds.get(ind)!=null){
-                                HandholdModel h = snappedHandholds.get(ind);
-                                snappedHandholds.set(ind,null);
-                                if (!snappedHandholds.contains(h,false))
-                                    h.desnap();
-                            }
-                            break;
-                        case HAND_LEFT:
-                            ind = 2;
-                            if (snappedHandholds.get(ind)!=null){
-                                HandholdModel h = snappedHandholds.get(ind);
-                                snappedHandholds.set(ind,null);
-                                if (!snappedHandholds.contains(h,false))
-                                    h.desnap();
-                            }
-                            break;
-                        case HAND_RIGHT:
-                            ind = 3;
-                            if (snappedHandholds.get(ind)!=null){
-                                HandholdModel h = snappedHandholds.get(ind);
-                                snappedHandholds.set(ind,null);
-                                if (!snappedHandholds.contains(h,false))
-                                    h.desnap();
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-
-                }
-            }
-            //bounding velocities
-            boundBodyVelocities(character);
-            if (controller == CONTROLLER_1) {
-                if (timestep == 0) {
-                    glowingHandholds = glowHandholds(character);
-                    glowingHandholds1 = glowingHandholds;
-                    glowingHandholds2 = glowingHandholds;
-                } else {
-                    glowingHandholds1 = glowingHandholds;
-
-                    glowingHandholds = glowHandholds(character);
-
-                    for (int i = 0; i < glowingHandholds2.size; i++) {
-                        glowingHandholds2.set(i, glowingHandholds.get(i));
-                        if (glowingHandholds.get(i) == null) glowingHandholds2.set(i, glowingHandholds1.get(i));
-                    }
+                switch (i) {
+                    case FOOT_LEFT:
+                        ind = 0;
+                        if (snappedHandholds.get(ind)!=null){
+                            HandholdModel h = snappedHandholds.get(ind);
+                            snappedHandholds.set(ind,null);
+                            if (!snappedHandholds.contains(h,false))
+                                h.desnap();
+                        }
+                        break;
+                    case FOOT_RIGHT:
+                        ind = 1;
+                        if (snappedHandholds.get(ind)!=null){
+                            HandholdModel h = snappedHandholds.get(ind);
+                            snappedHandholds.set(ind,null);
+                            if (!snappedHandholds.contains(h,false))
+                                h.desnap();
+                        }
+                        break;
+                    case HAND_LEFT:
+                        ind = 2;
+                        if (snappedHandholds.get(ind)!=null){
+                            HandholdModel h = snappedHandholds.get(ind);
+                            snappedHandholds.set(ind,null);
+                            if (!snappedHandholds.contains(h,false))
+                                h.desnap();
+                        }
+                        break;
+                    case HAND_RIGHT:
+                        ind = 3;
+                        if (snappedHandholds.get(ind)!=null){
+                            HandholdModel h = snappedHandholds.get(ind);
+                            snappedHandholds.set(ind,null);
+                            if (!snappedHandholds.contains(h,false))
+                                h.desnap();
+                        }
+                        break;
+                    default:
+                        break;
                 }
 
-                //snapLimbsToHandholds(glowingHandholds,character,justReleased);
-                snapLimbsToHandholds(glowingHandholds2, character, justReleased);
             }
+        }
+        //bounding velocities
+        boundBodyVelocities(character);
+        if (controller == CONTROLLER_1) {
+            if (timestep == 0) {
+                glowingHandholds = glowHandholds(character);
+                glowingHandholds1 = glowingHandholds;
+                glowingHandholds2 = glowingHandholds;
+            } else {
+                glowingHandholds1 = glowingHandholds;
+
+                glowingHandholds = glowHandholds(character);
+
+                for (int i = 0; i < glowingHandholds2.size; i++) {
+                    glowingHandholds2.set(i, glowingHandholds.get(i));
+                    if (glowingHandholds.get(i) == null) glowingHandholds2.set(i, glowingHandholds1.get(i));
+                }
+            }
+
+            //snapLimbsToHandholds(glowingHandholds,character,justReleased);
+            snapLimbsToHandholds(glowingHandholds2, character, justReleased);
+        }
 
         else{
             if (timestep == 0) {
