@@ -1421,7 +1421,6 @@ public class GamingMode extends ModeController {
     	if(e.isGripped()){
             HandholdModel handholdModel = (HandholdModel) e.getJoint().getBodyB().getFixtureList().get(0).getUserData();
             if (handholdModel.getX() == x && handholdModel.getY() == y) {
-                System.out.println(currentStep);
                 currentStep++;
                 currentTutorialStep = tutorialGuide.get(currentStep);
             }
