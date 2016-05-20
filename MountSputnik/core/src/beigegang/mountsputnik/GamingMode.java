@@ -75,13 +75,14 @@ public class GamingMode extends ModeController {
     protected static final String LAVA_FILE = "assets/volcano/Lava.png";
     protected static final String LAVA_GLOW_FILE = "assets/volcano/LavaGlow.png";
     protected static final String LAVA_CONT_FILE = "assets/volcano/LavaCont.png";
+    protected static final String WATERFALL_TINT_FILE = "assets/waterfall/Misty Tint.png";
     protected static final String UI_FILE = "assets/HUD4Background.png";
     protected static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
     protected static final String GLOW_FILE = "assets/glow2.png";
 //    protected static final String SNAP_FILE = "assets/snap.png";
 //    protected static final String CRUMBLY_FILE = "assets/crumbly.png";
 //    protected static final String SLIPPERY_FILE = "assets/slippery.png";
-    protected static final String RUSSIAN_FLAG_FILE = "RussianFlag.png";
+    protected static final String RUSSIAN_FLAG_FILE = "Flag.png";
     protected static final HashMap<String,Integer> NUM_HANDHOLDS = new HashMap<String,Integer>();
     protected static final String PART_TEXTURES[] = {"Ragdoll/Torso.png", "Ragdoll/Head.png", "Ragdoll/Hips.png",
             "Ragdoll/ArmLeft.png", "Ragdoll/ArmRight.png", "Ragdoll/ForearmLeft.png", "Ragdoll/ForearmRight.png",
@@ -146,6 +147,7 @@ public class GamingMode extends ModeController {
     protected static TextureRegion lavaTexture;
     protected static TextureRegion lavaGlowTexture; 
     protected static TextureRegion lavaContTexture;
+    protected static TextureRegion waterfallTintTexture;
     protected static TextureRegion glowTexture;
     protected static TextureRegion snapTexture;
     protected static TextureRegion crumblyTexture;
@@ -269,6 +271,8 @@ public class GamingMode extends ModeController {
         loadAddTexture(RUSSIAN_FLAG_FILE);
         loadAddTexture(HANDHOLD_WARNING);
         loadAddTexture(OBSTACLE_WARNING);
+        loadAddTexture(WATERFALL_TINT_FILE);
+
     }
 
     /**
@@ -300,6 +304,7 @@ public class GamingMode extends ModeController {
         lavaTexture = createTexture(manager, LAVA_FILE, false);
         lavaGlowTexture = createTexture(manager, LAVA_GLOW_FILE, false);
         lavaContTexture = createTexture(manager, LAVA_CONT_FILE, false);
+        waterfallTintTexture = createTexture(manager, WATERFALL_TINT_FILE, false);
         glowTexture = createTexture(manager, GLOW_FILE, false);
 //        snapTexture = createTexture(manager, SNAP_FILE, false);
 //        crumblyTexture = createTexture(manager, CRUMBLY_FILE, false);
@@ -1340,13 +1345,13 @@ public class GamingMode extends ModeController {
      */
     protected void snapLimbsToHandholds(Array<HandholdModel> hs,CharacterModel c,Array<Integer> jr) {
 
-        if (jr.contains(FOOT_LEFT,false) || timestep < 2)
+        if (jr.contains(FOOT_LEFT,false) || timestep < 1)
             snapIfPossible(FOOT_LEFT, hs,c, 0);
-        if (jr.contains(FOOT_RIGHT,false)|| timestep < 2)
+        if (jr.contains(FOOT_RIGHT,false)|| timestep < 1)
             snapIfPossible(FOOT_RIGHT, hs,c, 1);
-        if (timestep <2 || jr.contains(HAND_LEFT,false))
+        if (timestep <1  || jr.contains(HAND_LEFT,false))
             snapIfPossible(HAND_LEFT, hs,c, 2);
-        if (jr.contains(HAND_RIGHT,false) || timestep < 2 )
+        if (jr.contains(HAND_RIGHT,false) || timestep <1 )
             snapIfPossible(HAND_RIGHT, hs,c, 3);
 
     }
@@ -1442,7 +1447,7 @@ public class GamingMode extends ModeController {
         counterInt = 0;
 
         while (id == GAME_MODE && counterInt <= lastReachedCheckpoint){
-            canvas.draw(RUSSIAN_FLAG, Color.WHITE, canvas.getWidth()/4,checkpoints.get(counterInt)*scale.y - canvas.getHeight()/2, canvas.getWidth()/2, canvas.getHeight());
+            canvas.draw(RUSSIAN_FLAG, Color.WHITE, canvas.getWidth()/2- canvas.getWidth()/32,checkpoints.get(counterInt)*scale.y, canvas.getWidth()/16, canvas.getHeight()/16);
             counterInt++;
         }
 
