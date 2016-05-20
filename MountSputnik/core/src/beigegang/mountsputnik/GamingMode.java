@@ -638,7 +638,7 @@ public class GamingMode extends ModeController {
         if(currLevel == LEVEL_TUTORIAL && id == GAME_MODE){
 	        //To make tutorial: currentStep = 0; 
 	        jsonReader = new JsonReader();
-	        tutorialGuide = jsonReader.parse(Gdx.files.internal("Levels/tutorial/tutorialGuide2.json"));
+	        tutorialGuide = jsonReader.parse(Gdx.files.internal("Levels/tutorial/tutorialGuide.json"));
 	        currentTutorialStep = tutorialGuide.get(currentStep); 
         }
         
@@ -1491,7 +1491,10 @@ public class GamingMode extends ModeController {
         if (id == GAME_MODE && currLevel == LEVEL_TUTORIAL){
 	        Vector2 characterPos = character1.parts.get(currentTutorialStep.getInt("e")).getPosition(); 
 	        canvas.draw(tutorialRing, Color.WHITE, characterPos.x*scale.x - 25, characterPos.y * scale.y - 25,50,50);
-	    }
+	        try{
+	        	canvas.drawText(currentTutorialStep.getString("t"), mastodon, currentTutorialStep.getFloat("x"), currentTutorialStep.getFloat("y") ); 
+	        }catch(Exception e){System.out.println(e); }
+        }
         
         if (warningController != null) warningController.draw(canvas);
         canvas.end();
