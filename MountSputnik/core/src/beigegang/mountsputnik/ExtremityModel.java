@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Joint;
 import static beigegang.mountsputnik.SoundController.*;
+import static beigegang.mountsputnik.Constants.*;
 
 public class ExtremityModel extends PartModel {
 	/** Whether or not this extremity is gripping*/
@@ -31,7 +32,7 @@ public class ExtremityModel extends PartModel {
 	
 	/** Sets the value of isGripping to true*/
 	public void grip(){
-		SoundController.get(SoundController.GRIP_SOUND).play();
+		if (GRIP_SOUNDS_ON) SoundController.get(SoundController.GRIP_SOUND).play();
 		gripped = true;
 		gripTime = 0;
 		if (animator.getSize() != 1) animator.setFrame(1);
@@ -42,7 +43,7 @@ public class ExtremityModel extends PartModel {
 	}
 	/** Sets the value of isGripping to false*/
 	public void ungrip(){
-		if (gripped) SoundController.get(SoundController.UNGRIP_SOUND).play();
+		if (gripped && GRIP_SOUNDS_ON) SoundController.get(SoundController.UNGRIP_SOUND).play();
 		gripped = false;
 		gripTime = 0;
 		animator.setFrame(0);

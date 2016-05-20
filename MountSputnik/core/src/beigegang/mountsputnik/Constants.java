@@ -150,4 +150,6 @@ public final class Constants {
 	/** amount of time (in 1/60 seconds) to put the warning up for an obstacle before it spawns.
 	 * currently at 3 seconds */
 	public static int TIME_TO_WARN = 180;
+
+	public static boolean GRIP_SOUNDS_ON = true;
 }
