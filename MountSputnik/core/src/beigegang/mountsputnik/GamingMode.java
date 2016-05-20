@@ -483,7 +483,7 @@ public class GamingMode extends ModeController {
         NUM_HANDHOLDS.put("tutorial",4);
         NUM_HANDHOLDS.put("sky", 1);
         NUM_HANDHOLDS.put("mountain", 1);
-        NUM_HANDHOLDS.put("space",1);
+        NUM_HANDHOLDS.put("space",2);
         NUM_HANDHOLDS.put("volcano", 1);
         NUM_HANDHOLDS.put("waterfall", 1);
 
