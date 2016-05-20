@@ -553,6 +553,8 @@ public class GamingMode extends ModeController {
         animationTimestep = 0;
         queuedObstacles.clear();
         currentStep = 0; 
+        if(tutorialGuide != null)
+        	currentTutorialStep = tutorialGuide.get(currentStep); 
     }
 
 
@@ -1451,7 +1453,7 @@ public class GamingMode extends ModeController {
         SharedMethods.drawBackgrounds(canvas,ground,background,midground,foreground,tile,edge,currLevel);
 
         if (currLevel == LEVEL_TUTORIAL)
-            canvas.draw(tutorialOverlay, Color.WHITE, canvas.getWidth()/4, canvas.getHeight()/8, canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
+            canvas.draw(tutorialOverlay, Color.WHITE, canvas.getWidth()/5, canvas.getHeight()/8, canvas.getWidth()*3/5, levelFormat.getFloat("height")*scale.y);
         counterInt = 0;
 
         while (id == GAME_MODE && counterInt <= lastReachedCheckpoint){
