@@ -150,7 +150,7 @@ public class GameMode extends GamingMode {
 		character1 = new CharacterModel(partTextures, world, DEFAULT_WIDTH / 2, Math.max(DEFAULT_HEIGHT / 2, checkpoints.get(lastReachedCheckpoint)), scale);
 		makeHandholdsToGripAtStart(character1);
 		addCharacterToGame(character1);
-		movementController1 = new PositionMovementController(character1, scale);
+		movementController1 = new MovementController(character1, scale);
 		warningController = new WarningController(scale, handholdWarning, obstacleWarning);
 	}
 

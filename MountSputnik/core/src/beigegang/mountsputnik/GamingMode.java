@@ -365,8 +365,8 @@ public class GamingMode extends ModeController {
         listener.exitScreen(this, EXIT_GAME_NEXT_RACE_LEVEL);
     }
 
-    protected PositionMovementController movementController1;
-    protected PositionMovementController movementController2;
+    protected MovementController movementController1;
+    protected MovementController movementController2;
 
     protected WarningController warningController;
 
@@ -625,9 +625,9 @@ public class GamingMode extends ModeController {
         addCharacterToGame(character1);
         if (id == RACE_MODE)
             addCharacterToGame(character2);
-        movementController1 = new PositionMovementController(character1, scale);
+        movementController1 = new MovementController(character1, scale);
         if (id == RACE_MODE)
-            movementController2 = new PositionMovementController(character2, scale);
+            movementController2 = new MovementController(character2, scale);
         canvas.setCameraPosition(canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
         if(currLevel == LEVEL_TUTORIAL && id == GAME_MODE){
 	        //To make tutorial: currentStep = 0; 
@@ -847,7 +847,7 @@ public class GamingMode extends ModeController {
 
     public void update(float dt, int controller) {
         CharacterModel character;
-        PositionMovementController movementController;
+        MovementController movementController;
         if (id == GAME_MODE || controller == CONTROLLER_1){
             character = character1;
             movementController = movementController1;

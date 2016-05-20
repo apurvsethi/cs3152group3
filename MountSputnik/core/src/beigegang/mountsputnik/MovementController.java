@@ -5,284 +5,174 @@ import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
 import com.badlogic.gdx.utils.Array;
 
 import static beigegang.mountsputnik.Constants.*;
+
 /**
- * Created by jacobcooper on 4/11/16.
- * This class is full of static helper functions for movement because GameMode was too crowded
- * @author Jacob
+ * Created by Apurv on 4/20/16.
+ *
+ * Movement controller to move the player based on exact position. Calculates
+ * constraints as needed to ensure that the player's wanted movement is
+ * allowed, does it if possible.
  */
 public class MovementController {
+    // Sensitivity for moving crosshair with gameplay
+    private static final float GP_ACCELERATE = 1.1f;
+    private static final float GP_MAX_SPEED  = 11.0f;
+    private static final float GP_THRESHOLD  = 0.20f;
 
-    public CharacterModel character;
-    /**
-     * last limb controlled by player.
-     */
-    private Vector2 torso_cache;
+    private CharacterModel character;
+    private Vector2 originalCache;
+    private Vector2 posCache;
+    private Vector2 torsoCache;
+    private Vector2 crossCache;
+    private Vector2 scale;
 
-    public MovementController(CharacterModel character) {
+    private float armLength;
+    private float forearmLength;
+    private float thighLength;
+    private float shinLength;
+    private float momentum;
+
+    public MovementController(CharacterModel character, Vector2 scale) {
         this.character = character;
-        torso_cache = new Vector2();
+        originalCache = new Vector2();
+        posCache = new Vector2();
+        torsoCache = new Vector2();
+        crossCache = new Vector2();
+        this.scale = scale;
+
+        armLength = (character.getJoint(ARM_LEFT, FOREARM_LEFT).getAnchorA().
+                sub(character.getInnerJoint(ARM_LEFT).getAnchorA())).len();
+        forearmLength = character.parts.get(HAND_LEFT).getPosition().
+                sub(character.getJoint(ARM_LEFT, FOREARM_LEFT).getAnchorA()).len();
+        thighLength = (character.getJoint(THIGH_LEFT, SHIN_LEFT).getAnchorA().
+                sub(character.getInnerJoint(THIGH_LEFT).getAnchorA())).len();
+        shinLength = character.parts.get(FOOT_LEFT).getPosition().
+                sub(character.getJoint(THIGH_LEFT, SHIN_LEFT).getAnchorA()).len();
+        momentum = 0f;
     }
 
-    /**
-     * Applies torso force directed by player if body is hooked to 1+ handholds
-     * @author Jacob
-     *
-     * @param h horizontal force applied
-     * @param v vertical force applied
-     */
-    public void applyTorsoForceIfApplicable(float h, float v) {
-        Vector2 force = calcTorsoForce();
-        if (isGripping(FOOT_LEFT)|| isGripping(FOOT_RIGHT)
-                || isGripping(HAND_LEFT) || isGripping(HAND_RIGHT)) {
-            applyIfUnderLimit(CHEST, force, h, v);
+    public void moveCharacter(float horizontalL, float verticalL, float horizontalR, float verticalR,
+                              Array<Integer> nextToPress, Array<Integer> justReleased) {
+        boolean np = nextToPress.size > 0;
+        boolean jr = justReleased.size > 0;
+
+        if (np && nextToPress.get(0) == HAND_LEFT)
+            moveLimb(ARM_LEFT, FOREARM_LEFT, HAND_LEFT, horizontalL, verticalL, true, true);
+        else if (jr && justReleased.contains(HAND_LEFT,false)) lockLimb(ARM_LEFT, FOREARM_LEFT);
+        if (np && nextToPress.get(0) == HAND_RIGHT)
+            moveLimb(ARM_RIGHT, FOREARM_RIGHT, HAND_RIGHT, horizontalL, verticalL, true, false);
+        else if (jr && justReleased.contains(HAND_RIGHT,false)) lockLimb(ARM_RIGHT, FOREARM_RIGHT);
+        if (np && nextToPress.get(0) == FOOT_LEFT)
+            moveLimb(THIGH_LEFT, SHIN_LEFT, FOOT_LEFT, horizontalL, verticalL, false, true);
+        else if (jr && justReleased.contains(FOOT_LEFT,false)) lockLimb(THIGH_LEFT, SHIN_LEFT);
+        if (np && nextToPress.get(0) == FOOT_RIGHT)
+            moveLimb(THIGH_RIGHT, SHIN_RIGHT, FOOT_RIGHT, horizontalL, verticalL, false, false);
+        else if (jr && justReleased.contains(FOOT_RIGHT,false)) lockLimb(THIGH_RIGHT, SHIN_RIGHT);
+
+        moveTorso(horizontalR, verticalR);
+    }
+
+    private void moveLimb(int root, int mid, int extremity,
+                          float horizontal, float vertical,
+                          boolean isArm, boolean isLeft) {
+        PartModel extremityPart = character.parts.get(extremity);
+        RevoluteJoint rootJoint = (RevoluteJoint) character.getInnerJoint(root);
+        RevoluteJoint midJoint = (RevoluteJoint) character.getJoint(root, mid);
+
+        originalCache.set(extremityPart.getPosition());
+        crossCache.set(horizontal, vertical);
+        if (crossCache.len2() > GP_THRESHOLD && inLimits(rootJoint, midJoint)) {
+            momentum += GP_ACCELERATE;
+            momentum = Math.min(momentum, GP_MAX_SPEED);
+            crossCache.scl(momentum);
+            crossCache.scl(1 / scale.x, 1 / scale.y);
+            posCache.set(originalCache);
+            posCache.add(crossCache);
+
+            adjustToRadius(rootJoint, isArm);
+            extremityPart.setPosition(posCache, extremityPart.getAngle());
+        }
+        else momentum = 0;
+
+        adjustTowardsLimits(rootJoint, midJoint, isArm, isLeft);
+    }
+
+    private boolean inLimits(RevoluteJoint rootJoint, RevoluteJoint midJoint) {
+        return !(rootJoint.getJointAngle() < rootJoint.getLowerLimit() - Math.toRadians(10)
+                || rootJoint.getJointAngle() > rootJoint.getUpperLimit() + Math.toRadians(10)
+                || midJoint.getJointAngle() < midJoint.getLowerLimit() - Math.toRadians(10)
+                || midJoint.getJointAngle() > midJoint.getUpperLimit() + Math.toRadians(10));
+    }
+
+    private void adjustToRadius(RevoluteJoint rootJoint, boolean isArm) {
+        float radius = isArm ? armLength + forearmLength : thighLength + shinLength;
+        if (!(Math.pow((posCache.x - rootJoint.getAnchorA().x), 2)
+                + Math.pow((posCache.y - rootJoint.getAnchorA().y), 2)
+                < Math.pow(radius, 2))) {
+            float vx = posCache.x - rootJoint.getAnchorA().x;
+            float vy = posCache.y - rootJoint.getAnchorA().y;
+            float magV = (float)Math.sqrt(vx*vx + vy*vy);
+            posCache.set(rootJoint.getAnchorA().x + vx / magV * radius,
+                    rootJoint.getAnchorA().y + vy / magV * radius);
         }
     }
 
-    private Vector2 calcTorsoForce() {
-        torso_cache.set(CONSTANT_X_FORCE * 2f, CONSTANT_X_FORCE * 2f);
+    private void adjustTowardsLimits(RevoluteJoint rootJoint, RevoluteJoint midJoint,
+                                     boolean isArm, boolean isLeft) {
+        moveTowardLimits(rootJoint);
+        moveTowardLimits(midJoint);
+        if (midJoint.getMotorSpeed() != 0 && rootJoint.getMotorSpeed() == 0) {
+            float motorSpeed = ((isArm && isLeft) || (!isArm && !isLeft)) ? -5f : 5f;
+            if ((isArm && posCache.y - originalCache.y > 0)
+                    || (!isArm && isLeft && posCache.x - originalCache.x > 0)
+                    || (!isArm && !isLeft && posCache.x - originalCache.x < 0))
+                motorSpeed = -motorSpeed;
+            rootJoint.setMotorSpeed(motorSpeed);
+        }
+    }
+
+    private void moveTowardLimits(RevoluteJoint joint) {
+        if (joint.getJointAngle() < joint.getLowerLimit())
+            joint.setMotorSpeed(5);
+        else if (joint.getJointAngle() > joint.getUpperLimit())
+            joint.setMotorSpeed(-5);
+        else joint.setMotorSpeed(0);
+    }
+
+    private void lockLimb(int root, int mid) {
+        RevoluteJoint rootJoint = (RevoluteJoint) character.getInnerJoint(root);
+        RevoluteJoint midJoint = (RevoluteJoint) character.getJoint(root, mid);
+        rootJoint.setMotorSpeed(0);
+        midJoint.setMotorSpeed(0);
+    }
+
+    private void moveTorso(float horizontalJoystick, float verticalJoystick) {
+        torsoCache.set(CONSTANT_X_FORCE * 2f, CONSTANT_X_FORCE * 2f);
+        boolean leftHand = ((ExtremityModel) (character.parts.get(HAND_LEFT))).isGripped();
+        boolean rightHand = ((ExtremityModel) (character.parts.get(HAND_RIGHT))).isGripped();
+        boolean leftLeg = ((ExtremityModel) (character.parts.get(FOOT_LEFT))).isGripped();
+        boolean rightLeg = ((ExtremityModel) (character.parts.get(FOOT_RIGHT))).isGripped();
 
         int counter = 0;
-        if (isGripping(HAND_LEFT)) counter++;
-        if (isGripping(HAND_RIGHT)) counter++;
-        if (isGripping(FOOT_LEFT)) counter++;
-        if (isGripping(FOOT_RIGHT)) counter++;
-        if (counter > 2) counter +=2;
+        if (leftHand) counter++;
+        if (rightHand) counter++;
+        if (leftLeg) counter++;
+        if (rightLeg) counter++;
+        if (counter > 2) counter += 2;
+        torsoCache.scl(counter);
 
-        torso_cache.scl(counter);
-        return torso_cache;
-    }
-
-    private void applyIfUnderLimit(int part, Vector2 force, float h, float v) {
-        character.parts.get(part).body.applyForceToCenter(force.x*h, 0, true);
-        character.parts.get(part).body.applyForceToCenter(0, force.y*v, true);
-    }
-
-    /**
-     *
-     * @param part - ungripped part to apply the forces to
-     * @param v    - vertical direction given by player (-1.0 -> 1.0 f) (ints if keyboard)
-     * @param h    - horizontal direction given by player (-1.0 -> 1.0f) (ints if keyboard)
-     *
-     * @author Jacob
-     */
-
-    public void findAndApplyForces(int part, float v, float h) {
-        RevoluteJoint upperJoint;
-//        resetLimbSpeedsTo0();
-
-        switch (part) {
-            case HAND_LEFT:
-                upperJoint = ((RevoluteJoint) character.joints.get(ARM_LEFT - 1));
-                upperJoint.setMaxMotorTorque(25);
-                rotateLimbPiece(v, h, ARM_LEFT, FOREARM_LEFT);
-//                rotateJoint(v, h, ARM_LEFT, FOREARM_LEFT, HAND_LEFT, true, true);
-                break;
-            case HAND_RIGHT:
-                upperJoint = ((RevoluteJoint) character.joints.get(ARM_RIGHT - 1));
-                upperJoint.setMaxMotorTorque(50);
-                rotateLimbPiece(v, h, ARM_RIGHT, FOREARM_RIGHT);
-//                rotateJoint(v, h, ARM_RIGHT, FOREARM_RIGHT, HAND_RIGHT, true, false);
-                break;
-            case FOOT_LEFT:
-                upperJoint = ((RevoluteJoint) character.joints.get(THIGH_LEFT - 1));
-                upperJoint.setMaxMotorTorque(20);
-                rotateLimbPiece(v, h, THIGH_LEFT, SHIN_LEFT);
-//                rotateJoint(v, h, THIGH_LEFT, SHIN_LEFT, FOOT_LEFT, false, true);
-                break;
-            case FOOT_RIGHT:
-                upperJoint = ((RevoluteJoint) character.joints.get(THIGH_RIGHT - 1));
-                upperJoint.setMaxMotorTorque(20);
-                rotateLimbPiece(v, h, THIGH_RIGHT, SHIN_RIGHT);
-//                rotateJoint(v, h, THIGH_RIGHT, SHIN_RIGHT, FOOT_RIGHT, false, false);
-                break;
-            default:
-                break;
+        if (leftHand|| rightHand || leftLeg || rightLeg) {
+            character.parts.get(CHEST).body.applyForceToCenter(torsoCache.x * horizontalJoystick, 0, true);
+            character.parts.get(CHEST).body.applyForceToCenter(0, torsoCache.y * verticalJoystick, true);
         }
-    }
-
-    /**
-     * Dampening method:
-     * basically freezes limbs once they aren't being controlled any longer.
-     * @author Jacob
-     */
-    public void resetLimbSpeedsTo0() {
-        RevoluteJoint joint;
-        for (int limbPiece : NON_EXTREMITY_LIMBS) {
-            joint = ((RevoluteJoint) character.joints.get(limbPiece - 1));
-            joint.setMotorSpeed(0);
-        }
-    }
-
-    /**
-     * SUPER IMPORTANT METHOD
-     * controls all rotations of upper pieces of a limb (upper arm and upper leg) and
-     * the rotations of the forearms and shins upon diagonal movement of the joystick
-     * somehow it generalizes SUPER well to all limbs in all cases, which was unexpected.
-     *
-     * @param v - vertical input from joystick
-     * @param h - horizontal input from joystick
-     * @param upperJoint - where this limb connects to the torso
-     * @param lowerJoint - either a knee or elbow joint depending on the limb
-     * @author Jacob
-     */
-    private void rotateLimbPiece(float v, float h, int upperJoint, int lowerJoint) {
-        Vector2 root = character.joints.get(upperJoint - 1).getAnchorA();
-        Vector2 shoot = character.joints.get(lowerJoint - 1).getAnchorA();
-        float absoluteAngle = findAbsoluteAngleOfPart(root, shoot);
-        float desiredAngle = findAbsoluteAngle(-v, -h);
-        boolean posJointSpeedV, posJointSpeedH;
-        float speedToRotate = (upperJoint == THIGH_LEFT ||  upperJoint == SHIN_LEFT
-                || upperJoint == THIGH_RIGHT || upperJoint == SHIN_RIGHT) ? SHIN_JOINT_SPEED : FOREARM_JOINT_SPEED;
-        posJointSpeedV = absoluteAngle > -180 && absoluteAngle < 0;
-        if (v < 0) posJointSpeedV = !posJointSpeedV;
-
-        posJointSpeedH = !(absoluteAngle > -90 && absoluteAngle <= 90);
-        if (h > 0) posJointSpeedH = !posJointSpeedH;
-
-        if (!isForceDiagonal(v, h)) {
-            if (Math.abs(v) > 0.2)
-                setSpeedPart(upperJoint, speedToRotate, posJointSpeedV);
-            if (Math.abs(h) > 0.2)
-                setSpeedPart(upperJoint, speedToRotate, posJointSpeedH);
-        }
-        else if ((v > 0 && absoluteAngle < 0 && desiredAngle > absoluteAngle)
-                    || (v > 0 && absoluteAngle >= 0 && desiredAngle < absoluteAngle)
-                    || (v <= 0 && absoluteAngle < 0 && desiredAngle <= absoluteAngle)
-                    || (v <= 0 && absoluteAngle >= 0 && desiredAngle >= absoluteAngle))
-            setSpeedPart(upperJoint, speedToRotate, posJointSpeedV);
-        else setSpeedPart(upperJoint, speedToRotate, posJointSpeedH);
-    }
-
-    private void rotateJoint(float v, float h, int inPart, int midPart,
-                                    int outPart, boolean isHand, boolean isLeft) {
-        RevoluteJoint joint = ((RevoluteJoint) character.joints.get(midPart - 1));
-        joint.setMaxMotorTorque(30);
-        Vector2 root = character.joints.get(inPart - 1).getAnchorA();
-        Vector2 shoot = character.joints.get(midPart - 1).getAnchorA();
-        float aa = findAbsoluteAngleOfPart(root, shoot);
-
-        if (isForceDiagonal(v, h)) {
-            rotateLimbPiece(v, h, midPart, outPart);
-            return;
-        }
-
-        if (isHand) {
-            verticalForearmMovement(v, joint, aa, isLeft);
-            horizontalForearmMovement(h, joint, aa, isLeft);
-        }
-        else {
-            verticalShinMovement(v, joint, aa, isLeft);
-            horizontalShinMovement(h, joint, aa, isLeft);
-        }
-    }
-
-    private boolean isGripping(int part) {
-        return ((ExtremityModel) (character.parts.get(part))).isGripped();
-    }
-
-    /**
-     * @param rootAnchor
-     * @param shootAnchor
-     * @return absolute angle, from -180 to 180, of part on the board/screen - arm pointing up has angle of 0 degrees.
-     * arm pointing to the right has an angle of 90 degrees
-     * @author Jacob
-     */
-    private float findAbsoluteAngleOfPart(Vector2 rootAnchor, Vector2 shootAnchor) {
-        double dy = rootAnchor.y - shootAnchor.y;
-        double dx = rootAnchor.x - shootAnchor.x;
-        //atan2 pretends like -x axis is root axis, need to modify to make it thing positive y axis
-        return findAbsoluteAngle(dy, dx);
-    }
-
-    private float findAbsoluteAngle(double dy, double dx) {
-        double theta = Math.atan2(dy, dx) * RAD_TO_DEG;
-        if (theta > 90 && theta < 180) theta = 270 - theta;
-        else theta = -(90 + theta);
-
-        return (float) theta;
-    }
-
-    private boolean isForceDiagonal(float v, float h) {
-        return Math.abs(v) > .2 && Math.abs(h) > .2;
-    }
-
-    private void verticalForearmMovement(float v, RevoluteJoint forearmJoint,
-                                                float aa, boolean left) {
-        if ((v > 0.2 && aa > -45 && aa <= 45)
-                || (v < -0.2 && (aa <= -135 || aa > 135)))
-            setSpeedJoint(forearmJoint, -FOREARM_JOINT_SPEED, left);
-        else if ((v > 0.2 && (aa <= -45 || aa > 45))
-                || (v < -0.2 && aa > -135 && aa <= 135)) {
-            setSpeedJoint(forearmJoint, FOREARM_JOINT_SPEED, left);
-            if (v > 0.2 && ((left && aa <= -45) || (!left && aa > 45)))
-                forearmJoint.setMaxMotorTorque(100);
-        }
-    }
-
-    private void horizontalForearmMovement(float h, RevoluteJoint forearmJoint,
-                                                  float aa, boolean left) {
-        if ((left && (h < -0.2 || (h > 0.2 && aa < -135)))
-                || (!left && (h > 0.2 || (h < -0.2 && aa < -135))))
-            setSpeedJoint(forearmJoint, -FOREARM_JOINT_SPEED, left);
-        else if ((left && h > 0.2 && aa > -135)
-                || (!left && h < -0.2 && aa > -135))
-            setSpeedJoint(forearmJoint, FOREARM_JOINT_SPEED, left);
-    }
-
-    private void verticalShinMovement(float v, RevoluteJoint shinJoint,
-                                             float aa, boolean isLeft) {
-        if ((v > 0.2 && aa > -45 && aa <= 45)
-                || (v < -0.2 && (aa <= -135 || aa > 135)))
-            setSpeedJoint(shinJoint, SHIN_JOINT_SPEED, isLeft);
-        else if ((v > 0.2 && (aa <= -45 || aa > 45))
-                || (v < -0.2 && aa > -135 && aa <= 135)) {
-            setSpeedJoint(shinJoint, -SHIN_JOINT_SPEED, isLeft);
-            if (v > 0.2 && aa > 45)
-                shinJoint.setMaxMotorTorque(100);
-        }
-    }
-
-    private void horizontalShinMovement(float h, RevoluteJoint shinJoint,
-                                               float aa, boolean isLeft) {
-        if ((isLeft && h > 0.2) || (!isLeft && h < -0.2))
-            setSpeedJoint(shinJoint, SHIN_JOINT_SPEED, isLeft);
-        else if (((isLeft && h < -0.2) || (!isLeft && h > 0.2))
-                && ((aa > -135 && aa < 45) || aa > 135))
-            shinJoint.setMotorSpeed(SHIN_JOINT_SPEED);
-        else if (((isLeft && h < -0.2) || (!isLeft && h > 0.2))
-                && ((aa >=45 && aa <= 135) || aa <= -135))
-            shinJoint.setMotorSpeed(-SHIN_JOINT_SPEED);
-    }
-
-    private void setSpeedPart(int part, float speed, boolean pos) {
-        setSpeedJoint(((RevoluteJoint) character.joints.get(part - 1)), speed, pos);
-    }
-
-    private void setSpeedJoint(RevoluteJoint joint, float speed, boolean pos) {
-        if (!pos) speed = -speed;
-        joint.setMotorSpeed(speed);
-    }
-
-    /**
-     * attempts to allow limbs that WERE hooked to handholds to rotate and bend more easily allowing for more
-     * natural movement
-     * @param nextToPress - all limbs not hooked to handholds that are currently selected.
-     *
-     * @author Jacob
-     */
-    public void makeHookedJointsMovable(Array<Integer> nextToPress) {
-        if (!nextToPress.contains(FOOT_LEFT, true))
-            ((RevoluteJoint) character.joints.get(FOREARM_LEFT - 1)).setMaxMotorTorque(100);
-        if (!nextToPress.contains(FOOT_RIGHT, true))
-            ((RevoluteJoint) character.joints.get(FOREARM_RIGHT - 1)).setMaxMotorTorque(100);
-        if (!nextToPress.contains(HAND_LEFT, true))
-            ((RevoluteJoint) character.joints.get(SHIN_LEFT - 1)).setMaxMotorTorque(100);
-        if (!nextToPress.contains(HAND_RIGHT, true))
-            ((RevoluteJoint) character.joints.get(SHIN_RIGHT - 1)).setMaxMotorTorque(100);
     }
 
     public void dispose() {
         character = null;
-        torso_cache = null;
+        originalCache = null;
+        posCache = null;
+        torsoCache = null;
+        crossCache = null;
+        scale = null;
     }
 }
