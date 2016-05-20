@@ -24,7 +24,7 @@ public class InstructionMode extends ModeController {
 
     private static final String OVERLAY_FILE = "Menu/Overlay.jpg";
     private static final String TEXTBOX_FILE = "Menu/Text Box.png";
-    private static int maxScreen = 2;
+    private static int maxScreen = 4;
     private static int curScreen = 0;
     private static final String[] SLIDE_FILES= new String[maxScreen];
 
@@ -48,7 +48,7 @@ public class InstructionMode extends ModeController {
         assetManager = manager;
 
         for (int i = 0; i < SLIDE_FILES.length; i++) {
-            SLIDE_FILES[i] = "assets/tutorial/slide" + i + ".png";
+            SLIDE_FILES[i] = "assets/tutorial/HowToPlay/slide" + i + ".png";
             loadAddTexture(SLIDE_FILES[i]);
         }
         assetState = AssetState.LOADING;
@@ -76,7 +76,7 @@ public class InstructionMode extends ModeController {
         textbox = createTexture(manager, TEXTBOX_FILE, false);
         for (int i = 0; i < SLIDE_FILES.length; i++) {
             slides[i] = createTexture(manager, SLIDE_FILES[i], false);
-            System.out.println(SLIDE_FILES[i]);
+            //System.out.println(SLIDE_FILES[i]);
         }
         assetState = AssetState.COMPLETE;
     }
@@ -127,6 +127,8 @@ public class InstructionMode extends ModeController {
         canvas.draw(slides[curScreen], Color.WHITE, (canvas.getWidth() - textboxWidth) / 2,
                 bottomOfScreen + (canvas.getHeight() - textboxHeight) / 2,
                 textboxWidth, textboxHeight);
+        canvas.drawTextCentered("Press X to dismiss", fontNormal, (canvas.getCamera().position.y - canvas.getHeight()*3/4) );
+	
 //        for (int i = 0; i < menuOptions.length; i++) {
 //            font = currSelection == i ? fontSelected : fontNormal;
 //            canvas.drawTextCentered(menuOptions[i], font, drawY);

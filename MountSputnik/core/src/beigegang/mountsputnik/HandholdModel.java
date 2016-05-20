@@ -207,10 +207,7 @@ public class HandholdModel extends GameObject{
 		isSnapped = true;
 	}
 
-	@Override
-	public void draw(GameCanvas canvas) {
-
-		//TODO: remove this if check once all level blocks only contain handholds within the playable area
+	public void drawGlow(GameCanvas canvas){
 		if (getX() * drawPositionScale.x > canvas.getWidth() / 5 && getX() * drawPositionScale.x < canvas.getWidth() * 4 / 5) {
 			if (isSnapped){
 				canvas.draw(glowTexture, Color.LIME, glowOrigin.x, glowOrigin.y, getX() * drawPositionScale.x, getY() * drawPositionScale.y,
@@ -227,6 +224,15 @@ public class HandholdModel extends GameObject{
 							getAngle(), drawSizeScale.x, drawSizeScale.y);
 				}
 			}
+		}
+	}
+	
+	@Override
+	public void draw(GameCanvas canvas) {
+
+		//TODO: remove this if check once all level blocks only contain handholds within the playable area
+		if (getX() * drawPositionScale.x > canvas.getWidth() / 5 && getX() * drawPositionScale.x < canvas.getWidth() * 4 / 5) {
+			
 				canvas.draw(animator, Color.WHITE, origin.x, origin.y,
 						getX() * drawPositionScale.x, getY() * drawPositionScale.y,
 						getAngle(), drawSizeScale.x, drawSizeScale.y);
