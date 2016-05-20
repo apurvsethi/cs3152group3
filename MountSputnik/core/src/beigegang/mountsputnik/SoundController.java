@@ -1,6 +1,8 @@
 package beigegang.mountsputnik;
 
 import java.util.HashMap;
+
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.*;
 import com.badlogic.gdx.assets.*;
 
@@ -28,9 +30,12 @@ public class SoundController {
     public static final String SLIP_SOUND = "slip";
     /** Colliding with falling obstacle*/
     public static final String COLLIDE_SOUND = "collide";
+    /** Game music*/
+    public static final String MUSIC_SOUND = "music";
 
     /** Hash map storing references to sound assets (after they are loaded) */
     private static HashMap<String, Sound> soundBank;
+    private static HashMap<String, Music> musicBank;
 
     // Files storing the sound references
     /** Selecting a menu item file*/
@@ -49,6 +54,8 @@ public class SoundController {
     public static final String SLIP_FILE = "Sound/slip.wav";
     /** Colliding with falling obstacle*/
     public static final String COLLIDE_FILE = "Sound/collide.wav";
+    /** Music file*/
+    public static final String MUSIC_FILE = "Sound/Abstraction.mp3";
 
     /**
      * Preloads the assets for this Sound controller.
@@ -67,7 +74,11 @@ public class SoundController {
         manager.load(UNGRIP_FILE,Sound.class);
         manager.load(CRUMBLE_FILE,Sound.class);
         manager.load(SLIP_FILE,Sound.class);
-        //manager.load(COLLIDE_FILE,Sound.class);
+        //manager.load(MUSIC_FILE,Sound.class);
+
+        musicBank = new HashMap<String, Music>();
+        Music music = Gdx.audio.newMusic(Gdx.files.internal(MUSIC_FILE));
+        musicBank.put(MUSIC_SOUND, music);
     }
 
     /**
@@ -103,8 +114,8 @@ public class SoundController {
         if (manager.isLoaded(SLIP_FILE)) {
             soundBank.put(SLIP_SOUND,manager.get(SLIP_FILE,Sound.class));
         }
-//        if (manager.isLoaded(COLLIDE_FILE)) {
-//            soundBank.put(COLLIDE_SOUND,manager.get(COLLIDE_FILE,Sound.class));
+//        if (manager.isLoaded(MUSIC_FILE)) {
+//            soundBank.put(MUSIC_SOUND,manager.get(MUSIC_FILE,Sound.class));
 //        }
     }
 
@@ -127,7 +138,6 @@ public class SoundController {
             manager.unload(UNGRIP_FILE);
             manager.unload(CRUMBLE_FILE);
             manager.unload(SLIP_FILE);
-            //manager.unload(COLLIDE_FILE);
         }
     }
 
@@ -138,5 +148,14 @@ public class SoundController {
      */
     public static Sound get(String key) {
         return soundBank.get(key);
+    }
+
+    /**
+     * Returns the music for the given name
+     *
+     * @return the music for the given name
+     */
+    public static Music getMusic(String key) {
+        return musicBank.get(key);
     }
 }
