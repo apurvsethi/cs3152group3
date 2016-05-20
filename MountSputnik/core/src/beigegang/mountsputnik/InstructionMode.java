@@ -1,3 +1,4 @@
+
 package beigegang.mountsputnik;
 
 import beigegang.util.ScreenListener;
@@ -6,9 +7,9 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-import static beigegang.mountsputnik.Constants.*;
+import static beigegang.mountsputnik.Constants.MENU_CHANGE_COOLDOWN;
 
-public class DeadMode extends ModeController {
+public class InstructionMode extends ModeController {
 
     /**
      * Track asset loading from all instances and subclasses
@@ -23,6 +24,9 @@ public class DeadMode extends ModeController {
 
     private static final String OVERLAY_FILE = "Menu/Overlay.jpg";
     private static final String TEXTBOX_FILE = "Menu/Text Box.png";
+    private static int maxScreen = 2;
+    private static int curScreen = 0;
+    private static final String[] SLIDE_FILES= new String[maxScreen];
 
     /**
      * Texture asset for files used, parts, etc.
@@ -30,8 +34,10 @@ public class DeadMode extends ModeController {
     private static TextureRegion overlay;
     private static TextureRegion textbox;
 
-    private static String[] menuOptions = {"Restart Last Checkpoint", "Restart Level", "Menu", "Quit"};
-    private static int exitCodes[] ={EXIT_GAME_RESTART_LAST_CHECKPOINT,EXIT_GAME_RESTART_LEVEL,EXIT_MENU,EXIT_QUIT};
+    private static TextureRegion[] slides = new TextureRegion[SLIDE_FILES.length];
+
+//    private static String[] menuOptions = {"Restart Last Checkpoint", "Restart Level", "Menu", "Quit"};
+//    private static int exitCodes[] ={EXIT_GAME_RESTART_LAST_CHECKPOINT,EXIT_GAME_RESTART_LEVEL,EXIT_MENU,EXIT_QUIT};
     private static Color overlayColor = new Color(Color.WHITE);
 
 
@@ -40,9 +46,14 @@ public class DeadMode extends ModeController {
 
     public void preLoadContent(AssetManager manager) {
         assetManager = manager;
+
+        for (int i = 0; i < SLIDE_FILES.length; i++) {
+            SLIDE_FILES[i] = "assets/tutorial/slide" + i + ".png";
+            loadAddTexture(SLIDE_FILES[i]);
+        }
+        assetState = AssetState.LOADING;
         if (assetState != AssetState.EMPTY) return;
 
-        assetState = AssetState.LOADING;
     }
 
     /**
@@ -63,6 +74,10 @@ public class DeadMode extends ModeController {
 
         overlay = createTexture(manager, OVERLAY_FILE, false);
         textbox = createTexture(manager, TEXTBOX_FILE, false);
+        for (int i = 0; i < SLIDE_FILES.length; i++) {
+            slides[i] = createTexture(manager, SLIDE_FILES[i], false);
+            System.out.println(SLIDE_FILES[i]);
+        }
         assetState = AssetState.COMPLETE;
     }
 
@@ -81,14 +96,18 @@ public class DeadMode extends ModeController {
 
         if (changeCooldown > 0) changeCooldown --;
 
-        if (changeCooldown == 0 && Math.abs(input.getVerticalL()) > 0.5) {
+        if (changeCooldown == 0 && Math.abs(input.getHorizontalL()) > 0.5) {
             SoundController.get(SoundController.SCROLL_SOUND).play();
-            currSelection = (currSelection + (input.getVerticalL() > 0.5 ? -1 : 1) + menuOptions.length) % menuOptions.length;
+
+            curScreen = Math.abs((curScreen + (int) Math.signum(input.getHorizontalL())))%maxScreen;
             changeCooldown = MENU_CHANGE_COOLDOWN;
         }
-        if (input.didSelect()){
+//        currSelection = (currSelection + (input.getVerticalL() > 0.5 ? -1 : 1) + menuOptions.length) % menuOptions.length;
+
+
+        if (input.didX()){
             SoundController.get(SoundController.SELECT_SOUND).play();
-            listener.exitScreen(this, exitCodes[currSelection]);
+            listener.exitScreen(this, Constants.EXIT_GAME_RESUME_LEVEL);
         }
 
     }
@@ -103,15 +122,16 @@ public class DeadMode extends ModeController {
                 bottomOfScreen + (canvas.getHeight() - textboxHeight) / 2,
                 textboxWidth, textboxHeight);
         float drawY = bottomOfScreen + canvas.getHeight() * 0.125f;
-        canvas.drawTextCentered("YOU DIED!", titleFont, drawY);
-        BitmapFont font;
-        drawY -= canvas.getHeight() * 0.08f;
-
-        for (int i = 0; i < menuOptions.length; i++) {
-            font = currSelection == i ? fontSelected : fontNormal;
-            canvas.drawTextCentered(menuOptions[i], font, drawY);
-            drawY -= canvas.getHeight() * 0.055;
-        }
+//        System.out.println(slides[0]);
+//        System.out.println(slides[1]);
+        canvas.draw(slides[curScreen], Color.WHITE, (canvas.getWidth() - textboxWidth) / 2,
+                bottomOfScreen + (canvas.getHeight() - textboxHeight) / 2,
+                textboxWidth, textboxHeight);
+//        for (int i = 0; i < menuOptions.length; i++) {
+//            font = currSelection == i ? fontSelected : fontNormal;
+//            canvas.drawTextCentered(menuOptions[i], font, drawY);
+//            drawY -= canvas.getHeight() * 0.055;
+//        }
         canvas.end();
     }
 
@@ -122,3 +142,5 @@ public class DeadMode extends ModeController {
     }
 
 }
+
+

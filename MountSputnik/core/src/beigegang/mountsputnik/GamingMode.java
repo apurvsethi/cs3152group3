@@ -187,10 +187,12 @@ public class GamingMode extends ModeController {
     protected PauseMode pauseMode;
     protected VictoryMode victoryMode;
     protected DeadMode deadMode;
+    protected InstructionMode instructionMode;
 
     protected boolean isPaused = false;
     protected boolean isDead = false;
     protected boolean isVictorious = false;
+    protected boolean isInstructing = false;
     // ************************************START CONTENT LOADING*********************************************** //
     protected BitmapFont kremlinS;
     protected BitmapFont mastodonS;
@@ -217,6 +219,7 @@ public class GamingMode extends ModeController {
         pauseMode.preLoadContent(manager);
         deadMode.preLoadContent(manager);
         victoryMode.preLoadContent(manager);
+        instructionMode.preLoadContent(manager);
 
         for (String name : LEVEL_NAMES) {
             loadAddTexture("assets/"+name+"/Background.png");
@@ -284,7 +287,8 @@ public class GamingMode extends ModeController {
         pauseMode.loadContent(manager);
         deadMode.loadContent(manager);
         victoryMode.loadContent(manager);
-        
+        instructionMode.loadContent(manager);
+
         background = createTexture(manager, "assets/"+levelName+"/Background.png", false);
         midground = createTexture(manager, "assets/"+levelName+"/Midground.png", false);
         foreground = createTexture(manager, "assets/"+levelName+"/Foreground.png", false); 
@@ -459,6 +463,7 @@ public class GamingMode extends ModeController {
         pauseMode = new PauseMode();
         victoryMode = new VictoryMode();
         deadMode = new DeadMode();
+        instructionMode = new InstructionMode();
         //create debug font
         font.setColor(Color.RED);
         font.getData().setScale(5);
@@ -512,6 +517,7 @@ public class GamingMode extends ModeController {
         isPaused = false;
         isDead = false;
         isVictorious = false;
+        isInstructing = false;
         assetState = AssetState.LOADING;
         loadContent(assetManager);
         if (id == RACE_MODE){
@@ -861,15 +867,19 @@ public class GamingMode extends ModeController {
             input = InputController.getInstance(CONTROLLER_2);
 
         }
-        doingAnimation = input.watchAnimation() && currLevel == LEVEL_TUTORIAL && id == GAME_MODE;
-        if (doingAnimation) {
-            getAnimationInformation();
-            inx = animationLX;
-            iny = animationLY;
-            rinx = animationRX;
-            riny = animationRY;
-            nextToPress = animationNextToPress;
-            justReleased = animationJustReleased;
+        if (currLevel == LEVEL_TUTORIAL && input.didX()){
+            listener.exitScreen(this, EXIT_INSTRUCTIONS);
+
+        }
+//        doingAnimation = input.watchAnimation() && currLevel == LEVEL_TUTORIAL && id == GAME_MODE;
+        if (doingAnimation && false) {
+//            getAnimationInformation();
+//            inx = animationLX;
+//            iny = animationLY;
+//            rinx = animationRX;
+//            riny = animationRY;
+//            nextToPress = animationNextToPress;
+//            justReleased = animationJustReleased;
         } else {
             inx = input.getHorizontalL();
             iny = input.getVerticalL();
@@ -1538,6 +1548,7 @@ public class GamingMode extends ModeController {
         if (isPaused) pauseMode.draw(canvas);
         else if (isDead) deadMode.draw(canvas);
         else if (isVictorious) victoryMode.draw(canvas);
+        else if (isInstructing) instructionMode.draw(canvas);
     }
 
     public void setLevel(int level){
@@ -1580,6 +1591,8 @@ public class GamingMode extends ModeController {
 				}
 				else if(isPaused)
 					pauseMode.update(delta,  listener,id==RACE_MODE);
+                else if (isInstructing)
+                    instructionMode.update(delta,listener);
 				else{
 					this.update(delta);
 					postUpdate(delta);
@@ -1619,13 +1632,19 @@ public class GamingMode extends ModeController {
     public void resume() {
         // Shouldn't need to do anything to resume for now, can change focus of screen
         isPaused = false;
+        isInstructing = false;
     }
 
     public void dead(){
         deadMode.reset();
         isDead = true;
     }
-
+    public void instruct(){
+        if (currLevel == LEVEL_TUTORIAL && id == GAME_MODE){
+            instructionMode.reset();
+            isInstructing = true;
+        }
+    }
     public void victorious(){
 
         victoryMode.reset();

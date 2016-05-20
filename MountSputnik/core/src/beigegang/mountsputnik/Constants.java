@@ -33,7 +33,7 @@ public final class Constants {
 	public static final int EXIT_GAME_NEXT_RACE_LEVEL = 15;
 	public static final int EXIT_RACE_PAUSE = 16;
 	public static final int EXIT_GAME_RESUME_RACE_LEVEL = 17;
-
+	public static final int EXIT_INSTRUCTIONS = 18;
 	/**Level codes*/
 	public static final int NUM_LEVELS = 7;
 	public static final int LEVEL_TUTORIAL = 0;
