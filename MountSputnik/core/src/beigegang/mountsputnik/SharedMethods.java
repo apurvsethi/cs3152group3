@@ -66,7 +66,8 @@ public class SharedMethods {
     }
 
     public static void drawProgress(GameCanvas canvas, TextureRegion progress ,int progressLevel, float xStart,float yStart) {
-    	int a = canvas.getHeight()/4;
+    	progressLevel = Math.max(progressLevel,0);
+        int a = canvas.getHeight()/4;
     	int yOffset = a - a*progressLevel/20;
         canvas.draw(progress, Color.WHITE, 0, yOffset, canvas.getWidth()/5, canvas.getHeight()*progressLevel/20);
     }
