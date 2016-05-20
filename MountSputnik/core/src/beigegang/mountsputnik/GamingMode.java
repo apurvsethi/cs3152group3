@@ -869,6 +869,7 @@ public class GamingMode extends ModeController {
             if(currLevel == LEVEL_TUTORIAL && id == GAME_MODE&& currentStep < 27){
             	input.filterInput(currentTutorialStep.getInt("e")); 
             }
+
         }
         else {
             character = character2;
@@ -876,7 +877,7 @@ public class GamingMode extends ModeController {
             input = InputController.getInstance(CONTROLLER_2);
 
         }
-        if (input.didX()){
+        if (input.didX() || (id == GAME_MODE && currLevel == LEVEL_TUTORIAL && timestep == 0)){
             listener.exitScreen(this, EXIT_INSTRUCTIONS);
 
         }
@@ -936,6 +937,7 @@ public class GamingMode extends ModeController {
         //bounding velocities
         boundBodyVelocities(character);
         if (controller == CONTROLLER_1) {
+
             if (timestep == 0) {
                 glowingHandholds = glowHandholds(character);
                 glowingHandholds1 = glowingHandholds;
