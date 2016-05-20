@@ -77,7 +77,6 @@ public class GamingMode extends ModeController {
     protected static final String LAVA_CONT_FILE = "assets/volcano/LavaCont.png";
     protected static final String WATERFALL_TINT_FILE = "assets/waterfall/Misty Tint.png";
     protected static final String UI_FILE = "assets/HUD4Background.png";
-    protected static final String LOGO_FILE = "Menu/StartMenu/Logo Only.png";
     protected static final String GLOW_FILE = "assets/glow2.png";
 //    protected static final String SNAP_FILE = "assets/snap.png";
 //    protected static final String CRUMBLY_FILE = "assets/crumbly.png";
@@ -138,7 +137,6 @@ public class GamingMode extends ModeController {
     protected static TextureRegion tile;
     protected static TextureRegion UI;
     protected static TextureRegion CANYON;
-    protected static TextureRegion LOGO;
     protected static BitmapFont mastodon;
     protected static BitmapFont kremlin;
     protected static TextureRegion RUSSIAN_FLAG;
@@ -262,7 +260,6 @@ public class GamingMode extends ModeController {
     
         loadAddTexture(UI_FILE);
         loadAddTexture(GAUGES_FILE);
-        loadAddTexture(LOGO_FILE);
         loadAddTexture(LAVA_FILE);
         loadAddTexture(LAVA_GLOW_FILE);
         loadAddTexture(LAVA_CONT_FILE);
@@ -302,7 +299,6 @@ public class GamingMode extends ModeController {
         foreground = createTexture(manager, "assets/"+levelName+"/Foreground.png", false); 
         tile = createTexture(manager, "assets/"+levelName+"/Surface.png", false);
         UI = createTexture(manager, UI_FILE, false);
-        LOGO = createTexture(manager, LOGO_FILE, false);
         edge = createTexture(manager, "assets/"+levelName+"/SurfaceEdge.png", false);
         ground = createTexture(manager, "assets/"+levelName+"/LevelStart.png", false);
         lavaTexture = createTexture(manager, LAVA_FILE, false);
