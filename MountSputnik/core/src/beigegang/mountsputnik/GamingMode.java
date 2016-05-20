@@ -170,6 +170,7 @@ public class GamingMode extends ModeController {
     protected static TextureRegion progressBarTexture;
     protected Texture UITexture = new Texture(UI_FILE);
     protected static int progressLevel = 0;
+    protected static int progressLevel2 = 0;
     /** The reader to process JSON files */
     protected JsonReader jsonReader;
     /** The JSON defining the level model */
@@ -196,6 +197,7 @@ public class GamingMode extends ModeController {
     // ************************************START CONTENT LOADING*********************************************** //
     protected BitmapFont kremlinS;
     protected BitmapFont mastodonS;
+    protected BitmapFont mastodonB; 
 
     /**
      * Preloads the assets for this controller.
@@ -249,6 +251,8 @@ public class GamingMode extends ModeController {
 		loadAddFont("Game" + KREMLIN_FILE, k);
 		FreetypeFontLoader.FreeTypeFontLoaderParameter m = makeFont(MASTODON_FILE, 55, Color.ORANGE);
 		loadAddFont("Game" + MASTODON_FILE, m);
+		FreetypeFontLoader.FreeTypeFontLoaderParameter mb = makeFont(MASTODON_FILE, 35, Color.BLACK); 
+		loadAddFont("GameBlack" + MASTODON_FILE, mb); 
 		FreetypeFontLoader.FreeTypeFontLoaderParameter ks = makeFont(KREMLIN_FILE, 40, Color.ORANGE);
 		loadAddFont("GameSmall" + KREMLIN_FILE, ks);
 		FreetypeFontLoader.FreeTypeFontLoaderParameter ms = makeFont(MASTODON_FILE, 40, Color.ORANGE);
@@ -308,6 +312,7 @@ public class GamingMode extends ModeController {
         fallingObstacle = createFilmStrip(manager, "assets/"+levelName+"/Rockbust_Animation.png", 1, 5, 5);
         kremlin = manager.get("Game" + KREMLIN_FILE, BitmapFont.class);
         mastodon = manager.get("Game" + MASTODON_FILE, BitmapFont.class);
+        mastodonB = manager.get("GameBlack" + MASTODON_FILE, BitmapFont.class); 
         kremlinS = manager.get("GameSmall" + KREMLIN_FILE, BitmapFont.class);
         mastodonS = manager.get("GameSmall" + MASTODON_FILE, BitmapFont.class);
         
@@ -636,7 +641,7 @@ public class GamingMode extends ModeController {
             movementController2 = new MovementController(character2, scale);
         canvas.setCameraPosition(canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
         if(currLevel == LEVEL_TUTORIAL && id == GAME_MODE){
-	        //To make tutorial: currentStep = 0; 
+	        currentStep = 0; 
 	        jsonReader = new JsonReader();
 	        tutorialGuide = jsonReader.parse(Gdx.files.internal("Levels/tutorial/tutorialGuide.json"));
 	        currentTutorialStep = tutorialGuide.get(currentStep); 
@@ -859,7 +864,7 @@ public class GamingMode extends ModeController {
             movementController = movementController1;
             input = InputController.getInstance(CONTROLLER_1);
             //tutorialGuide
-            if(currLevel == LEVEL_TUTORIAL){
+            if(currLevel == LEVEL_TUTORIAL && id == GAME_MODE&& currentStep < 27){
             	input.filterInput(currentTutorialStep.getInt("e")); 
             }
         }
@@ -967,7 +972,7 @@ public class GamingMode extends ModeController {
             //            snapLimbsToHandholds(glowingHandholds,character,justReleased);
             snapLimbsToHandholds(glowingHandholds5, character, justReleased);
         }
-        if( id == GAME_MODE && currLevel == LEVEL_TUTORIAL)
+        if( id == GAME_MODE && currLevel == LEVEL_TUTORIAL && currentStep<27)
         	advanceTutorial(); 
         
         cameraWork();
@@ -1473,7 +1478,7 @@ public class GamingMode extends ModeController {
         //tutorialGuide
 //        System.out.println(tutorialGuide);
 
-        if(id == GAME_MODE && currLevel == LEVEL_TUTORIAL)
+        if(id == GAME_MODE && currLevel == LEVEL_TUTORIAL && currentStep < 27)
         	canvas.draw(tutorialCircle, Color.WHITE, currentTutorialStep.getFloat("x") * scale.x - 25, currentTutorialStep.getFloat("y") * scale.y - 25, 50,50);
         
         for (GameObject obj : objects) obj.draw(canvas);
@@ -1493,13 +1498,13 @@ public class GamingMode extends ModeController {
         }
         
         //tutorialGuide
-        if (id == GAME_MODE && currLevel == LEVEL_TUTORIAL){
+        if (id == GAME_MODE && currLevel == LEVEL_TUTORIAL && currentStep < 27){
 	        Vector2 characterPos = character1.parts.get(currentTutorialStep.getInt("e")).getPosition(); 
 	        canvas.draw(tutorialRing, Color.WHITE, characterPos.x*scale.x - 25, characterPos.y * scale.y - 25,50,50);
 	        try{
-	        	canvas.drawText(currentTutorialStep.getString("t"), mastodon, currentTutorialStep.getFloat("x"), currentTutorialStep.getFloat("y") ); 
-	        }catch(Exception e){//System.out.println(e);
-            }
+
+	        	canvas.drawText(currentTutorialStep.getString("t"), mastodonB, currentTutorialStep.getFloat("x")*scale.x + 20, currentTutorialStep.getFloat("y")*scale.y );
+	        }catch(Exception e){}
         }
         
         if (warningController != null) warningController.draw(canvas);
@@ -1553,8 +1558,8 @@ public class GamingMode extends ModeController {
             vector = character2.parts.get(HEAD).getPosition();
             a = (vector.y - cposYAtTime0) / (maxHandhold - cposYAtTime0);
             if (timestep % 60 == 0 && character2.getEnergy() != 0)
-                progressLevel = (int)(a*20);
-            SharedMethods.drawProgress(canvas, progress, progressLevel, canvas.getWidth()*4/5, 0);
+                progressLevel2 = (int)(a*20);
+            SharedMethods.drawProgress(canvas, progress, progressLevel2, canvas.getWidth()*4/5, 0);
             energyLevel = Math.abs((int) Math.ceil(character2.getEnergy() / 10f));
             flashing2 = SharedMethods.drawEnergy(canvas, character2, energyTextures, lowEnergyHalo, energyLevel, canvas.getWidth() * 4 / 5, 0, flashing2);
             canvas.draw(gauges, Color.WHITE, canvas.getWidth()*4/5, 0, canvas.getWidth()*1/5, canvas.getHeight());
