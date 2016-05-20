@@ -85,7 +85,7 @@ public class WarningController {
         float totalTimesteps = handholdModel.getCrumble() * 60;
         if (totalTimesteps <= 0) totalTimesteps = handholdModel.getSlip() * 60;
 
-        if (totalTimesteps > 0) {
+        if (totalTimesteps > 0 && !handholdModel.getGripped()) {
             HandholdWarning handholdWarning = new HandholdWarning(
                     handholdStrip, handholdModel.getPosition(),
                     0.25f, 0.25f, scale, totalTimesteps);

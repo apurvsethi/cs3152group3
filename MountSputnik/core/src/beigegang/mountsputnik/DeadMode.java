@@ -1,12 +1,12 @@
 package beigegang.mountsputnik;
 
+import beigegang.util.ScreenListener;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import static beigegang.mountsputnik.Constants.*;
-import beigegang.util.ScreenListener;
 
 public class DeadMode extends ModeController {
 

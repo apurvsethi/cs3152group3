@@ -69,6 +69,7 @@ public class MenuMode extends ModeController {
 	private int currSelection = 0;
 	private int changeCooldown = 0;
 	private boolean race;
+	private boolean musicPlaying = false;
 
 	public void preLoadContent(AssetManager manager) {
 		assetManager = manager;
@@ -144,6 +145,10 @@ public class MenuMode extends ModeController {
 
 	@Override
 	public void update(float dt) {
+		if (!musicPlaying){
+			SoundController.getMusic(SoundController.MUSIC_SOUND).play();
+			SoundController.getMusic(SoundController.MUSIC_SOUND).setLooping(true);
+		}
 		if (changeCooldown > 0) changeCooldown --;
 
 		InputController input = InputController.getInstance(0);

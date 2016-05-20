@@ -104,7 +104,10 @@ public class LoadingMode extends ModeController {
 	public void update(float dt) {
 		manager.update(budget);
 		progress = manager.getProgress();
-		if (progress >= 1.0f) listener.exitScreen(this, EXIT_MENU);
+		if (progress >= 1.0f)
+		{
+			listener.exitScreen(this, EXIT_MENU);
+		}
 	}
 	
 	@Override

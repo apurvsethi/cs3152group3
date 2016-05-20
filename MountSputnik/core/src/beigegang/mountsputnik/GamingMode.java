@@ -187,10 +187,12 @@ public class GamingMode extends ModeController {
     protected PauseMode pauseMode;
     protected VictoryMode victoryMode;
     protected DeadMode deadMode;
+    protected InstructionMode instructionMode;
 
     protected boolean isPaused = false;
     protected boolean isDead = false;
     protected boolean isVictorious = false;
+    protected boolean isInstructing = false;
     // ************************************START CONTENT LOADING*********************************************** //
     protected BitmapFont kremlinS;
     protected BitmapFont mastodonS;
@@ -217,6 +219,7 @@ public class GamingMode extends ModeController {
         pauseMode.preLoadContent(manager);
         deadMode.preLoadContent(manager);
         victoryMode.preLoadContent(manager);
+        instructionMode.preLoadContent(manager);
 
         for (String name : LEVEL_NAMES) {
             loadAddTexture("assets/"+name+"/Background.png");
@@ -284,7 +287,8 @@ public class GamingMode extends ModeController {
         pauseMode.loadContent(manager);
         deadMode.loadContent(manager);
         victoryMode.loadContent(manager);
-        
+        instructionMode.loadContent(manager);
+
         background = createTexture(manager, "assets/"+levelName+"/Background.png", false);
         midground = createTexture(manager, "assets/"+levelName+"/Midground.png", false);
         foreground = createTexture(manager, "assets/"+levelName+"/Foreground.png", false); 
@@ -365,8 +369,8 @@ public class GamingMode extends ModeController {
         listener.exitScreen(this, EXIT_GAME_NEXT_RACE_LEVEL);
     }
 
-    protected PositionMovementController movementController1;
-    protected PositionMovementController movementController2;
+    protected MovementController movementController1;
+    protected MovementController movementController2;
 
     protected WarningController warningController;
 
@@ -459,6 +463,8 @@ public class GamingMode extends ModeController {
         pauseMode = new PauseMode();
         victoryMode = new VictoryMode();
         deadMode = new DeadMode();
+        instructionMode = new InstructionMode();
+        vector = new Vector2();
         //create debug font
         font.setColor(Color.RED);
         font.getData().setScale(5);
@@ -512,6 +518,7 @@ public class GamingMode extends ModeController {
         isPaused = false;
         isDead = false;
         isVictorious = false;
+        isInstructing = false;
         assetState = AssetState.LOADING;
         loadContent(assetManager);
         if (id == RACE_MODE){
@@ -624,9 +631,9 @@ public class GamingMode extends ModeController {
         addCharacterToGame(character1);
         if (id == RACE_MODE)
             addCharacterToGame(character2);
-        movementController1 = new PositionMovementController(character1, scale);
+        movementController1 = new MovementController(character1, scale);
         if (id == RACE_MODE)
-            movementController2 = new PositionMovementController(character2, scale);
+            movementController2 = new MovementController(character2, scale);
         canvas.setCameraPosition(canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
         if(currLevel == LEVEL_TUTORIAL && id == GAME_MODE){
 	        //To make tutorial: currentStep = 0; 
@@ -846,7 +853,7 @@ public class GamingMode extends ModeController {
 
     public void update(float dt, int controller) {
         CharacterModel character;
-        PositionMovementController movementController;
+        MovementController movementController;
         if (id == GAME_MODE || controller == CONTROLLER_1){
             character = character1;
             movementController = movementController1;
@@ -861,15 +868,19 @@ public class GamingMode extends ModeController {
             input = InputController.getInstance(CONTROLLER_2);
 
         }
-        doingAnimation = input.watchAnimation() && currLevel == LEVEL_TUTORIAL && id == GAME_MODE;
-        if (doingAnimation) {
-            getAnimationInformation();
-            inx = animationLX;
-            iny = animationLY;
-            rinx = animationRX;
-            riny = animationRY;
-            nextToPress = animationNextToPress;
-            justReleased = animationJustReleased;
+        if (currLevel == LEVEL_TUTORIAL && input.didX()){
+            listener.exitScreen(this, EXIT_INSTRUCTIONS);
+
+        }
+//        doingAnimation = input.watchAnimation() && currLevel == LEVEL_TUTORIAL && id == GAME_MODE;
+        if (doingAnimation && false) {
+//            getAnimationInformation();
+//            inx = animationLX;
+//            iny = animationLY;
+//            rinx = animationRX;
+//            riny = animationRY;
+//            nextToPress = animationNextToPress;
+//            justReleased = animationJustReleased;
         } else {
             inx = input.getHorizontalL();
             iny = input.getVerticalL();
@@ -911,13 +922,9 @@ public class GamingMode extends ModeController {
 
         movementController.moveCharacter(inx,iny,rinx,riny,nextToPress,justReleased);
 
-        if (nextToPress.size > 0) {
-            for (int i : nextToPress) {
-                ungrip(((ExtremityModel) (character.parts.get(i))),i);
+        for (int i : nextToPress)
+            ungrip(((ExtremityModel) (character.parts.get(i))),i);
 
-
-            }
-        }
         //bounding velocities
         boundBodyVelocities(character);
         if (controller == CONTROLLER_1) {
@@ -984,7 +991,7 @@ public class GamingMode extends ModeController {
                 }
             }
         }
-        vector = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
+        vector.set(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
         character.updateEnergy(oxygen, 1, vector.len(), gravity.y != 0, gravity.y == 0);
         character.decrementStun();
 
@@ -1133,7 +1140,7 @@ public class GamingMode extends ModeController {
 
 
     /** Grips a handhold by adding a revolute joint between the handhold and the extremity **/
-    public void grip(ExtremityModel e, HandholdModel h){
+    public void grip(ExtremityModel e, HandholdModel h, CharacterModel c){
         if (e.getJoint() == null){
             RevoluteJointDef jointD = new RevoluteJointDef();
             jointD.initialize(e.getBody(), h.getBody(), e.getPosition());
@@ -1144,6 +1151,11 @@ public class GamingMode extends ModeController {
             warningController.addHandholdWarning(h);
         }
         e.grip();
+        if (snappedHandholds.contains(h, true)) {
+            int numbering = snappedHandholds.indexOf(h, true);
+            ExtremityModel other = (ExtremityModel) c.parts.get(EXTREMITIES[numbering]);
+            e.setGripTime(other.getGripTime());
+        }
         //This is code to make a tutorialGuide. Will delete when we have settled on one
 //        positionListWrite += "\"" + currentStep + "\" : {"; 
 //        positionListWrite += "\"x\": " + h.getPosition().x + ","; 
@@ -1163,7 +1175,7 @@ public class GamingMode extends ModeController {
 
         }
         e.ungrip();
-        int ind = 0;
+        int ind;
 
         switch (i) {
             case FOOT_LEFT:
@@ -1274,12 +1286,8 @@ public class GamingMode extends ModeController {
      * @author Jacob
      */
     protected Vector2 boundVelocity(Vector2 vect) {
-        if (Math.abs(vect.x) > 1 || Math.abs(vect.y) > 1) {
-        }
-        vect.x = (vect.x>0) ? Math.min(PART_MAX_X_VELOCITY,vect.x) : Math.max(-1 * PART_MAX_X_VELOCITY,vect.x);
-        vect.y = (vect.y>0) ? Math.min(PART_MAX_Y_VELOCITY,vect.y) : Math.max(-1 * PART_MAX_Y_VELOCITY,vect.y);
-
-
+        vect.x = Math.min(PART_MAX_X_VELOCITY, Math.max(-PART_MAX_X_VELOCITY,vect.x));
+        vect.y = Math.min(PART_MAX_Y_VELOCITY, Math.max(-PART_MAX_Y_VELOCITY,vect.y));
         return vect;
     }
 
@@ -1357,7 +1365,7 @@ public class GamingMode extends ModeController {
             ((ExtremityModel) c.parts.get(limb)).grip();
             c.parts.get(limb).setPosition(closest.snapPoints.first(), c.parts.get(limb).getAngle());
 
-            grip(((ExtremityModel) c.parts.get(limb)), closest);
+            grip(((ExtremityModel) c.parts.get(limb)), closest, c);
             closest.snap();
             switch(limb){
                 case FOOT_LEFT: snappedHandholds.set(0,closest); break;
@@ -1371,8 +1379,8 @@ public class GamingMode extends ModeController {
     }
 
     protected double distanceFrom(int limb, Vector2 snapPoint, CharacterModel c) {
-        vector = new Vector2 (c.parts.get(limb).getPosition().sub(snapPoint));
-        return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+        vector.set(c.parts.get(limb).getPosition().sub(snapPoint));
+        return vector.len();
     }
 
     public PooledList<GameObject> getGameObjects(){
@@ -1388,11 +1396,13 @@ public class GamingMode extends ModeController {
     protected void advanceTutorial(){
     	ExtremityModel e = (ExtremityModel) character1.parts.get(currentTutorialStep.getInt("e")); 
     	float x = currentTutorialStep.getFloat("x"); 
-    	float y = currentTutorialStep.getFloat("y"); 
-    	Vector2 h = new Vector2(x,y); 
-    	if(e.isGripped() && ((HandholdModel) e.getJoint().getBodyB().getFixtureList().get(0).getUserData()).getPosition().equals(h)){
-            currentStep++; 
-            currentTutorialStep = tutorialGuide.get(currentStep); 
+    	float y = currentTutorialStep.getFloat("y");
+    	if(e.isGripped()){
+            HandholdModel handholdModel = (HandholdModel) e.getJoint().getBodyB().getFixtureList().get(0).getUserData();
+            if (handholdModel.getX() == x && handholdModel.getY() == y) {
+                currentStep++;
+                currentTutorialStep = tutorialGuide.get(currentStep);
+            }
         }
     }
 
@@ -1471,7 +1481,7 @@ public class GamingMode extends ModeController {
 
         if (warningController != null) warningController.draw(canvas);
         canvas.end();
-        
+
         drawHUD();
 
         if (debug) {
@@ -1485,6 +1495,7 @@ public class GamingMode extends ModeController {
         if (isPaused) pauseMode.draw(canvas);
         else if (isDead) deadMode.draw(canvas);
         else if (isVictorious) victoryMode.draw(canvas);
+        else if (isInstructing) instructionMode.draw(canvas);
     }
 
     private void drawHUD() {
@@ -1571,6 +1582,8 @@ public class GamingMode extends ModeController {
 				}
 				else if(isPaused)
 					pauseMode.update(delta,  listener,id==RACE_MODE);
+                else if (isInstructing)
+                    instructionMode.update(delta,listener);
 				else{
 					this.update(delta);
 					postUpdate(delta);
@@ -1610,13 +1623,19 @@ public class GamingMode extends ModeController {
     public void resume() {
         // Shouldn't need to do anything to resume for now, can change focus of screen
         isPaused = false;
+        isInstructing = false;
     }
 
     public void dead(){
         deadMode.reset();
         isDead = true;
     }
-
+    public void instruct(){
+        if (currLevel == LEVEL_TUTORIAL && id == GAME_MODE){
+            instructionMode.reset();
+            isInstructing = true;
+        }
+    }
     public void victorious(){
 
         victoryMode.reset();
