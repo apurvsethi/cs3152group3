@@ -19,11 +19,12 @@ public class SharedMethods {
             h = canvas.getHeight();
         float tileY = y - (y % (canvas.getWidth() / 4));
         canvas.draw(background, Color.WHITE, 0, y, canvas.getWidth(), canvas.getHeight());
-        if (levelName == LEVEL_WATERFALL) {
-            Color c = Color.WHITE;
-            c.a = .75f;
-            canvas.draw(GamingMode.waterfallTintTexture, c, 0, y, canvas.getWidth(), canvas.getHeight());
-        }
+        //leave commented. this draws the misty overlay for waterfall that we didn't like.
+//        if (levelName == LEVEL_WATERFALL) {
+//            Color c = Color.WHITE;
+//            c.a = .75f;
+//            canvas.draw(GamingMode.waterfallTintTexture, c, 0, y, canvas.getWidth(), canvas.getHeight());
+//        }
         if (levelName == LEVEL_SPACE){
             canvas.draw(midground, Color.WHITE, 0, y * MIDGROUND_SCROLL, canvas.getWidth(), h);
 

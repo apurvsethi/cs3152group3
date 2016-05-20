@@ -24,7 +24,7 @@ public class InstructionMode extends ModeController {
 
     private static final String OVERLAY_FILE = "Menu/Overlay.jpg";
     private static final String TEXTBOX_FILE = "Menu/Text Box.png";
-    private static int maxScreen = 4;
+    private static int maxScreen = 5;
     private static int curScreen = 0;
     private static final String[] SLIDE_FILES= new String[maxScreen];
 
@@ -98,8 +98,8 @@ public class InstructionMode extends ModeController {
 
         if (changeCooldown == 0 && Math.abs(input.getHorizontalL()) > 0.5) {
             SoundController.get(SoundController.SCROLL_SOUND).play();
-
-            curScreen = Math.abs((curScreen + (int) Math.signum(input.getHorizontalL())))%maxScreen;
+            int i = (curScreen + (int) Math.signum(input.getHorizontalL()));
+            curScreen = i>=0?i%maxScreen:maxScreen-1;
             changeCooldown = MENU_CHANGE_COOLDOWN;
         }
 //        currSelection = (currSelection + (input.getVerticalL() > 0.5 ? -1 : 1) + menuOptions.length) % menuOptions.length;
