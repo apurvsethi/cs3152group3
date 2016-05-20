@@ -9,9 +9,9 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 
-import static beigegang.mountsputnik.Constants.*;
+import java.io.FileWriter;
 
-import java.io.FileWriter; 
+import static beigegang.mountsputnik.Constants.*;
 
 public class MenuMode extends ModeController {
 
@@ -302,12 +302,15 @@ public class MenuMode extends ModeController {
 		float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
 		float tileY = y - (y % (canvas.getWidth() / 4));
 		canvas.draw(background, Color.WHITE, 0, y, canvas.getWidth(), canvas.getHeight());
-
-		canvas.draw(midground, Color.WHITE, canvas.getWidth() * 4 / 5, y, canvas.getWidth() / 5, canvas.getHeight());
-		midground.flip(true,false);
-		canvas.draw(midground, Color.WHITE, 0, y, canvas.getWidth() / 5, canvas.getHeight());
-		midground.flip(true,false);
-
+//		//AKA SPACE
+		if (currSelection == 3){
+			canvas.draw(midground, Color.WHITE, 0, y, canvas.getWidth(), canvas.getHeight());
+		}else {
+			canvas.draw(midground, Color.WHITE, canvas.getWidth() * 4 / 5, y, canvas.getWidth() / 5, canvas.getHeight());
+			midground.flip(true, false);
+			canvas.draw(midground, Color.WHITE, 0, y, canvas.getWidth() / 5, canvas.getHeight());
+			midground.flip(true, false);
+		}
 		canvas.draw(foreground, Color.WHITE, canvas.getWidth() * 4 / 5, y - canvas.getHeight() * 0.9f, canvas.getWidth() / 5, foreground.getTexture().getHeight());
 		foreground.flip(true,false);
 		canvas.draw(foreground, Color.WHITE, 0, y - canvas.getHeight() * 0.45f, canvas.getWidth() / 5, foreground.getTexture().getHeight());
