@@ -44,8 +44,9 @@ public class InputController {
 	/** Whether the back button was pressed (menus). */
 	private boolean backPressed;
 	private boolean backPrevious;
-	/** if animation help wanted */
-	public boolean animationPressed;
+	/** if instruction help wanted */
+	private boolean instructionsPressed;
+	private boolean instructionsPrevious;
 
 	/** Whether the left arm action button was pressed. */
 	private boolean leftArmPressed;
@@ -252,9 +253,7 @@ public class InputController {
 		return menuPressed && !menuPrevious;
 	}
 	
-	public boolean watchAnimation(){
-		return animationPressed;
-	}
+
 	/**
 	 * Returns true if the player wants to select menu item.
 	 *
@@ -262,6 +261,14 @@ public class InputController {
 	 */
 	public boolean didSelect() {
 		return selectPressed && !selectPrevious;
+	}
+	/**
+	 * Returns true if the player wants to get instructions.
+	 *
+	 * @return true if the player wants to get instructions.
+	 */
+	public boolean didX() {
+		return instructionsPressed && !instructionsPrevious;
 	}
 
 	/**
@@ -348,6 +355,7 @@ public class InputController {
 		menuPrevious = menuPressed;
 		debugPrevious = debugPressed;
 		selectPrevious = selectPressed;
+		instructionsPrevious = instructionsPressed;
 		backPrevious = backPressed;
 		leftArmPrevious = leftArmPressed;
 		rightArmPrevious = rightArmPressed;
@@ -383,7 +391,7 @@ public class InputController {
 		debugPressed  = xbox.getBack();
 		selectPressed = xbox.getA();
 		backPressed = xbox.getB();
-		animationPressed = xbox.getY();
+		instructionsPressed = xbox.getX();
 
 		leftArmPressed = triggerScheme ? xbox.getLeftTrigger() > 0.5 : xbox.getLB();
 		rightArmPressed = triggerScheme ?
@@ -413,6 +421,8 @@ public class InputController {
 		menuPressed = (secondary && menuPressed) || (Gdx.input.isKeyPressed(Input.Keys.R));
 		debugPressed = (secondary && debugPressed) || (Gdx.input.isKeyPressed(Input.Keys.D));
 		selectPressed  = (secondary && selectPressed) || (Gdx.input.isKeyPressed(Input.Keys.ENTER));
+		instructionsPressed  = (secondary && instructionsPressed) || (Gdx.input.isKeyPressed(Input.Keys.X));
+
 		backPressed = (secondary && backPressed) || (Gdx.input.isKeyPressed(Input.Keys.B));
 
 		leftArmPressed = (secondary && leftArmPressed) || (Gdx.input.isKeyPressed(Input.Keys.Q));
@@ -420,7 +430,6 @@ public class InputController {
 		leftLegPressed = (secondary && leftLegPressed) || (Gdx.input.isKeyPressed(Input.Keys.A));
 		rightLegPressed = (secondary && rightLegPressed) || (Gdx.input.isKeyPressed(Input.Keys.S));
 
-		animationPressed = (secondary && animationPressed)||(Gdx.input.isKeyPressed(Input.Keys.Y));
 
 		horizontalL = (secondary ? horizontalL : 0.0f);
 		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))

@@ -180,7 +180,10 @@ public class GameEngine extends Game implements ScreenListener {
 			RaceMode race = (RaceMode) controllers[RACE_SCREEN];
 			race.pause();
 		}
-
+		else if (exitCode == EXIT_INSTRUCTIONS) {
+			GameMode game = (GameMode) controllers[GAME_SCREEN];
+			game.instruct();
+		}
 	}
 
 	public void exitLevelSelect(Screen screen, int level, boolean race) {

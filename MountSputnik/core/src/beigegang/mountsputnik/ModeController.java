@@ -14,13 +14,9 @@
  */
 package beigegang.mountsputnik;
 
-import java.util.Iterator;
-
 import beigegang.util.FilmStrip;
 import beigegang.util.PooledList;
 import beigegang.util.ScreenListener;
-import static beigegang.mountsputnik.Constants.*;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
@@ -33,6 +29,10 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
+
+import java.util.Iterator;
+
+import static beigegang.mountsputnik.Constants.*;
 
 /**
  * Interface for the root class of a player mode.
