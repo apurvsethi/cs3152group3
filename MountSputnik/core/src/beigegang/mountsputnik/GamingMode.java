@@ -1401,11 +1401,14 @@ public class GamingMode extends ModeController {
     	ExtremityModel e = (ExtremityModel) character1.parts.get(currentTutorialStep.getInt("e")); 
     	float x = currentTutorialStep.getFloat("x"); 
     	float y = currentTutorialStep.getFloat("y");
+//        for (HandholdModel h : snappedHandholds){
+//            if (h!=null && (currentTutorialStep.getInt("e")) == FOOT_RIGHT) System.out.println(h.getPosition());
+//        }
     	if(e.isGripped()){
             HandholdModel handholdModel = (HandholdModel) e.getJoint().getBodyB().getFixtureList().get(0).getUserData();
             if (handholdModel.getX() == x && handholdModel.getY() == y) {
+                System.out.println(currentStep);
                 currentStep++;
-                //System.out.println(currentStep); 
                 currentTutorialStep = tutorialGuide.get(currentStep);
             }
         }
@@ -1468,6 +1471,8 @@ public class GamingMode extends ModeController {
         }
         
         //tutorialGuide
+//        System.out.println(tutorialGuide);
+
         if(id == GAME_MODE && currLevel == LEVEL_TUTORIAL)
         	canvas.draw(tutorialCircle, Color.WHITE, currentTutorialStep.getFloat("x") * scale.x - 25, currentTutorialStep.getFloat("y") * scale.y - 25, 50,50);
         
@@ -1493,7 +1498,8 @@ public class GamingMode extends ModeController {
 	        canvas.draw(tutorialRing, Color.WHITE, characterPos.x*scale.x - 25, characterPos.y * scale.y - 25,50,50);
 	        try{
 	        	canvas.drawText(currentTutorialStep.getString("t"), mastodon, currentTutorialStep.getFloat("x"), currentTutorialStep.getFloat("y") ); 
-	        }catch(Exception e){System.out.println(e); }
+	        }catch(Exception e){//System.out.println(e);
+            }
         }
         
         if (warningController != null) warningController.draw(canvas);
