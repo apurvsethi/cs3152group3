@@ -62,8 +62,8 @@ public class MenuMode extends ModeController {
 	private static int exitCodes[] = {EXIT_LEVEL_SELECT, EXIT_RACE_LEVEL_SELECT, EXIT_SETTINGS, EXIT_QUIT};
 	private static String[][] levelSelectOptions = {{"1. Tutorial", "2. Canyon"}, {"3. Waterfall", "4. Volcano"}, {"5. Snowy Mountain", "6. Sky"}, {"7. Space", "Menu"}};
 	private static int levelSelectCodes[] = {LEVEL_TUTORIAL, LEVEL_WATERFALL, LEVEL_SNOWY_MOUNTAIN, LEVEL_SPACE, LEVEL_CANYON, LEVEL_VOLCANO, LEVEL_SKY};
-	private static String[] settingsOptions = {"Trigger Scheme", "Stick Scheme", "Menu"};
-	private static String[] currentSchemes = {"Classic", "Classic"};
+	private static String[] settingsOptions = {"Trigger Scheme", "Stick Scheme", "Grip Sounds", "Menu"};
+	private static String[] currentSchemes = {"Classic", "Classic", "On"};
 	private static int backCode = EXIT_MENU;
 
 
@@ -212,6 +212,11 @@ public class MenuMode extends ModeController {
 				currentSchemes[1] = input.getStickScheme() ? "Swapped" : "Classic";
 				SoundController.get(SoundController.SELECT_SOUND).play();
 			}
+			else if (currSelection == 2){
+				GRIP_SOUNDS_ON = !GRIP_SOUNDS_ON;
+				currentSchemes[2] = GRIP_SOUNDS_ON? "On" : "Off";
+				SoundController.get(SoundController.SELECT_SOUND).play();
+			}
 			else {
 				SoundController.get(SoundController.DECLINE_SOUND).play();
 				listener.exitScreen(this, backCode);
@@ -269,12 +274,12 @@ public class MenuMode extends ModeController {
 		}
 		else if (currView == SETTINGS) {
 			canvas.draw(textbox, Color.WHITE, canvas.getWidth() * 0.2f, bottomOfScreen + canvas.getHeight() * 0.07f,
-					canvas.getWidth() * 0.6f, canvas.getHeight() * 0.32f);
+					canvas.getWidth() * 0.6f, canvas.getHeight() * 0.39f);
 
 			float drawXName = -canvas.getWidth() * 0.12f;
 			float drawXScheme = canvas.getWidth() * 0.15f;
 			BitmapFont font = currSelection == 0 ? fontSelected : fontNormal;
-			drawY -= canvas.getHeight() * 0.211f;
+			drawY -= canvas.getHeight() * 0.16f;
 
 			for (int i = 0; i < currentSchemes.length; i++) {
 				canvas.drawTextCentered(settingsOptions[i], font, drawXName, drawY);
