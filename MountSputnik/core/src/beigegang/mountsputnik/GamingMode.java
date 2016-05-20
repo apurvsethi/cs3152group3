@@ -643,7 +643,7 @@ public class GamingMode extends ModeController {
         if(currLevel == LEVEL_TUTORIAL && id == GAME_MODE){
 	        //To make tutorial: currentStep = 0; 
 	        jsonReader = new JsonReader();
-	        tutorialGuide = jsonReader.parse(Gdx.files.internal("Levels/tutorial/tutorialGuide.json"));
+	        tutorialGuide = jsonReader.parse(Gdx.files.internal("Levels/tutorial/tutorialGuide2.json"));
 	        currentTutorialStep = tutorialGuide.get(currentStep); 
         }
         
@@ -863,6 +863,7 @@ public class GamingMode extends ModeController {
             character = character1;
             movementController = movementController1;
             input = InputController.getInstance(CONTROLLER_1);
+            //tutorialGuide
             if(currLevel == LEVEL_TUTORIAL){
             	input.filterInput(currentTutorialStep.getInt("e")); 
             }
@@ -873,7 +874,7 @@ public class GamingMode extends ModeController {
             input = InputController.getInstance(CONTROLLER_2);
 
         }
-        if (currLevel == LEVEL_TUTORIAL && input.didX()){
+        if (input.didX()){
             listener.exitScreen(this, EXIT_INSTRUCTIONS);
 
         }
@@ -1163,6 +1164,7 @@ public class GamingMode extends ModeController {
             ExtremityModel other = (ExtremityModel) c.parts.get(EXTREMITIES[numbering]);
             e.setGripTime(other.getGripTime());
         }
+        //System.out.println(h.getPosition().toString());
         //This is code to make a tutorialGuide. Will delete when we have settled on one
 //        positionListWrite += "\"" + currentStep + "\" : {"; 
 //        positionListWrite += "\"x\": " + h.getPosition().x + ","; 
@@ -1408,6 +1410,7 @@ public class GamingMode extends ModeController {
             HandholdModel handholdModel = (HandholdModel) e.getJoint().getBodyB().getFixtureList().get(0).getUserData();
             if (handholdModel.getX() == x && handholdModel.getY() == y) {
                 currentStep++;
+                //System.out.println(currentStep); 
                 currentTutorialStep = tutorialGuide.get(currentStep);
             }
         }
@@ -1463,8 +1466,16 @@ public class GamingMode extends ModeController {
                 }
             }
         }
+        for (GameObject obj: objects){
+        	if(obj instanceof HandholdModel){
+        		((HandholdModel) obj).drawGlow(canvas);
+        	}
+        }
+        
+        //tutorialGuide
         if(id == GAME_MODE && currLevel == LEVEL_TUTORIAL)
         	canvas.draw(tutorialCircle, Color.WHITE, currentTutorialStep.getFloat("x") * scale.x - 25, currentTutorialStep.getFloat("y") * scale.y - 25, 50,50);
+        
         for (GameObject obj : objects) obj.draw(canvas);
         if (tutorialToggle1)
             SharedMethods.drawToggles(canvas, character1, input1, tutorialTextures,  scale);
@@ -1481,11 +1492,12 @@ public class GamingMode extends ModeController {
             }
         }
         
+        //tutorialGuide
         if (id == GAME_MODE && currLevel == LEVEL_TUTORIAL){
 	        Vector2 characterPos = character1.parts.get(currentTutorialStep.getInt("e")).getPosition(); 
 	        canvas.draw(tutorialRing, Color.WHITE, characterPos.x*scale.x - 25, characterPos.y * scale.y - 25,50,50);
 	    }
-
+        
         if (warningController != null) warningController.draw(canvas);
         canvas.end();
 
@@ -1638,7 +1650,7 @@ public class GamingMode extends ModeController {
         isDead = true;
     }
     public void instruct(){
-        if (currLevel == LEVEL_TUTORIAL && id == GAME_MODE){
+        if (id == GAME_MODE){
             instructionMode.reset();
             isInstructing = true;
         }
