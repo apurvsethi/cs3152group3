@@ -13,7 +13,7 @@ public class SharedMethods {
     public static void drawBackgrounds(GameCanvas canvas, TextureRegion ground, TextureRegion background, TextureRegion midground, TextureRegion foreground, TextureRegion tile, TextureRegion edge, int levelName){
         float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
         float h; 
-        if (levelName == LEVEL_VOLCANO || levelName == LEVEL_TUTORIAL) 
+        if (levelName == LEVEL_VOLCANO || levelName == LEVEL_TUTORIAL || levelName == LEVEL_WATERFALL) 
         	h = midground.getTexture().getHeight(); 
         	else h = canvas.getHeight(); 
         float tileY = y - (y % (canvas.getWidth() / 4));
