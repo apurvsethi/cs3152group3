@@ -37,9 +37,10 @@ public class MenuMode extends ModeController {
 	private static final String BARE_BACKGROUND_FILE = "Menu/StartMenu/LevelSelect/BareBackground.png";
 	private static final String TEXTBOX_FILE = "Menu/Text Box.png";
 	private static final String LEVEL_LOCKED_FILE = "Menu/StartMenu/LevelSelect/Locked.png";
-	protected static final String LAVA_FILE = "assets/volcano/Lava.png";
-	protected static final String LAVA_GLOW_FILE = "assets/volcano/LavaGlow.png";
-	protected static final String LEVEL_NAMES[] = {"tutorial", "waterfall", "mountain", "space", "canyon", "volcano", "sky"};
+	private static final String LAVA_FILE = "assets/volcano/Lava.png";
+	private static final String LAVA_GLOW_FILE = "assets/volcano/LavaGlow.png";
+	private static final String LEVEL_NAMES[] = {"tutorial", "waterfall", "mountain", "space", "canyon", "volcano", "sky"};
+	private static final int[] SELECTION_TO_LEVEL = {0, 2, 4, 6, 1, 3, 5};
 
 	/**
 	 * Texture asset for files used, parts, etc.
@@ -235,7 +236,7 @@ public class MenuMode extends ModeController {
 			canvas.draw(bareBackground, Color.WHITE, 0, bottomOfScreen, canvas.getWidth(), canvas.getHeight());
 		else drawBackgrounds(levelSelectGrounds[currSelection], levelSelectBackgrounds[currSelection],
 				levelSelectMidgrounds[currSelection], levelSelectForegrounds[currSelection],
-				levelSelectSurfaces[currSelection], levelSelectEdges[currSelection]);
+				levelSelectSurfaces[currSelection], levelSelectEdges[currSelection], SELECTION_TO_LEVEL[currSelection]);
 		canvas.end();
 
 		canvas.begin();
@@ -298,32 +299,43 @@ public class MenuMode extends ModeController {
 		canvas.end();
 	}
 
-	private void drawBackgrounds(TextureRegion ground, TextureRegion background, TextureRegion midground, TextureRegion foreground, TextureRegion tile, TextureRegion edge){
+
+	private void drawBackgrounds(TextureRegion ground, TextureRegion background, TextureRegion midground, TextureRegion foreground, TextureRegion tile, TextureRegion edge, int levelName){
 		float y = canvas.getCamera().position.y - canvas.getHeight() / 2;
+		float h;
+		if (levelName == LEVEL_VOLCANO || levelName == LEVEL_TUTORIAL || levelName == LEVEL_WATERFALL)
+			h = midground.getTexture().getHeight();
+		else
+			h = canvas.getHeight();
 		float tileY = y - (y % (canvas.getWidth() / 4));
 		canvas.draw(background, Color.WHITE, 0, y, canvas.getWidth(), canvas.getHeight());
+		if (levelName == LEVEL_SPACE){
+			canvas.draw(midground, Color.WHITE, 0, y * MIDGROUND_SCROLL, canvas.getWidth(), h);
 
-		canvas.draw(midground, Color.WHITE, canvas.getWidth() * 4 / 5, y, canvas.getWidth() / 5, canvas.getHeight());
-		midground.flip(true,false);
-		canvas.draw(midground, Color.WHITE, 0, y, canvas.getWidth() / 5, canvas.getHeight());
-		midground.flip(true,false);
+		}else{
+			canvas.draw(midground, Color.WHITE, canvas.getWidth() * 4 / 5, y * MIDGROUND_SCROLL, canvas.getWidth() / 5, h);
+			midground.flip(true,false);
+			canvas.draw(midground, Color.WHITE, 0, y * MIDGROUND_SCROLL, canvas.getWidth() / 5, h);
+			midground.flip(true,false);
 
-		canvas.draw(foreground, Color.WHITE, canvas.getWidth() * 4 / 5, y - canvas.getHeight() * 0.9f, canvas.getWidth() / 5, foreground.getTexture().getHeight());
-		foreground.flip(true,false);
-		canvas.draw(foreground, Color.WHITE, 0, y - canvas.getHeight() * 0.45f, canvas.getWidth() / 5, foreground.getTexture().getHeight());
-		foreground.flip(true,false);
+			canvas.draw(foreground, Color.WHITE, canvas.getWidth() * 4 / 5, y - canvas.getHeight() * 0.9f, canvas.getWidth() / 5, foreground.getTexture().getHeight());
+			foreground.flip(true,false);
+			canvas.draw(foreground, Color.WHITE, 0, y - canvas.getHeight() * 0.45f, canvas.getWidth() / 5, foreground.getTexture().getHeight());
+			foreground.flip(true,false);
 
-		for (int counterInt = 0; counterInt < 5; counterInt++) {
-			canvas.draw(tile, Color.WHITE, canvas.getWidth() / 5, tileY, 3*canvas.getWidth() / 10, canvas.getWidth() / 4);
-			canvas.draw(tile, Color.WHITE, (canvas.getWidth()-1) / 2, tileY, 3*canvas.getWidth() / 10, canvas.getWidth() / 4);
-			canvas.draw(edge, Color.WHITE, (canvas.getWidth()-1) * 4 / 5, tileY, canvas.getWidth() / 16, canvas.getHeight());
-			edge.flip(true,false);
-			canvas.draw(edge, Color.WHITE, canvas.getWidth() / 5 - canvas.getWidth() / 16, tileY, canvas.getWidth() / 16, canvas.getHeight());
-			edge.flip(true,false);
+			for (int counterInt = 0; counterInt < 5; counterInt++) {
+				canvas.draw(tile, Color.WHITE, canvas.getWidth() / 5, tileY, 3*canvas.getWidth() / 10, canvas.getWidth() / 4);
+				canvas.draw(tile, Color.WHITE, (canvas.getWidth()-1) / 2, tileY, 3*canvas.getWidth() / 10, canvas.getWidth() / 4);
+				canvas.draw(edge, Color.WHITE, (canvas.getWidth()-2) * 4 / 5, tileY + canvas.getHeight()/8, canvas.getWidth() / 16, canvas.getWidth()/4);
+				edge.flip(true,false);
+				canvas.draw(edge, Color.WHITE, canvas.getWidth() / 5 - canvas.getWidth() / 16, tileY + canvas.getHeight()/8, canvas.getWidth() / 16, canvas.getWidth()/4);
+				edge.flip(true,false);
 
-			tileY += canvas.getWidth() / 4;
+				tileY += canvas.getWidth() / 4;
+			}
 		}
 		canvas.draw(ground, Color.WHITE, canvas.getWidth() / 5, 0, 3*canvas.getWidth() / 5, canvas.getHeight() / 8);
+
 	}
 
 	private void drawLava(float bottomOfScreen) {
