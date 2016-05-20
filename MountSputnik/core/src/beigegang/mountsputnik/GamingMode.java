@@ -1022,8 +1022,10 @@ public class GamingMode extends ModeController {
         	//uncomment to make a tutorialGuide
 //        	positionListWrite += "}"; 
 //        	System.out.println(positionListWrite);
-            if (id == RACE_MODE)
+            if (id == RACE_MODE){
                 listener.exitScreen(this, EXIT_VICTORY_RACE);
+            	victoryMode.setWinner(controller+1);
+            }
             else listener.exitScreen(this, EXIT_VICTORY);
 
         }

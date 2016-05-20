@@ -15,15 +15,19 @@ public class SharedMethods {
         float h; 
         if (levelName == LEVEL_VOLCANO || levelName == LEVEL_TUTORIAL || levelName == LEVEL_WATERFALL) 
         	h = midground.getTexture().getHeight(); 
-        	else h = canvas.getHeight(); 
+        else
+            h = canvas.getHeight();
         float tileY = y - (y % (canvas.getWidth() / 4));
         canvas.draw(background, Color.WHITE, 0, y, canvas.getWidth(), canvas.getHeight());
+        if (levelName == LEVEL_SPACE){
+            canvas.draw(midground, Color.WHITE, 0, y * MIDGROUND_SCROLL, canvas.getWidth(), h);
 
-        canvas.draw(midground, Color.WHITE, canvas.getWidth() * 4 / 5, y * MIDGROUND_SCROLL, canvas.getWidth() / 5, h);
-        midground.flip(true,false);
-        canvas.draw(midground, Color.WHITE, 0, y * MIDGROUND_SCROLL, canvas.getWidth() / 5, h);
-        midground.flip(true,false);
-        
+        }else{
+            canvas.draw(midground, Color.WHITE, canvas.getWidth() * 4 / 5, y * MIDGROUND_SCROLL, canvas.getWidth() / 5, h);
+            midground.flip(true,false);
+            canvas.draw(midground, Color.WHITE, 0, y * MIDGROUND_SCROLL, canvas.getWidth() / 5, h);
+            midground.flip(true,false);
+
         canvas.draw(foreground, Color.WHITE, canvas.getWidth() * 4 / 5, y * FOREGROUND_SCROLL, canvas.getWidth() / 5, foreground.getTexture().getHeight());
         foreground.flip(true,false);
         canvas.draw(foreground, Color.WHITE, 0, y * FOREGROUND_SCROLL, canvas.getWidth() / 5, foreground.getTexture().getHeight());
@@ -38,6 +42,7 @@ public class SharedMethods {
             edge.flip(true,false);
 
             tileY += canvas.getWidth() / 4;
+        }
         }
         canvas.draw(ground, Color.WHITE, canvas.getWidth() / 5, 0, 3*canvas.getWidth() / 5, canvas.getHeight() / 8);
 
