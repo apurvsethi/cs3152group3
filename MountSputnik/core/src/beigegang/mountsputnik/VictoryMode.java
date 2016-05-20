@@ -39,6 +39,7 @@ public class VictoryMode extends ModeController {
 
     private int currSelection = 0;
     private int changeCooldown = 0;
+    private int winner =0;
 
     public void preLoadContent(AssetManager manager) {
         assetManager = manager;
@@ -49,7 +50,11 @@ public class VictoryMode extends ModeController {
         FreetypeFontLoader.FreeTypeFontLoaderParameter title = makeFont(TITLE_FONT_FILE, 60, Color.BROWN);
         loadAddFont("Normal" + TITLE_FONT_FILE, title);
     }
-
+    
+    public void setWinner(int w){
+    	winner = w;
+    }
+    
     /**
      * Loads the assets for this controller.
      *
@@ -125,7 +130,12 @@ public class VictoryMode extends ModeController {
                 bottomOfScreen + (canvas.getHeight() - textboxHeight) / 2,
                 textboxWidth, textboxHeight);
         float drawY = bottomOfScreen + canvas.getHeight() * 0.12f;
-        canvas.drawTextCentered("YOU WON!", titleFont, drawY);
+        if(winner == 0){
+        	canvas.drawTextCentered("YOU WON!", titleFont, drawY);
+        }
+        else{
+        	canvas.drawTextCentered("PLAYER " + winner + " WON!", titleFont, drawY);
+        }
         BitmapFont font;
         drawY -= canvas.getHeight() * 0.078f;
 
