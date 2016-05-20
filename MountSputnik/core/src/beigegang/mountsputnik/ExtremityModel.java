@@ -51,6 +51,10 @@ public class ExtremityModel extends PartModel {
 	public int getGripTime(){
 		return gripTime;
 	}
+
+	public void setGripTime(int gripTime){
+		this.gripTime = gripTime;
+	}
 	
 	public void updateGripTime(){
 		if(gripped)

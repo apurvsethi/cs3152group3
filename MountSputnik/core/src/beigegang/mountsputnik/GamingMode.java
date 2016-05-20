@@ -369,8 +369,8 @@ public class GamingMode extends ModeController {
         listener.exitScreen(this, EXIT_GAME_NEXT_RACE_LEVEL);
     }
 
-    protected PositionMovementController movementController1;
-    protected PositionMovementController movementController2;
+    protected MovementController movementController1;
+    protected MovementController movementController2;
 
     protected WarningController warningController;
 
@@ -464,6 +464,7 @@ public class GamingMode extends ModeController {
         victoryMode = new VictoryMode();
         deadMode = new DeadMode();
         instructionMode = new InstructionMode();
+        vector = new Vector2();
         //create debug font
         font.setColor(Color.RED);
         font.getData().setScale(5);
@@ -630,9 +631,9 @@ public class GamingMode extends ModeController {
         addCharacterToGame(character1);
         if (id == RACE_MODE)
             addCharacterToGame(character2);
-        movementController1 = new PositionMovementController(character1, scale);
+        movementController1 = new MovementController(character1, scale);
         if (id == RACE_MODE)
-            movementController2 = new PositionMovementController(character2, scale);
+            movementController2 = new MovementController(character2, scale);
         canvas.setCameraPosition(canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
         if(currLevel == LEVEL_TUTORIAL && id == GAME_MODE){
 	        //To make tutorial: currentStep = 0; 
@@ -852,7 +853,7 @@ public class GamingMode extends ModeController {
 
     public void update(float dt, int controller) {
         CharacterModel character;
-        PositionMovementController movementController;
+        MovementController movementController;
         if (id == GAME_MODE || controller == CONTROLLER_1){
             character = character1;
             movementController = movementController1;
@@ -921,13 +922,9 @@ public class GamingMode extends ModeController {
 
         movementController.moveCharacter(inx,iny,rinx,riny,nextToPress,justReleased);
 
-        if (nextToPress.size > 0) {
-            for (int i : nextToPress) {
-                ungrip(((ExtremityModel) (character.parts.get(i))),i);
+        for (int i : nextToPress)
+            ungrip(((ExtremityModel) (character.parts.get(i))),i);
 
-
-            }
-        }
         //bounding velocities
         boundBodyVelocities(character);
         if (controller == CONTROLLER_1) {
@@ -994,7 +991,7 @@ public class GamingMode extends ModeController {
                 }
             }
         }
-        vector = new Vector2(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
+        vector.set(character.parts.get(CHEST).getVX(), character.parts.get(CHEST).getVY());
         character.updateEnergy(oxygen, 1, vector.len(), gravity.y != 0, gravity.y == 0);
         character.decrementStun();
 
@@ -1143,7 +1140,7 @@ public class GamingMode extends ModeController {
 
 
     /** Grips a handhold by adding a revolute joint between the handhold and the extremity **/
-    public void grip(ExtremityModel e, HandholdModel h){
+    public void grip(ExtremityModel e, HandholdModel h, CharacterModel c){
         if (e.getJoint() == null){
             RevoluteJointDef jointD = new RevoluteJointDef();
             jointD.initialize(e.getBody(), h.getBody(), e.getPosition());
@@ -1154,6 +1151,11 @@ public class GamingMode extends ModeController {
             warningController.addHandholdWarning(h);
         }
         e.grip();
+        if (snappedHandholds.contains(h, true)) {
+            int numbering = snappedHandholds.indexOf(h, true);
+            ExtremityModel other = (ExtremityModel) c.parts.get(EXTREMITIES[numbering]);
+            e.setGripTime(other.getGripTime());
+        }
         //This is code to make a tutorialGuide. Will delete when we have settled on one
 //        positionListWrite += "\"" + currentStep + "\" : {"; 
 //        positionListWrite += "\"x\": " + h.getPosition().x + ","; 
@@ -1173,7 +1175,7 @@ public class GamingMode extends ModeController {
 
         }
         e.ungrip();
-        int ind = 0;
+        int ind;
 
         switch (i) {
             case FOOT_LEFT:
@@ -1284,12 +1286,8 @@ public class GamingMode extends ModeController {
      * @author Jacob
      */
     protected Vector2 boundVelocity(Vector2 vect) {
-        if (Math.abs(vect.x) > 1 || Math.abs(vect.y) > 1) {
-        }
-        vect.x = (vect.x>0) ? Math.min(PART_MAX_X_VELOCITY,vect.x) : Math.max(-1 * PART_MAX_X_VELOCITY,vect.x);
-        vect.y = (vect.y>0) ? Math.min(PART_MAX_Y_VELOCITY,vect.y) : Math.max(-1 * PART_MAX_Y_VELOCITY,vect.y);
-
-
+        vect.x = Math.min(PART_MAX_X_VELOCITY, Math.max(-PART_MAX_X_VELOCITY,vect.x));
+        vect.y = Math.min(PART_MAX_Y_VELOCITY, Math.max(-PART_MAX_Y_VELOCITY,vect.y));
         return vect;
     }
 
@@ -1367,7 +1365,7 @@ public class GamingMode extends ModeController {
             ((ExtremityModel) c.parts.get(limb)).grip();
             c.parts.get(limb).setPosition(closest.snapPoints.first(), c.parts.get(limb).getAngle());
 
-            grip(((ExtremityModel) c.parts.get(limb)), closest);
+            grip(((ExtremityModel) c.parts.get(limb)), closest, c);
             closest.snap();
             switch(limb){
                 case FOOT_LEFT: snappedHandholds.set(0,closest); break;
@@ -1381,8 +1379,8 @@ public class GamingMode extends ModeController {
     }
 
     protected double distanceFrom(int limb, Vector2 snapPoint, CharacterModel c) {
-        vector = new Vector2 (c.parts.get(limb).getPosition().sub(snapPoint));
-        return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+        vector.set(c.parts.get(limb).getPosition().sub(snapPoint));
+        return vector.len();
     }
 
     public PooledList<GameObject> getGameObjects(){
@@ -1398,11 +1396,13 @@ public class GamingMode extends ModeController {
     protected void advanceTutorial(){
     	ExtremityModel e = (ExtremityModel) character1.parts.get(currentTutorialStep.getInt("e")); 
     	float x = currentTutorialStep.getFloat("x"); 
-    	float y = currentTutorialStep.getFloat("y"); 
-    	Vector2 h = new Vector2(x,y); 
-    	if(e.isGripped() && ((HandholdModel) e.getJoint().getBodyB().getFixtureList().get(0).getUserData()).getPosition().equals(h)){
-            currentStep++; 
-            currentTutorialStep = tutorialGuide.get(currentStep); 
+    	float y = currentTutorialStep.getFloat("y");
+    	if(e.isGripped()){
+            HandholdModel handholdModel = (HandholdModel) e.getJoint().getBodyB().getFixtureList().get(0).getUserData();
+            if (handholdModel.getX() == x && handholdModel.getY() == y) {
+                currentStep++;
+                currentTutorialStep = tutorialGuide.get(currentStep);
+            }
         }
     }
 
@@ -1437,49 +1437,6 @@ public class GamingMode extends ModeController {
         vector = character1.parts.get(HEAD).getPosition();
         SharedMethods.drawBackgrounds(canvas,ground,background,midground,foreground,tile,edge,currLevel);
 
-        canvas.end();
-        canvas.beginHUD();
-        float hudMidX = -canvas.getWidth() * 0.4f;
-        float timerTextY = canvas.getHeight() * 0.4f;
-        float timerTimeY = timerTextY - canvas.getHeight() * 0.045f;
-        int seconds = timestep/60;
-        String minuteString = (seconds/60 >= 10) ? seconds/60 + "" : ("0"+seconds/60);
-        String secondString = (seconds%60 >= 10) ? seconds%60 + "" : ("0"+seconds%60);
-        String time = minuteString+":"+secondString;
-        SharedMethods.drawUI(canvas,0, UI,.7f);
-        canvas.drawTextCentered("Time", mastodon, hudMidX, timerTextY);
-        canvas.drawTextCentered(time, kremlin, hudMidX, timerTimeY);
-        if (id == RACE_MODE){
-            SharedMethods.drawUI(canvas,canvas.getWidth()*4/5, UI,.7f);
-        	canvas.drawTextCentered("Time", mastodon, -hudMidX, timerTextY);
-            canvas.drawTextCentered(time, kremlin, -hudMidX, timerTimeY);
-        }
-
-        float a = (vector.y - cposYAtTime0)/(maxHandhold - cposYAtTime0);
-        if (timestep%60 == 0 && character1.getEnergy() != 0)
-            progressLevel = (int)(a*20);
-        SharedMethods.drawProgress(canvas,progress,progressLevel,0, 0);
-        energyLevel = Math.abs((int) Math.ceil(character1.getEnergy() / 10f));
-        flashing1 = SharedMethods.drawEnergy(canvas, character1, energyTextures, lowEnergyHalo, energyLevel, 0, 0, flashing1);
-        canvas.draw(gauges, Color.WHITE, 0, 0, canvas.getWidth()*1/5, canvas.getHeight());
-        canvas.drawTextCentered("Progress", mastodonS, -845*canvas.getWidth()/SCREEN_WIDTH, canvas.getHeight() * 0.29f);
-        canvas.drawTextCentered("Stamina", mastodonS,-685*canvas.getWidth()/SCREEN_WIDTH , canvas.getHeight() * 0.29f);
-        canvas.drawTextCentered(levelName, mastodon, hudMidX, -canvas.getHeight() * 0.375f);
-        if (id == RACE_MODE) {
-            vector = character2.parts.get(HEAD).getPosition();
-            a = (vector.y - cposYAtTime0) / (maxHandhold - cposYAtTime0);
-            if (timestep % 60 == 0 && character2.getEnergy() != 0)
-            	progressLevel = (int)(a*20);
-            SharedMethods.drawProgress(canvas, progress, progressLevel, canvas.getWidth()*4/5, 0);
-            energyLevel = Math.abs((int) Math.ceil(character2.getEnergy() / 10f));
-            flashing2 = SharedMethods.drawEnergy(canvas, character2, energyTextures, lowEnergyHalo, energyLevel, canvas.getWidth() * 4 / 5, 0, flashing2);
-            canvas.draw(gauges, Color.WHITE, canvas.getWidth()*4/5, 0, canvas.getWidth()*1/5, canvas.getHeight());
-            canvas.drawTextCentered("Stamina", mastodonS, 840*canvas.getWidth()/SCREEN_WIDTH, canvas.getHeight() * 0.29f);
-            canvas.drawTextCentered("Progress", mastodonS, 680*canvas.getWidth()/SCREEN_WIDTH , canvas.getHeight() * 0.29f);
-            canvas.drawTextCentered(levelName, mastodon, -hudMidX, -canvas.getHeight() * 0.375f);
-        }
-        canvas.endHUD();
-        canvas.begin();
         if (currLevel == LEVEL_TUTORIAL)
             canvas.draw(tutorialOverlay, Color.WHITE, canvas.getWidth()/4, canvas.getHeight()/8, canvas.getWidth()/2, levelFormat.getFloat("height")*scale.y);
         counterInt = 0;
@@ -1489,9 +1446,6 @@ public class GamingMode extends ModeController {
             counterInt++;
         }
 
-        canvas.end();
-
-        canvas.begin();
         if(currLevel != LEVEL_SKY && currLevel != LEVEL_SPACE){
             for (int i = 0; i < character1.parts.size; i++){
                 character1.parts.get(i).drawShadow(shadowTextures[i], canvas);
@@ -1510,20 +1464,13 @@ public class GamingMode extends ModeController {
         if (id == RACE_MODE && tutorialToggle2)
             SharedMethods.drawToggles(canvas, character2, input2, tutorialTextures,  scale);
 
-
-
-        canvas.end();
-
-        canvas.begin();
-       
-
         if (risingObstacle != null) {
             float lavaOrigin = risingObstacle.getHeight() * scale.y -
                     canvas.getHeight();
-            canvas.draw(lavaGlowTexture, Color.WHITE, canvas.getWidth() * 0.17f, lavaOrigin+canvas.getHeight(), canvas.getWidth() * 0.66f, canvas.getHeight());
-            canvas.draw(risingObstacle.getTexture(), Color.WHITE, canvas.getWidth() * 0.17f, lavaOrigin, canvas.getWidth() * 0.66f, canvas.getHeight());
+            canvas.draw(lavaGlowTexture, Color.WHITE, -canvas.getWidth() * 0.03f, lavaOrigin+canvas.getHeight(), canvas.getWidth() * 1.06f, canvas.getHeight());
+            canvas.draw(risingObstacle.getTexture(), Color.WHITE, -canvas.getWidth() * 0.03f, lavaOrigin, canvas.getWidth() * 1.06f, canvas.getHeight());
             while((lavaOrigin-=canvas.getHeight())>0){
-            	canvas.draw(lavaContTexture, Color.WHITE, canvas.getWidth() * 0.17f, lavaOrigin, canvas.getWidth() * 0.66f, canvas.getHeight());
+            	canvas.draw(lavaContTexture, Color.WHITE, -canvas.getWidth() * 0.03f, lavaOrigin, canvas.getWidth() * 1.06f, canvas.getHeight());
             }
         }
         
@@ -1531,11 +1478,11 @@ public class GamingMode extends ModeController {
 	        Vector2 characterPos = character1.parts.get(currentTutorialStep.getInt("e")).getPosition(); 
 	        canvas.draw(tutorialRing, Color.WHITE, characterPos.x*scale.x - 25, characterPos.y * scale.y - 25,50,50);
 	    }
-        canvas.end();
 
-        canvas.begin();
         if (warningController != null) warningController.draw(canvas);
         canvas.end();
+
+        drawHUD();
 
         if (debug) {
             canvas.beginDebug();
@@ -1549,6 +1496,50 @@ public class GamingMode extends ModeController {
         else if (isDead) deadMode.draw(canvas);
         else if (isVictorious) victoryMode.draw(canvas);
         else if (isInstructing) instructionMode.draw(canvas);
+    }
+
+    private void drawHUD() {
+        canvas.beginHUD();
+        float hudMidX = -canvas.getWidth() * 0.4f;
+        float timerTextY = canvas.getHeight() * 0.4f;
+        float timerTimeY = timerTextY - canvas.getHeight() * 0.045f;
+        int seconds = timestep/60;
+        String minuteString = (seconds/60 >= 10) ? seconds/60 + "" : ("0"+seconds/60);
+        String secondString = (seconds%60 >= 10) ? seconds%60 + "" : ("0"+seconds%60);
+        String time = minuteString+":"+secondString;
+        SharedMethods.drawUI(canvas,0, UI,.7f);
+        canvas.drawTextCentered("Time", mastodon, hudMidX, timerTextY);
+        canvas.drawTextCentered(time, kremlin, hudMidX, timerTimeY);
+        if (id == RACE_MODE){
+            SharedMethods.drawUI(canvas,canvas.getWidth()*4/5, UI,.7f);
+            canvas.drawTextCentered("Time", mastodon, -hudMidX, timerTextY);
+            canvas.drawTextCentered(time, kremlin, -hudMidX, timerTimeY);
+        }
+
+        float a = (vector.y - cposYAtTime0)/(maxHandhold - cposYAtTime0);
+        if (timestep%60 == 0 && character1.getEnergy() != 0)
+            progressLevel = (int)(a*20);
+        SharedMethods.drawProgress(canvas,progress,progressLevel,0, 0);
+        energyLevel = Math.abs((int) Math.ceil(character1.getEnergy() / 10f));
+        flashing1 = SharedMethods.drawEnergy(canvas, character1, energyTextures, lowEnergyHalo, energyLevel, 0, 0, flashing1);
+        canvas.draw(gauges, Color.WHITE, 0, 0, canvas.getWidth()*1/5, canvas.getHeight());
+        canvas.drawTextCentered("Progress", mastodonS, -845*canvas.getWidth()/SCREEN_WIDTH, canvas.getHeight() * 0.29f);
+        canvas.drawTextCentered("Stamina", mastodonS,-685*canvas.getWidth()/SCREEN_WIDTH , canvas.getHeight() * 0.29f);
+        canvas.drawTextCentered(levelName, mastodon, hudMidX, -canvas.getHeight() * 0.375f);
+        if (id == RACE_MODE) {
+            vector = character2.parts.get(HEAD).getPosition();
+            a = (vector.y - cposYAtTime0) / (maxHandhold - cposYAtTime0);
+            if (timestep % 60 == 0 && character2.getEnergy() != 0)
+                progressLevel = (int)(a*20);
+            SharedMethods.drawProgress(canvas, progress, progressLevel, canvas.getWidth()*4/5, 0);
+            energyLevel = Math.abs((int) Math.ceil(character2.getEnergy() / 10f));
+            flashing2 = SharedMethods.drawEnergy(canvas, character2, energyTextures, lowEnergyHalo, energyLevel, canvas.getWidth() * 4 / 5, 0, flashing2);
+            canvas.draw(gauges, Color.WHITE, canvas.getWidth()*4/5, 0, canvas.getWidth()*1/5, canvas.getHeight());
+            canvas.drawTextCentered("Stamina", mastodonS, 840*canvas.getWidth()/SCREEN_WIDTH, canvas.getHeight() * 0.29f);
+            canvas.drawTextCentered("Progress", mastodonS, 680*canvas.getWidth()/SCREEN_WIDTH , canvas.getHeight() * 0.29f);
+            canvas.drawTextCentered(levelName, mastodon, -hudMidX, -canvas.getHeight() * 0.375f);
+        }
+        canvas.endHUD();
     }
 
     public void setLevel(int level){
